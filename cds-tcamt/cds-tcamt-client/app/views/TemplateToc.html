@@ -1,0 +1,276 @@
+<div ui-tree>
+    <ol ui-tree-nodes="" ng-model="templatesToc">
+        <li ng-repeat="template in templatesToc" ui-tree-node data-nodrag>
+            <div ui-tree-handle ng-click="Activate(this); OpenTemplateMetadata(template)" ng-class="{selected : this.$modelValue===activeModel}">
+                {{template.name}}
+            </div>
+            <div ui-tree-handle>
+                <span data-nodrag ng-click="switchermsg(messagetempCollapsed)" class="glyphicon glyphicon-plus" ng-class="{
+                          'glyphicon glyphicon-plus': messagetempCollapsed,
+                          'glyphicon glyphicon-minus': !messagetempCollapsed
+                        }">
+                </span> Messages Template
+                <span ng-show="selectedIntegrationProfile">for {{selectedIntegrationProfile.sectionTitle}}-{{selectedConformanceProfile.name}}</span>
+            </div>
+            <ol ui-tree-nodes="" ng-model="template.messageTemplates" ng-if="!messagetempCollapsed">
+                <li ng-repeat="msgTmp in template.messageTemplates" ui-tree-node ng-if="selectedTestStep.conformanceProfileId===msgTmp.conformanceProfileId|| selectedTestStep===null">
+                    <div ui-tree-handle ng-click="Activate(this);OpenMsgTemplateMetadata(msgTmp)" ng-class="{selected : this.$modelValue===activeModel}">
+                        <span ng-if="selectedTestStep" context-menu="MessageOptions"><span class="label-success badge">MT</span>{{msgTmp.name}}</span>
+                        <span ng-if="!selectedTestStep"><span class="label-success badge">MT</span>{{msgTmp.name}}</span>
+                    </div>
+                </li>
+            </ol>
+            <div ui-tree-handle>
+                <span data-nodrag ng-click="switcherseg(segmenttempCollapsed)" class="glyphicon glyphicon-plus" ng-class="{
+                          'glyphicon glyphicon-plus': segmenttempCollapsed,
+                          'glyphicon glyphicon-minus': !segmenttempCollapsed
+                        }">
+                </span> Segment Templates
+                <span ng-show="selectedSegmentNode">for {{selectedSegmentNode.segment.obj.name}}</span>
+            </div>
+            <ol ui-tree-nodes="" ng-model="template.segmentTemplates" ng-if="!segmenttempCollapsed">
+                <li ng-repeat="segTmp in template.segmentTemplates" ui-tree-node ng-if="selectedSegmentNode===null ||selectedSegmentNode.segment.obj.name===segTmp.segmentName">
+                    <div ui-tree-handle ng-click="Activate(this);OpenSegmentTemplateMetadata(segTmp)" ng-class="{selected : this.$modelValue===activeModel}">
+                        <span ng-if="selectedTestStep" context-menu="SegmentOptions"><span class=" label-success badge">ST</span>{{segTmp.name}}</span>
+                        <span ng-if="!selectedTestStep"><span class=" label-success badge">ST</span>{{segTmp.name}}</span>
+                    </div>
+                </li>
+            </ol>
+            <div ui-tree-handle>
+                <span data-nodrag ng-click="switcherEr7(Er7Collapsed)" class="glyphicon glyphicon-plus" ng-class="{
+                          'glyphicon glyphicon-plus': Er7Collapsed,
+                          'glyphicon glyphicon-minus': !Er7Collapsed
+                        }">
+                </span> Er7 Templates
+                <span ng-show="selectedIntegrationProfile">for {{selectedIntegrationProfile.sectionTitle}}-{{selectedConformanceProfile.name}}/span>
+            </div>
+            <ol ui-tree-nodes="" ng-model="template.er7Templates" ng-if="!Er7Collapsed">
+                <li ng-repeat="er7Tmp in template.er7Templates" ui-tree-node ng-if="selectedTestStep.integrationProfileId===er7Tmp.integrationProfileId || selectedTestStep.conformanceProfileId===er7Tmp.conformanceProfileId|| selectedTestStep===null">
+                    <div ui-tree-handle ng-click="Activate(this);OpenEr7TemplatesMetadata(er7Tmp)" ng-class="{selected : this.$modelValue===activeModel}">
+                        <span context-menu="Er7Options" ng-if="selectedTestStep"><span class=" label-success badge">ET</span>{{er7Tmp.name}}</span>
+                        <span ng-if="!selectedTestStep"><span class=" label-success badge">ET</span>{{er7Tmp.name}}</span>
+                    </div>
+                </li>
+            </ol>
+        </li>
+    </ol>
+</div>
+<script type="text/ng-template" id="TemplateMetadata.html">
+    <div class="page-header">
+        <span class="header4">Template Metadata</span>
+    </div>
+    <form name="testplanMetaDataForm" class="form-horizontal" novalidate>
+        <div class="row" style="margin:10px">
+            <div class="col-md-12">
+                <div class="col-md-5 col-margin">
+                    <div class="form-group">
+                        <label class="control-label">Name</label>
+                        <input class="form-control" type="text" ng-change="recordChanged()" name="name" ng-model="rootTemplate.name" required />
+                    </div>
+                </div>
+                <div class="col-md-5 col-margin">
+                    <div class="form-group">
+                        <label class="control-label">Note</label>
+                        <input class="form-control" type="text" ng-change="recordChanged()" name="description" ng-model="rootTemplate.description" required />
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-12">
+                <div class="col-md-5 col-margin">
+                    <div class="form-group">
+                        <label class="control-label">Date</label>
+                        <input class="form-control" type="text" ng-change="recordChanged()" ng-disabled="true" name="date" ng-model="selectedTestPlan.lastUpdateDate" required />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</script>
+<script type="text/ng-template" id="MessageTemplateMetadata.html">
+    <div class="page-header">
+        <span class="header4">Message Template</span>
+    </div>
+    <form name="testplanMetaDataForm" class="form-horizontal" novalidate>
+        <div class="row" style="margin:10px">
+            <div class="col-md-12">
+                <div class="col-md-5 col-margin">
+                    <div class="form-group">
+                        <label class="control-label">Name</label>
+                        <input class="form-control" type="text" ng-change="recordChanged()" name="name" ng-model="msgTemplate.name" required />
+                    </div>
+                </div>
+                <div class="col-md-5 col-margin">
+                    <div class="form-group">
+                        <label class="control-label">Description</label>
+                        <input class="form-control" type="text" ng-change="recordChanged()" name="description" ng-model="msgTemplate.description" required />
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-12">
+                <div class="col-md-5 col-margin">
+                    <div class="form-group">
+                        <label class="control-label">Integration Profile</label>
+                        <input class="form-control" type="text" ng-change="recordChanged()" name="version" ng-model="msgTemplate.integrationProfileId" disabled required />
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-12">
+                <div class="col-md-5 col-margin">
+                    <div class="form-group">
+                        <label class="control-label">Conformance Profile </label>
+                        <input class="form-control" type="text" ng-change="recordChanged()" name="version" ng-model="msgTemplate.conformanceProfileId" required disabled />
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-12">
+                <div class="col-md-5 col-margin">
+                    <div class="form-group">
+                        <label class="control-label">Date</label>
+                        <input class="form-control" type="text" ng-change="recordChanged()" ng-disabled="true" name="date" ng-model="msgTemplate.date" required />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+    <div class="page-header">
+        <span class="header4">Categorizations</span>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-striped table-bordered">
+            <thead>
+                <tr class="tbl-header">
+                    <th class="col-md-2">Path</th>
+                    <th class="col-md-5">Test Data Categorization</th>
+                    <th class="col-md-5">List Data</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr ng-repeat="categorization in msgTemplate.categorizations">
+                    <td class="col-md-2">
+                        {{categorization.iPath}}
+                    </td>
+                    <td class="col-md-5">
+                        {{categorization.testDataCategorization}}
+                    </td>
+                    <td class="col-md-5">
+                    <div ng-if="cantegorization.listData.length>0">
+                        {{categorization.listData}}
+                    </div>
+               
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</script>
+<script type="text/ng-template" id="Er7TemplateMetadata.html">
+    <div class="page-header">
+        <span class="header4">Er7 Template</span>
+    </div>
+    <form name="testplanMetaDataForm" class="form-horizontal" novalidate>
+        <div class="row" style="margin:10px">
+            <div class="col-md-12">
+                <div class="col-md-5 col-margin">
+                    <div class="form-group">
+                        <label class="control-label">Name</label>
+                        <input class="form-control" type="text" ng-change="recordChanged()" name="name" ng-model="er7Template.name" required />
+                    </div>
+                </div>
+                <div class="col-md-5 col-margin">
+                    <div class="form-group">
+                        <label class="control-label">Description</label>
+                        <input class="form-control" type="text" ng-change="recordChanged()" name="description" ng-model="er7Template.description" required />
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-12">
+                <div class="col-md-5 col-margin">
+                    <div class="form-group">
+                        <label class="control-label">Integration Profile</label>
+                        <input disabled class="form-control" type="text" ng-change="recordChanged()" name="version" ng-model="er7Template.integrationProfileId" required />
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-12">
+                <div class="col-md-5 col-margin">
+                    <div class="form-group">
+                        <label class="control-label">Conformance Profile</label>
+                        <input disabled class="form-control" type="text" ng-change="recordChanged()" name="version" ng-model="er7Template.conformanceProfileId" required />
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-12">
+                <div class="col-md-5 col-margin">
+                    <div class="form-group">
+                        <label class="control-label">Date</label>
+                        <input class="form-control" type="text" ng-change="recordChanged()" ng-disabled="true" name="date" ng-model="er7Template.date" required />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+    <label class="control-label col-md-12 ">Er7 Message</label>
+    <div class="col-md-12">
+        <ui-codemirror disabled ui-codemirror-opts="editorOptions" ng-model="er7Template.er7Message"></ui-codemirror>
+    </div>
+</script>
+<script type="text/ng-template" id="SegmentTemplateMetadata.html">
+    <div class="page-header">
+        <span class="header4">Segment Template</span>
+    </div>
+    <form name="testplanMetaDataForm" class="form-horizontal" novalidate>
+        <div class="row" style="margin:10px">
+            <div class="col-md-12">
+                <div class="col-md-5 col-margin">
+                    <div class="form-group">
+                        <label class="control-label">Name</label>
+                        <input class="form-control" type="text" ng-change="recordChanged()" name="name" ng-model="segmentTemplateObject.name" required />
+                    </div>
+                </div>
+                <div class="col-md-5 col-margin">
+                    <div class="form-group">
+                        <label class="control-label">Description</label>
+                        <input class="form-control" type="text" ng-change="recordChanged()" name="description" ng-model="segmentTemplateObject.description" required />
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-12">
+                <div class="col-md-5 col-margin">
+                    <div class="form-group">
+                        <label class="control-label">Date</label>
+                        <input class="form-control" type="text" ng-change="recordChanged()" ng-disabled="true" name="date" ng-model="segmentTemplateObject.date" required />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+    <div class="page-header">
+        <span class="header4">Categorizations</span>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-striped table-bordered">
+            <thead>
+                <tr class="tbl-header">
+                    <th class="col-md-2">Path</th>
+                    <th class="col-md-5">Test Data Categorization</th>
+                    <th class="col-md-5">list Data</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr ng-repeat="categorization in segmentTemplateObject.categorizations">
+                    <td class="col-md-2">
+                        {{segmentTemplateObject.segmentName}}{{categorization.iPath}}
+                    </td>
+                    <td class="col-md-5">
+                        {{categorization.testDataCategorization}}
+                    </td>
+                    <td class="col-md-5">
+                    <div ng-if="cantegorization.listData.length>0">
+                        {{categorization.listData}}
+                    </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</script>

@@ -1,0 +1,28 @@
+<style id="antiClickjack">
+body {
+	display: none !important;
+}
+
+.handle-custom {
+	background-color: red;
+}
+</style>
+<script type="text/javascript">
+	if (self === top) {
+		var antiClickjack = document.getElementById("antiClickjack");
+		antiClickjack.parentNode.removeChild(antiClickjack);
+	} else {
+		top.location = self.location;
+	}
+</script>
+<div>
+	<table class="table table-hover">
+		<tr  ng-repeat="forecast in selectedTestPlan.forecast">
+			<td style="cursor:pointer;" >
+				<strong>
+					{{forecast.target.name}}
+				</strong>
+			</td>
+		</tr>
+	</table>
+</div>

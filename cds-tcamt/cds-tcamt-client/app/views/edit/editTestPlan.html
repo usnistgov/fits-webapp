@@ -1,0 +1,104 @@
+<style id="antiClickjack">
+body {
+	display: none !important;
+}
+</style>
+<script type="text/javascript">
+	if (self === top) {
+		var antiClickjack = document.getElementById("antiClickjack");
+		antiClickjack.parentNode.removeChild(antiClickjack);
+	} else {
+		top.location = self.location;
+	}
+</script>
+<script type="text/ng-template" id="EditTestPlanMetadata.html">
+	
+    <div class="page-header">
+        <span class="header5">Test Case Information</span>
+    </div>
+            
+	<form name="testplanMetaDataForm" class="form-horizontal" novalidate>
+		<div class="row">
+			<div class="col-md-12">
+				<div class="col-md-8">
+					<md-input-container style="width: 100%;">
+						<label>Name</label>
+						<input ng-model="selectedTestPlan.name" ng-change="recordChanged()" type="text"/>
+					</md-input-container>
+				</div>
+				<div class="col-md-4">
+					<md-input-container style="width: 100%;">
+						<label>Evaluation Date</label>
+						<md-datepicker ng-model="selectedTestPlan.evalDate.fixed.obj" md-placeholder="Enter date" ng-change="dateChange(selectedTestPlan.evalDate.fixed)"></md-datepicker>
+					</md-input-container>
+				</div>
+				<div class="col-md-12">
+					<md-input-container style="width: 100%;">
+						<label>Description</label>
+						<input ng-model="selectedTestPlan.description" ng-change="recordChanged()" type="text"/>
+					</md-input-container>
+				</div>
+			</div>
+		</div>
+	</form>
+
+	<div class="page-header">
+        <span class="header5">Patient Information</span>
+    </div>
+
+	<form name="patientForm" class="form-horizontal" novalidate>
+		<div class="row">
+			<div class="col-md-12">
+				<div class="col-md-8">
+					<md-input-container style="width: 100%;">
+						<label>Gender</label>
+						<input ng-model="selectedTestPlan.patient.gender" ng-change="recordChanged()" type="text"/>
+					</md-input-container>
+				</div>
+				<div class="col-md-4">
+					<md-input-container style="width: 100%;">
+						<label>Date Of Birth</label>
+						<md-datepicker ng-model="selectedTestPlan.patient.dob.fixed.obj" md-placeholder="Enter date"></md-datepicker>
+					</md-input-container>
+				</div>
+			</div>
+		</div>
+	</form>
+
+	<div class="page-header">
+        <span class="header5">MetaData</span>
+    </div>
+
+	<form name="mdForm" class="form-horizontal" novalidate>
+		<div class="row">
+			<div class="col-md-12">	
+				<div class="col-md-8">
+					<md-input-container style="width: 100%;">
+						<label>Version</label>
+						<input ng-model="selectedTestPlan.metaData.version" ng-change="recordChanged()" type="text"/>
+					</md-input-container>
+				</div>
+				<div class="col-md-4">
+					<md-input-container style="width: 100%;">
+						<label>Date Created</label>
+						<md-datepicker ng-model="selectedTestPlan.metaData.dateCreated.fixed.obj" ng-disabled="true"></md-datepicker>
+					</md-input-container>
+				</div>
+			</div>
+			<div class="col-md-12">	
+				<div class="col-md-8">
+					<md-input-container style="width: 100%;">
+						<label>Type</label>
+						<input value="{{selectedTestPlan.metaData.imported ? 'Imported' : 'Created'}}" ng-disabled="true" type="text"/>
+					</md-input-container>
+				</div>
+				<div class="col-md-4">
+					<md-input-container style="width: 100%;">
+						<label>Date Last Updated</label>
+						<md-datepicker ng-model="selectedTestPlan.metaData.dateLastUpdated.fixed.obj" ng-disabled="true"></md-datepicker>
+					</md-input-container>
+				</div>
+			</div>
+		</div>
+	</form>
+</script>

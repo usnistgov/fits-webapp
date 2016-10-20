@@ -1,0 +1,23 @@
+<style id="antiClickjack">body {
+    display: none !important;
+}</style>
+<script type="text/javascript">
+    if (self === top) {
+        var antiClickjack = document.getElementById("antiClickjack");
+        antiClickjack.parentNode.removeChild(antiClickjack);
+    } else {
+        top.location = self.location;
+    }
+</script>
+
+
+<div class="row">
+	<textarea class="lined form-control" rows="20" ng-model="selectedTestStep.er7Message" ng-change="updateMessage(); recordChanged(); " />
+	<script>
+	$(function() {
+		$(".lined").linedtextarea(
+			{selectedLine: 1}
+		);
+	});
+	</script>
+</div>

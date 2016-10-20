@@ -1,0 +1,38 @@
+<style id="antiClickjack">
+body {
+	display: none !important;
+}
+</style>
+<script type="text/javascript">
+	if (self === top) {
+		var antiClickjack = document.getElementById("antiClickjack");
+		antiClickjack.parentNode.removeChild(antiClickjack);
+	} else {
+		top.location = self.location;
+	}
+</script>
+<script type="text/ng-template" id="EditTestCaseGroupMetadata.html">
+    <div class="page-header">
+        <span class="header5">TestCase Group Metadata</span>
+    </div>
+            
+	<form name="testcasegroupMetaDataForm" class="form-horizontal" novalidate>
+		<div class="row">
+			<div class="col-md-12">
+				<div class="col-md-6">
+					<md-input-container style="width: 100%;">
+						<label>Name</label>
+						<input ng-model="selectedTestCaseGroup.name" ng-change="recordChanged()" type="text"/>
+					</md-input-container>
+				</div>
+
+				<div class="col-md-6">
+					<md-input-container style="width: 100%;">
+						<label>Description</label>
+						<input ng-model="selectedTestCaseGroup.description" ng-change="recordChanged()" type="text"/>
+					</md-input-container>
+				</div>
+			</div>
+		</div>
+	</form>
+</script>

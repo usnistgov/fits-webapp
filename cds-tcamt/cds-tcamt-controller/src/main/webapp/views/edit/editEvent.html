@@ -1,0 +1,39 @@
+<style id="antiClickjack">body {
+	display: none !important;
+}</style> <script type="text/javascript">if (self === top) {
+		var antiClickjack = document.getElementById("antiClickjack");
+		antiClickjack.parentNode.removeChild(antiClickjack);
+	} else {
+		top.location = self.location;
+	}</script> <script type="text/ng-template" id="EditEventData.html"><div class="page-header">
+        <span class="header5">Event</span>
+    </div>
+            
+	<form name="eventForm" class="form-horizontal" novalidate>
+		<div class="row">
+			<div class="col-md-12">
+				<div class="col-md-12">
+					<md-input-container style="width: 100%;">
+						<label>Event Type</label>
+						<input value="{{selectedEvent.type.toUpperCase()}}" ng-disabled="true" type="text"/>
+					</md-input-container>
+				</div>
+			</div>
+            <div class="col-md-12">
+				<div class="col-md-6">
+					<md-input-container style="width: 100%;">
+						<label>Vaccine</label>
+						<md-select ng-model="selectedEvent[selectedEvent.type].administred">
+							 <md-option ng-repeat="v in AllVaccines" ng-value="v" ng-selected="v.id === selectedEvent[selectedEvent.type].administred.id">{{v.name}}</md-option>
+						</md-select>
+					</md-input-container>
+				</div>
+				<div class="col-md-6">
+					<md-input-container style="width: 100%;">
+						<label>Date Of Vaccination</label>
+						<md-datepicker ng-model="selectedEvent[selectedEvent.type].date.fixed" md-placeholder="Enter date"></md-datepicker>
+					</md-input-container>
+				</div>
+			</div>
+		</div>
+	</form></script>

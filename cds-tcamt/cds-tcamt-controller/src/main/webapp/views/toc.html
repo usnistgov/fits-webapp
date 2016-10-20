@@ -1,0 +1,12 @@
+<style id="antiClickjack">body {
+	display: none !important;
+}
+
+.handle-custom {
+	background-color: red;
+}</style> <script type="text/javascript">if (self === top) {
+		var antiClickjack = document.getElementById("antiClickjack");
+		antiClickjack.parentNode.removeChild(antiClickjack);
+	} else {
+		top.location = self.location;
+	}</script> <div> <table class="table table-hover"> <tr ng-repeat="event in selectedTestPlan.events"> <td ng-click="selectEvent(event)" style="cursor: pointer" ng-class="{'info' : eventIsSelected(event)}"> <strong> {{event.vaccination.doseNumber}} # {{event.vaccination.administred.name}} - {{event.vaccination.date.fixed.date | date:'MM/dd/yyyy'}} </strong>   </table> </div>
