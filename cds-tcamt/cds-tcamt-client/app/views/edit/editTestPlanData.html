@@ -1,0 +1,50 @@
+<style id="antiClickjack">
+body {
+	display: none !important;
+}
+</style>
+<script type="text/javascript">
+	if (self === top) {
+		var antiClickjack = document.getElementById("antiClickjack");
+		antiClickjack.parentNode.removeChild(antiClickjack);
+	} else {
+		top.location = self.location;
+	}
+</script>
+<script type="text/ng-template" id="EditTestPlanData.html">
+	
+    <div class="page-header">
+        <span class="header5">Test Plan Information</span>
+    </div>
+            
+	<form name="testplanMetaDataForm" class="form-horizontal" novalidate>
+		<div class="row">
+			<div class="col-md-12">
+				<div class="col-md-8">
+					<md-input-container style="width: 100%;">
+						<label>Name</label>
+						<input ng-model="selectedTestPlan1.name" ng-change="recordChanged()" type="text"/>
+					</md-input-container>
+				</div>
+				<div class="col-md-4">
+					<md-input-container style="width: 100%;">
+						<label>Creation Date</label>
+						<md-datepicker ng-model="selectedTestPlan1.obj" md-placeholder="Enter date" ng-change="dateChange(selectedTestPlan1)"></md-datepicker>
+					</md-input-container>
+				</div>
+				<div class="col-md-6">
+					<md-input-container style="width: 100%;">
+						<label>Description</label>
+						<input ng-model="selectedTestPlan1.description" ng-change="recordChanged()" type="text"/>
+					</md-input-container>
+				</div>
+				<div class="col-md-6">
+					<md-input-container style="width: 100%;">
+						<label>Version</label>
+						<input ng-model="selectedTestPlan1.version" ng-change="recordChanged()" type="text"/>
+					</md-input-container>
+				</div>
+			</div>
+		</div>
+	</form>
+</script>

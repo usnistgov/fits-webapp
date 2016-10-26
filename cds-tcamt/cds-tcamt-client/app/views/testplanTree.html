@@ -1,0 +1,33 @@
+<style id="antiClickjack">
+body {
+	display: none !important;
+}
+
+.handle-custom {
+	background-color: red;
+}
+</style>
+<script type="text/javascript">
+	if (self === top) {
+		var antiClickjack = document.getElementById("antiClickjack");
+		antiClickjack.parentNode.removeChild(antiClickjack);
+	} else {
+		top.location = self.location;
+	}
+</script>
+<div ui-tree="treeOptions">
+	<ol ui-tree-nodes="" ng-model="selectedTestPlan1">
+		<li ng-repeat="test in selectedTestPlan1.testCases" ng-click="selectTest(test)" ng-class="{selected1 : isSelectedTC(test)}" ui-tree-node>
+			<div ui-tree-handle>
+				<div style="margin-left: 5px;">
+					<span data-nodrag >
+						<span class="label label-sub-component label-icon">T</span> 
+						<span>{{test.name}}</span> 
+						<i ng-show="this.$modelValue===activeModel" class="fa fa-pencil fa-fw"></i>
+					</span>
+				</div>
+			</div>
+		</li>
+	</ol>
+</div>
+

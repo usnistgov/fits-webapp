@@ -30,12 +30,12 @@
                             <td st-ratio="5">{{$index + 1}}</td>
                             <td st-ratio="20" ng-bind="row.name"></td>
                             <td st-ratio="30" ng-bind="row.description"></td>
-                            <td st-ratio="15" ng-bind="row.metaData.version"></td>
-   							<td st-ratio="15" ng-bind="row.metaData.dateLastUpdated.fixed.date | date:'MM/dd/yyyy'"></td>
+                            <td st-ratio="15" ng-bind="row.version"></td>
+   							<td st-ratio="15" ng-bind="row.date | date:'MM/dd/yyyy'"></td>
                             <td st-ratio="15">
                         	    <button title="Select"
                                     type="button" class="btn btn-xs btn-info no-margin"
-                                    ng-click="selectTest(row)">
+                                    ng-click="selectTestPlan1(row)">
                                         <span><i class="fa fa-pencil fa-fw"></i></span>
                                 </button>
                                 <button title="Delete" type="button" class="btn btn-xs btn-danger no-margin"

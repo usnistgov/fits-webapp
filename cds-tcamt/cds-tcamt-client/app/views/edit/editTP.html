@@ -12,18 +12,34 @@ body {
 	}
 </script>
 <ng-include src="'views/edit/editTestPlan.html'"></ng-include>
+<ng-include src="'views/edit/editTestPlanData.html'"></ng-include>
 <ng-include src="'views/edit/editEvent.html'"></ng-include>
 <ng-include src="'views/edit/editTestCaseGroup.html'"></ng-include>
 <ng-include src="'views/edit/editTestCase.html'"></ng-include>
 <ng-include src="'views/edit/editTestStep.html'"></ng-include>
-<div class="row" ng-show="!selectedTestPlan">
+<ng-include src="'views/edit/editForecast.html'"></ng-include>
+<div class="row" ng-show="!selectedTestPlan1">
 	<div class="col-md-12">
 		<p>No Test Case Selected.</p>
 	</div>
 </div>
-<div ng-show="selectedTestPlan">
+<div ng-show="selectedTestPlan1">
 	<div class="row">
 		<div ng-show="!hideLoe" class="col-md-3">
+			<div class="panel panel-primary">
+				<div class="panel-heading panel-heading-collapsable"
+					style="background-color: #293856;">
+					<i class="glyphicon glyphicon-list"></i> <strong>
+					Test Cases
+					</strong>
+				</div>
+				<div class="panel-body">
+					<div class="toc-container">
+						<ng-include src="'views/testplanTree.html'" />
+					</div>
+				</div>
+			</div>
+			<br />
 			<div class="panel panel-primary">
 				<div class="panel-heading panel-heading-collapsable"
 					style="background-color: #293856;">
@@ -74,11 +90,17 @@ body {
 			<div class="panel panel-primary">
 				<div class="panel-heading" style="background-color: #293856">
 					<strong>Dashboard</strong>
-					<button title="Back to Test Case Metadata" type="button"
-						 ng-hide="isMDview()"
+					<button title="Back to Test Plan Metadata" type="button"
+						 ng-show="showTPbutton()"
 						 class="btn btn-xs btn-default pull-right" style="margin:0px;background-color:#eeeeee;"
-						ng-click="backToGeneral()">
-						<span>Back</span>
+						ng-click="loadTPview()">
+						<span>Test Plan</span>
+					</button>
+					<button title="Back to Test Case Metadata" type="button"
+						 ng-show="showTCbutton()"
+						 class="btn btn-xs btn-default pull-right" style="margin:0px; margin-right : 10px; background-color:#eeeeee;"
+						ng-click="loadTCview()">
+						<span>Test Case</span>
 					</button>
 				</div>
 				<div class="panel-body"

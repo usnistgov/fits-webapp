@@ -1,0 +1,103 @@
+<style id="antiClickjack">
+body {
+	display: none !important;
+}
+</style>
+<script type="text/javascript">
+	if (self === top) {
+		var antiClickjack = document.getElementById("antiClickjack");
+		antiClickjack.parentNode.removeChild(antiClickjack);
+	} else {
+		top.location = self.location;
+	}
+</script>
+<!--     <div class="page-header"> -->
+<!--         <span class="header5">Event</span> -->
+<!--     </div> -->
+            
+<!-- 	<form name="eventForm" class="form-horizontal" novalidate> -->
+<!-- 		<div class="row"> -->
+<!-- 			<div class="col-md-12"> -->
+<!-- 				<div class="col-md-12"> -->
+<!-- 					<md-input-container style="width: 100%;"> -->
+<!-- 						<label>Event Type</label> -->
+<!-- 						<input value="{{selectedEvent.type.toUpperCase()}}" ng-disabled="true" type="text"/> -->
+<!-- 					</md-input-container> -->
+<!-- 				</div> -->
+<!-- 			</div> -->
+<!-- 		</div> -->
+<!-- 	</form> -->
+<script type="text/ng-template" id="EditForecastData.html">
+
+
+	<div class="page-header">
+        <span class="header5">Forecast</span>
+    </div>
+
+	<form name="vaccineForm" class="form-horizontal" novalidate>
+		<div class="row">
+            <div class="col-md-12">
+				<div class="col-md-12">
+					<md-input-container style="width: 100%;">
+						<label>Vaccine</label>
+						<md-select ng-model="selectedForecast.target" ng-model-options="{trackBy: '$value.id'}">
+							 <md-option ng-repeat="v in AllVaccines" ng-value="v">{{v.name}} / {{v.details}}</md-option>
+						</md-select>
+					</md-input-container>
+				</div>
+			</div>
+			<div class="col-md-12">
+				<div class="col-md-4">
+					<md-input-container style="width: 100%;">
+						<label>Earliest</label>
+						<md-datepicker ng-model="selectedForecast.earliest.fixed.obj" md-placeholder="Enter date" ng-change="dateChange(selectedForecast.earliest.fixed)"></md-datepicker>
+					</md-input-container>
+				</div>
+				<div class="col-md-4">
+					<md-input-container style="width: 100%;">
+						<label>Recommended</label>
+						<md-datepicker ng-model="selectedForecast.recommended.fixed.obj" md-placeholder="Enter date" ng-change="dateChange(selectedForecast.recommended.fixed)"></md-datepicker>
+					</md-input-container>
+				</div>
+				<div class="col-md-4">
+					<md-input-container style="width: 100%;">
+						<label>Past Due</label>
+						<md-datepicker ng-model="selectedForecast.pastDue.fixed.obj" md-placeholder="Enter date" ng-change="dateChange(selectedForecast.pastDue.fixed)"></md-datepicker>
+					</md-input-container>
+				</div>
+			</div>
+			<div class="col-md-12">
+				<div class="col-md-4">
+					<md-input-container style="width: 100%;">
+						<label>Serie Status</label>
+						<md-select ng-model="selectedForecast.serieStatus" ng-model-options="{trackBy: '$value'}">
+							<md-option value="A">Assumed complete or immune</md-option>
+							<md-option value="C">Complete</md-option>
+							<md-option value="D">Due</md-option>
+							<md-option value="E">Error</md-option>
+							<md-option value="F">Finished</md-option>
+							<md-option value="G">Aged out</md-option>
+							<md-option value="I">Immune</md-option>
+							<md-option value="L">Due later</md-option>
+							<md-option value="N">Not complete</md-option>
+							<md-option value="O">Overdue</md-option>
+							<md-option value="R">No results</md-option>
+							<md-option value="S">Complete for season</md-option>
+							<md-option value="U">Unknown</md-option>
+							<md-option value="V">Consider</md-option>
+							<md-option value="W">Waivered</md-option>
+							<md-option value="X">Contraindicated</md-option>
+							<md-option value="Z">Recommended but not required</md-option>
+						</md-select>
+					</md-input-container>
+				</div>
+				<div class="col-md-8">
+					<md-input-container style="width: 100%;">
+						<label>Forecast Reason</label>
+						<input ng-model="selectedForecast.forecastReason" ng-change="recordChanged()" type="text"/>
+					</md-input-container>
+				</div>
+			</div>
+		</div>
+	</form>
+</script>

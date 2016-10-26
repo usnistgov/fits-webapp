@@ -16,7 +16,8 @@
         <div class="row">
             <div class="pull-left">
                 <span ng-show="accordi.tpList" class="header4" style="margin-top:50px !important;">List of Test Plans</span>
-                <span ng-show="accordi.tpDetails" class="header4" style="margin-top:50px !important;">Test Case : {{selectedTestPlan.name}}</span>
+                <span ng-show="accordi.tpDetails && TCSelected()" class="header4" style="margin-top:50px !important;">Test Case : {{selectedTestPlan.name}}</span>
+                <span ng-show="accordi.tpDetails && !TCSelected()" class="header4" style="margin-top:50px !important;">Test Plan : {{selectedTestPlan1.name}}</span>
                 <span style="margin-left:10px; font-size:14px;font-weight: bold; color:red" ng-show="isChanged"><i class="fa fa-exclamation-triangle"></i> Unsaved Changes</span>
             </div>
 

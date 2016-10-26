@@ -15,7 +15,8 @@ body {
 		top.location = self.location;
 	}
 </script>
-<div>
+<span ng-show="!TCSelected()">No test case selected.</span>
+<div ng-show="TCSelected()">
 	<table class="table table-hover">
 		<tr ng-repeat="event in selectedTestPlan.events">
 			<td ng-click="selectEvent(event)" style="cursor: pointer;"
