@@ -5,78 +5,82 @@
 		antiClickjack.parentNode.removeChild(antiClickjack);
 	} else {
 		top.location = self.location;
-	}</script> <!--     <div class="page-header"> --> <!--         <span class="header5">Event</span> --> <!--     </div> --> <!-- 	<form name="eventForm" class="form-horizontal" novalidate> --> <!-- 		<div class="row"> --> <!-- 			<div class="col-md-12"> --> <!-- 				<div class="col-md-12"> --> <!-- 					<md-input-container style="width: 100%;"> --> <!-- 						<label>Event Type</label> --> <!-- 						<input value="{{selectedEvent.type.toUpperCase()}}" ng-disabled="true" type="text"/> --> <!-- 					</md-input-container> --> <!-- 				</div> --> <!-- 			</div> --> <!-- 		</div> --> <!-- 	</form> --> <script type="text/ng-template" id="EditEventData.html"><div class="page-header">
-        <span class="header5">Vaccine</span>
-    </div>
+	}</script> <!--     <div class="page-header"> --> <!--         <span class="header5">Event</span> --> <!--     </div> --> <!-- 	<form name="eventForm" class="form-horizontal" novalidate> --> <!-- 		<div class="row"> --> <!-- 			<div class="col-md-12"> --> <!-- 				<div class="col-md-12"> --> <!-- 					<md-input-container style="width: 100%;"> --> <!-- 						<label>Event Type</label> --> <!-- 						<input value="{{selectedEvent.type.toUpperCase()}}" ng-disabled="true" type="text"/> --> <!-- 					</md-input-container> --> <!-- 				</div> --> <!-- 			</div> --> <!-- 		</div> --> <!-- 	</form> --> <script type="text/ng-template" id="EditEventData.html"><md-content>
+		<md-tabs md-dynamic-height md-border-bottom>
+			<md-tab label="Vaccine">
+				<md-content class="md-padding">
+					<form name="vaccineForm" class="form-horizontal" novalidate>
+						<div class="row">
+				            <div class="col-md-12">
+								<div class="col-md-12">
+									<md-input-container style="width: 100%;">
+										<label>Vaccine</label>
+										<md-select ng-model="selectedEvent[selectedEvent.type].administred" ng-model-options="{trackBy: '$value.id'}">
+											 <md-option ng-repeat="v in AllVaccines" ng-value="v">{{v.name}} / {{v.details}}</md-option>
+										</md-select>
+									</md-input-container>
+								</div>
+								<div class="col-md-offset-4 col-md-4">
+									<date-choose  label="'Date Of Vaccination'" dt="selectedEvent[selectedEvent.type].date"></date-choose>
+								</div>
+							</div>
+						</div>
+					</form>
+				</md-content>
+			</md-tab>
+			<md-tab label="Evaluations">
+				<md-content class="md-padding">
+			
+		
+						<button title="Add Evaluation" type="button"
+							class="btn btn-sm btn-info pull-right"
+							style="margin: 0px;"
+							ng-click="newEvaluation(selectedEvent[selectedEvent.type].evaluations)">
+							<span><i class="fa fa-plus fa-fw"></i> Add Evaluation </span>
+						</button>
+				    
 
-	<form name="vaccineForm" class="form-horizontal" novalidate>
-		<div class="row">
-            <div class="col-md-12">
-				<div class="col-md-9">
-					<md-input-container style="width: 100%;">
-						<label>Vaccine</label>
-						<md-select ng-model="selectedEvent[selectedEvent.type].administred" ng-model-options="{trackBy: '$value.id'}">
-							 <md-option ng-repeat="v in AllVaccines" ng-value="v">{{v.name}} / {{v.details}}</md-option>
-						</md-select>
-					</md-input-container>
-				</div>
-				<div class="col-md-3">
-					<md-input-container style="width: 100%;">
-						<label>Date Of Vaccination</label>
-						<md-datepicker ng-model="selectedEvent[selectedEvent.type].date.fixed.obj" md-placeholder="Enter date" ng-change="dateChange(selectedEvent[selectedEvent.type].date.fixed)"></md-datepicker>
-					</md-input-container>
-				</div>
-			</div>
-		</div>
-	</form>
-
-	<div class="page-header">
-        <span class="header5">Evaluations</span>
-		<button title="Add Evaluation" type="button"
-			class="btn btn-sm btn-info pull-right"
-			style="margin: 0px;"
-			ng-click="newEvaluation(selectedEvent[selectedEvent.type].evaluations)">
-			<span><i class="fa fa-plus fa-fw"></i></span>
-		</button>
-    </div>
-
-	<form ng-repeat="evaluation in selectedEvent[selectedEvent.type].evaluations track by $index" name="vaccineForm" class="form-horizontal" novalidate>
-		<div class="row">
-            <div class="col-md-12">
-				<div class="col-md-1">
-					<md-input-container style="width: 100%;">
-					<button ng-show="!evaluation.tmp" title="Delete Evaluation" type="button"
-						class="btn btn-sm btn-danger"
-						style="margin: 0px;"
-						ng-click="deleteEvaluation(selectedEvent[selectedEvent.type].evaluations,$index)">
-						<span><i class="fa fa-minus fa-fw"></i></span>
-					</button>
-					<button ng-show="evaluation.tmp" title="Delete Evaluation" type="button"
-						class="btn btn-sm btn-success"
-						style="margin: 0px;"
-						ng-click="addEvaluation(evaluation)">
-						<span><i class="fa fa-check fa-fw"></i></span>
-					</button>
-					</md-input-container>
-				</div>
-				<div class="col-md-6">
-					<md-input-container style="width: 100%;">
-						<label>Related To</label>
-						<md-select ng-model="evaluation.relatedTo" ng-model-options="{trackBy: '$value.id'}">
-							 <md-option ng-repeat="v in AllVaccines" ng-value="v">{{v.name}} / {{v.details}}</md-option>
-						</md-select>
-					</md-input-container>
-				</div>
-				<div class="col-md-5">
-					<md-input-container style="width: 100%;">
-						<label>Status</label>
-						<md-select ng-model="evaluation.status" ng-model-options="{trackBy: '$value'}">
-							 <md-option value="INVALID">Invalid</md-option>
-							 <md-option value="VALID">Valid</md-option>
-						</md-select>
-					</md-input-container>
-				</div>
-				
-			</div>
-		</div>
-	</form></script>
+					<form ng-repeat="evaluation in selectedEvent[selectedEvent.type].evaluations track by $index" name="vaccineForm" class="form-horizontal" novalidate>
+						<div class="row">
+				            <div class="col-md-12">
+								<div class="col-md-1">
+									<md-input-container style="width: 100%;">
+									<button ng-show="!evaluation.tmp" title="Delete Evaluation" type="button"
+										class="btn btn-sm btn-danger"
+										style="margin: 0px;"
+										ng-click="deleteEvaluation(selectedEvent[selectedEvent.type].evaluations,$index)">
+										<span><i class="fa fa-minus fa-fw"></i></span>
+									</button>
+									<button ng-show="evaluation.tmp" title="Delete Evaluation" type="button"
+										class="btn btn-sm btn-success"
+										style="margin: 0px;"
+										ng-click="addEvaluation(evaluation)">
+										<span><i class="fa fa-check fa-fw"></i></span>
+									</button>
+									</md-input-container>
+								</div>
+								<div class="col-md-6">
+									<md-input-container style="width: 100%;">
+										<label>Related To</label>
+										<md-select ng-model="evaluation.relatedTo" ng-model-options="{trackBy: '$value.id'}">
+											 <md-option ng-repeat="v in AllVaccines" ng-value="v">{{v.name}} / {{v.details}}</md-option>
+										</md-select>
+									</md-input-container>
+								</div>
+								<div class="col-md-5">
+									<md-input-container style="width: 100%;">
+										<label>Status</label>
+										<md-select ng-model="evaluation.status" ng-model-options="{trackBy: '$value'}">
+											 <md-option value="INVALID">Invalid</md-option>
+											 <md-option value="VALID">Valid</md-option>
+										</md-select>
+									</md-input-container>
+								</div>
+								
+							</div>
+						</div>
+					</form>
+				</md-content>
+			</md-tab>
+		</md-tabs>
+	</md-content></script>

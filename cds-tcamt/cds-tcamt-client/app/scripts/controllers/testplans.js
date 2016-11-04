@@ -1,14 +1,20 @@
 /**
  * Created by Jungyub on 5/12/16
  */
+angular.module('tcl').controller('ImportCtrl', function ( $scope, $rootScope, Restangular, $http, $filter, $modal ) {
+	
+});
 
 angular.module('tcl').controller('TestPlanCtrl', function ($document, $scope, $rootScope, $templateCache, Restangular, $http, $filter, $modal, $cookies, $timeout, userInfoService, ngTreetableParams, $interval, ViewSettings, StorageService, $q, notifications, IgDocumentService, ElementUtils,AutoSaveService,$sce,Notification) {
 	$scope.loading = false;
+	$scope.selectedTabTP = 0;
+	$scope.sfile = "BROWSE";
+	$scope.sfileO = null;
+	$scope.fileErr = false;
     $scope.selectedTestStepTab = 1;
     $scope.selectedEvent = {};
     $rootScope.selectedTestPlan1 = {};
     $scope.selectedForecast = {};
-	$rootScope.tps = [];
 	$scope.testPlanOptions=[];
 	$scope.accordi = {metaData: false, definition: true, tpList: true, tpDetails: false};
 	$rootScope.usageViewFilter = 'All';
@@ -33,16 +39,51 @@ angular.module('tcl').controller('TestPlanCtrl', function ($document, $scope, $r
 		}
 	});
 
-	// CDSI TCAMT
+// ------------------------------------------------------------------------------------------ CDSI TCAMT
+	$scope.selectedEvent = null;
+	$scope.selectedForecast = null;
+	$scope.selectedTP = null;
+	$scope.selectedTC = null;
+	$scope.selectedTG = null;
+	$scope.tps = [];
+	$scope.tpTree = [];
+	
+	$scope.loadTestCases = function () {
+		var delay = $q.defer();
+		$scope.error = null;
+		$scope.loading = true;
+
+		$http.get('api/testplans').then(function(response) {
+			$scope.tps = angular.fromJson(response.data);
+			for(p in $scope.tps){
+				for(t in $scope.tps[p].testCases){
+					$scope.sanitizeDate($scope.tps[p].metaData.dateCreated);
+					$scope.sanitizeDate($scope.tps[p].metaData.dateLastUpdated);
+					$scope.sanitizeTestCase($scope.tps[p].testCases[t]);
+				}
+			}
+			$scope.loading = false;
+			delay.resolve(true);
+		}, function(error) {
+			$scope.loading = false;
+			$scope.error = error.data;
+			delay.reject(false);
+
+		});
+	};
+	
 	$scope.selectEvent = function(e){
 		waitingDialog.show('Opening event...', {dialogSize: 'xs', progressType: 'info'});
 		$timeout(function () {
+			//Selection
 			$scope.selectedEvent = e;
-			$scope.selectedForecast = {};
+			$scope.selectedForecast = null;
+			
+			//Clean
 			$scope.removeTMP(e[e.type].evaluations);
-			console.log($scope.selectedEvent.type);
+			
+			//View
 			$scope.subview = "EditEventData.html";
-			console.log("subview changed");
 			waitingDialog.hide();
 		}, 0);
 	};
@@ -50,18 +91,87 @@ angular.module('tcl').controller('TestPlanCtrl', function ($document, $scope, $r
 	$scope.selectForecast = function(f){
 		waitingDialog.show('Opening forecast...', {dialogSize: 'xs', progressType: 'info'});
 		$timeout(function () {
+			//Selection
 			$scope.selectedForecast = f;
-			$scope.selectedEvent = {};
-//			$scope.subview = "EditEventData.html";
+			$scope.selectedEvent = null;
+
+			//View
 			$scope.subview = "EditForecastData.html";
-			console.log("subview changed");
+			waitingDialog.hide();
+		}, 0);
+	};
+	
+	$scope.selectTP = function(tp){
+		waitingDialog.show('Opening Test Plan...', {dialogSize: 'xs', progressType: 'info'});
+		$timeout(function () {
+			//Selection
+			$scope.selectedEvent = null;
+			$scope.selectedForecast = null;
+			$scope.selectedTC = null;
+			$scope.selectedTG = null;
+			$scope.tpTree = [];
+			$scope.selectedTP = tp;
+			$scope.tpTree.push($scope.selectedTP);
+			
+			//View
+			$scope.selectTPTab(1);
+			$scope.subview = "EditTestPlanData.html";
+			waitingDialog.hide();
+		}, 0);
+	};
+	
+	$scope.selectTC = function(tc){
+		waitingDialog.show('Opening Test Case...', {dialogSize: 'xs', progressType: 'info'});
+		console.log("DEBUG");
+		$timeout(function () {
+			//Selection
+			$scope.selectedEvent = null;
+			$scope.selectedForecast = null;
+			$scope.selectedTC = tc;
+			$scope.selectedTG = null;
+			
+			//View
+			$scope.subview = "EditTestPlanMetadata.html";
 			waitingDialog.hide();
 		}, 0);
 	};
 	
 	$scope.isSelectedTC = function(t){
-		return t === $rootScope.selectedTestPlan;
+		return t === $scope.selectedTC;
 	};
+
+	$scope.isSelectedEvent = function(e){
+		return e === $scope.selectedEvent;
+	};
+	
+	$scope.isSelectedForecast = function(f){
+		return f === $scope.selectedForecast;
+	};
+	
+	$scope.isSelectedTPv = function(){
+		return $scope.subview === "EditTestPlanData.html";
+	};
+	
+	$scope.isSelectedTCv = function(){
+		return $scope.subview === "EditTestPlanMetadata.html";
+	};
+	
+	$scope.aTCisSelected = function(){
+		return $scope.selectedTC && $scope.selectedTC !== {};
+	};
+	
+	$scope.aTPisSelected = function(){
+		return $scope.selectedTP && $scope.selectedTP !== {};
+	};
+	
+	$scope.anEvisSelected = function(){
+		return $scope.selectedEvent && $scope.selectedEvent !== {};
+	};
+	
+	$scope.aFisSelected = function(){
+		return $scope.selectedForecast && $scope.selectedForecast !== {};
+	};
+	
 	
 	$scope.removeTMP = function(list){
 		
@@ -74,53 +184,65 @@ angular.module('tcl').controller('TestPlanCtrl', function ($document, $scope, $r
 		}
 	}
 	
-	$scope.loadTCview = function(){
-		waitingDialog.show('Opening general metadata view', {dialogSize: 'xs', progressType: 'info'});
-		$timeout(function () {
-			$scope.selectedEvent = {};
-			$scope.selectedForecast = {};
-			$scope.subview = "EditTestPlanMetadata.html";
-			console.log("subview changed");
-			waitingDialog.hide();
-		}, 0);
+	$scope.addEvent = function(){
+		$scope.selectedTC.events.push({
+			type : "vaccination",
+			vaccination : {
+				administred : {
+					name : "New Event"
+				},
+				evaluations : [],
+				type : "VACCINATION",
+				date : {
+					fixed : {
+						date : null,
+						obj  : null
+					}
+				},
+				doseNumber : $scope.selectedTC.events.length + 1
+			}
+		});
 	};
 	
-	$scope.loadTPview = function(){
-		waitingDialog.show('Opening test case metadata view', {dialogSize: 'xs', progressType: 'info'});
-		$timeout(function () {
-			$scope.selectedEvent = {};
-			$scope.selectedForecast = {};
-			$rootScope.selectedTestPlan = undefined;
-			$scope.subview = "EditTestPlanData.html";
-			console.log("subview changed");
-			waitingDialog.hide();
-		}, 0);
-	};
-	
-	$scope.showTPbutton = function(){
-		return $scope.subview !== "EditTestPlanData.html";
-	};
-	
-	$scope.showTCbutton = function(){
-		return $scope.TCSelected() && $scope.subview !== "EditTestPlanMetadata.html";
-	};
-	
-	$scope.TCSelected = function(){
-		return $rootScope.selectedTestPlan && $rootScope.selectedTestPlan !== {} ;
-	};
-	
-	
-	$scope.eventIsSelected = function(e){
-		return $scope.selectedEvent === e;
-	};
-	
-	$scope.forecastIsSelected = function(f){
-		return $scope.selectedForecast === f;
+	$scope.addForecast = function(){
+		$scope.selectedTC.forecast.push({
+			doseNumber : 0,
+			forecastReason : "",
+			earliest : {
+				fixed : {
+					date : null,
+					obj  : null
+				}
+			},
+			recommended : {
+				fixed : {
+					date : null,
+					obj  : null
+				}
+			},
+			pastDue : {
+				fixed : {
+					date : null,
+					obj  : null
+				}
+			},
+			target : {
+				name : "New Forecast"
+			}
+		});
 	};
 	
 	$scope.sanitizeDate = function(date){
 		if(date.hasOwnProperty("fixed")){
 			date.fixed.obj = new Date(date.fixed.date);
+		}
+	};
+	
+	$scope.cleanDate = function(date){
+		if(date.hasOwnProperty("fixed")){
+			if(date.fixed.hasOwnProperty("obj")){
+				delete date.fixed.obj;
+			}
 		}
 	};
 	
@@ -139,6 +261,29 @@ angular.module('tcl').controller('TestPlanCtrl', function ($document, $scope, $r
 			$scope.sanitizeDate(tc.forecast[f].earliest);
 			$scope.sanitizeDate(tc.forecast[f].recommended);
 			$scope.sanitizeDate(tc.forecast[f].pastDue);
+		}
+	};
+	
+	$scope.prepareTestCase = function(tc){
+		$scope.cleanDate(tc.patient.dob);
+		$scope.cleanDate(tc.evalDate);
+		$scope.cleanDate(tc.metaData.dateCreated);
+		$scope.cleanDate(tc.metaData.dateLastUpdated);
+		for(e in tc.events){
+			delete tc.events[e].type;
+			var keys = [];
+			for(var k in tc.events[e]) keys.push(k);
+			console.log(" e "+e);
+			console.log(" k "+keys[0]);
+			console.log(tc.events[e][keys[0]]);
+			$scope.removeTMP(tc.events[e][keys[0]].evaluations);
+			$scope.cleanDate(tc.events[e][keys[0]].date);
+			console.log(tc.events[e][keys[0]]);
+		}
+		for(f in tc.forecast){
+			$scope.cleanDate(tc.forecast[f].earliest);
+			$scope.cleanDate(tc.forecast[f].recommended);
+			$scope.cleanDate(tc.forecast[f].pastDue);
 		}
 	};
 	
@@ -162,6 +307,99 @@ angular.module('tcl').controller('TestPlanCtrl', function ($document, $scope, $r
 	$scope.deleteEvaluation = function(list,index){
 		list.splice(index,1);
 	};
+	
+	$scope.eventCM = [
+	                  ['Delete Event', function(modelValue){
+	                	  $scope.selectedTC.events.splice(modelValue.$index,1);
+	                  }]
+	];
+	
+	$scope.forecastCM = [
+	                  ['Delete Forecast', function(modelValue){
+	                	  $scope.selectedTC.forecast.splice(modelValue.$index,1);
+	                  }]
+	];
+	
+	$scope.tpCM = [
+		                  ['Add Test Case', function(modelValue){
+		                	  var tc =  $scope.newTC();
+		                	  $scope.selectedTP.testCases.push(tc);
+		                	  $scope.selectTC(tc);
+		                  }],
+		                  ['Import Test Case', function(modelValue){
+		                	 $scope.selectTP($scope.selectedTP);
+		                	 $scope.selectedTabTP = 1;
+		                  }]
+	];
+	
+	
+    $scope.fileChange = function(files){
+    	console.log("change");
+    	if(files[0].type === "text/xml"){
+			console.log("in selected xml");
+			$scope.$apply(function() {
+				$scope.sfile = files[0].name;
+				$scope.fileErr = false;
+				$scope.sfileO = files[0];
+			});
+			
+		}
+		else{
+			console.log("in selected not xml");
+			$scope.$apply(function() {
+				$scope.sfile = "File should be XML";
+				$scope.fileErr = true;
+			});
+		}
+    };
+    
+    $scope.upload = function(){
+    	if($scope.sfileO != null && !$scope.fileErr){
+    		var fd = new FormData();
+			fd.append("file",$scope.sfileO);
+			 $http.post("api/testcase/import", fd, {
+		            transformRequest: angular.identity,
+		            headers: {'Content-Type': undefined}
+		     })
+		     .success(function(data){
+		    	 $scope.sfile = "browse";
+		    	 $scope.sfileO = null;
+		     })
+		     .error(function(data){
+		    	 $scope.sfile = "browse";
+		    	 $scope.sfileO = null;
+		     });
+    	}
+    };
+    
+    
+	$scope.tcCM = [
+	                  
+	                  ['Clone Test Case', function(modelValue){
+	                	  var obj = $scope.selectedTP.testCases[modelValue.$index];
+	                	  var clone = JSON.parse(JSON.stringify(obj));
+	                	  clone.name = "[CLONE] "+clone.name;
+	                	  $scope.sanitizeTestCase(clone);
+	                	  $scope.selectedTP.testCases.push(clone);
+	                	  $scope.selectTC(clone);
+	                  }],
+	                  ['Delete Test Case', function(modelValue){
+	                	  $scope.selectedTP.testCases.splice(modelValue.$index,1);
+	                  }]
+	];
+	
+	$scope.exportNIST = function(){
+		if($scope.selectedTC.id != null && $scope.selectedTC.id != undefined){
+			var form = document.createElement("form");
+			form.action = $rootScope.api('api/testcase/' + $scope.selectedTC.id + '/export/nist');
+			form.method = "POST";
+			form.target = "_target";
+			form.style.display = 'none';
+			document.body.appendChild(form);
+			form.submit();
+		}
+	}
+//--------------------------------------------------------------------------------------------------------
 
 	$scope.exportTestPackageHTML = function () {
 			var changes = angular.toJson([]);
@@ -241,6 +479,31 @@ angular.module('tcl').controller('TestPlanCtrl', function ($document, $scope, $r
 
 	};
 
+	$scope.loadTestPlans = function () {
+		var delay = $q.defer();
+		$scope.error = null;
+		$rootScope.tps = [];
+
+		if (userInfoService.isAuthenticated() && !userInfoService.isPending()) {
+			waitingDialog.show('Loading TestPlans...', {dialogSize: 'xs', progressType: 'info'});
+			$scope.loading = true;
+			$http.get('api/testplans').then(function (response) {
+				waitingDialog.hide();
+				$scope.tps = angular.fromJson(response.data);
+				$scope.loading = false;
+				delay.resolve(true);
+			}, function (error) {
+				$scope.loading = false;
+				$scope.error = error.data;
+				waitingDialog.hide();
+				delay.reject(false);
+			});
+		} else {
+			delay.reject(false);
+		}
+		return delay.promise;
+	};
+	
 	$scope.exportProfileXMLs = function () {
 
 		var listOfIGID = [];
@@ -271,32 +534,6 @@ angular.module('tcl').controller('TestPlanCtrl', function ($document, $scope, $r
 		form.style.display = 'none';
 		document.body.appendChild(form);
 		form.submit();
-	};
-
-
-	$scope.loadTestPlans = function () {
-		var delay = $q.defer();
-		$scope.error = null;
-		$rootScope.tps = [];
-
-		if (userInfoService.isAuthenticated() && !userInfoService.isPending()) {
-			waitingDialog.show('Loading TestPlans...', {dialogSize: 'xs', progressType: 'info'});
-			$scope.loading = true;
-			$http.get('api/testplans').then(function (response) {
-				waitingDialog.hide();
-				$rootScope.tps = angular.fromJson(response.data);
-				$scope.loading = false;
-				delay.resolve(true);
-			}, function (error) {
-				$scope.loading = false;
-				$scope.error = error.data;
-				waitingDialog.hide();
-				delay.reject(false);
-			});
-		} else {
-			delay.reject(false);
-		}
-		return delay.promise;
 	};
 
 	$scope.loadIGDocuments = function () {
@@ -347,29 +584,6 @@ angular.module('tcl').controller('TestPlanCtrl', function ($document, $scope, $r
 	$scope.initTestCases = function () {
 		$scope.loadTestCases();
 		$scope.loadVaccines();
-	};
-
-	$scope.loadTestCases = function () {
-		var delay = $q.defer();
-		$scope.error = null;
-		$rootScope.testCases = [];
-		$scope.loading = true;
-
-		$http.get('api/testCases').then(function(response) {
-			$rootScope.testCases = angular.fromJson(response.data);
-			for(p in $rootScope.testCases){
-				for(t in $rootScope.testCases[p].testCases){
-					$scope.sanitizeTestCase($rootScope.testCases[p].testCases[t]);
-				}
-			}
-			$scope.loading = false;
-			delay.resolve(true);
-		}, function(error) {
-			$scope.loading = false;
-			$scope.error = error.data;
-			delay.reject(false);
-
-		});
 	};
 	
 	$scope.loadVaccines = function () {
@@ -752,8 +966,21 @@ angular.module('tcl').controller('TestPlanCtrl', function ($document, $scope, $r
 	};
 	
 	$scope.saveAllChangedTestPlans = function() {
-		console.log("SAVE");
-		console.log($rootScope.selectedTestPlan);
+		var tc = JSON.parse(JSON.stringify($scope.selectedTC));
+		console.log(tc);
+		$scope.prepareTestCase(tc);
+		
+		$http.post('api/testcase/save', tc).then(function (response) {
+			Notification.success({message:"Test Plan Saved", delay: 1000});
+
+
+		}, function (error) {
+			$rootScope.saved = false;
+			Notification.error({message:"Error Saving", delay:1000});
+
+		});
+//		console.log("SAVE");
+//		console.log($rootScope.selectedTestPlan);
 //		$rootScope.tps.forEach(function(testplan) {
 //			if(testplan.isChanged){
 //				var changes = angular.toJson([]);

@@ -1,37 +1,11 @@
-<style id="antiClickjack">
-body {
+<style id="antiClickjack">body {
 	display: none !important;
-}
-</style>
-<script type="text/javascript">
-	if (self === top) {
+}</style> <script type="text/javascript">if (self === top) {
 		var antiClickjack = document.getElementById("antiClickjack");
 		antiClickjack.parentNode.removeChild(antiClickjack);
 	} else {
 		top.location = self.location;
-	}
-</script>
-<!--     <div class="page-header"> -->
-<!--         <span class="header5">Event</span> -->
-<!--     </div> -->
-            
-<!-- 	<form name="eventForm" class="form-horizontal" novalidate> -->
-<!-- 		<div class="row"> -->
-<!-- 			<div class="col-md-12"> -->
-<!-- 				<div class="col-md-12"> -->
-<!-- 					<md-input-container style="width: 100%;"> -->
-<!-- 						<label>Event Type</label> -->
-<!-- 						<input value="{{selectedEvent.type.toUpperCase()}}" ng-disabled="true" type="text"/> -->
-<!-- 					</md-input-container> -->
-<!-- 				</div> -->
-<!-- 			</div> -->
-<!-- 		</div> -->
-<!-- 	</form> -->
-
-
-<script type="text/ng-template" id="EditForecastData.html">
-
-	<md-content>
+	}</script> <!--     <div class="page-header"> --> <!--         <span class="header5">Event</span> --> <!--     </div> --> <!-- 	<form name="eventForm" class="form-horizontal" novalidate> --> <!-- 		<div class="row"> --> <!-- 			<div class="col-md-12"> --> <!-- 				<div class="col-md-12"> --> <!-- 					<md-input-container style="width: 100%;"> --> <!-- 						<label>Event Type</label> --> <!-- 						<input value="{{selectedEvent.type.toUpperCase()}}" ng-disabled="true" type="text"/> --> <!-- 					</md-input-container> --> <!-- 				</div> --> <!-- 			</div> --> <!-- 		</div> --> <!-- 	</form> --> <script type="text/ng-template" id="EditForecastData.html"><md-content>
 		<md-tabs md-dynamic-height md-border-bottom>
 			<md-tab label="Forecast">
 				<md-content class="md-padding">  
@@ -82,13 +56,13 @@ body {
 							</div>
 							<div class="col-md-12">
 								<div class="col-md-4">
-									<date-choose  tc="selectedTC" label="'Earliest'" dt="selectedForecast.earliest"></date-choose>
+									<date-choose  label="'Earliest'" dt="selectedForecast.earliest"></date-choose>
 								</div>
 								<div class="col-md-4">
-									<date-choose  tc="selectedTC" label="'Recommended'" dt="selectedForecast.recommended"></date-choose>
+									<date-choose  label="'Recommended'" dt="selectedForecast.recommended"></date-choose>
 								</div>
 								<div class="col-md-4">
-									<date-choose  tc="selectedTC" label="'Past Due'" dt="selectedForecast.pastDue"></date-choose>
+									<date-choose  label="'Past Due'" dt="selectedForecast.pastDue"></date-choose>
 								</div>
 							</div>
 						</div>
@@ -96,5 +70,4 @@ body {
 				</md-content>
 			</md-tab>
 		</md-tabs>
-	</md-content>
-</script>
+	</md-content></script>

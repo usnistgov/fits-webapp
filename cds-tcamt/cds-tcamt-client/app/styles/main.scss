@@ -11,6 +11,29 @@ $icon-font-path: "../fonts/";
   padding: 0.2em 0;
 }
 
+.activeBC {
+	color : #0061ff;
+}
+
+.breadcrumb > li + li::before {
+	color : #000;
+	font-size : 15px;
+}
+
+.breadcrumb {
+	background-color : #efefef;
+}
+
+.fle {
+	border-top : 0.5px solid #d0d0d0;
+}
+
+.le {
+	border-bottom : 0.5px solid #d0d0d0;
+	border-left : 0.5px solid #d0d0d0;
+	border-right : 0.5px solid #d0d0d0;
+}
+
 #wrapper {
   position: relative;
   width: 100%;
@@ -52,6 +75,14 @@ body {
 	background-color : #D9EDF7;
 }
 
+.sinfo {
+	background-color : #c4deff;
+}
+
+.sbadge {
+	background-color : #F24A08;
+}
+
 table{
   font-size:12px;
 }
@@ -79,6 +110,23 @@ table{
 /* Custom page header */
 .header {
   border-bottom: 1px solid #e5e5e5;
+}
+
+.fileUpload {
+    position: relative;
+    overflow: hidden;
+    margin: 10px;
+}
+.upload {
+    position: absolute;
+    top: 0;
+    right: 0;
+    margin: 0;
+    padding: 0;
+    font-size: 20px;
+    cursor: pointer;
+    opacity: 0;
+    filter: alpha(opacity=0);
 }
 
 /* Make the masthead heading the same height as the navigation */
@@ -2273,15 +2321,15 @@ table.forumline > tr > td {
   background-color: red;
 }
 .selected1{
-/* Permalink - use to edit and share this gradient: http://colorzilla.com/gradient-editor/#2c539e+0,2c539e+100;Blue+3D+%232 */
-background: #2c539e; /* Old browsers */
-background: -moz-linear-gradient(top,  #2c539e 0%, #2c539e 100%); /* FF3.6-15 */
-background: -webkit-linear-gradient(top,  #2c539e 0%,#2c539e 100%); /* Chrome10-25,Safari5.1-6 */
-background: linear-gradient(to bottom,  #2c539e 0%,#2c539e 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
-filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#2c539e', endColorstr='#2c539e',GradientType=0 );
- /* IE6-9 */
- color:white;
+/* Permalink - use to edit and share this gradient: http://colorzilla.com/gradient-editor/#7abcff+0,60abf8+44,4096ee+100;Blue+3D+%2314 */
+background: #7abcff; /* Old browsers */
+background: -moz-linear-gradient(top, #7abcff 0%, #60abf8 44%, #4096ee 100%); /* FF3.6-15 */
+background: -webkit-linear-gradient(top, #7abcff 0%,#60abf8 44%,#4096ee 100%); /* Chrome10-25,Safari5.1-6 */
+background: linear-gradient(to bottom, #7abcff 0%,#60abf8 44%,#4096ee 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#7abcff', endColorstr='#4096ee',GradientType=0 ); /* IE6-9 */
+color : #FFFFFF;
 }
+
 tabset{
 margin-top:50px;
 padding:50px;

@@ -1,19 +1,12 @@
-<style id="antiClickjack">
-body {
+<style id="antiClickjack">body {
 	display: none !important;
-}
-</style>
-<script type="text/javascript">
-	if (self === top) {
+}</style> <script type="text/javascript">if (self === top) {
 		var antiClickjack = document.getElementById("antiClickjack");
 		antiClickjack.parentNode.removeChild(antiClickjack);
 	} else {
 		top.location = self.location;
-	}
-</script>
-<script type="text/ng-template" id="EditTestPlanData.html">
-	<md-content>
-		<md-tabs md-selected="selectedTabTP" md-dynamic-height md-border-bottom>
+	}</script> <script type="text/ng-template" id="EditTestPlanData.html"><md-content>
+		<md-tabs md-dynamic-height md-border-bottom>
 			<md-tab label="Test Plan Information">
 				<md-content class="md-padding">         
 					<form name="testplanMetaDataForm" class="form-horizontal" novalidate>
@@ -80,5 +73,4 @@ body {
 				</md-content>
 			</md-tab>
 		</md-tabs>
-	</md-content>
-</script>
+	</md-content></script>

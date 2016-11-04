@@ -15,19 +15,44 @@ body {
 		top.location = self.location;
 	}
 </script>
-<span ng-show="!TCSelected()">No test case selected.</span>
-<div ng-show="TCSelected()">
-	<table class="table table-hover">
-		<tr ng-repeat="event in selectedTestPlan.events">
-			<td ng-click="selectEvent(event)" style="cursor: pointer;"
-				ng-class="{'info' : eventIsSelected(event)}">
-				<strong>
-					{{event.vaccination.doseNumber}} #
-					{{event.vaccination.administred.name}} -
-					{{event.vaccination.date.fixed.date | date:'MM/dd/yyyy'}} 
-				</strong>
-			</td>
-		</tr>
-	</table>
+<!-- <span ng-show="!aTCisSelected()">No test case selected.</span> -->
+<div>
+	<md-list ng-cloak>
+		 <md-list-item class="secondary-button-padding"
+		 			   ng-repeat="event in selectedTC.events track by $index"
+		 			   ng-click="selectEvent(event)" 
+		 			   style="cursor: pointer;"
+						ng-class="{'sinfo' : isSelectedEvent(event), 'fle' : $index === 0, 'le' : true}"
+						context-menu="eventCM" model="$index" >
+
+		 			<table>
+		 				<tr>
+		 					<td>
+		 						<span class="badge sbadge" style="vertical-align:middle;">{{$index+1}}</span>
+		 					</td>
+		 					<td>
+		 						<span style="margin-left : 20px;">
+					   				<strong>{{event.vaccination.administred.name}}</strong>  -  
+									{{event.vaccination.date.fixed.date | date:'MM/dd/yyyy'}}
+								</span>
+							</td>
+						</tr>
+		 			</table>
+
+		 </md-list-item>
+	</md-list>
+<!-- 	<table class="table table-hover"> -->
+<!-- 		<tr ng-repeat="event in selectedTC.events track by $index"> -->
+<!-- 			<td ng-click="selectEvent(event)" style="cursor: pointer;" -->
+<!-- 				ng-class="{'info' : isSelectedEvent(event)}" -->
+<!-- 				context-menu="eventCM" model="$index"> -->
+<!-- 				<strong> -->
+<!-- 					{{event.vaccination.doseNumber}} # -->
+<!-- 					{{event.vaccination.administred.name}} - -->
+<!-- 					{{event.vaccination.date.fixed.date | date:'MM/dd/yyyy'}}  -->
+<!-- 				</strong> -->
+<!-- 			</td> -->
+<!-- 		</tr> -->
+<!-- 	</table> -->
 </div>
 

@@ -17,6 +17,7 @@ import gov.nist.healthcare.cds.domain.FixedDate;
 import gov.nist.healthcare.cds.domain.MetaData;
 import gov.nist.healthcare.cds.domain.Patient;
 import gov.nist.healthcare.cds.domain.TestCase;
+import gov.nist.healthcare.cds.domain.TestPlan;
 import gov.nist.healthcare.cds.domain.VaccinationEvent;
 import gov.nist.healthcare.cds.domain.Vaccine;
 import gov.nist.healthcare.cds.enumeration.EvaluationStatus;
@@ -24,9 +25,14 @@ import gov.nist.healthcare.cds.enumeration.EventType;
 import gov.nist.healthcare.cds.enumeration.Gender;
 import gov.nist.healthcare.cds.enumeration.SerieStatus;
 import gov.nist.healthcare.cds.repositories.TestCaseRepository;
+import gov.nist.healthcare.cds.repositories.TestPlanRepository;
 import gov.nist.healthcare.cds.repositories.VaccineRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.oxm.Marshaller;
+import org.springframework.oxm.Unmarshaller;
+import org.springframework.oxm.castor.CastorMarshaller;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -42,8 +48,16 @@ public class Bootstrap {
 	private TestCaseRepository testCaseRepository;
 	
 	@Autowired
+	private TestPlanRepository testPlanRepository;
+	
+	@Autowired
 	private VaccineRepository vaccineRepository;
 
+	@Bean
+	public Marshaller castorM(){
+		return new CastorMarshaller();
+	}
+	
 	@PostConstruct
 	public void init() throws ParseException {
 		System.out.println("[HT] Start");
@@ -72,7 +86,7 @@ public class Bootstrap {
 		
 		//Vaccine
 		Vaccine v = new Vaccine();
-		v.setCVX("107");
+		v.setCvx("107");
 		v.setName("DTaP");
 		v.setDetails("diphtheria, tetanus, pertussis");
 		
@@ -156,8 +170,21 @@ public class Bootstrap {
 		
 		tc.setMetaData(md);
 		
-		testCaseRepository.save(tc);
+		TestPlan tp = new TestPlan();
+		tp.setMetaData(md);
+		tp.setDescription("CDS TestCases for CDSi Specification v2");
+		tp.setName("CDC");
+		tp.addTestCase(tc);
+		tc.setTestPlan(tp);
+		testPlanRepository.save(tp);
 		
+		
+//		List<TestCase> res = importService.importCDC();
+//		tp.getTestCases().addAll(res);
+
+//		System.out.println("[HTC] "+res);
+//		System.out.println("[HTC]");
+//		System.out.println(exportService.exportNIST(tc));
 		
 		
 	}

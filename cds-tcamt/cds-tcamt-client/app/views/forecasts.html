@@ -15,16 +15,29 @@ body {
 		top.location = self.location;
 	}
 </script>
-<span ng-show="!selectedTestPlan">No test case selected.</span>
-<div ng-show="selectedTestPlan">
-	<table class="table table-hover">
-		<tr  ng-repeat="forecast in selectedTestPlan.forecast">
-			<td style="cursor:pointer;" ng-click="selectForecast(forecast)" style="cursor: pointer;"
-				ng-class="{'info' : forecastIsSelected(forecast)}">
-				<strong>
-					{{forecast.target.name}}
-				</strong>
-			</td>
-		</tr>
-	</table>
+<div>
+	<md-list ng-cloak>
+		 <md-list-item class="secondary-button-padding"
+		 			   ng-repeat="forecast in selectedTC.forecast track by $index"
+		 			   ng-click="selectForecast(forecast)"
+		 			   style="cursor: pointer;"
+					   ng-class="{'sinfo' : isSelectedForecast(forecast), 'fle' : $index === 0, 'le' : true}"
+					   context-menu="forecastCM" model="$index" >
+			<strong>
+				{{forecast.target.name}}
+			</strong>
+		</md-list-item>
+	</md-list>
+				
+<!-- 	<table class="table table-hover"> -->
+<!-- 		<tr  > -->
+<!-- 			<td style="cursor:pointer;"  style="cursor: pointer;" -->
+<!-- 				ng-class="{'info' : isSelectedForecast(forecast)}" -->
+<!-- 				context-menu="forecastCM" model="$index"> -->
+<!-- 				<strong> -->
+<!-- 					{{forecast.target.name}} -->
+<!-- 				</strong> -->
+<!-- 			</td> -->
+<!-- 		</tr> -->
+<!-- 	</table> -->
 </div>

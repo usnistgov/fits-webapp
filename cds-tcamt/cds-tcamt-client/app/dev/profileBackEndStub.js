@@ -78,13 +78,6 @@ angular.module('tcl').run(function ($httpBackend, $q, $http) {
 
     $httpBackend.whenGET(/resources\//).passThrough();
     
-    $httpBackend.whenGET('api/testplans').respond(function (method, url, data, headers) {
-        var request = new XMLHttpRequest();
-        request.open('GET', '../../resources/testplans.json', false);
-        request.send(null);
-        var profile = angular.fromJson(request.response);
-        return [request.status, profile, {}];
-    });
     
     $httpBackend.whenGET('api/vaccines').respond(function (method, url, data, headers) {
         var request = new XMLHttpRequest();
@@ -104,7 +97,7 @@ angular.module('tcl').run(function ($httpBackend, $q, $http) {
         return [request.status, profile, {}];
     });
     
-    $httpBackend.whenGET('api/testCases').respond(function (method, url, data, headers) {
+    $httpBackend.whenGET('api/testplans').respond(function (method, url, data, headers) {
         var request = new XMLHttpRequest();
         request.open('GET', '../../resources/testCases.json', false);
         request.send(null);
