@@ -23,7 +23,7 @@ body {
 				<div style="margin-left: 5px;">
 					 <i data-nodrag ng-click="toggle(this)" class="fa" ng-class="{'fa-caret-right': collapsed, 'fa-caret-down': !collapsed}"></i>
 					<span data-nodrag> <span
-						class="label label-sub-component label-icon">P</span> <span>{{tp.name}}</span>
+						class="label label-sub-component label-icon">P</span> <span ng-class="{ 'changedS' : tp.changed }">{{tp.name}}</span>
 						<i ng-show="this.$modelValue===activeModel"
 						class="fa fa-pencil fa-fw"></i>
 					</span>
@@ -35,7 +35,7 @@ body {
 					context-menu="tcCM" model="$index">
 						<div style="margin-left: 5px;">
 							<span data-nodrag> <span
-								class="label label-component label-icon">T</span> <span>{{tc.name}}</span>
+								class="label label-component label-icon">T</span> <span ng-class="{ 'changedS' : tc.changed }">{{tc.name}}</span>
 								<i ng-show="this.$modelValue===activeModel"
 								class="fa fa-pencil fa-fw"></i>
 							</span>

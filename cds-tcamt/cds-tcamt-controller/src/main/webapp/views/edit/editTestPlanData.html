@@ -6,7 +6,7 @@
 	} else {
 		top.location = self.location;
 	}</script> <script type="text/ng-template" id="EditTestPlanData.html"><md-content>
-		<md-tabs md-dynamic-height md-border-bottom>
+		<md-tabs md-selected="selectedTabTP" md-dynamic-height md-border-bottom>
 			<md-tab label="Test Plan Information">
 				<md-content class="md-padding">         
 					<form name="testplanMetaDataForm" class="form-horizontal" novalidate>
@@ -15,7 +15,7 @@
 								<div class="col-md-8">
 									<md-input-container style="width: 100%;">
 										<label>Name</label>
-										<input ng-model="selectedTP.name" ng-change="recordChanged()" type="text"/>
+										<input ng-model="selectedTP.name" ng-change="tpChanged()" type="text"/>
 									</md-input-container>
 								</div>
 								<div class="col-md-4">
@@ -27,13 +27,13 @@
 								<div class="col-md-6">
 									<md-input-container style="width: 100%;">
 										<label>Description</label>
-										<input ng-model="selectedTP.description" ng-change="recordChanged()" type="text"/>
+										<input ng-model="selectedTP.description" ng-change="tpChanged()" type="text"/>
 									</md-input-container>
 								</div>
 								<div class="col-md-6">
 									<md-input-container style="width: 100%;">
 										<label>Version</label>
-										<input ng-model="selectedTP.metaData.version" ng-change="recordChanged()" type="text"/>
+										<input ng-model="selectedTP.metaData.version" ng-change="tpChanged()" type="text"/>
 									</md-input-container>
 								</div>
 							</div>
@@ -47,11 +47,11 @@
 						<div class="row">
 							<div class="col-md-12">
 								<div class="col-md-6">
-									<md-input-container style="width: 100%;">
+									<md-input-container style="width: 100%;" ng-init="exportType = 'NIST'">
 										<label>Format Type</label>
 										<md-select name="sl" id="sl" ng-model="exportType"> 
-											<md-option ng-value="NIST">NIST</md-option>
-											<md-option ng-value="CDC">CDC SpreadSheet</md-option>
+											<md-option ng-value="'NIST'">NIST</md-option>
+											<md-option ng-disabled="true" ng-value="'CDC'">CDC SpreadSheet</md-option>
  										</md-select>
 									</md-input-container>
 								</div>

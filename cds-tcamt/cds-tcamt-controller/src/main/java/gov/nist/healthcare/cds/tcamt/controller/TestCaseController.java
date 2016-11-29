@@ -1,14 +1,14 @@
 package gov.nist.healthcare.cds.tcamt.controller;
 
-import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.security.Principal;
 import java.util.Arrays;
 import java.util.List;
+
+import javassist.NotFoundException;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -23,7 +23,6 @@ import gov.nist.healthcare.cds.service.NISTFormatService;
 import gov.nist.healthcare.cds.tcamt.domain.ImportResult;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -54,14 +53,36 @@ public class TestCaseController {
 	
 	@RequestMapping(value = "/testplans", method = RequestMethod.GET)
 	@ResponseBody
-	public List<TestPlan> test(){
-		return testPlanRepository.findAll();
+	public List<TestPlan> test(Principal p){
+		return testPlanRepository.findByUser(p.getName());
 	}
 	
-	@RequestMapping(value = "/testcase/save", method = RequestMethod.POST)
+	@RequestMapping(value = "/testcase/{id}/save", method = RequestMethod.POST)
 	@ResponseBody
-	public String save(@RequestBody TestCase tc){
-		testCaseRepository.save(tc);
+	public TestCase save(@RequestBody TestCase tc,@PathVariable Long id) throws NotFoundException{
+		TestPlan plan = testPlanRepository.findOne(id);
+		if(plan != null){
+			tc.setTestPlan(plan);
+			TestCase newTC = testCaseRepository.saveAndFlush(tc);
+			return newTC;
+		}
+		else {
+			throw new NotFoundException("TestPlan ("+id+")");
+		}
+	}
+	
+	@RequestMapping(value = "/testplan/save", method = RequestMethod.POST)
+	@ResponseBody
+	public String save(@RequestBody TestPlan tp,Principal p) throws NotFoundException{
+		tp.setUser(p.getName());
+		testPlanRepository.save(tp);
+		return "";
+	}
+	
+	@RequestMapping(value = "/testcase/{id}/delete", method = RequestMethod.POST)
+	@ResponseBody
+	public String delete(@PathVariable Long id) throws NotFoundException{
+		testCaseRepository.delete(id);
 		return "";
 	}
 	
@@ -78,10 +99,9 @@ public class TestCaseController {
 		}
 	}
 	
-	@RequestMapping(value = "/testcase/import", method = RequestMethod.POST)
+	@RequestMapping(value = "/testcase/{id}/import", method = RequestMethod.POST)
 	@ResponseBody
-	public ImportResult uploadFileHandler(@RequestParam("file") MultipartFile file) {
-		Long tp = 1L;
+	public ImportResult uploadFileHandler(@RequestParam("file") MultipartFile file,@PathVariable Long id) {
 		if (!file.isEmpty()) {
 			try {
 				byte[] bytes = file.getBytes();
@@ -89,7 +109,7 @@ public class TestCaseController {
 				List<XMLError> errors = nistFormatService._validate(fileContent);
 				if(errors.isEmpty()){
 					TestCase tc = nistFormatService._import(fileContent);
-					TestPlan tps = testPlanRepository.findOne(tp);
+					TestPlan tps = testPlanRepository.findOne(id);
 					if(tps == null){
 						ImportResult ir = new ImportResult();
 						ir.setStatus(false);
@@ -104,17 +124,14 @@ public class TestCaseController {
 						ir.setMessages(Arrays.asList("Error while parsing the file"));
 						return ir;
 					}
-					
-//					System.out.println("[HTC] "+tc.getId());
-//					tc.setTestPlan(tps);
-//					testCaseRepository.saveAndFlush(tc);
-					tps.addTestCase(tc);
+
 					tc.setTestPlan(tps);
-					testPlanRepository.save(tps);
+					testCaseRepository.saveAndFlush(tc);
 					ImportResult ir = new ImportResult();
 					ir.setStatus(true);
 					ir.setErrors(null);
 					ir.setMessages(null);
+					ir.setImported(tc);
 					return ir;
 				}
 				else {

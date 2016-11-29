@@ -33,6 +33,7 @@ body {
 					<i class="glyphicon glyphicon-list"></i> <strong>
 					Test Cases
 					</strong>
+					<span style="margin-left:10px; font-size:14px;font-weight: bold; color:#d6893b" ng-show="unsaved()"><i class="fa fa-exclamation-triangle"></i> Unsaved Changes </span>
 				</div>
 				<div class="panel-body">
 					<div class="toc-container" style="min-height : 100px;">
@@ -48,7 +49,7 @@ body {
 						events</strong>
 					<button title="Add Event" type="button"
 						class="btn btn-xs btn-info pull-right"
-						ng-click="addEvent()"
+						ng-click="addEvent(); tcChanged()"
 						ng-show="aTCisSelected()"
 						style="margin: 0px;">
 						<span><i class="fa fa-plus fa-fw"></i></span>
@@ -70,7 +71,7 @@ body {
 						class="btn btn-xs btn-info pull-right"
 						style="margin: 0px;"
 						ng-show="aTCisSelected()"
-						ng-click="addForecast()">
+						ng-click="addForecast(); tcChanged()">
 						<span><i class="fa fa-plus fa-fw"></i></span>
 					</button>
 				</div>

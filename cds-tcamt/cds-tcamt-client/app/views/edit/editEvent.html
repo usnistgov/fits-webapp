@@ -14,7 +14,7 @@ body {
 <!--     <div class="page-header"> -->
 <!--         <span class="header5">Event</span> -->
 <!--     </div> -->
-            
+
 <!-- 	<form name="eventForm" class="form-horizontal" novalidate> -->
 <!-- 		<div class="row"> -->
 <!-- 			<div class="col-md-12"> -->
@@ -32,31 +32,46 @@ body {
 
 	<md-content>
 		<md-tabs md-dynamic-height md-border-bottom>
-			<md-tab label="Vaccine">
+			<md-tab label="Vaccination Event">
 				<md-content class="md-padding">
 					<form name="vaccineForm" class="form-horizontal" novalidate>
 						<div class="row">
 				            <div class="col-md-12">
 								<div class="col-md-12">
-									<md-input-container style="width: 100%;">
+									<div style="width: 100%; margin-bottom : 20px;">
 										<label>Vaccine</label>
-										<md-select ng-model="selectedEvent[selectedEvent.type].administred" ng-model-options="{trackBy: '$value.id'}">
-											 <md-option ng-repeat="v in AllVaccines" ng-value="v">{{v.name}} / {{v.details}}</md-option>
-										</md-select>
-									</md-input-container>
+<md-autocomplete
+          md-selected-item="selectedEvent[selectedEvent.type].administred"
+ 		  md-selected-item-change="tcChanged()"
+          md-search-text="vacSearch"
+          md-items="item in searchV(vacSearch)"
+          md-item-text="item.name + ' # ' + item.cvx"
+          placeholder="Select a vaccine"
+          md-min-length="0">
+        <md-item-template>
+          <span class="item-title">
+            <span> {{item.cvx}} # {{item.name}} </span>
+          </span>
+          <span class="item-metadata">
+            <span class="item-metastat">
+              <strong>{{item.details}}</strong>
+            </span>
+          </span>
+        </md-item-template>
+      </md-autocomplete>
+									</div>
 								</div>
 								<div class="col-md-offset-4 col-md-4">
-									<date-choose  tc="selectedTC" label="'Date Of Vaccination'" dt="selectedEvent[selectedEvent.type].date"></date-choose>
+									<date-choose ng-init="ctrl.init()" tc="selectedTC" label="'Date Of Vaccination'" dt="selectedEvent[selectedEvent.type].date"></date-choose>
 								</div>
 							</div>
 						</div>
 					</form>
 				</md-content>
 			</md-tab>
-			<md-tab label="Evaluations">
+			<md-tab label="Expected Evaluations">
 				<md-content class="md-padding">
 			
-		
 						<button title="Add Evaluation" type="button"
 							class="btn btn-sm btn-info pull-right"
 							style="margin: 0px;"
@@ -68,42 +83,73 @@ body {
 					<form ng-repeat="evaluation in selectedEvent[selectedEvent.type].evaluations track by $index" name="vaccineForm" class="form-horizontal" novalidate>
 						<div class="row">
 				            <div class="col-md-12">
-								<div class="col-md-1">
-									<md-input-container style="width: 100%;">
-									<button ng-show="!evaluation.tmp" title="Delete Evaluation" type="button"
-										class="btn btn-sm btn-danger"
-										style="margin: 0px;"
-										ng-click="deleteEvaluation(selectedEvent[selectedEvent.type].evaluations,$index)">
-										<span><i class="fa fa-minus fa-fw"></i></span>
-									</button>
-									<button ng-show="evaluation.tmp" title="Delete Evaluation" type="button"
-										class="btn btn-sm btn-success"
-										style="margin: 0px;"
-										ng-click="addEvaluation(evaluation)">
-										<span><i class="fa fa-check fa-fw"></i></span>
-									</button>
-									</md-input-container>
-								</div>
-								<div class="col-md-6">
-									<md-input-container style="width: 100%;">
+								
+								<div class="col-md-12">
+<div style="width: 100%; margin-bottom : 20px;">
 										<label>Related To</label>
-										<md-select ng-model="evaluation.relatedTo" ng-model-options="{trackBy: '$value.id'}">
-											 <md-option ng-repeat="v in AllVaccines" ng-value="v">{{v.name}} / {{v.details}}</md-option>
-										</md-select>
-									</md-input-container>
+							<md-autocomplete
+          md-selected-item="evaluation.relatedTo"
+ 		  md-selected-item-change="tcChanged()"
+          md-search-text="vacSearch1"
+          md-items="item in searchV(vacSearch1)"
+          md-item-text="item.name + ' # ' + item.cvx"
+          placeholder="Select a vaccine"
+          md-min-length="0">
+        <md-item-template>
+          <span class="item-title">
+            <span> {{item.cvx}} # {{item.name}} </span>
+          </span>
+          <span class="item-metadata">
+            <span class="item-metastat">
+              <strong>{{item.details}}</strong>
+            </span>
+          </span>
+        </md-item-template>
+      </md-autocomplete>
+</div>
 								</div>
 								<div class="col-md-5">
 									<md-input-container style="width: 100%;">
 										<label>Status</label>
-										<md-select ng-model="evaluation.status" ng-model-options="{trackBy: '$value'}">
+										<md-select ng-model="evaluation.status" ng-model-options="{trackBy: '$value'}" ng-change="tcChanged()">
 											 <md-option value="INVALID">Invalid</md-option>
 											 <md-option value="VALID">Valid</md-option>
 										</md-select>
 									</md-input-container>
 								</div>
-								
+								<div class="col-md-6">
+									<md-input-container style="width: 100%;">
+										<label>Reason</label>
+										<md-select ng-model="evaluation.reason" ng-model-options="{trackBy: '$value'}" ng-change="tcChanged()">
+											 <md-option value="A">Vaccine Dose Administered was administered after the Lot Number Expiration Date.</md-option>
+											 <md-option value="B">Vaccine Dose Administered was deemed to be ineffective or sub-potent. (e.g. recalled, cold-chain break, partially administered).</md-option>
+											<md-option value="C">Vaccine Dose Administered was administered at too young of an age.</md-option>
+											<md-option value="D">Vaccine Dose Administered was administered too soon following a previous dose.</md-option>
+											<md-option value="E">Vaccine Dose Administered was administered too close to another vaccine (e.g. live virus conflict).</md-option>
+											<md-option value="F">Vaccine Dose Administered amount was less than the recommended amount.</md-option>
+											<md-option value="G">Vaccine Dose Administered was administered outside of an acceptable age range.</md-option>
+										</md-select>
+									</md-input-container>
+								</div>
+								<div class="col-md-1">
+									<md-input-container style="width: 100%;">
+									<button ng-show="!evaluation.tmp" title="Delete Evaluation" type="button"
+										class="btn btn-sm btn-danger"
+										style="margin: 0px;"
+										ng-click="deleteEvaluation(selectedEvent[selectedEvent.type].evaluations,$index); tcChanged()">
+										<span><i class="fa fa-minus fa-fw"></i></span>
+									</button>
+									<button ng-show="evaluation.tmp" title="Delete Evaluation" type="button"
+										class="btn btn-sm btn-success"
+										style="margin: 0px;"
+										ng-click="addEvaluation(evaluation); tcChanged()">
+										<span><i class="fa fa-check fa-fw"></i></span>
+									</button>
+									</md-input-container>
+								</div>
 							</div>
 						</div>
+						<hr/>
 					</form>
 				</md-content>
 			</md-tab>

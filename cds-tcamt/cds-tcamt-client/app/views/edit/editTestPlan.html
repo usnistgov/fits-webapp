@@ -22,16 +22,16 @@ body {
 								<div class="col-md-8">
 									<md-input-container style="width: 100%;">
 										<label>Name</label>
-										<input ng-model="selectedTC.name" ng-change="recordChanged()" type="text"/>
+										<input ng-model="selectedTC.name" ng-change="tcChanged()" type="text"/>
 									</md-input-container>
 								</div>
 								<div class="col-md-4 pull-right">
-									<date-choose exclude="'EvalDate'" tc="selectedTC" label="'Evaluation Date'" dt="selectedTC.evalDate"></date-choose>
+									<date-choose exclude="'EvalDate'" tc="selectedTC" label="'Assessment Date'" dt="selectedTC.evalDate"></date-choose>
 								</div>
 								<div class="col-md-8">
 									<md-input-container style="width: 100%;">
 										<label>Description</label>
-										<input ng-model="selectedTC.description" ng-change="recordChanged()" type="text"/>
+										<input ng-model="selectedTC.description" ng-change="tcChanged()" type="text"/>
 									</md-input-container>
 								</div>
 							</div>
@@ -47,7 +47,10 @@ body {
 								<div class="col-md-8">
 									<md-input-container style="width: 100%;">
 										<label>Gender</label>
-										<input ng-model="selectedTC.patient.gender" ng-change="recordChanged()" type="text"/>
+										<md-select ng-model="selectedTC.patient.gender" ng-model-options="{trackBy: '$value'}">
+											<md-option ng-value="'F'">Female</md-option>
+											<md-option ng-value="'M'">Male</md-option>
+										</md-select>
 									</md-input-container>
 								</div>
 								<div class="col-md-4 pull-right">
@@ -66,7 +69,7 @@ body {
 								<div class="col-md-9">
 									<md-input-container style="width: 100%;">
 										<label>Version</label>
-										<input ng-model="selectedTC.metaData.version" ng-change="recordChanged()" type="text"/>
+										<input ng-model="selectedTC.metaData.version" ng-change="tcChanged()" type="text"/>
 									</md-input-container>
 								</div>
 								<div class="col-md-3">

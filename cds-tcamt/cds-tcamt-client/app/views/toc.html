@@ -29,11 +29,15 @@ body {
 		 				<tr>
 		 					<td>
 		 						<span class="badge sbadge" style="vertical-align:middle;">{{$index+1}}</span>
+<!-- 		 						<i ng-show="!validateEvent(event)" class="fa fa-exclamation-circle" style="font-size : 2em; color : red;" aria-hidden="true"></i> -->
 		 					</td>
 		 					<td>
-		 						<span style="margin-left : 20px;">
+		 						<span style="margin-left : 20px;" ng-hide="event.vaccination.administred === null">
 					   				<strong>{{event.vaccination.administred.name}}</strong>  -  
 									{{event.vaccination.date.fixed.date | date:'MM/dd/yyyy'}}
+								</span>
+								<span style="margin-left : 20px;" ng-show="event.vaccination.administred === null">
+					   				<strong>New Event</strong>
 								</span>
 							</td>
 						</tr>

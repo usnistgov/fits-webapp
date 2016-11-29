@@ -24,7 +24,7 @@ body {
 					   ng-class="{'sinfo' : isSelectedForecast(forecast), 'fle' : $index === 0, 'le' : true}"
 					   context-menu="forecastCM" model="$index" >
 			<strong>
-				{{forecast.target.name}}
+				{{forecast.target === null ? 'New Forecast' : forecast.target.name}}
 			</strong>
 		</md-list-item>
 	</md-list>

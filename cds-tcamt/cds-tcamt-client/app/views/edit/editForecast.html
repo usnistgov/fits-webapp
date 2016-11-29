@@ -40,19 +40,36 @@ body {
 						<div class="row">
 				            <div class="col-md-12">
 								<div class="col-md-12">
-									<md-input-container style="width: 100%;">
+
+									<div style="width: 100%; margin-bottom : 20px;">
 										<label>Vaccine</label>
-										<md-select ng-model="selectedForecast.target" ng-model-options="{trackBy: '$value.id'}">
-											 <md-option ng-repeat="v in AllVaccines" ng-value="v">{{v.name}} / {{v.details}}</md-option>
-										</md-select>
-									</md-input-container>
+<md-autocomplete
+          md-selected-item="selectedForecast.target"
+ 		  md-selected-item-change="tcChanged()"
+          md-search-text="vacSearch2"
+          md-items="item in searchV(vacSearch2)"
+          md-item-text="item.name + ' # ' + item.cvx"
+          placeholder="Select a vaccine"
+          md-min-length="0">
+        <md-item-template>
+          <span class="item-title">
+            <span> {{item.cvx}} # {{item.name}} </span>
+          </span>
+          <span class="item-metadata">
+            <span class="item-metastat">
+              <strong>{{item.details}}</strong>
+            </span>
+          </span>
+        </md-item-template>
+      </md-autocomplete>
+									</div>
 								</div>
 							</div>
 							<div class="col-md-12">
 								<div class="col-md-4">
 									<md-input-container style="width: 100%;">
 										<label>Serie Status</label>
-										<md-select ng-model="selectedForecast.serieStatus" ng-model-options="{trackBy: '$value'}">
+										<md-select ng-model="selectedForecast.serieStatus" ng-model-options="{trackBy: '$value'}" ng-change="tcChanged()">
 											<md-option value="A">Assumed complete or immune</md-option>
 											<md-option value="C">Complete</md-option>
 											<md-option value="D">Due</md-option>
@@ -76,7 +93,7 @@ body {
 								<div class="col-md-8">
 									<md-input-container style="width: 100%;">
 										<label>Forecast Reason</label>
-										<input ng-model="selectedForecast.forecastReason" ng-change="recordChanged()" type="text"/>
+										<input ng-model="selectedForecast.forecastReason" ng-change="tcChanged()" type="text"/>
 									</md-input-container>
 								</div>
 							</div>
