@@ -76,6 +76,35 @@ angular
 						}
 					};
 
+					$scope.newTestPlan = function(){
+						var dt = new Date();
+						var tp = {
+								id : "cl_"+$scope.generateUUID(),
+								name : "New Test Plan",
+								description : "",
+								changed : true,
+								metaData : {
+									version : "1",
+									imported : false,
+									dateCreated : {
+										fixed : {
+											date : dt.getTime(),
+											obj : dt
+										}
+									},
+									dateLastUpdated : {
+										fixed : {
+											date : dt.getTime(),
+											obj : dt
+										}
+									}
+								},
+								testCases : []
+						};
+						$scope.tps.push(tp);
+						$scope.selectTP(tp);
+					};
+					
 					$scope.generateUUID = function() {
 					    var d = new Date().getTime();
 					    var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
@@ -94,7 +123,7 @@ angular
 						}
 						return -1;
 					};
-					
+
 					$scope.loadTestCases = function() {
 						var delay = $q.defer();
 						$scope.error = null;
@@ -815,11 +844,14 @@ angular
 						}
 					};
 
-					$scope.prepareTestCase = function(tc) {
-						console.log((typeof tc.id) === "string");
-						if((typeof tc.id) === "string" && tc.id.startsWith("cl_")){
-							delete tc.id;
+					$scope.cleanID = function(obj){
+						if((typeof obj.id) === "string" && obj.id.startsWith("cl_")){
+							delete obj.id;
 						}
+					};
+					
+					$scope.prepareTestCase = function(tc) {
+						$scope.cleanID(tc);
 						if(tc.hasOwnProperty("changed")){
 							delete tc.changed;
 						}
@@ -1511,6 +1543,9 @@ angular
 							resolve : {
 								testplanToDelete : function() {
 									return testplan;
+								},
+								tps : function(){
+									return $scope.tps;
 								}
 							}
 						});
@@ -1888,6 +1923,7 @@ angular
 						}
 						
 						if(ready){
+							$scope.cleanID(_tp);
 							$scope.cleanDate(_tp.metaData.dateCreated);
 							$scope.cleanDate(_tp.metaData.dateLastUpdated);
 							if(_tp.hasOwnProperty("changed")){
@@ -5830,15 +5866,26 @@ angular
 
 angular.module('tcl').controller(
 		'ConfirmTestPlanDeleteCtrl',
-		function($scope, $modalInstance, testplanToDelete, $rootScope, $http) {
+		function($scope, $modalInstance, testplanToDelete, tps, $rootScope, $http) {
 			$scope.testplanToDelete = testplanToDelete;
 			$scope.loading = false;
 			$scope.deleteTestPlan = function() {
 				$scope.loading = true;
+				if((typeof testplanToDelete.id) === "string" && testplanToDelete.id.startsWith("cl_")){
+					var id = $scope.getIndex(tps,testplanToDelete.id);
+					if(~id){
+						tps.splice(id,1);
+					}
+				}
+				else {
 				$http.post(
-						$rootScope.api('api/testplans/'
+						$rootScope.api('api/testplan/'
 								+ $scope.testplanToDelete.id + '/delete'))
 						.then(function(response) {
+							var id = $scope.getIndex(tps,testplanToDelete.id);
+							if(~id){
+								tps.splice(id,1);
+							}
 							$rootScope.msg().text = "testplanDeleteSuccess";
 							$rootScope.msg().type = "success";
 							$rootScope.msg().show = true;
@@ -5853,8 +5900,18 @@ angular.module('tcl').controller(
 							$rootScope.msg().type = "danger";
 							$rootScope.msg().show = true;
 						});
+				};
 			};
-
+			
+			$scope.getIndex = function(l,id){
+				for(var i = 0; i < l.length; i++){
+					if(l[i].id === id){
+						return i;
+					}
+				}
+				return -1;
+			};
+			
 			$scope.cancel = function() {
 				$modalInstance.dismiss('cancel');
 			};

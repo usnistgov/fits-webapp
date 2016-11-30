@@ -184,7 +184,7 @@ public class Bootstrap {
 		md.setDateCreated(new FixedDate(new Date()));
 		md.setDateLastUpdated(new FixedDate(new Date()));
 		md.setImported(false);
-		md.setVersion(1);
+		md.setVersion("1");
 		
 		tc.setMetaData(md);
 		
@@ -198,7 +198,7 @@ public class Bootstrap {
 		md.setDateCreated(new FixedDate(new Date()));
 		md.setDateLastUpdated(new FixedDate(new Date()));
 		md.setImported(false);
-		md.setVersion(1);
+		md.setVersion("1");
 		tp.setMetaData(md);
 		tp.setDescription("CDS TestCases for CDSi Specification v2");
 		tp.setName("CDC");
@@ -211,7 +211,7 @@ public class Bootstrap {
 		md.setDateCreated(new FixedDate(new Date()));
 		md.setDateLastUpdated(new FixedDate(new Date()));
 		md.setImported(false);
-		md.setVersion(1);
+		md.setVersion("1");
 		tp.setMetaData(md);
 		tp.setDescription("CDS TestCases for CDSi Specification v2");
 		tp.setName("CDC");
@@ -224,7 +224,7 @@ public class Bootstrap {
 		md.setDateCreated(new FixedDate(new Date()));
 		md.setDateLastUpdated(new FixedDate(new Date()));
 		md.setImported(false);
-		md.setVersion(1);
+		md.setVersion("1");
 		tp.setMetaData(md);
 		tp.setDescription("CDS TestCases for CDSi Specification v2");
 		tp.setName("CDC");
@@ -237,7 +237,7 @@ public class Bootstrap {
 		md.setDateCreated(new FixedDate(new Date()));
 		md.setDateLastUpdated(new FixedDate(new Date()));
 		md.setImported(false);
-		md.setVersion(1);
+		md.setVersion("1");
 		tp.setMetaData(md);
 		tp.setDescription("CDS TestCases for CDSi Specification v2");
 		tp.setName("CDC");

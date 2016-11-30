@@ -7,7 +7,7 @@
     "angular-bootstrap": "~0.14.2",
     "angular-cookies": "1.5.5",
     "angular-messages": "1.5.5",
-    "angular-material" : "1.1.0",
+    "angular-material" : "1.1.1",
     "angular-resource": "1.5.5",
     "angular-route": "1.5.5",
     "angular-sanitize": "1.5.5",

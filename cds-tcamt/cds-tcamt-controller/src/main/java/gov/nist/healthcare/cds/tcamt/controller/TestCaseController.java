@@ -96,6 +96,13 @@ public class TestCaseController {
 		return "";
 	}
 	
+	@RequestMapping(value = "/testplan/{id}/delete", method = RequestMethod.POST)
+	@ResponseBody
+	public String deleteTP(@PathVariable Long id) throws NotFoundException{
+		testPlanRepository.delete(id);
+		return "";
+	}
+	
 	@RequestMapping(value = "/testcase/{id}/export/{format}", method = RequestMethod.POST)
 	@ResponseBody
 	public void export(@PathVariable Long id,@PathVariable String format,HttpServletRequest request, HttpServletResponse response) throws IOException{
