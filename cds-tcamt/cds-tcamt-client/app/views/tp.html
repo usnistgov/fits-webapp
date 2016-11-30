@@ -49,10 +49,12 @@
                 <button ng-show="accordi.tpDetails" title="View TestPlan List" type="button" class="btn btn-sm btn-info" ng-click="closeTestPlanEdit()">
                     <span><i class="fa fa-list fa-fw"></i>List</span>
                 </button>
-
+				<button ng-show="aTPisSelected()" title="Import" type="button" class="btn btn-sm btn-info" ng-click="importButton()">
+                    <span><i class="fa fa-download fa-fw"></i>Import</span>
+                </button>
                 <div ng-show="accordi.tpDetails && aTCisSelected() && !selectedTC.changed" class="btn-group">
                     <button type="button" class="btn btn-info btn-sm">
-                        <span><i class="fa fa-download fa-fw"></i> Export</span>
+                        <span><i class="fa fa-upload fa-fw"></i> Export</span>
                     </button>
                     <button type="button" class="btn btn-info btn-sm dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
                         <span class="caret"></span>

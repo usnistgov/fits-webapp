@@ -145,7 +145,7 @@ public class Bootstrap {
 		ee1.setRelatedTo(vaccineRepository.findByName("DTaP"));
 		ee1.setStatus(EvaluationStatus.VALID);
 		
-		vcEvent1.setEvaluations(Arrays.asList(ee1));
+		vcEvent1.setEvaluations(new HashSet<>(Arrays.asList(ee1)));
 		
 		VaccinationEvent vcEvent2 = new VaccinationEvent();
 		Date e2d = dateformat.parse("02/05/2011");
@@ -160,7 +160,7 @@ public class Bootstrap {
 		ee2.setRelatedTo(vaccineRepository.findByName("DTaP"));
 		ee2.setStatus(EvaluationStatus.INVALID);
 		ee2.setEvaluationReason("Age too young");
-		vcEvent2.setEvaluations(Arrays.asList(ee2));
+		vcEvent2.setEvaluations(new HashSet<>(Arrays.asList(ee2)));
 		
 		tc.addEvent(vcEvent1);
 		tc.addEvent(vcEvent2);

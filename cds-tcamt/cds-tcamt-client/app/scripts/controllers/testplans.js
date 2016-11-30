@@ -133,6 +133,7 @@ angular
 						});
 						$timeout(function() {
 							// Selection
+							var ch = $scope.selectedTC.changed;
 							$scope.selectedEvent = e;
 							$scope.selectedForecast = null;
 							$scope.selectedType = "evt";
@@ -142,6 +143,8 @@ angular
 							// View
 							$scope.subview = "EditEventData.html";
 							waitingDialog.hide();
+							if(!ch)
+								$scope.selectedTC.changed = false;
 						}, 0);
 					};
 
@@ -152,12 +155,15 @@ angular
 						});
 						$timeout(function() {
 							// Selection
+							var ch = $scope.selectedTC.changed;
 							$scope.selectedForecast = f;
 							$scope.selectedEvent = null;
 							$scope.selectedType = "fc";
 							// View
 							$scope.subview = "EditForecastData.html";
 							waitingDialog.hide();
+							if(!ch)
+								$scope.selectedTC.changed = false;
 						}, 0);
 					};
 
@@ -180,6 +186,7 @@ angular
 							$scope.selectTPTab(1);
 							$scope.subview = "EditTestPlanData.html";
 							waitingDialog.hide();
+							$scope.selectedTP.changed = false;
 						}, 0);
 					};
 
@@ -606,32 +613,41 @@ angular
 							if (!has(fc, "forecastReason"))
 								errors.errorMessages
 										.push("Forecast must have a reason");
-
-							if (!has(fc, "earliest"))
+							
+							if (!has(fc, "serieStatus"))
 								errors.errorMessages
-										.push("Forecast must have an earliest date");
+										.push("Forecast must have a status");
 							else {
-								$scope.mergeErrors(errors.within, $scope
-										.validateDT(fc.earliest, "Earliest"));
+								
+								if(fc.serieStatus !== 'C'){
+									if (!has(fc, "earliest"))
+										errors.errorMessages
+												.push("Forecast must have an earliest date");
+									else {
+										$scope.mergeErrors(errors.within, $scope
+												.validateDT(fc.earliest, "Earliest"));
+									}
+
+									if (!has(fc, "recommended"))
+										errors.errorMessages
+												.push("Forecast must have a recommended date");
+									else {
+										$scope.mergeErrors(errors.within, $scope
+												.validateDT(fc.recommended,
+														"Recommended"));
+									}
+
+									if (!has(fc, "pastDue"))
+										errors.errorMessages
+												.push("Forecast must have a pastDue date");
+									else {
+										$scope.mergeErrors(errors.within, $scope
+												.validateDT(fc.pastDue, "Past Due"));
+									}
+								}
 							}
 
-							if (!has(fc, "recommended"))
-								errors.errorMessages
-										.push("Forecast must have a recommended date");
-							else {
-								$scope.mergeErrors(errors.within, $scope
-										.validateDT(fc.recommended,
-												"Recommended"));
-							}
-
-							if (!has(fc, "pastDue"))
-								errors.errorMessages
-										.push("Forecast must have a pastDue date");
-							else {
-								$scope.mergeErrors(errors.within, $scope
-										.validateDT(fc.pastDue, "Past Due"));
-							}
-
+							
 							if (!has(fc, "target"))
 								errors.errorMessages
 										.push("Forecast must have a target");
@@ -640,9 +656,7 @@ angular
 										.validateVC(fc.target));
 							}
 
-							if (!has(fc, "serieStatus"))
-								errors.errorMessages
-										.push("Forecast must have a status");
+							
 
 						} else {
 							errors.errorMessages.push("Internal Error");
@@ -706,53 +720,62 @@ angular
 					};
 
 					$scope.addEvent = function() {
-						$scope.selectedTC.events
-								.push({
-									type : "vaccination",
-									vaccination : {
-										administred : null,
-										evaluations : [],
-										type : "VACCINATION",
-										date : {
-											fixed : {
-												date : null,
-												obj : null
-											}
-										},
-										doseNumber : $scope.selectedTC.events.length + 1
-									}
-								});
+						var ev = {
+								type : "vaccination",
+								vaccination : {
+									administred : null,
+									evaluations : [],
+									type : "VACCINATION",
+									date : {
+										fixed : {
+											date : null,
+											obj : null
+										}
+									},
+									doseNumber : $scope.selectedTC.events.length + 1
+								}
+							};
+						$scope.selectedTC.events.push(ev);
+						$scope.selectEvent(ev);
 					};
 
 					$scope.addForecast = function() {
-						$scope.selectedTC.forecast.push({
-							doseNumber : 0,
-							forecastReason : "",
-							earliest : {
-								fixed : {
-									date : null,
-									obj : null
-								}
-							},
-							recommended : {
-								fixed : {
-									date : null,
-									obj : null
-								}
-							},
-							pastDue : {
-								fixed : {
-									date : null,
-									obj : null
-								}
-							},
-							target : null
-						});
+						var fc = {
+								doseNumber : 0,
+								forecastReason : "",
+								earliest : {
+									fixed : {
+										date : null,
+										obj : null
+									}
+								},
+								recommended : {
+									fixed : {
+										date : null,
+										obj : null
+									}
+								},
+								pastDue : {
+									fixed : {
+										date : null,
+										obj : null
+									}
+								},
+								target : null
+							};
+						$scope.selectedTC.forecast.push(fc);
+						$scope.selectForecast(fc);
 					};
 
 					$scope.sanitizeDate = function(date) {
 						if (date.hasOwnProperty("fixed")) {
 							date.fixed.obj = new Date(date.fixed.date);
+							if(!date.hasOwnProperty("relative")){
+								date.type = "fixed";
+							}
+						}
+						else if(date.hasOwnProperty("relative")){
+							date.type = "relative";
 						}
 					};
 
@@ -816,9 +839,11 @@ angular
 							$scope.cleanDate(tc.events[e][keys[0]].date);
 						}
 						for (var f in tc.forecast) {
+	
 							$scope.cleanDate(tc.forecast[f].earliest);
 							$scope.cleanDate(tc.forecast[f].recommended);
 							$scope.cleanDate(tc.forecast[f].pastDue);
+							
 						}
 					};
 
@@ -899,6 +924,11 @@ angular
 						$scope.selectTC($scope.selectedTC);
 						$scope.tcChanged();
 					} ] ];
+					
+					$scope.importButton = function(){
+						$scope.selectTP($scope.selectedTP);
+						$scope.selectedTabTP = 1;
+					};
 					
 					$scope.newTC = function(){
 						var dt = new Date();
@@ -1814,10 +1844,17 @@ angular
 							$http.post('api/testcase/'+tp.id+'/save', tc).then(
 							
 									function(response) {
+										console.log("Saving");
+										console.log(tc);
+										
 										var newTC = response.data;
+										console.log("Saved");
+										console.log(newTC);
 										var i = $scope.getIndex(tp.testCases,id);
 										if(~i){
 											$scope.sanitizeTestCase(newTC);
+											console.log("Sanitized");
+											console.log(newTC);
 											tp.testCases[i] = newTC;
 											tc = tp.testCases[i];
 											deferred.resolve({status : true, id : i});

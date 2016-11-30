@@ -82,7 +82,17 @@ public class TestCaseController {
 	@RequestMapping(value = "/testcase/{id}/delete", method = RequestMethod.POST)
 	@ResponseBody
 	public String delete(@PathVariable Long id) throws NotFoundException{
-		testCaseRepository.delete(id);
+		
+		TestCase tc = testCaseRepository.findOne(id);
+		if(tc == null)
+			throw new NotFoundException("TC not found");
+		else {
+			TestPlan tp = testPlanRepository.findOne(tc.getTestPlan().getId());
+			if(tp == null)
+				throw new NotFoundException("TC not found");
+			tp.getTestCases().remove(tc);
+			testPlanRepository.saveAndFlush(tp);
+		}
 		return "";
 	}
 	

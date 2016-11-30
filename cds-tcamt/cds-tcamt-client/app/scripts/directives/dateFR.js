@@ -162,12 +162,12 @@ angular.module('tcl').directive('dateChoose', function() {
 								stack.push("DOB");
 								return ctrl.validate(ctrl.tc.patient.dob,stack)
 							}
-							else if(_date.obj.relativeTo === "EvalDate" && stack.indexOf("EvalDate") === -1){
+							else if(_date.obj.relativeTo === "EVALDATE" && stack.indexOf("EVALDATE") === -1){
 								console.log("check EvalDate");
-								stack.push("EvalDate");
+								stack.push("EVALDATE");
 								return ctrl.validate(ctrl.tc.evalDate,stack);
 							}
-							else if(_date.obj.relativeTo === "Today"){
+							else if(_date.obj.relativeTo === "TODAY"){
 								console.log("is Today");
 								return true;
 							}

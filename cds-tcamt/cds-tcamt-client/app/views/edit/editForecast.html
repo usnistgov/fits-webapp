@@ -45,11 +45,11 @@ body {
 										<label>Vaccine</label>
 <md-autocomplete
           md-selected-item="selectedForecast.target"
- 		  md-selected-item-change="tcChanged()"
           md-search-text="vacSearch2"
           md-items="item in searchV(vacSearch2)"
           md-item-text="item.name + ' # ' + item.cvx"
           placeholder="Select a vaccine"
+md-menu-class="autocomplete-custom-template"
           md-min-length="0">
         <md-item-template>
           <span class="item-title">
@@ -98,13 +98,13 @@ body {
 								</div>
 							</div>
 							<div class="col-md-12">
-								<div class="col-md-4">
+								<div class="col-md-4" ng-show="selectedForecast.serieStatus !== 'C'">
 									<date-choose  tc="selectedTC" label="'Earliest'" dt="selectedForecast.earliest"></date-choose>
 								</div>
-								<div class="col-md-4">
+								<div class="col-md-4" ng-show="selectedForecast.serieStatus !== 'C'">
 									<date-choose  tc="selectedTC" label="'Recommended'" dt="selectedForecast.recommended"></date-choose>
 								</div>
-								<div class="col-md-4">
+								<div class="col-md-4" ng-show="selectedForecast.serieStatus !== 'C'">
 									<date-choose  tc="selectedTC" label="'Past Due'" dt="selectedForecast.pastDue"></date-choose>
 								</div>
 							</div>

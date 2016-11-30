@@ -34,7 +34,7 @@ body {
 		 					<td>
 		 						<span style="margin-left : 20px;" ng-hide="event.vaccination.administred === null">
 					   				<strong>{{event.vaccination.administred.name}}</strong>  -  
-									{{event.vaccination.date.fixed.date | date:'MM/dd/yyyy'}}
+									{{event.vaccination.date.type && event.vaccination.date.type === 'relative' ? 'Relative' : event.vaccination.date.fixed.date | date:'MM/dd/yyyy'}}
 								</span>
 								<span style="margin-left : 20px;" ng-show="event.vaccination.administred === null">
 					   				<strong>New Event</strong>

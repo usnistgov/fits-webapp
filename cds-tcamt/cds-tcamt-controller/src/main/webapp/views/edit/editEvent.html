@@ -17,11 +17,11 @@
 										<label>Vaccine</label>
 <md-autocomplete
           md-selected-item="selectedEvent[selectedEvent.type].administred"
- 		  md-selected-item-change="tcChanged()"
           md-search-text="vacSearch"
           md-items="item in searchV(vacSearch)"
           md-item-text="item.name + ' # ' + item.cvx"
           placeholder="Select a vaccine"
+md-menu-class="autocomplete-custom-template"
           md-min-length="0">
         <md-item-template>
           <span class="item-title">
@@ -64,11 +64,11 @@
 										<label>Related To</label>
 							<md-autocomplete
           md-selected-item="evaluation.relatedTo"
- 		  md-selected-item-change="tcChanged()"
           md-search-text="vacSearch1"
           md-items="item in searchV(vacSearch1)"
           md-item-text="item.name + ' # ' + item.cvx"
           placeholder="Select a vaccine"
+md-menu-class="autocomplete-custom-template"
           md-min-length="0">
         <md-item-template>
           <span class="item-title">
