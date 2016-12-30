@@ -18,29 +18,26 @@ body {
 <!-- <span ng-show="!aTCisSelected()">No test case selected.</span> -->
 <div>
 	<md-list ng-cloak>
-		 <md-list-item class="secondary-button-padding"
+		 <md-list-item
 		 			   ng-repeat="event in selectedTC.events track by $index"
 		 			   ng-click="selectEvent(event)" 
-		 			   style="cursor: pointer;"
+		 			   style="cursor: pointer; height : 50px;"
 						ng-class="{'sinfo' : isSelectedEvent(event), 'fle' : $index === 0, 'le' : true}"
 						context-menu="eventCM" model="$index" >
 
-		 			<table>
+		 			<table style="width : 100%;">
 		 				<tr>
 		 					<td>
-		 						<span class="badge sbadge" style="vertical-align:middle;">{{$index+1}}</span>
-<!-- 		 						<i ng-show="!validateEvent(event)" class="fa fa-exclamation-circle" style="font-size : 2em; color : red;" aria-hidden="true"></i> -->
+		 						<span class="badge sbadge" style="vertical-align:middle;" >{{$index+1}}</span>
 		 					</td>
-		 					<td>
-		 						<span style="margin-left : 20px;" ng-hide="event.vaccination.administred === null">
-					   				<strong>{{event.vaccination.administred.name}}</strong>  -  
-									{{event.vaccination.date.type && event.vaccination.date.type === 'relative' ? 'Relative' : event.vaccination.date.fixed.date | date:'MM/dd/yyyy'}}
-								</span>
-								<span style="margin-left : 20px;" ng-show="event.vaccination.administred === null">
-					   				<strong>New Event</strong>
-								</span>
-							</td>
-						</tr>
+		 					<td style="margin-bottom : 0;" ng-hide="event.vaccination.administred === null">
+		 						<strong>{{event.vaccination.administred.name}}</strong> - 
+		 						{{eventLabel(event)}}
+		 					</td>
+		 					<td ng-show="event.vaccination.administred === null">
+		 						<strong>New Event</strong>
+		 					</td>
+		 				</tr>
 		 			</table>
 
 		 </md-list-item>

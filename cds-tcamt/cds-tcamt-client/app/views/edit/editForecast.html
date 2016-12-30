@@ -11,24 +11,6 @@ body {
 		top.location = self.location;
 	}
 </script>
-<!--     <div class="page-header"> -->
-<!--         <span class="header5">Event</span> -->
-<!--     </div> -->
-            
-<!-- 	<form name="eventForm" class="form-horizontal" novalidate> -->
-<!-- 		<div class="row"> -->
-<!-- 			<div class="col-md-12"> -->
-<!-- 				<div class="col-md-12"> -->
-<!-- 					<md-input-container style="width: 100%;"> -->
-<!-- 						<label>Event Type</label> -->
-<!-- 						<input value="{{selectedEvent.type.toUpperCase()}}" ng-disabled="true" type="text"/> -->
-<!-- 					</md-input-container> -->
-<!-- 				</div> -->
-<!-- 			</div> -->
-<!-- 		</div> -->
-<!-- 	</form> -->
-
-
 <script type="text/ng-template" id="EditForecastData.html">
 
 	<md-content>
@@ -38,55 +20,16 @@ body {
 
 					<form name="vaccineForm" class="form-horizontal" novalidate>
 						<div class="row">
-				            <div class="col-md-12">
-								<div class="col-md-12">
-
-									<div style="width: 100%; margin-bottom : 20px;">
-										<label>Vaccine</label>
-<md-autocomplete
-          md-selected-item="selectedForecast.target"
-          md-search-text="vacSearch2"
-          md-items="item in searchV(vacSearch2)"
-          md-item-text="item.name + ' # ' + item.cvx"
-          placeholder="Select a vaccine"
-md-menu-class="autocomplete-custom-template"
-          md-min-length="0">
-        <md-item-template>
-          <span class="item-title">
-            <span> {{item.cvx}} # {{item.name}} </span>
-          </span>
-          <span class="item-metadata">
-            <span class="item-metastat">
-              <strong>{{item.details}}</strong>
-            </span>
-          </span>
-        </md-item-template>
-      </md-autocomplete>
-									</div>
-								</div>
+				            <div class="col-md-12" style="margin-bottom : 20px;">
+								<label class="col-md-12" style="color: rgb(117, 117, 139);">Target</label>	
+								<vaccine-picker  vxm="vxm"  vxg="vxgs" model="selectedForecast.target"></vaccine-picker>
 							</div>
 							<div class="col-md-12">
 								<div class="col-md-4">
 									<md-input-container style="width: 100%;">
 										<label>Serie Status</label>
 										<md-select ng-model="selectedForecast.serieStatus" ng-model-options="{trackBy: '$value'}" ng-change="tcChanged()">
-											<md-option value="A">Assumed complete or immune</md-option>
-											<md-option value="C">Complete</md-option>
-											<md-option value="D">Due</md-option>
-											<md-option value="E">Error</md-option>
-											<md-option value="F">Finished</md-option>
-											<md-option value="G">Aged out</md-option>
-											<md-option value="I">Immune</md-option>
-											<md-option value="L">Due later</md-option>
-											<md-option value="N">Not complete</md-option>
-											<md-option value="O">Overdue</md-option>
-											<md-option value="R">No results</md-option>
-											<md-option value="S">Complete for season</md-option>
-											<md-option value="U">Unknown</md-option>
-											<md-option value="V">Consider</md-option>
-											<md-option value="W">Waivered</md-option>
-											<md-option value="X">Contraindicated</md-option>
-											<md-option value="Z">Recommended but not required</md-option>
+											<md-option ng-repeat=" enum in serieStatus " ng-value="enum.code">{{enum.details}}</md-option>
 										</md-select>
 									</md-input-container>
 								</div>

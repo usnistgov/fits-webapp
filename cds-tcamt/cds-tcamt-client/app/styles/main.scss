@@ -4,6 +4,18 @@ $icon-font-path: "../fonts/";
 @import 'sass-bootstrap/lib/bootstrap';
 
 
+multiselect ul {
+	max-height : 500px;
+}
+
+multiselect .caret {
+	display : none;
+}
+
+multiselect button:after {
+  content: 'Vaccine Group';
+}
+
 .browsehappy {
   margin: 0.2em 0;
   background: #ccc;
@@ -11,7 +23,11 @@ $icon-font-path: "../fonts/";
   padding: 0.2em 0;
 }
 
-
+.view-active {
+   -moz-box-shadow:    inset 0 0 10px #000000;
+   -webkit-box-shadow: inset 0 0 10px #000000;
+   box-shadow:         inset 0 0 10px #000000;
+}
 
 .autocompletedemoCustomTemplate .autocomplete-custom-template li {
   border-bottom: 1px solid #ccc;
@@ -1369,15 +1385,17 @@ input.account-input {
 }
 
 .app-modal-window .modal-dialog {
-  width: 90%;
-  height: 90%;
+  width: 95%;
+  height: 95%;
   overflow-y: auto;
 }
 
-.app-modal-window .modal-dialog {
-  width: 90%;
-  height: 90%;
-  overflow-y: auto;
+.md-select-menu-container {
+        z-index: 9999;
+}
+
+.group-select > .active > a {
+	background-color : white;
 }
 
 .nav > li > a {

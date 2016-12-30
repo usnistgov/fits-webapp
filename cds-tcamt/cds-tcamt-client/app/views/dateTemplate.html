@@ -1,49 +1,48 @@
 <script type="text/ng-template" id="date.html">
-<div ng-init="ctrl.init()">
-	<label style="color: rgb(117, 117, 139);" ng-bind="ctrl.label"></label>
-	<div class="btn-group btn-group-justified">
-		<label class="btn btn-primary" ng-model="ctrl.dt.type"
-			uib-btn-radio="'fixed'" uncheckable>Fixed</label> <label
-			class="btn btn-primary" ng-model="ctrl.dt.type"
-			uib-btn-radio="'relative'" uncheckable>Relative</label>
+	<div>
+		<label style="color: rgb(117, 117, 139);" ng-bind="ctrl.label"></label>
+		<div class="btn-group btn-group-justified">
+			<label class="btn btn-primary" ng-model="ctrl.dt._type" uib-btn-radio="'fixed'" uncheckable>Fixed</label> 
+			<label class="btn btn-primary" ng-model="ctrl.dt._type" uib-btn-radio="'relative'" uncheckable>Relative</label>
+		</div>
+		<div ng-show="ctrl.dt._type === 'fixed'" style="padding: 10px; background: #f6f6f6; border: 1px solid #e1e1e1;" class="col-md-12">
+			<div class="col-md-12" style="font-size: 15px; color: #0740C7;" class="pull-left">{{ctrl.dt.fixed.date | date : 'fullDate'}}</div>
+			<md-input-container class="col-md-offset-2 col-md-5"> 
+				<md-datepicker
+					ng-model="ctrl.dt.fixed._dateObj"
+					md-placeholder="Enter date"
+					ng-change="ctrl.dateChange(ctrl.dt.fixed)">
+				</md-datepicker>
+			</md-input-container>
+		</div>
+		<div ng-show="ctrl.dt._type === 'relative'" style="padding: 10px; background: #f6f6f6; border: 1px solid #e1e1e1;">
+			<md-input-container style="width: 100%;"> 
+				<label>Relative To</label>
+				<md-select ng-model="ctrl.dt.relative.relativeTo">
+					<md-option ng-value="'DOB'" ng-disabled="ctrl.exclude === 'DOB'">Date Of Birth</md-option>
+					<md-option ng-value="'EVALDATE'" ng-disabled="ctrl.exclude === 'EvalDate'">Evaluation Date</md-option>
+					<md-option ng-value="'TODAY'">Today</md-option>
+				</md-select>
+			</md-input-container>
+			<md-input-container style="width: 31%;"> 
+				<label>Years</label>
+				<input ng-model="ctrl.dt.relative.year" type="number"> 
+			</md-input-container>
+			<md-input-container style="width: 33%;"> 
+				<label>Months</label>
+				<input ng-model="ctrl.dt.relative.month" type="number"> 
+			</md-input-container>
+			<md-input-container style="width: 32%;"> 
+				<label>Days</label>
+				<input ng-model="ctrl.dt.relative.day" type="number">
+			</md-input-container>
+		</div>
+		<div ng-show="ctrl.dt._type === 'error'" style="padding: 10px; background: #ffdde3; border: 1px solid #e1e1e1;">
+			<span> Impossible to make date relative to {{errRelative}} </span>
+			<button class="btn btn-danger" ng-click="ctrl.dismiss()">
+				<i class="fa fa-times" aria-hidden="true"></i> 
+				Dismiss
+			</button>
+		</div>
 	</div>
-	<div ng-show="ctrl.dt.type === 'fixed'"
-		style="padding: 10px; background: #f6f6f6; border: 1px solid #e1e1e1;" class="col-md-12">
-		<div class="col-md-12" style="font-size: 15px; color: #0740C7;" class="pull-left">{{ctrl.dt.fixed.date | date : 'fullDate'}}</div>
-		<md-input-container class="col-md-offset-2 col-md-5"> <md-datepicker
-			ng-model="ctrl.dt.fixed.obj"
-			md-placeholder="Enter date"
-			ng-change="ctrl.dateChange(ctrl.dt.fixed)"></md-datepicker>
-		</md-input-container>
-	</div>
-	<div ng-show="ctrl.dt.type === 'relative'"
-		style="padding: 10px; background: #f6f6f6; border: 1px solid #e1e1e1;">
-		<md-input-container style="width: 100%;"> 
-			<label>Relative To</label>
-			<md-select ng-model="ctrl.dt.relative.relativeTo">
-				<md-option ng-value="'DOB'" ng-disabled="ctrl.exclude === 'DOB'">Date Of Birth</md-option>
-				<md-option ng-value="'EVALDATE'" ng-disabled="ctrl.exclude === 'EvalDate'">Evaluation Date</md-option>
-				<md-option ng-value="'TODAY'">Today</md-option>
-			</md-select>
-		</md-input-container>
-		<md-input-container style="width: 31%;"> 
-			<label>Years</label>
-			<input ng-model="ctrl.dt.relative.year" type="number"> 
-		</md-input-container>
-		<md-input-container style="width: 33%;"> 
-			<label>Months</label>
-			<input ng-model="ctrl.dt.relative.month" type="number"> 
-		</md-input-container>
-		<md-input-container style="width: 32%;"> 
-			<label>Days</label>
-			<input ng-model="ctrl.dt.relative.day" type="number">
-		</md-input-container>
-	</div>
-	<div ng-show="ctrl.dt.type === 'error'"
-		style="padding: 10px; background: #ffdde3; border: 1px solid #e1e1e1;">
-		<span> Impossible to make date relative to {{errRelative}} </span>
-		<button class="btn btn-danger"
-				ng-click="ctrl.dismiss()"><i class="fa fa-times" aria-hidden="true"></i> Dismiss</button>
-	</div>
-</div>
 </script>

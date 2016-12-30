@@ -10,92 +10,63 @@ angular.module('tcl').directive('dateChoose', function() {
 		},
 		controller : function($scope,$rootScope) {
 			var ctrl = this;
+			ctrl.typeAttr  = "_type";
+			ctrl.createFixed = function(){
+				return {
+					date : "",
+					_dateObj : null
+				};
+			};
+			ctrl.createRelative = function(){
+				return {
+					relativeTo : "",
+					year : 0,
+					month : 0,
+					day : 0
+				}
+			};
+			ctrl.createNew = function(){
+				var obj = {};
+				obj.fixed = ctrl.createFixed();
+				obj.relative = ctrl.createRelative();
+				obj[ctrl.typeAttr] = "undefined";
+			};
 			
-			$scope.$watch('ctrl.dt', function (newValue, oldValue, scope) {
-				if(!ctrl.change)
-					ctrl.init();
-				else
-					ctrl.change = false;
+			
+			ctrl.initialize = function(date){
+				if(date){
+					if(date.hasOwnProperty("fixed") && date.hasOwnProperty("relative") &&  date.hasOwnProperty(ctrl.typeAttr)){
+						ctrl.type  = date[ctrl.typeAttr];
+					}
+					else if(date.hasOwnProperty("fixed")){
+						ctrl.type  = "fixed";
+						date[ctrl.typeAttr] = "fixed";
+						date.relative = ctrl.createRelative();
+					}
+					else if(date.hasOwnProperty("relative")){
+						ctrl.type  = "relative";
+						date[ctrl.typeAttr] = "relative";
+						date.fixed = ctrl.createFixed();
+					}
+				}
+				else {
+					date = ctrl.createNew();
+				}
+			};
+			
+			$scope.$watch('ctrl', function (newValue, oldValue, scope) {
+				ctrl.initialize(ctrl.dt);
 			});
 			
-			ctrl.init = function(){
-				ctrl.change = true;
-				ctrl.errRelative = "";
-				if(ctrl.dt.hasOwnProperty("fixed") && ctrl.dt.hasOwnProperty("relative") && ctrl.dt.hasOwnProperty("type")){
-					ctrl.type  = ctrl.dt.type;
-				}
-				else if(ctrl.dt.hasOwnProperty("fixed")){
-					ctrl.dt.type = "fixed";
-					ctrl.dt.relative = {
-							relativeTo : "",
-							year : 0,
-							month : 0,
-							day : 0
-					};
-				}
-				else if(ctrl.dt.hasOwnProperty("relative")){
-					ctrl.dt.type = "relative";
-					ctrl.dt.fixed = {
-							obj : new Date()
-					};
-					ctrl.dt.fixed.date = ctrl.dt.fixed.obj.getTime();
-				}
-			};
-			
 			ctrl.dateChange = function(dateObj){
-				console.log("change");
-				dateObj.date = dateObj.obj.getTime();
+				dateObj.date = dateObj._dateObj.getTime();
 			};
-			
-//			ctrl.init = function(){
-//				ctrl.type = "";
-//				ctrl.fixedDateObj = {
-//						fixed : {
-//							obj : new Date()
-//						}
-//				};
-//				ctrl.fixedDateObj.fixed.date = ctrl.fixedDateObj.fixed.obj.getTime();
-//				ctrl.errRelative = "";
-//				ctrl.relativeDateObj = {
-//						relative : {
-//							relativeTo : "",
-//							year : 0,
-//							month : 0,
-//							day : 0
-//						}
-//				};
-//				console.log("Handling Date L : "+ctrl.label);
-//				if(ctrl.dt.hasOwnProperty("fixed")){
-//					console.log("Is Fixed");
-//					ctrl.type  = "fixed";
-//					ctrl.fixedDateObj = $.extend(true, {},ctrl.dt);
-//				}
-//				else if(ctrl.dt.hasOwnProperty("relative")){
-//					ctrl.type = "relative";
-//					ctrl.relativeDateObj = $.extend(true, {},ctrl.dt);
-//				}
-//				else {
-//					ctrl.type = "fixed";
-//					ctrl.dt = $.extend(true, {},ctrl.fixedDateObj);
-//				}
-//			};
-			
-			
-//			$scope.$watch('ctrl.dt.type', function (newValue, oldValue, scope) {
-//				console.log("WATCH "+newValue);
-//			    if(newValue === "fixed"){
-//			    	ctrl.dt.type = "fixed";
-//			    }
-//			    else if (newValue === "relative"){
-//			    	ctrl.dt.type = "relative";
-//			    }
-//			});
 			
 			$scope.$watch('ctrl.dt.relative.relativeTo', function (newValue, oldValue, scope) {
 			    if(newValue && newValue != ""){
 			    	if(!ctrl.validate(ctrl.dt,[])){
 			    		console.log("Not Valid");
-			    		ctrl.dt.type  = "error";
+			    		ctrl.dt._type  = "error";
 			    		ctrl.errRelative = newValue;
 			    		ctrl.dt.relative.relativeTo = "";
 			    	}
@@ -103,16 +74,16 @@ angular.module('tcl').directive('dateChoose', function() {
 			});
 			
 			ctrl.dismiss = function(){
-				ctrl.dt.type  = "relative";
+				ctrl.dt._type  = "relative";
 			};
 			
 			ctrl.filter = function(date){
 				if(date){
-					if(date.hasOwnProperty("type")){
-						if(date.type === "relative"){
+					if(date.hasOwnProperty(ctrl.typeAttr)){
+						if(date[ctrl.typeAttr] === "relative"){
 							return {obj : date.relative, type : "relative"};
 						}
-						else if(date.type === "fixed"){
+						else if(date[ctrl.typeAttr] === "fixed"){
 							return {obj : date.fixed, type : "fixed"};
 						}
 						else
@@ -137,7 +108,7 @@ angular.module('tcl').directive('dateChoose', function() {
 				if(date.type === "fixed"){
 					return true;
 				}
-				else if(date.type === "relative" && date.obj.hasOwnProperty("relativeTo") && date.obj.relativeTo === "Today"){
+				else if(date.type === "relative" && date.obj.hasOwnProperty("relativeTo") && date.obj.relativeTo === "TODAY"){
 					return true;
 				}
 				else {
@@ -147,8 +118,6 @@ angular.module('tcl').directive('dateChoose', function() {
 			
 			ctrl.validate = function(date,stack){
 				var _date = ctrl.filter(date);
-				console.log(date);
-				console.log(_date);
 				if(_date){
 					if(ctrl.resolvable(_date)){
 						console.log("is Resolvable");
