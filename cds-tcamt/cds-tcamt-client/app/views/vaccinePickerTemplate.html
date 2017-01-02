@@ -3,7 +3,7 @@
 		<div style="padding: 10px;">
 			<table style="width: 100%;" ng-show="ctrl.model.discriminator === 'generic'">
 				<tr>
-					<td><img src="images/injection.png" /></td>
+					<td style="width: 100px;"><img src="images/injection.png" /></td>
 					<td style="margin-left: 10px;">
 						<span style="background-color: red;" class="badge">G</span>
 						<span style="background-color: green;" class="badge">CVX#{{ctrl.model.cvx}}</span> 
@@ -23,7 +23,7 @@
 			</table>
 			<table style="width: 100%;" ng-show="ctrl.model.discriminator === 'specific'">
 				<tr>
-					<td><img src="images/injection.png" /></td>
+					<td style="width: 100px;"><img src="images/injection.png" /></td>
 					<td style="margin-left: 10px;">
 						<span style="background-color: red;" class="badge">S</span>
 						<span style="background-color: green;" class="badge">CVX#{{ctrl.getVx(ctrl.model).cvx}}</span> 
@@ -46,11 +46,92 @@
 			</table>
 			<table style="width: 100%;" ng-show="!ctrl.model">
 				<tr>
-					<td><img src="images/injection.png" /></td>
-					<td style="margin-left: 10px; background-color : rgb(255, 230, 230); text-align : center; text-transform : uppercase;">
-						Select Vaccine
+					<td style="width: 100px;"><img src="images/injection.png" /></td>
+					<td style="margin-left: 10px; background-color : rgb(255, 230, 230); text-transform : uppercase;">
+						<div class="col-md-12" style="padding: 5px;">
+							<span class="col-md-12" style="text-align : center; ">Select Vaccine</span>
+							<div ng-show="ctrl.qMp" class="col-md-12" style="padding: 0;">
+								<div class="col-md-12"
+									 style="padding : 0; height : 35px; background-color: white; border : 1px solid #0f0f0f0f;"
+									 layout="column"
+									 layout-align="center">
+									<table class="col-md-12 table-condensed">
+										<tr>
+											<td style="width: 80px;">#<strong>{{ctrl.qMp.vx.cvx}}</strong></td>
+											<td><strong>{{ctrl.qMp.vx.name}}</strong> </td>
+											<td>
+												<button class="btn btn-xs btn-primary pull-right" ng-click="ctrl.clearqMp()">
+													<i class="fa fa-times" aria-hidden="true"></i>
+												</button>
+											</td>
+										</tr>
+									</table>
+								</div>
+								<div class="col-md-12"  style="padding: 0px;" ng-show="ctrl.allowMvx && ctrl.qMp.products.length > 0">
+									<div ng-show="ctrl.qMx" class="col-md-12"  style="padding: 0; margin-top: 10px;">
+										<div class="col-md-12"
+											 style="padding : 0; height : 35px; background-color: white; border : 1px solid #0f0f0f0f;"
+											 layout="column"
+											 layout-align="center">
+											<table class="col-md-12 table-condensed">
+												<tr>
+													<td style="width: 80px;"><strong>{{ctrl.qMx.mx.mvx}}</strong></td>
+													<td><strong>{{ctrl.qMx.name}}</strong> </td>
+													<td>
+														<button class="btn btn-xs btn-primary pull-right" ng-click="ctrl.clearqMx()">
+															<i class="fa fa-times" aria-hidden="true"></i>
+														</button>
+													</td>
+												</tr>
+											</table>
+										</div>
+									</div>
+									<div ng-show="!ctrl.qMx" class="col-md-12"  style="padding: 0; margin-top: 10px;">
+										<input type="text" class="col-md-12 form-control" ng-model="ctrl.qsearchMx" style="background-color: white;" placeholder=" Search (name, cvx)">
+										<ul class="list-group col-md-12" style="padding: 0; max-height: 200px; overflow-y: scroll;" ng-hide="ctrl.qsearchLX.length === 0">
+											<li class="col-md-12 list-group-item myselect"
+												ng-click="ctrl.setqMx(pdt)"
+												style="background-color: white; cursor: pointer; height: 30px; border : 1px solid #0f0f0f0f;"
+												ng-class="{'fle' : $index === 0, 'le' : true}"
+												layout="column"
+												layout-align="center"
+												ng-repeat="pdt in ctrl.qsearchLX = (ctrl.qMp.products | product : ctrl.qsearchMx) track by $index">
+												<table>
+													<tr>
+														<td><span ng-bind-html="pdt.mx.mvx | highlight : ctrl.qsearchMx" ></span></td>
+														<td><span ng-bind-html="pdt.name | highlight : ctrl.qsearchMx"></span> </td>
+													</tr>
+												</table>
+											</li>
+										</ul>
+									</div>
+								</div>
+								<div class="col-md-12" layout="row" layout-align="center">
+									<button flex="25" class="btn btn-xs btn-success" ng-click="ctrl.select()"> Select </button>
+								</div>
+							</div>
+							<div ng-show="!ctrl.qMp" class="col-md-12" style="padding: 0px;">
+								<input type="text" class="col-md-12 form-control" ng-model="ctrl.qsearch" style="background-color: white;" placeholder=" Search (name, cvx)">
+								<ul class="list-group col-md-12" style="padding: 0px; z-index : 999; max-height: 200px; position: absolute; overflow-y: scroll;" ng-hide="ctrl.qsearchL.length === 0">
+									<li class="col-md-12 list-group-item myselect"
+										ng-click="ctrl.setqMp(mp)"
+										style="background-color: white; cursor: pointer; height: 30px; border : 1px solid #0f0f0f0f;"
+										ng-class="{'fle' : $index === 0, 'le' : true}"
+										layout="column"
+										layout-align="center"
+										ng-repeat="mp in ctrl.qsearchL = (ctrl.vxm | vaccineEpt : ctrl.qsearch) track by $index">
+										<table>
+											<tr>
+												<td>#<span ng-bind-html="mp.vx.cvx | highlight : ctrl.qsearch" ></span></td>
+												<td><span ng-bind-html="mp.vx.name | highlight : ctrl.qsearch"></span> </td>
+											</tr>
+										</table>
+									</li>
+								</ul>
+							</div>
+						</div>
 					</td>
-					<td>
+					<td style="width: 100px;">
 						<button class="btn btn-xs pull-right" ng-click="ctrl.searchVx(selectedEvent)">
 							<i style="font-size: 2em;" class="fa fa-search" aria-hidden="true"></i>
 						</button>

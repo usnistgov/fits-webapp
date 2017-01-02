@@ -16,6 +16,10 @@ multiselect button:after {
   content: 'Vaccine Group';
 }
 
+.myselect:hover {
+  color: rgba(15, 15, 15, 0.33);
+}
+
 .browsehappy {
   margin: 0.2em 0;
   background: #ccc;

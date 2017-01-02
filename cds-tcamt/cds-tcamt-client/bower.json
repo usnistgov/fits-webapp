@@ -34,7 +34,8 @@
     "ng-notifications-bar": "^0.0.16",
     "codemirror": "5.18.2",
     "angular-ui-codemirror": "0.3.0",
-    "angular-bootstrap-multiselect": "https://github.com/bentorfs/angular-bootstrap-multiselect.git#^1.1.6"
+    "angular-bootstrap-multiselect": "https://github.com/bentorfs/angular-bootstrap-multiselect.git#^1.1.6",
+    "angular-ui-select": "^0.19.6"
   },
   "devDependencies": {
     "angular-scenario": "1.5.5",

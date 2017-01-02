@@ -21,15 +21,37 @@ angular.module('tcl').filter('vaccine', function () {
   };
 });
 
+angular.module('tcl').filter('vaccineEpt', function () {
+    return function (items,str) {
+        if (!items || !items.length) { return; }
+        return items.filter(function (item) {
+            if(!str || str === "") return false;
+            var s = str.toLowerCase();
+            return item.vx.name.toLowerCase().includes(s) || item.vx.cvx.includes(s);
+        });
+    };
+});
+
 angular.module('tcl').filter('product', function () {
 	  return function (items,str) {
 		  if (!items || !items.length) { return; }
 		  return items.filter(function (item) {
 			  if(!str || str === "") return true;
 			  var s = str.toLowerCase();
-			  return item.mx.name.toLowerCase().includes(s) || item.name.toLowerCase().includes(s) || item.mx.mvx.toLowerCase().includes(s) || item.mx.name.toLowerCase().includes(s);
+			  return item.name.toLowerCase().includes(s) || item.mx.mvx.toLowerCase().includes(s) || item.mx.name.toLowerCase().includes(s);
 		  });
 	  };
+});
+
+angular.module('tcl').filter('productEpt', function () {
+    return function (items,str) {
+        if (!items || !items.length) { return; }
+        return items.filter(function (item) {
+            if(!str || str === "") return false;
+            var s = str.toLowerCase();
+            return  item.name.toLowerCase().includes(s) || item.mx.mvx.toLowerCase().includes(s);
+        });
+    };
 });
 
 angular.module('tcl').filter('unspecified', function () {
@@ -126,6 +148,7 @@ angular
 					$scope.evalReason = [];
 					$scope.serieStatus = [];
 					$scope.gender = [];
+                    $scope.selectedTabTC = 0;
 					$scope.control = {
 						error : {
 							isSet : false,
@@ -254,6 +277,7 @@ angular
 							
 							// View
 							$scope.subview = "EditEventData.html";
+                            $rootScope.$emit('vp_clear', true);
 							waitingDialog.hide();
 						}, 0);
 					};
@@ -850,6 +874,11 @@ angular
 						$scope.selectTP($scope.selectedTP);
 						$scope.selectedTabTP = 1;
 					};
+
+					$scope.summary = function () {
+                        $scope.selectTC($scope.selectedTC);
+                        $scope.selectedTabTC = 3;
+                    };
 
 					$scope.eventCM = [ 
 					     [ 'Delete Event', 
@@ -1464,13 +1493,5 @@ angular.module('tcl').controller('VaccineBrowseCtrl',
 				var v = JSON.parse(JSON.stringify(x));
 				$uibModalInstance.close(v);
 			};
-			
-			$scope.trace = function(){
-				console.log($scope.vxGroups);
-				console.log($scope.filterData);
-				var dt = $filter('vxgroup')($scope.vxm,$scope.vxGroups);
-				var dt2 =$scope.vxm.filter($scope.ftr);
-				console.log(dt);
-				console.log(dt2);
-			};
+
 	});

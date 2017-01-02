@@ -38,7 +38,8 @@ var app = angular
         'ui.codemirror',
         'angularjs-dropdown-multiselect',
         'ui-notification',
-        'btorfs.multiselect'
+        'btorfs.multiselect',
+        'ui.select'
     ]);
 
 var

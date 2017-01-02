@@ -33,7 +33,8 @@ var app = angular
         'ui.bootstrap',
         'ui.codemirror',
         'ui-notification',
-        'btorfs.multiselect'
+        'btorfs.multiselect',
+        'ui.select'
     ]);
 app.config(function(NotificationProvider) {
     NotificationProvider.setOptions({
