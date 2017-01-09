@@ -25,19 +25,24 @@ body {
 		<p>No Test Case Selected.</p>
 	</div>
 </div>
-<div ng-show="selectedTestPlan1">
+<div ng-show="selectedTestPlan1" class="fill">
 	<div class="row">
-		<div ng-show="!hideLoe" class="col-md-3">
+		<div ng-show="!hideLoe" class="col-md-4">
 			<div class="panel panel-primary">
-				<div class="panel-heading panel-heading-collapsable"
-					style="background-color: #293856;">
-					<i class="glyphicon glyphicon-list"></i> <strong>
-					Test Cases
-					</strong>
-					<span style="margin-left:10px; font-size:14px;font-weight: bold; color:#d6893b" ng-show="unsaved()"><i class="fa fa-exclamation-triangle"></i> Unsaved Changes </span>
+				<div class="panel-heading col-md-12"  style="background-color: #293856;">
+					<div class="col-md-3" style="padding: 0;">
+						<i class="glyphicon glyphicon-list"></i>
+						<strong> Test Cases </strong>
+					</div>
+					<div class="col-md-offset-2 col-md-7" style="padding: 0;">
+						<div class="input-group" style="width : 100%;">
+							<span class="input-group-addon"  style="background-color: rgb(240, 240, 240);" id="basic-addon1"><i class="fa fa-search" aria-hidden="true"></i></span>
+							<input type="text" class="form-control" ng-model="tcSearch.name" ng-model-options="{ updateOn: 'blur' }" style="padding-left: 10px; background-color: white; width : 100%;" placeholder=" Search By TestCase Name"/>
+						</div>
+					</div>
 				</div>
-				<div class="panel-body">
-					<div class="toc-container" style="min-height : 100px;">
+				<div class="panel-body panel-resizable">
+					<div class="toc-container fill">
 						<ng-include src="'views/testplanTree.html'" />
 					</div>
 				</div>
@@ -84,21 +89,17 @@ body {
 			</div>
 		</div>
 
-
-
-
-		<div
-			ng-class="{'col-md-9': !hideToc, 'col-md-11 col-98-5-percent':hideToc}">
-			<div class="panel panel-primary">
+		<div class="fill col-md-8">
+			<div class="panel panel-primary" style="background-color: rgb(250, 250, 250);">
 				<div class="panel-heading" style="background-color: #293856">
 					<strong>Dashboard</strong>
 					<button ng-show="aTCisSelected()" ng-click="summary()" class="btn btn-xs btn-info pull-right" style="margin: 0px;">
 						Summary
 					</button>
 				</div>
-				<div class="panel-body"
-					style="padding-bottom: 10px;">
-					<div class="col-md-12"
+				<div class="panel-body panel-resizable"
+					style="padding-bottom: 10px; height : 100%; bottom : 0;">
+					<div class="col-md-12 fill"
 						ng-show="subview === null||subview===undefined|| !subview">
 						<p>No Element Selected</p>
 					</div>

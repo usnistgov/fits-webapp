@@ -20,6 +20,8 @@ import gov.nist.healthcare.cds.auth.domain.Account;
 import gov.nist.healthcare.cds.auth.domain.Privilege;
 import gov.nist.healthcare.cds.auth.repo.PrivilegeRepository;
 import gov.nist.healthcare.cds.auth.service.AccountService;
+import gov.nist.healthcare.cds.domain.CDCImport;
+import gov.nist.healthcare.cds.domain.CDCImportConfig;
 import gov.nist.healthcare.cds.domain.ExpectedEvaluation;
 import gov.nist.healthcare.cds.domain.ExpectedForecast;
 import gov.nist.healthcare.cds.domain.FixedDate;
@@ -31,6 +33,7 @@ import gov.nist.healthcare.cds.domain.VaccinationEvent;
 import gov.nist.healthcare.cds.domain.Vaccine;
 import gov.nist.healthcare.cds.domain.VaccineMapping;
 import gov.nist.healthcare.cds.domain.exception.VaccineNotFoundException;
+import gov.nist.healthcare.cds.domain.xml.ErrorModel;
 import gov.nist.healthcare.cds.enumeration.EvaluationStatus;
 import gov.nist.healthcare.cds.enumeration.EventType;
 import gov.nist.healthcare.cds.enumeration.Gender;
@@ -40,6 +43,7 @@ import gov.nist.healthcare.cds.repositories.TestPlanRepository;
 import gov.nist.healthcare.cds.repositories.VaccineMappingRepository;
 import gov.nist.healthcare.cds.repositories.VaccineRepository;
 import gov.nist.healthcare.cds.service.VaccineImportService;
+import gov.nist.healthcare.cds.service.impl.CSSFormatServiceImpl;
 import gov.nist.healthcare.cds.service.impl.NISTFormatServiceImpl;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -75,6 +79,9 @@ public class Bootstrap {
 
 	@Autowired
 	private NISTFormatServiceImpl importService;
+	
+	@Autowired
+	private CSSFormatServiceImpl cdcImportService;
 	
 	@Bean
 	public Marshaller castorM(){
@@ -137,9 +144,9 @@ public class Bootstrap {
 		Patient pt = new Patient();
 		pt.setDob(dob);
 		pt.setGender(Gender.F);
-//		
+		
 		tc.setPatient(pt);
-//		
+		
 //		//Events
 		VaccinationEvent vcEvent1 = new VaccinationEvent();
 		Date e1d = dateformat.parse("06/04/2011");
@@ -153,9 +160,9 @@ public class Bootstrap {
 		ExpectedEvaluation ee1 = new ExpectedEvaluation();
 		ee1.setRelatedTo(vxRepository.findOne("107"));
 		ee1.setStatus(EvaluationStatus.VALID);
-//		
+		
 		vcEvent1.setEvaluations(new HashSet<>(Arrays.asList(ee1)));
-//		
+		
 		VaccinationEvent vcEvent2 = new VaccinationEvent();
 		Date e2d = dateformat.parse("02/05/2011");
 		FixedDate e2do = new FixedDate();
@@ -173,7 +180,7 @@ public class Bootstrap {
 		
 		tc.addEvent(vcEvent1);
 		tc.addEvent(vcEvent2);
-//		
+		
 		ExpectedForecast ef = new ExpectedForecast();
 		ef.setDoseNumber(2);
 		ef.setTarget(vxRepository.findOne("107"));
@@ -185,89 +192,75 @@ public class Bootstrap {
 		ef.setEarliest(new FixedDate(earliest));
 		ef.setRecommended(new FixedDate(recommended));
 		ef.setPastDue(new FixedDate(pastDue));
-//		
+		
 		tc.setForecast(new HashSet<>(Arrays.asList(ef)));
-//		//--------------------
-//		//MetaData
+		//--------------------
+		//MetaData
 		MetaData md = new MetaData();
 		md.setDateCreated(new FixedDate(new Date()));
 		md.setDateLastUpdated(new FixedDate(new Date()));
 		md.setImported(false);
 		md.setVersion("1");
-//		
+		
 		tc.setMetaData(md);
 		
+		String file = getStringFromInputStream(Bootstrap.class.getResourceAsStream("/test.xml"));
+		TestCase t1 = this.importService._import(file);
+		TestCase t2 = this.importService._import(file);
+		TestCase t3 = this.importService._import(file);
+		
 		TestPlan tp = new TestPlan();
-		MetaData mdp = new MetaData();
-		mdp.setDateCreated(new FixedDate(new Date()));
-		mdp.setDateLastUpdated(new FixedDate(new Date()));
-		mdp.setImported(false);
-		mdp.setVersion("1");
-		tp.setMetaData(mdp);
+		md = new MetaData();
+		md.setDateCreated(new FixedDate(new Date()));
+		md.setDateLastUpdated(new FixedDate(new Date()));
+		md.setImported(false);
+		md.setVersion("1");
+		tp.setMetaData(md);
 		tp.setDescription("CDS TestCases for CDSi Specification v2");
 		tp.setName("CDC");
 		tp.setUser("hossam");
+		tp.addTestCase(t3);
+		t3.setTestPlan(tp);
+		testPlanRepository.saveAndFlush(tp);
+		tp = new TestPlan();
+		md = new MetaData();
+		md.setDateCreated(new FixedDate(new Date()));
+		md.setDateLastUpdated(new FixedDate(new Date()));
+		md.setImported(false);
+		md.setVersion("1");
+		tp.setMetaData(md);
+		tp.setDescription("CDS TestCases for CDSi Specification v2");
+		tp.setName("CDC");
+		tp.setUser("michael");
+		tp.addTestCase(t1);
+		t1.setTestPlan(tp);
+		testPlanRepository.saveAndFlush(tp);
+		tp = new TestPlan();
+		md = new MetaData();
+		md.setDateCreated(new FixedDate(new Date()));
+		md.setDateLastUpdated(new FixedDate(new Date()));
+		md.setImported(false);
+		md.setVersion("1");
+		tp.setMetaData(md);
+		tp.setDescription("CDS TestCases for CDSi Specification v2");
+		tp.setName("CDC");
+		tp.setUser("robert");
+		tp.addTestCase(t2);
+		t2.setTestPlan(tp);
+		testPlanRepository.saveAndFlush(tp);
+		tp = new TestPlan();
+		md = new MetaData();
+		md.setDateCreated(new FixedDate(new Date()));
+		md.setDateLastUpdated(new FixedDate(new Date()));
+		md.setImported(false);
+		md.setVersion("1");
+		tp.setMetaData(md);
+		tp.setDescription("CDS TestCases for CDSi Specification v2");
+		tp.setName("CDC");
 		tp.addTestCase(tc);
 		tc.setTestPlan(tp);
+		tp.setUser("admin");
 		testPlanRepository.saveAndFlush(tp);
-//		
-//		String file = getStringFromInputStream(Bootstrap.class.getResourceAsStream("/test.xml"));
-//		TestCase t1 = this.importService._import(file);
-//		TestCase t2 = this.importService._import(file);
-//		TestCase t3 = this.importService._import(file);
-//		
-//		TestPlan tp = new TestPlan();
-//		md = new MetaData();
-//		md.setDateCreated(new FixedDate(new Date()));
-//		md.setDateLastUpdated(new FixedDate(new Date()));
-//		md.setImported(false);
-//		md.setVersion("1");
-//		tp.setMetaData(md);
-//		tp.setDescription("CDS TestCases for CDSi Specification v2");
-//		tp.setName("CDC");
-//		tp.setUser("hossam");
-//		tp.addTestCase(t3);
-//		t3.setTestPlan(tp);
-//		testPlanRepository.saveAndFlush(tp);
-//		tp = new TestPlan();
-//		md = new MetaData();
-//		md.setDateCreated(new FixedDate(new Date()));
-//		md.setDateLastUpdated(new FixedDate(new Date()));
-//		md.setImported(false);
-//		md.setVersion("1");
-//		tp.setMetaData(md);
-//		tp.setDescription("CDS TestCases for CDSi Specification v2");
-//		tp.setName("CDC");
-//		tp.setUser("michael");
-//		tp.addTestCase(t1);
-//		t1.setTestPlan(tp);
-//		testPlanRepository.saveAndFlush(tp);
-//		tp = new TestPlan();
-//		md = new MetaData();
-//		md.setDateCreated(new FixedDate(new Date()));
-//		md.setDateLastUpdated(new FixedDate(new Date()));
-//		md.setImported(false);
-//		md.setVersion("1");
-//		tp.setMetaData(md);
-//		tp.setDescription("CDS TestCases for CDSi Specification v2");
-//		tp.setName("CDC");
-//		tp.setUser("robert");
-//		tp.addTestCase(t2);
-//		t2.setTestPlan(tp);
-//		testPlanRepository.saveAndFlush(tp);
-//		tp = new TestPlan();
-//		md = new MetaData();
-//		md.setDateCreated(new FixedDate(new Date()));
-//		md.setDateLastUpdated(new FixedDate(new Date()));
-//		md.setImported(false);
-//		md.setVersion("1");
-//		tp.setMetaData(md);
-//		tp.setDescription("CDS TestCases for CDSi Specification v2");
-//		tp.setName("CDC");
-//		tp.addTestCase(tc);
-//		tc.setTestPlan(tp);
-//		tp.setUser("admin");
-//		testPlanRepository.saveAndFlush(tp);
 //		
 //		
 ////		List<TestCase> res = importService.importCDC();

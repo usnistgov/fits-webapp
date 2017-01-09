@@ -34,8 +34,8 @@ body {
 		</div>
 	</div>
 </div>
-</md-content> </md-tab> <md-tab label="Expected Evaluations"> <md-content
-	class="md-padding">
+</md-content> </md-tab> <md-tab label="Expected Evaluations">
+<md-content class="md-padding">
 <div>
 	<button title="Add Evaluation" type="button"
 		class="btn btn-sm btn-info pull-right" style="margin: 0px;"
@@ -72,7 +72,7 @@ body {
 				<md-select ng-disabled="evaluation.status !== 'INVALID'"
 					ng-model="evaluation.reason" ng-model-options="{trackBy: '$value'}"
 					ng-change="tcChanged()"> <md-option
-					ng-repeat=" enum in evalReason " ng-value="enum.code">{{enum.details}}</md-option>
+					ng-repeat=" enum in ::evalReason " ng-value="enum.code">{{::enum.details}}</md-option>
 				</md-select> </md-input-container>
 			</div>
 			<div class="col-md-1" style="margin-top: 10px;">
@@ -100,25 +100,25 @@ body {
 	<div class="panel-body">
 		<div class="input-group col-md-4" style="margin-top : 15px;" ng-class="{'col-md-4' : generic, 'col-md-12' : !generic }">
 					<span class="input-group-addon"  id="basic-addon1"><i class="fa fa-search" aria-hidden="true"></i></span>
-					<input type="text" ng-model="searchtxt" class="form-control" style="background-color : white;" placeholder="Search" aria-describedby="basic-addon1">
+					<input type="text" ng-change="vxdataChange()" ng-model="searchtxt" class="form-control" style="background-color : white;" placeholder="Search" aria-describedby="basic-addon1">
 		</div>
 		<div class="col-md-4" ng-show="generic">
-			<multiselect show-unselect-all="true" class="group-select" ng-model="vxGroups" options="vxgs"
+			<multiselect show-unselect-all="true" class="group-select" ng-model="vxGroups" ng-change="vxdataChange()" options="vxgs"
 			id-prop="cvx" display-prop="name" search-limit="100" show-search="true">
 			</multiselect>
 		</div>
 		<div style="margin-top : 15px;" class="col-md-offset-1 col-md-3" ng-show="generic">
-			<md-checkbox ng-model="unspec" aria-label="Unspecified">
+			<md-checkbox ng-model="unspec" aria-label="Unspecified" ng-change="vxdataChange()">
 				Unspecified Formulation
 			</md-checkbox>
 		</div>
 		<div ng-show="generic">
-			<md-card ng-class="{'alternate0' : isW($index), 'alternate1' : !isW($index) }" style="margin : 0; height : 125px;" class="col-md-6" ng-repeat="mp in filterData = ( vxm | vaccine:searchtxt | vxgroup:vxGroups | unspecified:unspec ) | limitTo:pageSize:pageSize*(pcG-1) track by $index">
+			<md-card ng-class="{'alternate0' : isW($index), 'alternate1' : !isW($index) }" style="margin : 0; height : 125px;" class="col-md-6" ng-repeat="mp in ::filterData = ( vxm | vaccine:searchtxt | vxgroup:vxGroups | unspecified:unspec ) | limitTo:pageSize:pageSize*(pcG-1) track by $index">
      				<md-card-title style="padding : 18px 10px 10px;" layout="row" layout-align="end center">
        				<md-card-title-text>
-         					<span class="md-headline" style="font-size : 18px; text-transform: capitalize;">{{mp.vx.name}}</span>
-         					<span class="md-subhead">#{{mp.vx.cvx}}</span>
-         					<span class="md-subhead" style="font-size : 12px; text-transform: capitalize;">{{mp.vx.details}}</span>
+         					<span class="md-headline" style="font-size : 18px; text-transform: capitalize;">{{::mp.vx.name}}</span>
+         					<span class="md-subhead">#{{::mp.vx.cvx}}</span>
+         					<span class="md-subhead" style="font-size : 12px; text-transform: capitalize;">{{::mp.vx.details}}</span>
      					</md-card-title-text>
        				<md-card-actions layout="column" layout-align="end center">
       						<md-button ng-click="select(mp.vx)">
@@ -138,13 +138,13 @@ body {
 				</button>
 				<span style="text-transform : capitalize;">{{selectedMapping.vx.name}}#{{selectedMapping.vx.cvx}}</span>
 			</div>
-			<md-card ng-class="{'alternate0' : ($index%2) === 0, 'alternate1' : ($index%2) === 1 }" style="margin : 0;" class="col-md-12" ng-repeat="pr in filterPr = ( selectedMapping.products | product:searchtxt ) | limitTo:pageSize:pageSize*(pcS-1) track by $index">
+			<md-card ng-class="{'alternate0' : ($index%2) === 0, 'alternate1' : ($index%2) === 1 }" style="margin : 0;" class="col-md-12" ng-repeat="pr in ::filterPr = ( selectedMapping.products | product:searchtxt ) | limitTo:pageSize:pageSize*(pcS-1) track by $index">
     			<md-card-title style="padding : 18px 10px 10px;" layout="row" layout-align="end center">
        				<md-card-title-text>
-         					<span class="md-headline" style="font-size : 18px; text-transform: capitalize;">{{pr.name}}</span>
-         					<span class="md-subhead">Manufacturer {{pr.mx.name}}</span>
-         					<span class="md-subhead">CVX #{{selectedMapping.vx.cvx}} </span>
-         					<span class="md-subhead">MVX #{{pr.mx.mvx}}</span>
+         					<span class="md-headline" style="font-size : 18px; text-transform: capitalize;">{{::pr.name}}</span>
+         					<span class="md-subhead">Manufacturer {{::pr.mx.name}}</span>
+         					<span class="md-subhead">CVX #{{::selectedMapping.vx.cvx}} </span>
+         					<span class="md-subhead">MVX #{{::pr.mx.mvx}}</span>
      					</md-card-title-text>
        				<md-card-actions layout="column" layout-align="end center">
       						<md-button ng-click="select(pr)">

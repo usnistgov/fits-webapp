@@ -39,7 +39,8 @@ var app = angular
         'angularjs-dropdown-multiselect',
         'ui-notification',
         'btorfs.multiselect',
-        'ui.select'
+        'ui.select',
+        'infinite-scroll'
     ]);
 
 var

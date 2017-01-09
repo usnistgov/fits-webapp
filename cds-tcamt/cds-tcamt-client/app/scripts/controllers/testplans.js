@@ -1,8 +1,7 @@
 /**
  * Created by Jungyub on 5/12/16
  */
-angular
-		.module('tcl').filter('startFrom', function() {
+angular.module('tcl').filter('startFrom', function() {
     return function(input, start) {
     	 if (!input || !input.length) { return; }
         start = +start; //parse to int
@@ -105,7 +104,7 @@ angular
 						$timeout, userInfoService, ngTreetableParams,
 						$interval, ViewSettings, StorageService, $q,
 						notifications, IgDocumentService, ElementUtils,
-						AutoSaveService, $sce, Notification, TestObjectUtil, TestObjectFactory, VaccineService) {
+						AutoSaveService, $sce, Notification, TestObjectUtil, TestObjectFactory, VaccineService, TestObjectSynchronize) {
 					$scope.vxm = [];
 					$scope.loading = false;
 					$scope.selectedTabTP = 0;
@@ -133,7 +132,12 @@ angular
 					$scope.nistStd = {};
 					$scope.nistStd.nist = false;
 					$scope.nistStd.std = false;
-
+					$scope.exportCDC = {
+							ignore : true,
+							from : 1,
+							to : 999,
+							all : true
+					};
 					
 					// ------------------------------------------------------------------------------------------
 					// CDSI TCAMT
@@ -149,6 +153,9 @@ angular
 					$scope.serieStatus = [];
 					$scope.gender = [];
                     $scope.selectedTabTC = 0;
+                    $scope.tcSearch = {
+                    	name : ""
+					};
 					$scope.control = {
 						error : {
 							isSet : false,
@@ -253,14 +260,13 @@ angular
 									TestObjectUtil.sanitizeEvents($scope.tps[tp].testCases[tc]);
 								}
 							}
-							$scope.loading = false;
 							delay.resolve(true);
+							$scope.loading = false;
 						}, 
 						function(error) {
 							$scope.loading = false;
 							$scope.error = error.data;
 							delay.reject(false);
-
 						});
 					};
 
@@ -304,6 +310,7 @@ angular
 							progressType : 'info'
 						});
 						$timeout(function() {
+							console.log("SelectTP");
 							// Selection
 							$scope.selectedEvent = null;
 							$scope.selectedForecast = null;
@@ -331,7 +338,6 @@ angular
 							$scope.selectedEvent = null;
 							$scope.selectedForecast = null;
 							$scope.selectedTC = tc;
-							console.log(tc);
 							$scope.selectedTG = null;
 							$scope.selectedType = "tc";
 
@@ -593,14 +599,6 @@ angular
 											.validateDT(vaccination.date,
 													"Event Date"));
 								}
-
-								if (!has(vaccination, "type"))
-									errors.errorMessages
-											.push("Event must have a type");
-
-								if (!has(vaccination, "doseNumber"))
-									errors.errorMessages
-											.push("Event must have a dose number");
 
 								if (!has(vaccination, "administred"))
 									errors.errorMessages
@@ -948,24 +946,28 @@ angular
 					
 					$scope.fileChange = function(files) {
 						console.log("change");
-						if (files[0].type === "text/xml") {
-							console.log("in selected xml");
+//						if (files[0].type === "text/xml") {
 							$scope.$apply(function() {
 								$scope.sfile = files[0].name;
 								$scope.fileErr = false;
 								$scope.sfileO = files[0];
 							});
 
-						} else {
-							console.log("in selected not xml");
-							$scope.$apply(function() {
-								$scope.sfile = "File should be XML";
-								$scope.fileErr = true;
-							});
-						}
+//						} else {
+//							console.log("in selected not xml");
+//							$scope.$apply(function() {
+//								$scope.sfile = "File should be XML";
+//								$scope.fileErr = true;
+//							});
+//						}
 					};
-
-					$scope.upload = function() {
+					
+					$scope.sanitizeTestCase = function(tc){
+						TestObjectUtil.sanitizeDates(tc);
+						TestObjectUtil.sanitizeEvents(tc);
+					};
+					
+					$scope.uploadNIST = function() {
 						if ($scope.sfileO != null && !$scope.fileErr) {
 							var fd = new FormData();
 							fd.append("file", $scope.sfileO);
@@ -973,7 +975,7 @@ angular
 									.post(
 											"api/testcase/"
 													+ $scope.selectedTP.id
-													+ "/import",
+													+ "/import/nist",
 											fd,
 											{
 												transformRequest : angular.identity,
@@ -985,10 +987,65 @@ angular
 											function(data) {
 												console.log(data);
 												if (data.status) {
-													$scope
-															.sanitizeTestCase(data.imported);
-													$scope.selectedTP.testCases
-															.push(data.imported);
+													$scope.sanitizeTestCase(data.imported);
+													$scope.selectedTP.testCases.push(data.imported);
+												} else {
+													Notification
+															.error({
+																message : "Error While Importing",
+																delay : 1000
+															});
+												}
+
+												$scope.sfile = "browse";
+												$scope.sfileO = null;
+											}).error(function(data) {
+										Notification.error({
+											message : "Error While Importing",
+											delay : 1000
+										});
+										$scope.sfile = "browse";
+										$scope.sfileO = null;
+									});
+						}
+					};
+					
+					$scope.upload = function(){
+						if($scope.exportType === 'NIST'){
+							$scope.uploadNIST();
+						}
+						else {
+							$scope.uploadCDC();
+						}
+					};
+					
+					$scope.uploadCDC = function() {
+						if ($scope.sfileO != null && !$scope.fileErr) {
+
+							var fd = new FormData();
+							fd.append("file", $scope.sfileO);
+							fd.append('config', new Blob([JSON.stringify($scope.exportCDC)], {
+							    type: "application/json"
+							}));
+							$http.post(
+											"api/testcase/"
+													+ $scope.selectedTP.id
+													+ "/import/cdc",
+											fd,
+											{
+												transformRequest : angular.identity,
+												headers : {
+													'Content-Type' : undefined
+												}
+											})
+									.success(
+											function(data) {
+												console.log(data);
+												if (data.status) {
+													for(var i in data.testCases){
+														$scope.sanitizeTestCase(data.testCases[i]);
+														$scope.selectedTP.testCases.push(data.testCases[i]);
+													}
 												} else {
 													Notification
 															.error({
@@ -1056,7 +1113,6 @@ angular
 					};
 
 					// --------------------------------------------------------------------------------------------------------
-
 					
 					$scope.initTestCases = function() {
 						$scope.loadTestCases();
@@ -1071,15 +1127,15 @@ angular
 						$scope.loading = true;
 
 						$http.get('api/vaccines').then(
-								function(response) {
-									$scope.AllVaccines = angular.fromJson(response.data);
-									$scope.loading = false;
-									delay.resolve(true);
-								}, function(error) {
-									$scope.loading = false;
-									$scope.error = error.data;
-									delay.reject(false);
-								});
+							function(response) {
+								$scope.AllVaccines = angular.fromJson(response.data);
+								$scope.loading = false;
+								delay.resolve(true);
+							}, function(error) {
+								$scope.loading = false;
+								$scope.error = error.data;
+								delay.reject(false);
+						});
 					};
 
 					$scope.confirmDeleteTestPlan = function(testplan) {
@@ -1153,13 +1209,14 @@ angular
 							return _tc;
 						}
 					};
-
+                    // TestObjectSynchronize
 					$scope.saveTC = function(tp, tc, id) {
 						var deferred = $q.defer();
 						if (tc === null) {
 							deferred.resolve(false);
 						} else {
 							if(TestObjectUtil.isLocal(tp)){
+								console.log("TP is Local => Save TP");
 								return $scope.saveTP(tp);
 							}
 							console.log("DIRECT SAVE");
@@ -1175,7 +1232,7 @@ angular
 								var i = TestObjectUtil.index(tp.testCases,"id",id);
 								TestObjectUtil.synchronize(id,tp.testCases,newTC);
 								tc = newTC;
-
+								//$scope.selectTC(newTC);
 								deferred.resolve({
 									status : true,
 									id : i
@@ -1190,6 +1247,33 @@ angular
 						}
 						return deferred.promise;
 					};
+
+                    $scope.saveTPOnly = function(tp) {
+                        var deferred = $q.defer();
+                        var _tp = JSON.parse(JSON.stringify(tp));
+                        var id = _tp.id;
+                        if(TestObjectUtil.isLocal(_tp)){
+                            delete _tp.id;
+                        }
+                        delete _tp.testCases;
+                        TestObjectUtil.cleanObject(_tp,new RegExp("^_.*"));
+                        $http.post('api/testplan/save', _tp).then(function(response) {
+								var newTP = response.data;
+								TestObjectUtil.sanitizeDates(newTP);
+								TestObjectUtil.sanitizeEvents(newTP);
+								TestObjectUtil.synchronize(id,$scope.tps,newTP);
+								tp = newTP;
+								$scope.selectTP(newTP);
+								deferred.resolve({
+									status : true
+								});
+							},
+							function(error) {
+                        		deferred.resolve({
+									status : false
+								});
+                        });
+                    };
 
 					$scope.saveTP = function(tp) {
 						var deferred = $q.defer();
@@ -1214,18 +1298,20 @@ angular
 							if(TestObjectUtil.isLocal(_tp)){
 								delete _tp.id;
 							}
-							TestObjectUtil.cleanObject(_tp,new RegExp("^_.*"));
+                            TestObjectUtil.cleanObject(_tp,new RegExp("^_.*"));
 							console.log("DIRECT SAVE");
 							console.log(_tp);
 							$http.post('api/testplan/save', _tp)
 							.then(function(response) {
-								tp.changed = false;
+
 								var newTP = response.data;
+								for(var tc in newTP.testCases){
+									TestObjectUtil.sanitizeEvents(newTP.testCases[tc]);
+								}
 								TestObjectUtil.sanitizeDates(newTP);
-								TestObjectUtil.sanitizeEvents(newTP);
 								TestObjectUtil.synchronize(id,$scope.tps,newTP);
 								tp = newTP;
-								
+								$scope.selectTP(newTP);
 								deferred.resolve({
 									status : true
 								});
@@ -1246,68 +1332,112 @@ angular
 						if ($scope.aTPisSelected() && !$scope.aTCisSelected()) {
 							console.log("Saving");
 							console.log($scope.selectedTP);
-							$scope.saveTP($scope.selectedTP)
-							.then(function(response) {
-								if (response.status) {
-									Notification.success({
-										message : "Test Plan Saved",
-										delay : 1000
-									});
-								} else {
-									Notification.error({
-										message : "Error Saving",
-										delay : 1000
-									});
-								}
-							}, 
-							function(error) {
-								Notification.error({
-									message : "Error Saving",
-									delay : 1000
-								});
-							});
+
+                            TestObjectSynchronize.syncTP($scope.tps,$scope.selectedTP).then(
+                                function (result) {
+                                    Notification.success({
+                                        message : result.message,
+                                        delay : 1000
+                                    });
+                                },
+                                function (result) {
+                                    Notification.error({
+                                        message : result.message,
+                                        delay : 1000
+                                    });
+                                }
+                            );
+							// $scope.saveTP($scope.selectedTP)
+							// .then(function(response) {
+							// 	if (response.status) {
+							// 		Notification.success({
+							// 			message : "Test Plan Saved",
+							// 			delay : 1000
+							// 		});
+							// 	} else {
+							// 		Notification.error({
+							// 			message : "Error Saving",
+							// 			delay : 1000
+							// 		});
+							// 	}
+							// },
+							// function(error) {
+							// 	Notification.error({
+							// 		message : "Error Saving",
+							// 		delay : 1000
+							// 	});
+							// });
 							
 						} else if ($scope.aTCisSelected()) {
 							console.log("Saving");
 							console.log($scope.selectedTC);
-							var tc = $scope.saveableTC($scope.selectedTC);
-							if (tc !== null) {
-								$scope.saveTC($scope.selectedTP, tc , $scope.selectedTC.id)
-								.then(function(response) {
-									console.log(response);
-									if (response.status) {
-										Notification
-										.success({
-											message : "Test Case Saved",
-											delay : 1000
-										});
-										$scope.selectTC($scope.selectedTP.testCases[response.id]);
-									} 
-									else {
-										Notification
-										.error({
-											message : "Error Saving",
-											delay : 1000
-										});
-									}
-								},
-								function(error) {
-									Notification
-									.error({
-										message : "Error Saving",
+
+							//------ Validation
+                            var obj = $scope.validateTC($scope.selectedTC);
+                            var validation = {};
+                            if (obj.errorMessages.length > 0 || obj.within.length > 0) {
+                                validation.saveable = false;
+                                validation.errors = ["ER1","ER2"];
+                            }
+                            else {
+                                validation.saveable = true;
+							}
+							//------- Validation
+
+                            TestObjectSynchronize.syncTC($scope.tps, $scope.selectedTP, $scope.selectedTC, validation).then(
+                            	function (result) {
+                            		$scope.selectTC(result.tc);
+									Notification.success({
+										message : result.message,
 										delay : 1000
 									});
-								});
-							}
+                                },
+                                function (result) {
+
+                            		if(result.hasOwnProperty("errors")){
+                                        $scope.control.error.isSet = true;
+									}
+                                    Notification.error({
+                                        message : result.message,
+                                        delay : 1000
+                                    });
+                                }
+							);
+							// if (tc !== null) {
+							// 	$scope.saveTC($scope.selectedTP, tc , $scope.selectedTC.id)
+							// 	.then(function(response) {
+							// 		console.log(response);
+							// 		if (response.status) {
+							// 			Notification
+							// 			.success({
+							// 				message : "Test Case Saved",
+							// 				delay : 1000
+							// 			});
+							// 			$scope.selectTC($scope.selectedTP.testCases[response.id]);
+							// 		}
+							// 		else {
+							// 			Notification
+							// 			.error({
+							// 				message : "Error Saving",
+							// 				delay : 1000
+							// 			});
+							// 		}
+							// 	},
+							// 	function(error) {
+							// 		Notification
+							// 		.error({
+							// 			message : "Error Saving",
+							// 			delay : 1000
+							// 		});
+							// 	});
+							// }
 						}
 					};
 
-					
-					
 				});
 
 angular.module('tcl').controller('ConfirmTestPlanDeleteCtrl',
-	function($scope, $modalInstance, testplanToDelete, tps, $http) {
+	function($scope, $uibModalInstance, testplanToDelete, tps, $http) {
 		$scope.testplanToDelete = testplanToDelete;
 		$scope.loading = false;
 		$scope.deleteTestPlan = function() {
@@ -1330,12 +1460,12 @@ angular.module('tcl').controller('ConfirmTestPlanDeleteCtrl',
 					$rootScope.msg().show = true;
 					$rootScope.manualHandle = true;
 					$scope.loading = false;
-					$modalInstance.close();
+					$uibModalInstance.dismiss('cancel');
 				},
 				function(error) {
 					$scope.error = error;
 					$scope.loading = false;
-					$modalInstance.dismiss('cancel');
+                    $uibModalInstance.dismiss('cancel');
 					$rootScope.msg().text = "testplanDeleteFailed";
 					$rootScope.msg().type = "danger";
 					$rootScope.msg().show = true;
@@ -1353,7 +1483,7 @@ angular.module('tcl').controller('ConfirmTestPlanDeleteCtrl',
 		};
 
 		$scope.cancel = function() {
-			$modalInstance.dismiss('cancel');
+            $uibModalInstance.dismiss('cancel');
 		};
 });
 
@@ -1395,11 +1525,13 @@ angular.module('tcl').controller('VaccineBrowseCtrl',
 			
 			$scope.zoom = function(mp){
 				$scope.generic = false;
+				$scope.searchtxt = "";
 				$scope.selectedMapping = mp;
 			};
 			
 			$scope.unzoom = function(){
 				$scope.generic = true;
+				$scope.searchtxt = "";
 				$scope.selectedMapping = {};
 			};
 			
@@ -1493,5 +1625,9 @@ angular.module('tcl').controller('VaccineBrowseCtrl',
 				var v = JSON.parse(JSON.stringify(x));
 				$uibModalInstance.close(v);
 			};
-
+			
+			$scope.vxdataChange = function(){
+				$scope.pcG = 1;
+				$scope.pcS = 1;
+			};
 	});

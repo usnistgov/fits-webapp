@@ -87,14 +87,24 @@ multiselect button:after {
 }
 
 #wrapper {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  margin: 0 auto;
-  background: white;
-  color: black;
-  box-shadow: 0 0 6px #021a4c;
-  background-color: #fafafa;
+	position: relative;
+	width: 100%;
+	height: 100%;
+	margin: 0 auto;
+	background: white;
+	color: black;
+	background-color: #fafafa;
+	border:0px;
+}
+
+.fill { 
+    min-height: 100%;
+    height: 100%;
+}
+
+.panel-resizable {
+	resize: vertical;
+    overflow: auto
 }
 
 #header-wrap {
@@ -103,9 +113,8 @@ multiselect button:after {
 }
 
 #appcontainer {
-  border: 1px;
-  border-color: #000000;
-  min-height: 500px;
+	border: 0px;
+	min-height: 500px;
 }
 
 #testplan-header {

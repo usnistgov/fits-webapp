@@ -131,6 +131,10 @@ angular.module('tcl').factory('TestObjectUtil', function () {
 			isLocal : function(obj){
 				return obj.hasOwnProperty("id") ? (typeof obj.id === 'string' ? true : false ) : true; 
 			},
+
+			isLocalID : function(id){
+            	return typeof id === 'string' ? true : false;
+        	},
 			
 			generateUID : function(){
 				var d = new Date().getTime();
@@ -253,6 +257,126 @@ angular.module('tcl').factory('TestObjectFactory', function (TestObjectUtil) {
 				return eval;
 			}
 			
-	}
+	};
 	return testObjectService;
+});
+
+angular.module('tcl').factory('TestObjectSynchronize', function ($q, $http,TestObjectUtil) {
+    var TestObjectSynchronize = {
+    	syncTC : function(tps, tp,tc, _validation){
+            var deferred = $q.defer();
+            // var _validation = TestObjectValidation.validateTC(tc);
+
+            if(TestObjectUtil.isLocal(tp)){
+                console.log("Cannot Save, Local TP, Must Save");
+                TestObjectSynchronize.syncTP(tps,tp).then(
+                	function(response){
+                        TestObjectSynchronize.syncTC(tps, response.tp, tc, _validation).then(
+                        	function (response) {
+                                deferred.resolve(response);
+                            },
+                            function (response) {
+                                deferred.reject(response);
+                            }
+						);
+					},
+                    function(response){
+                        deferred.reject(response);
+                    }
+				);// deferred.reject({ status : false, message : 'Cannot Save TestCase, please save the TestPlan before saving TestCase'})
+                return deferred.promise;
+            }
+
+            if(_validation.saveable){
+            	var id = tc.id;
+            	var _tc = TestObjectSynchronize.prepare(tc);
+                $http.post('api/testcase/' + tp.id + '/save', _tc).then(
+                	function(response){
+                        var newTC = response.data;
+                        TestObjectUtil.sanitizeDates(newTC);
+                        TestObjectUtil.sanitizeEvents(newTC);
+                        TestObjectUtil.synchronize(id,tp.testCases,newTC);
+
+                        deferred.resolve({
+                            status : true,
+                            message : "TestCase Saved",
+							tc : newTC
+                        });
+					},
+                    function(response){
+                        deferred.reject({
+                            status : false,
+                            message : "Error While Saving TestCase"
+                        });
+                    }
+				);
+			}
+			else {
+                deferred.reject({
+                    status : false,
+                    message : "TestCase Contains Errors, please fix them and try again",
+					errors : _validation.errors
+                });
+			}
+			return deferred.promise;
+		},
+		syncTP : function (tps,tp) {
+            var deferred = $q.defer();
+            var _tp = JSON.parse(JSON.stringify(tp));
+            delete _tp.testCases;
+            var id = _tp.id;
+            if(TestObjectUtil.isLocal(_tp)){
+                delete _tp.id;
+            }
+            TestObjectUtil.cleanObject(_tp,new RegExp("^_.*"));
+            $http.post('api/testplan/partial/save', _tp).then(
+				function(response){
+                    var newTP = response.data;
+                    for(var tc in newTP.testCases){
+                        TestObjectUtil.sanitizeEvents(newTP.testCases[tc]);
+                    }
+                    TestObjectUtil.sanitizeDates(newTP);
+                    TestObjectUtil.synchronize(id,tps,newTP);
+                    TestObjectSynchronize.mergeTP(tp,newTP);
+                    deferred.resolve({
+                        status : true,
+						tp : tp,
+						message : "TestPlan Saved"
+                    });
+				},
+				function(response){
+					deferred.reject({
+						status : false,
+						message : "Error While Saving TestPlan"
+					});
+				}
+			);
+
+            return deferred.promise;
+        },
+		mergeTP : function(local,remote){
+    		local.id = remote.id;
+    		local.name = remote.name;
+    		local.description = remote.description;
+    		local.metaData = remote.metaData;
+
+    		for(var tc in remote.testCases){
+    			var i = TestObjectUtil.index(local.testCases,"id",remote.testCases[tc].id);
+				local.testCases[i] = remote.testCases[tc];
+			}
+		},
+		prepare : function(tc){
+            var _tc = JSON.parse(JSON.stringify(tc));
+            if (_tc.hasOwnProperty("position")) {
+                delete _tc.position;
+            }
+            if(TestObjectUtil.isLocal(_tc)){
+                delete _tc.id;
+            }
+            TestObjectUtil.cleanDates(_tc);
+            TestObjectUtil.cleanObject(_tc,new RegExp("^_.*"));
+            return _tc;
+		}
+    };
+    return TestObjectSynchronize;
 });

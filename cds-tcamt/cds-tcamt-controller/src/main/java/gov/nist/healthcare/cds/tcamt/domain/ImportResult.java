@@ -1,20 +1,21 @@
 package gov.nist.healthcare.cds.tcamt.domain;
 
 import gov.nist.healthcare.cds.domain.TestCase;
-import gov.nist.healthcare.cds.domain.xml.XMLError;
+import gov.nist.healthcare.cds.domain.xml.ErrorModel;
 
 import java.util.List;
 
 public class ImportResult {
-	private List<XMLError> errors;
+	private List<ErrorModel> errors;
 	private boolean status;
 	private List<String> messages;
 	private TestCase imported;
+	private List<TestCase> testCases;
 	
-	public List<XMLError> getErrors() {
+	public List<ErrorModel> getErrors() {
 		return errors;
 	}
-	public void setErrors(List<XMLError> errors) {
+	public void setErrors(List<ErrorModel> errors) {
 		this.errors = errors;
 	}
 	public boolean isStatus() {
@@ -34,6 +35,12 @@ public class ImportResult {
 	}
 	public void setImported(TestCase imported) {
 		this.imported = imported;
+	}
+	public List<TestCase> getTestCases() {
+		return testCases;
+	}
+	public void setTestCases(List<TestCase> testCases) {
+		this.testCases = testCases;
 	}
 	
 	

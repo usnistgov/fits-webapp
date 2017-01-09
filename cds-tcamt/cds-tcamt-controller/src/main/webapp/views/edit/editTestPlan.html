@@ -6,7 +6,7 @@
 	} else {
 		top.location = self.location;
 	}</script> <script type="text/ng-template" id="EditTestPlanMetadata.html"><md-content>
-		<md-tabs md-dynamic-height md-border-bottom>
+		<md-tabs md-selected="selectedTabTC" md-dynamic-height md-border-bottom>
 			<md-tab label="Test Case Information">
 				<md-content class="md-padding">         
 					<form name="testplanMetaDataForm" class="form-horizontal" novalidate>
@@ -154,7 +154,8 @@
 					<h3>Vaccination History and Expected Evaluations</h3>
 					<table class="table table-condensed table-striped table-bordered" ng-repeat="event in selectedTC.events track by $index">
 						<tr>
-							<td colspan=2 style="color : blue;"><strong>{{$index + 1}} - {{event.vaccination.administred.name}} # {{event.vaccination.administred.cvx}}</strong></td>
+							<td ng-show="event.vaccination.administred.discriminator === 'generic'" colspan=2 style="color : blue;"><strong>{{$index + 1}} - {{event.vaccination.administred.name}} # {{event.vaccination.administred.cvx}}</strong></td>
+							<td ng-show="event.vaccination.administred.discriminator === 'specific'" colspan=2 style="color : blue;"><strong>{{$index + 1}} - {{event.vaccination.administred.name}} - </strong>{{getMapping(event.vaccination.administred).vx.name}} <strong># {{getMapping(event.vaccination.administred).vx.cvx}} - {{event.vaccination.administred.mx.mvx}}</strong></td>
 						</tr>
 						<tr>
 							<td style="width : 200px;"><strong> Date Administred </strong></td>

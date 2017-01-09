@@ -9,7 +9,18 @@
         top.location = self.location;
     }
 </script>
-<div class="row">
+<!-- <div class="row"> -->
+<!-- <ul> -->
+<!-- <li ng-repeat=" i in ::it "><strong>{{i.x}}</strong> -->
+<!-- <button ng-click="editT(i)"> -->
+<!-- Edit -->
+<!-- </button> -->
+<!-- </li> -->
+<!-- </ul> -->
+
+<!-- <button ng-click="addT()"> -->
+<!-- ADD -->
+<!-- </button> -->
 
     <div ng-hide="loading">
         <div class="col-md-12">
@@ -26,7 +37,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr ng-repeat="row in tmpTps | orderBy:'lastUpdateDate'">
+                        <tr ng-repeat="row in tmpTps track by $index">
                             <td st-ratio="5">{{$index + 1}}</td>
                             <td st-ratio="20" ng-bind="row.name"></td>
                             <td st-ratio="30" ng-bind="row.description"></td>
