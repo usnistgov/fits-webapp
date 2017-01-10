@@ -56,20 +56,22 @@ body {
 								<div class="col-md-6">
 									<md-input-container style="width: 100%;" ng-init="exportType = 'NIST'">
 										<label>Format Type</label>
-										<md-select name="sl" id="sl" ng-model="exportType"> 
+										<md-select ng-model="export.type" ng-change="typeChange();">
 											<md-option ng-value="'NIST'">NIST</md-option>
 											<md-option ng-value="'CDC'">CDC SpreadSheet</md-option>
  										</md-select>
 									</md-input-container>
 								</div>
 								<div class="col-md-6">
-									<div class="btn btn-primary" style="width : 100%">
+									<div class="btn" ng-class="{'btn-info' : sfileO === null && !fileErr, 'btn-success' : !fileErr && sfileO !== null, 'btn-danger' : fileErr}" style="width : 100%">
 										<i class="fa fa-file pull-left" aria-hidden="true"></i>
-										<span>{{sfile}}</span> 
+										<!--<span ng-show="sfileO === null && !fileErr">{{sfile}}</span>-->
+										<!--<span ng-show="fileErr" style="color : rgb(252, 148, 148);">{{sfile}}</span>-->
+										<span>{{sfile}}</span>
 										<input type="file" class="upload" onchange="angular.element(this).scope().fileChange(this.files)"/>
 									</div>
 								</div>
-								<div class="col-md-12" ng-show="exportType === 'CDC'">
+								<div class="col-md-12" ng-show="export.type === 'CDC'">
 									<md-radio-group class="col-md-6" ng-model="exportCDC.all">
 										<md-radio-button ng-value="true">Import All</md-radio-button>
       									<md-radio-button ng-value="false">Select TestCases</md-radio-button>
@@ -99,7 +101,7 @@ body {
 							</div>
 							<div class="col-md-12">
 								<div class="col-md-3">
-									<button ng-click="upload()" class="btn btn-info" style="width : 100%">Import</button>
+									<button ng-show="!fileErr && sfileO !== null" ng-click="upload()" class="btn btn-info" style="width : 100%">Import</button>
 								</div>
 							</div>
 						</div>
@@ -108,4 +110,10 @@ body {
 			</md-tab>
 		</md-tabs>
 	</md-content>
+</script>
+<script type="text/ng-template" id="ImportLoading.html">
+	<div layout="column" layout-align="center center" style="padding : 10px;">
+		<img src="images/import.gif" />
+		<span>Please wait while we are importing TestCases</span>
+	</div>
 </script>

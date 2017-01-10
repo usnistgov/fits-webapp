@@ -23,7 +23,8 @@
 <!-- </button> -->
 
     <div ng-hide="loading">
-        <div class="col-md-12">
+        <span class="col-md-12" ng-show="tps.length === 0" >No TestPlan created yet.</span>
+        <div ng-show="tps.length !== 0" class="col-md-12">
             <div ng-show="error === null">
                 <table st-table="tmpTps" st-safe-src="tps" class="smart-table table table-striped table-bordered">
                     <thead>

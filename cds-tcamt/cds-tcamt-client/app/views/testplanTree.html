@@ -30,7 +30,7 @@ body {
 				</div>
 			</div>
 			<ol ui-tree-nodes="" ng-model="tp.testCases">
-				<li ng-repeat="tc in tp.testCases | filter:tcSearch.name track by $index" ui-tree-node ng-hide="$parentNodeScope.collapsed">
+				<li ng-repeat="tc in tp.testCases | testcase:tcSearch track by $index" ui-tree-node ng-hide="$parentNodeScope.collapsed">
 					<div ng-click="selectTC(tc)" ui-tree-handle ng-class="{selected1 : isSelectedTC(tc)}"
 					context-menu="tcCM" model="$index">
 						<div style="margin-left: 5px;">

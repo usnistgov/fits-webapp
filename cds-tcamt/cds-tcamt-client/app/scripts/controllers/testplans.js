@@ -63,6 +63,17 @@ angular.module('tcl').filter('unspecified', function () {
 	  };
 });
 
+angular.module('tcl').filter('testcase', function () {
+    return function (items,str) {
+        if (!items || !items.length) { return; }
+        return items.filter(function (item) {
+            if(!str || str === "") return true;
+            var s = str.toLowerCase();
+            return item.name.toLowerCase().includes(s);
+        });
+    };
+});
+
 angular.module('tcl').filter('vxgroup', function () {
 	
 	return function(items,groups){
@@ -141,6 +152,8 @@ angular
 					
 					// ------------------------------------------------------------------------------------------
 					// CDSI TCAMT
+					$scope.importing = false;
+                    $scope.impDiag = null;
 					$scope.selectedEvent = null;
 					$scope.selectedForecast = null;
 					$scope.selectedTP = null;
@@ -153,8 +166,9 @@ angular
 					$scope.serieStatus = [];
 					$scope.gender = [];
                     $scope.selectedTabTC = 0;
-                    $scope.tcSearch = {
-                    	name : ""
+                    $scope.tcSearch = "";
+                    $scope.export = {
+                    	type : 'NIST'
 					};
 					$scope.control = {
 						error : {
@@ -163,7 +177,18 @@ angular
 							obj : null,
 						}
 					};
-					
+					$scope.excelmime = [
+                        "application/vnd.ms-excel",
+                        "application/msexcel",
+                        "application/x-msexcel",
+                        "application/x-ms-excel",
+                        "application/x-excel",
+                        "application/x-dos_ms_excel",
+                        "application/xls",
+                        "application/x-xls",
+                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+					];
+
 					$scope.valueForEnum = function(code,enumList){
 						for(var i in enumList){
 							if(enumList[i].code === code){
@@ -248,7 +273,6 @@ angular
 					$scope.loadTestCases = function() {
 						var delay = $q.defer();
 						$scope.error = null;
-						$scope.loading = true;
 
 						$http.get('api/testplans')
 						.then(
@@ -261,13 +285,12 @@ angular
 								}
 							}
 							delay.resolve(true);
-							$scope.loading = false;
 						}, 
 						function(error) {
-							$scope.loading = false;
 							$scope.error = error.data;
 							delay.reject(false);
 						});
+						return delay.promise;
 					};
 
 					$scope.selectEvent = function(e) {
@@ -946,20 +969,37 @@ angular
 					
 					$scope.fileChange = function(files) {
 						console.log("change");
-//						if (files[0].type === "text/xml") {
-							$scope.$apply(function() {
-								$scope.sfile = files[0].name;
-								$scope.fileErr = false;
-								$scope.sfileO = files[0];
-							});
-
-//						} else {
-//							console.log("in selected not xml");
-//							$scope.$apply(function() {
-//								$scope.sfile = "File should be XML";
-//								$scope.fileErr = true;
-//							});
-//						}
+                        console.log(files[0].type);
+						if($scope.export.type === 'NIST') {
+							if(files[0].type === "text/xml") {
+                                $scope.$apply(function () {
+                                    $scope.sfile = files[0].name;
+                                    $scope.fileErr = false;
+                                    $scope.sfileO = files[0];
+                                });
+                            }
+                            else {
+                                $scope.$apply(function() {
+                                    $scope.sfile = "File should be XML";
+                                    $scope.fileErr = true;
+                                });
+							}
+						}
+						else {
+                            if (~$scope.excelmime.indexOf(files[0].type)) {
+                                $scope.$apply(function () {
+                                    $scope.sfile = files[0].name;
+                                    $scope.fileErr = false;
+                                    $scope.sfileO = files[0];
+                                });
+                            }
+                            else {
+                                $scope.$apply(function() {
+                                    $scope.sfile = "File should be Excel Spreadsheet";
+                                    $scope.fileErr = true;
+                                });
+                            }
+						}
 					};
 					
 					$scope.sanitizeTestCase = function(tc){
@@ -969,6 +1009,7 @@ angular
 					
 					$scope.uploadNIST = function() {
 						if ($scope.sfileO != null && !$scope.fileErr) {
+                            $scope.importing = true;
 							var fd = new FormData();
 							fd.append("file", $scope.sfileO);
 							$http
@@ -989,7 +1030,14 @@ angular
 												if (data.status) {
 													$scope.sanitizeTestCase(data.imported);
 													$scope.selectedTP.testCases.push(data.imported);
+                                                    $scope.importing = false;
+                                                    Notification
+                                                        .success({
+                                                            message : "TestCase Imported",
+                                                            delay : 1000
+                                                        });
 												} else {
+                                                    $scope.importing = false;
 													Notification
 															.error({
 																message : "Error While Importing",
@@ -999,7 +1047,9 @@ angular
 
 												$scope.sfile = "browse";
 												$scope.sfileO = null;
+
 											}).error(function(data) {
+                                		$scope.importing = false;
 										Notification.error({
 											message : "Error While Importing",
 											delay : 1000
@@ -1009,19 +1059,46 @@ angular
 									});
 						}
 					};
+
+                    $scope.$watch('importing', function (newValue, oldValue) {
+                        if(newValue === false){
+                            $scope.impDiag.close({});
+                        }
+                        else if(newValue === true){
+                            $scope.impDiag = $modal.open({
+                                templateUrl : 'ImportLoading.html',
+                                controller : 'ConfirmTestPlanDeleteCtrl',
+                                resolve : {
+                                    testplanToDelete : function() {
+                                        return null;
+                                    },
+                                    tps : function() {
+                                        return $scope.tps;
+                                    }
+                                }
+                            });
+						}
+                    });
+
+                    $scope.typeChange = function(){
+                        $scope.sfile = "browse";
+                        $scope.sfileO = null;
+                        $scope.fileErr = false;
+                    };
 					
 					$scope.upload = function(){
-						if($scope.exportType === 'NIST'){
+						console.log($scope.export.type);
+						if($scope.export.type === 'NIST'){
 							$scope.uploadNIST();
 						}
 						else {
-							$scope.uploadCDC();
-						}
+                            $scope.uploadCDC();
+                        }
 					};
 					
 					$scope.uploadCDC = function() {
 						if ($scope.sfileO != null && !$scope.fileErr) {
-
+                            $scope.importing = true;
 							var fd = new FormData();
 							fd.append("file", $scope.sfileO);
 							fd.append('config', new Blob([JSON.stringify($scope.exportCDC)], {
@@ -1046,6 +1123,11 @@ angular
 														$scope.sanitizeTestCase(data.testCases[i]);
 														$scope.selectedTP.testCases.push(data.testCases[i]);
 													}
+                                                    Notification
+                                                        .success({
+                                                            message : "TestCases Imported",
+                                                            delay : 1000
+                                                        });
 												} else {
 													Notification
 															.error({
@@ -1056,7 +1138,9 @@ angular
 
 												$scope.sfile = "browse";
 												$scope.sfileO = null;
+                                                $scope.importing = false;
 											}).error(function(data) {
+                                		$scope.importing = false;
 										Notification.error({
 											message : "Error While Importing",
 											delay : 1000
@@ -1115,8 +1199,12 @@ angular
 					// --------------------------------------------------------------------------------------------------------
 					
 					$scope.initTestCases = function() {
-						$scope.loadTestCases();
-						$scope.loadVaccines();
+						$scope.loading = true;
+						$scope.loadTestCases().then(function (resp) {
+                                $scope.loadVaccines().then(function (resp) {
+                                    $scope.loading = false;
+                                });
+                        });
 						$scope.initEnums();
 					};
 
@@ -1124,18 +1212,16 @@ angular
 						var delay = $q.defer();
 						$scope.error = null;
 						$scope.AllVaccines = [];
-						$scope.loading = true;
 
 						$http.get('api/vaccines').then(
 							function(response) {
 								$scope.AllVaccines = angular.fromJson(response.data);
-								$scope.loading = false;
 								delay.resolve(true);
 							}, function(error) {
-								$scope.loading = false;
 								$scope.error = error.data;
 								delay.reject(false);
 						});
+						return delay.promise;
 					};
 
 					$scope.confirmDeleteTestPlan = function(testplan) {
@@ -1378,6 +1464,7 @@ angular
                             if (obj.errorMessages.length > 0 || obj.within.length > 0) {
                                 validation.saveable = false;
                                 validation.errors = ["ER1","ER2"];
+                                console.log(obj);
                             }
                             else {
                                 validation.saveable = true;

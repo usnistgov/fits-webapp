@@ -37,12 +37,12 @@ body {
 					<div class="col-md-offset-2 col-md-7" style="padding: 0;">
 						<div class="input-group" style="width : 100%;">
 							<span class="input-group-addon"  style="background-color: rgb(240, 240, 240);" id="basic-addon1"><i class="fa fa-search" aria-hidden="true"></i></span>
-							<input type="text" class="form-control" ng-model="tcSearch.name" ng-model-options="{ updateOn: 'blur' }" style="padding-left: 10px; background-color: white; width : 100%;" placeholder=" Search By TestCase Name"/>
+							<input type="text" class="form-control" ng-model="tcSearch" ng-model-options="{ debounce: 500 }" style="padding-left: 10px; background-color: white; width : 100%;" placeholder=" Search By TestCase Name"/>
 						</div>
 					</div>
 				</div>
-				<div class="panel-body panel-resizable">
-					<div class="toc-container fill">
+				<div class="panel-body panel-resizable" style="height: 400px;">
+					<div style="white-space:nowrap;">
 						<ng-include src="'views/testplanTree.html'" />
 					</div>
 				</div>
@@ -98,7 +98,7 @@ body {
 					</button>
 				</div>
 				<div class="panel-body panel-resizable"
-					style="padding-bottom: 10px; height : 100%; bottom : 0;">
+					style="padding-bottom: 10px; height : 100%; bottom : 0; min-height: 400px;">
 					<div class="col-md-12 fill"
 						ng-show="subview === null||subview===undefined|| !subview">
 						<p>No Element Selected</p>

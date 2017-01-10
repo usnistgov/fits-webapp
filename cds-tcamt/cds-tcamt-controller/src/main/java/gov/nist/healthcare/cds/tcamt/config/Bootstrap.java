@@ -125,142 +125,150 @@ public class Bootstrap {
 		h.setUsername("hossam");
 		h.setPassword("qwerty");
 		accountService.createAdmin(h);
+		Account ai = new Account();
+		ai.setUsername("aira");
+		ai.setPassword("qwerty");
+		accountService.createAdmin(ai);
+		Account c = new Account();
+		c.setUsername("cdc");
+		c.setPassword("qwerty");
+		accountService.createAdmin(c);
 
-//		//TestCase
-		TestCase tc = new TestCase();
-		tc.setName("DTap Age Below Absolute Minimum");
-		tc.setDescription("DTaP #2 at age 10 weeks-5 days");
+////		//TestCase
+//		TestCase tc = new TestCase();
+//		tc.setName("DTap Age Below Absolute Minimum");
+//		tc.setDescription("DTaP #2 at age 10 weeks-5 days");
+////		
+//		SimpleDateFormat dateformat = new SimpleDateFormat("dd/MM/yyyy");
+//		Date birth    = dateformat.parse("26/02/2011");
+//		Date evalDate = dateformat.parse("01/02/2012");
+//		FixedDate eval = new FixedDate();
+//		eval.setDate(evalDate);
+//		tc.setEvalDate(eval);
+//		FixedDate dob = new FixedDate();
+//		dob.setDate(birth);
+////		
+//		//Patient
+//		Patient pt = new Patient();
+//		pt.setDob(dob);
+//		pt.setGender(Gender.F);
 //		
-		SimpleDateFormat dateformat = new SimpleDateFormat("dd/MM/yyyy");
-		Date birth    = dateformat.parse("26/02/2011");
-		Date evalDate = dateformat.parse("01/02/2012");
-		FixedDate eval = new FixedDate();
-		eval.setDate(evalDate);
-		tc.setEvalDate(eval);
-		FixedDate dob = new FixedDate();
-		dob.setDate(birth);
+//		tc.setPatient(pt);
 //		
-		//Patient
-		Patient pt = new Patient();
-		pt.setDob(dob);
-		pt.setGender(Gender.F);
-		
-		tc.setPatient(pt);
-		
-//		//Events
-		VaccinationEvent vcEvent1 = new VaccinationEvent();
-		Date e1d = dateformat.parse("06/04/2011");
-		FixedDate e1do = new FixedDate();
-		e1do.setDate(e1d);
-		vcEvent1.setDate(e1do);
-		vcEvent1.setAdministred(vxRepository.findOne("107"));
-		vcEvent1.setDoseNumber(1);
-		vcEvent1.setType(EventType.VACCINATION);
-		
-		ExpectedEvaluation ee1 = new ExpectedEvaluation();
-		ee1.setRelatedTo(vxRepository.findOne("107"));
-		ee1.setStatus(EvaluationStatus.VALID);
-		
-		vcEvent1.setEvaluations(new HashSet<>(Arrays.asList(ee1)));
-		
-		VaccinationEvent vcEvent2 = new VaccinationEvent();
-		Date e2d = dateformat.parse("02/05/2011");
-		FixedDate e2do = new FixedDate();
-		e2do.setDate(e2d);
-		vcEvent2.setDate(e2do);
-		vcEvent2.setAdministred(vxRepository.findOne("107"));
-		vcEvent2.setDoseNumber(2);
-		vcEvent2.setType(EventType.VACCINATION);
-		
-		ExpectedEvaluation ee2 = new ExpectedEvaluation();
-		ee2.setRelatedTo(vxRepository.findOne("107"));
-		ee2.setStatus(EvaluationStatus.INVALID);
-		ee2.setEvaluationReason("Age too young");
-		vcEvent2.setEvaluations(new HashSet<>(Arrays.asList(ee2)));
-		
-		tc.addEvent(vcEvent1);
-		tc.addEvent(vcEvent2);
-		
-		ExpectedForecast ef = new ExpectedForecast();
-		ef.setDoseNumber(2);
-		ef.setTarget(vxRepository.findOne("107"));
-		ef.setSerieStatus(SerieStatus.O);
-		ef.setForecastReason("Second dose was administed too early");
-		Date earliest = dateformat.parse("30/05/2011");
-		Date recommended = dateformat.parse("26/06/2011");
-		Date pastDue = dateformat.parse("22/08/2011");
-		ef.setEarliest(new FixedDate(earliest));
-		ef.setRecommended(new FixedDate(recommended));
-		ef.setPastDue(new FixedDate(pastDue));
-		
-		tc.setForecast(new HashSet<>(Arrays.asList(ef)));
-		//--------------------
-		//MetaData
-		MetaData md = new MetaData();
-		md.setDateCreated(new FixedDate(new Date()));
-		md.setDateLastUpdated(new FixedDate(new Date()));
-		md.setImported(false);
-		md.setVersion("1");
-		
-		tc.setMetaData(md);
-		
-		String file = getStringFromInputStream(Bootstrap.class.getResourceAsStream("/test.xml"));
-		TestCase t1 = this.importService._import(file);
-		TestCase t2 = this.importService._import(file);
-		TestCase t3 = this.importService._import(file);
-		
-		TestPlan tp = new TestPlan();
-		md = new MetaData();
-		md.setDateCreated(new FixedDate(new Date()));
-		md.setDateLastUpdated(new FixedDate(new Date()));
-		md.setImported(false);
-		md.setVersion("1");
-		tp.setMetaData(md);
-		tp.setDescription("CDS TestCases for CDSi Specification v2");
-		tp.setName("CDC");
-		tp.setUser("hossam");
-		tp.addTestCase(t3);
-		t3.setTestPlan(tp);
-		testPlanRepository.saveAndFlush(tp);
-		tp = new TestPlan();
-		md = new MetaData();
-		md.setDateCreated(new FixedDate(new Date()));
-		md.setDateLastUpdated(new FixedDate(new Date()));
-		md.setImported(false);
-		md.setVersion("1");
-		tp.setMetaData(md);
-		tp.setDescription("CDS TestCases for CDSi Specification v2");
-		tp.setName("CDC");
-		tp.setUser("michael");
-		tp.addTestCase(t1);
-		t1.setTestPlan(tp);
-		testPlanRepository.saveAndFlush(tp);
-		tp = new TestPlan();
-		md = new MetaData();
-		md.setDateCreated(new FixedDate(new Date()));
-		md.setDateLastUpdated(new FixedDate(new Date()));
-		md.setImported(false);
-		md.setVersion("1");
-		tp.setMetaData(md);
-		tp.setDescription("CDS TestCases for CDSi Specification v2");
-		tp.setName("CDC");
-		tp.setUser("robert");
-		tp.addTestCase(t2);
-		t2.setTestPlan(tp);
-		testPlanRepository.saveAndFlush(tp);
-		tp = new TestPlan();
-		md = new MetaData();
-		md.setDateCreated(new FixedDate(new Date()));
-		md.setDateLastUpdated(new FixedDate(new Date()));
-		md.setImported(false);
-		md.setVersion("1");
-		tp.setMetaData(md);
-		tp.setDescription("CDS TestCases for CDSi Specification v2");
-		tp.setName("CDC");
-		tp.addTestCase(tc);
-		tc.setTestPlan(tp);
-		tp.setUser("admin");
-		testPlanRepository.saveAndFlush(tp);
+////		//Events
+//		VaccinationEvent vcEvent1 = new VaccinationEvent();
+//		Date e1d = dateformat.parse("06/04/2011");
+//		FixedDate e1do = new FixedDate();
+//		e1do.setDate(e1d);
+//		vcEvent1.setDate(e1do);
+//		vcEvent1.setAdministred(vxRepository.findOne("107"));
+//		vcEvent1.setDoseNumber(1);
+//		vcEvent1.setType(EventType.VACCINATION);
+//		
+//		ExpectedEvaluation ee1 = new ExpectedEvaluation();
+//		ee1.setRelatedTo(vxRepository.findOne("107"));
+//		ee1.setStatus(EvaluationStatus.VALID);
+//		
+//		vcEvent1.setEvaluations(new HashSet<>(Arrays.asList(ee1)));
+//		
+//		VaccinationEvent vcEvent2 = new VaccinationEvent();
+//		Date e2d = dateformat.parse("02/05/2011");
+//		FixedDate e2do = new FixedDate();
+//		e2do.setDate(e2d);
+//		vcEvent2.setDate(e2do);
+//		vcEvent2.setAdministred(vxRepository.findOne("107"));
+//		vcEvent2.setDoseNumber(2);
+//		vcEvent2.setType(EventType.VACCINATION);
+//		
+//		ExpectedEvaluation ee2 = new ExpectedEvaluation();
+//		ee2.setRelatedTo(vxRepository.findOne("107"));
+//		ee2.setStatus(EvaluationStatus.INVALID);
+//		ee2.setEvaluationReason("Age too young");
+//		vcEvent2.setEvaluations(new HashSet<>(Arrays.asList(ee2)));
+//		
+//		tc.addEvent(vcEvent1);
+//		tc.addEvent(vcEvent2);
+//		
+//		ExpectedForecast ef = new ExpectedForecast();
+//		ef.setDoseNumber(2);
+//		ef.setTarget(vxRepository.findOne("107"));
+//		ef.setSerieStatus(SerieStatus.O);
+//		ef.setForecastReason("Second dose was administed too early");
+//		Date earliest = dateformat.parse("30/05/2011");
+//		Date recommended = dateformat.parse("26/06/2011");
+//		Date pastDue = dateformat.parse("22/08/2011");
+//		ef.setEarliest(new FixedDate(earliest));
+//		ef.setRecommended(new FixedDate(recommended));
+//		ef.setPastDue(new FixedDate(pastDue));
+//		
+//		tc.setForecast(new HashSet<>(Arrays.asList(ef)));
+//		//--------------------
+//		//MetaData
+//		MetaData md = new MetaData();
+//		md.setDateCreated(new FixedDate(new Date()));
+//		md.setDateLastUpdated(new FixedDate(new Date()));
+//		md.setImported(false);
+//		md.setVersion("1");
+//		
+//		tc.setMetaData(md);
+//		
+//		String file = getStringFromInputStream(Bootstrap.class.getResourceAsStream("/test.xml"));
+//		TestCase t1 = this.importService._import(file);
+//		TestCase t2 = this.importService._import(file);
+//		TestCase t3 = this.importService._import(file);
+//		
+//		TestPlan tp = new TestPlan();
+//		md = new MetaData();
+//		md.setDateCreated(new FixedDate(new Date()));
+//		md.setDateLastUpdated(new FixedDate(new Date()));
+//		md.setImported(false);
+//		md.setVersion("1");
+//		tp.setMetaData(md);
+//		tp.setDescription("CDS TestCases for CDSi Specification v2");
+//		tp.setName("CDC");
+//		tp.setUser("hossam");
+//		tp.addTestCase(t3);
+//		t3.setTestPlan(tp);
+//		testPlanRepository.saveAndFlush(tp);
+//		tp = new TestPlan();
+//		md = new MetaData();
+//		md.setDateCreated(new FixedDate(new Date()));
+//		md.setDateLastUpdated(new FixedDate(new Date()));
+//		md.setImported(false);
+//		md.setVersion("1");
+//		tp.setMetaData(md);
+//		tp.setDescription("CDS TestCases for CDSi Specification v2");
+//		tp.setName("CDC");
+//		tp.setUser("michael");
+//		tp.addTestCase(t1);
+//		t1.setTestPlan(tp);
+//		testPlanRepository.saveAndFlush(tp);
+//		tp = new TestPlan();
+//		md = new MetaData();
+//		md.setDateCreated(new FixedDate(new Date()));
+//		md.setDateLastUpdated(new FixedDate(new Date()));
+//		md.setImported(false);
+//		md.setVersion("1");
+//		tp.setMetaData(md);
+//		tp.setDescription("CDS TestCases for CDSi Specification v2");
+//		tp.setName("CDC");
+//		tp.setUser("robert");
+//		tp.addTestCase(t2);
+//		t2.setTestPlan(tp);
+//		testPlanRepository.saveAndFlush(tp);
+//		tp = new TestPlan();
+//		md = new MetaData();
+//		md.setDateCreated(new FixedDate(new Date()));
+//		md.setDateLastUpdated(new FixedDate(new Date()));
+//		md.setImported(false);
+//		md.setVersion("1");
+//		tp.setMetaData(md);
+//		tp.setDescription("CDS TestCases for CDSi Specification v2");
+//		tp.setName("CDC");
+//		tp.addTestCase(tc);
+//		tc.setTestPlan(tp);
+//		tp.setUser("admin");
+//		testPlanRepository.saveAndFlush(tp);
 //		
 //		
 ////		List<TestCase> res = importService.importCDC();

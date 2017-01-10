@@ -125,7 +125,7 @@ public class TestCaseController {
 	@ResponseBody
 	public void export(@PathVariable Long id,@PathVariable String format,HttpServletRequest request, HttpServletResponse response) throws IOException{
 		TestCase tc = testCaseRepository.findOne(id);
-		if(format.equals("nist")){
+		if(format.equals("nist") && tc != null){
 			response.setContentType("text/xml");
 			response.setHeader("Content-disposition", "attachment;filename="+tc.getName().replace(" ", "_")+".xml" );
 			String str = nistFormatService._export(tc);
