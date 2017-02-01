@@ -99,6 +99,9 @@ app.config(function ($routeProvider, RestangularProvider, $httpProvider, Keepali
             templateUrl: 'views/account/userAccount.html',
             controller: 'AccountMgtCtrl'
         })
+        .when('/exec', {
+            templateUrl: 'views/execution.html'
+        })
 //        .when('/account', {
 //            templateUrl: 'views/account/account.html',
 //            controller: 'AccountCtrl',

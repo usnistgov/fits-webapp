@@ -380,3 +380,205 @@ angular.module('tcl').factory('TestObjectSynchronize', function ($q, $http,TestO
     };
     return TestObjectSynchronize;
 });
+
+angular.module('tcl').factory('TestDataService', function ($http,$q,TestObjectUtil) {
+	return {
+		loadTestPlans : function () {
+            var deferred = $q.defer();
+            var tps = [];
+            $http.get('api/testplans').then(
+				function(response) {
+					tps = angular.fromJson(response.data);
+					TestObjectUtil.sanitizeDates(tps);
+					for(var tp in tps){
+						for(var tc in tps[tp].testCases){
+							TestObjectUtil.sanitizeEvents(tps[tp].testCases[tc]);
+						}
+					}
+                    deferred.resolve(tps);
+				},
+				function(error) {
+                    deferred.reject("Failed to load TestPlans");
+				});
+            return deferred.promise;
+        },
+
+		loadEnums : function () {
+            var deferred = $q.defer();
+            var enums = {};
+            $http.get('api/enum/evaluationStatus').then(
+				function(response) {
+                    enums.evalStatus = response.data;
+					$http.get('api/enum/evaluationReason').then(
+						function(response) {
+                            enums.evalReason = response.data;
+							$http.get('api/enum/serieStatus').then(
+								function(response) {
+									enums.serieStatus = response.data;
+									$http.get('api/enum/gender').then(
+										function(response) {
+											enums.gender = response.data;
+											deferred.resolve(enums);
+										},
+										function(error) {
+											deferred.reject("Failed To Load Genders");
+										}
+									);
+								},
+								function(error) {
+									deferred.reject("Failed To Load Serie Status");
+								}
+							);
+						},
+						function(error) {
+                            deferred.reject("Failed To Load Evaluation Reason");
+						}
+					);
+				},
+				function(error) {
+                    deferred.reject("Failed To Load Evaluation Status");
+				}
+			);
+			return deferred.promise;
+        }
+	}
+});
+
+angular.module('tcl').factory('TestObjectSchema', function () {
+	return {
+        config : {
+            ids : {
+                active : true,
+                separator : "-"
+            }
+        },
+        types : {
+        	idType : {
+        		choice : [
+					{
+						id : "N",
+						options : {
+							min : 0
+						},
+						discriminator : function (doc,parent) {
+							return typeof parent.id === "number"
+                        }
+					},
+                    {
+						id : "S",
+                        discriminator : function (doc,parent) {
+                            return typeof parent.id !== "number"
+                        }
+                    }
+				]
+			},
+            date : {
+                id : "O",
+                model : [
+                    {
+                        choice : [
+                            {
+                                key : "fixed",
+								name : "Fixed",
+								id  : "fx",
+                                typeRef : "fixedDate",
+                                usage : "R",
+                                discriminator : function(parent,obj){
+                                    return !parent.hasOwnProperty("relative");
+                                }
+                            },
+                            {
+                                key : "relative",
+                                name : "Relative",
+								id  : "rl",
+                                typeRef : "relativeDate",
+                                usage : "R",
+                                discriminator : function(parent,obj){
+                                    return !parent.hasOwnProperty("fixed");
+                                }
+                            },
+                        ]
+                    }
+                ]
+            },
+
+            fixedDate : {
+				id : "O",
+				model : [
+					{
+						key : "id",
+						id : "id",
+                        name : "ID",
+						typeRef : "idType",
+						usage : "O"
+					},
+                    {
+                        key : "date",
+                        id : "dt",
+                        name : "DateObj",
+						type : {
+                        	id : "N",
+							options : {
+                        		min : 0
+							}
+						},
+                        usage : "R"
+                    }
+				]
+			},
+
+            relativeDate : {
+				id : "O",
+				model : [
+                    {
+                        key : "id",
+                        id : "id",
+                        name : "ID",
+                        typeRef : "idType",
+                        usage : "O"
+                    },
+                    {
+                        key : "relativeTo",
+                        id : "rlt",
+                        name : "Relative To",
+                        type : {
+                        	id : "S",
+							options : {
+                        		min : 5
+							}
+						},
+                        usage : "R"
+                    },
+                    {
+                        key : "years",
+                        id : "y",
+                        name : "Years",
+                        type : {
+                            id : "N"
+                        },
+                        usage : "R"
+                    },
+                    {
+                        key : "months",
+                        id : "m",
+                        name : "Months",
+                        type : {
+                            id : "N"
+                        },
+                        usage : "R"
+                    },
+                    {
+                        key : "days",
+                        id : "d",
+                        name : "days",
+                        type : {
+                            id : "N"
+                        },
+                        usage : "R"
+                    }
+				]
+			}
+
+        }
+    };
+});

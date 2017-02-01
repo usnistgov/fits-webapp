@@ -115,7 +115,7 @@ angular
 						$timeout, userInfoService, ngTreetableParams,
 						$interval, ViewSettings, StorageService, $q,
 						notifications, IgDocumentService, ElementUtils,
-						AutoSaveService, $sce, Notification, TestObjectUtil, TestObjectFactory, VaccineService, TestObjectSynchronize) {
+						AutoSaveService, $sce, Notification, TestObjectUtil, TestObjectFactory, VaccineService, TestObjectSynchronize, TestDataService) {
 					$scope.vxm = [];
 					$scope.loading = false;
 					$scope.selectedTabTP = 0;
@@ -144,9 +144,9 @@ angular
 					$scope.nistStd.nist = false;
 					$scope.nistStd.std = false;
 					$scope.exportCDC = {
-							ignore : true,
+							ignore : false,
 							from : 1,
-							to : 999,
+							to : 1000,
 							all : true
 					};
 					
@@ -220,77 +220,47 @@ angular
 					};
 
 					$scope.initEnums = function(){
-						$http.get('api/enum/evaluationStatus')
-						.then(
-						function(response) {
-							$scope.evalStatus = response.data;
+                        var d = $q.defer();
+                        TestDataService.loadEnums().then(function (data) {
+							for(k in data){
+								if(data.hasOwnProperty(k))
+									$scope[k] = data[k];
+							}
+							d.resolve(true);
 						},
-						function(error) {
-							console.log("error");
+						function (err) {
+							console.log(err);
+                            d.resolve(false);
 						});
-						$http.get('api/enum/evaluationReason')
-						.then(
-						function(response) {
-							$scope.evalReason = response.data;
-						},
-						function(error) {
-							console.log("error");
-						});
-						$http.get('api/enum/serieStatus')
-						.then(
-						function(response) {
-							$scope.serieStatus = response.data;
-						},
-						function(error) {
-							console.log("error");
-						});
-						$http.get('api/enum/gender')
-						.then(
-						function(response) {
-							$scope.gender = response.data;
-						},
-						function(error) {
-							console.log("error");
-						});
-						$http.get('api/vxg')
-						.then(
-						function(response) {
-							$scope.vxgs = response.data;
-						},
-						function(error) {
-							console.log("error");
-						});
-						$http.get('api/vxm')
-						.then(
-						function(response) {
-							$scope.vxm = response.data;
-						},
-						function(error) {
-							console.log("error");
-						});
+                        return d.promise;
 					};
 
-					$scope.loadTestCases = function() {
-						var delay = $q.defer();
-						$scope.error = null;
-
-						$http.get('api/testplans')
-						.then(
-						function(response) {
-							$scope.tps = angular.fromJson(response.data);
-							TestObjectUtil.sanitizeDates($scope.tps);
-							for(var tp in $scope.tps){
-								for(var tc in $scope.tps[tp].testCases){
-									TestObjectUtil.sanitizeEvents($scope.tps[tp].testCases[tc]);
-								}
+                    $scope.loadVaccines = function () {
+                        var d = $q.defer();
+						VaccineService.load().then(function (data) {
+							for(k in data){
+								if(data.hasOwnProperty(k))
+									$scope[k] = data[k];
 							}
-							delay.resolve(true);
-						}, 
-						function(error) {
-							$scope.error = error.data;
-							delay.reject(false);
-						});
-						return delay.promise;
+							d.resolve(true);
+                        },
+						function (err) {
+							console.log(err);
+                            d.resolve(false);
+                        });
+                        return d.promise;
+                    };
+
+					$scope.loadTestCases = function() {
+						var d = $q.defer();
+                        TestDataService.loadTestPlans().then(function (data) {
+                                $scope.tps = data;
+                            	d.resolve(true);
+                        }, function (err) {
+                                console.log(err);
+                                d.resolve(false);
+                        });
+                        return d.promise;
 					};
 
 					$scope.selectEvent = function(e) {
@@ -752,9 +722,6 @@ angular
 						errors.id = id;
 
 						if (fc) {
-							if (!has(fc, "forecastReason"))
-								errors.errorMessages
-										.push("Forecast must have a reason");
 
 							if (!has(fc, "serieStatus"))
 								errors.errorMessages
@@ -926,7 +893,10 @@ angular
 					          function(modelValue) {
 					        	$scope.selectTP($scope.selectedTP);
 					        	$scope.selectedTabTP = 1;
-					        } ] ];
+					        },
+							function () {
+								return !$scope.isLocal($scope.selectedTP);
+                            }] ];
 
 					$scope.tcCM = [
 					         [	'Clone Test Case',
@@ -1200,29 +1170,17 @@ angular
 					
 					$scope.initTestCases = function() {
 						$scope.loading = true;
-						$scope.loadTestCases().then(function (resp) {
-                                $scope.loadVaccines().then(function (resp) {
+						$scope.loadTestCases().then(function (a) {
+                            $scope.initEnums().then(function (b) {
+                                $scope.loadVaccines().then(function (c) {
+                                    console.log($scope.tps);
                                     $scope.loading = false;
+                                    $scope.error = null;
                                 });
+                            });
                         });
-						$scope.initEnums();
 					};
 
-					$scope.loadVaccines = function() {
-						var delay = $q.defer();
-						$scope.error = null;
-						$scope.AllVaccines = [];
-
-						$http.get('api/vaccines').then(
-							function(response) {
-								$scope.AllVaccines = angular.fromJson(response.data);
-								delay.resolve(true);
-							}, function(error) {
-								$scope.error = error.data;
-								delay.reject(false);
-						});
-						return delay.promise;
-					};
 
 					$scope.confirmDeleteTestPlan = function(testplan) {
 						var modalInstance = $modal.open({
@@ -1241,6 +1199,10 @@ angular
 							
 						});
 					};
+
+					$scope.isLocal = function(tp) {
+						return TestObjectUtil.isLocal(tp);
+                    };
 //----					
 					$scope.prefill = function(list,x){
 						var groups = $scope.getGroups(x);
@@ -1416,8 +1378,8 @@ angular
 						$scope.control.error.obj = [];
 
 						if ($scope.aTPisSelected() && !$scope.aTCisSelected()) {
-							console.log("Saving");
-							console.log($scope.selectedTP);
+                            console.log("Saving");
+                            console.log($scope.selectedTP);
 
                             TestObjectSynchronize.syncTP($scope.tps,$scope.selectedTP).then(
                                 function (result) {
@@ -1534,6 +1496,11 @@ angular.module('tcl').controller('ConfirmTestPlanDeleteCtrl',
 				if (~id) {
 					tps.splice(id, 1);
 				}
+                $scope.loading = false;
+                $uibModalInstance.dismiss('cancel');
+                $rootScope.msg().text = "testplanDeleteSuccess";
+                $rootScope.msg().type = "success";
+                $rootScope.msg().show = true;
 			} 
 			else {
 				$http.post('api/testplan/'+ $scope.testplanToDelete.id + '/delete')
@@ -1542,12 +1509,12 @@ angular.module('tcl').controller('ConfirmTestPlanDeleteCtrl',
 					if (~id) {
 						tps.splice(id, 1);
 					}
+
+					$scope.loading = false;
+					$uibModalInstance.dismiss('cancel');
 					$rootScope.msg().text = "testplanDeleteSuccess";
 					$rootScope.msg().type = "success";
 					$rootScope.msg().show = true;
-					$rootScope.manualHandle = true;
-					$scope.loading = false;
-					$uibModalInstance.dismiss('cancel');
 				},
 				function(error) {
 					$scope.error = error;

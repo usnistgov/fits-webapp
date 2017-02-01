@@ -1,4 +1,4 @@
-angular.module('tcl').factory('VaccineService', function () {
+angular.module('tcl').factory('VaccineService', function ($http,$q) {
 	var VaccineService = {
 			getMapping : function(vxm,x){
 				if(!x)
@@ -40,9 +40,30 @@ angular.module('tcl').factory('VaccineService', function () {
 						return vxm[mp].vx;
 				}
 				return null;
-			}
-			
-			
+			},
+
+			load : function () {
+                var deferred = $q.defer();
+                var v = {};
+                $http.get('api/vxg').then(
+					function(response) {
+						v.vxgs = response.data;
+                        $http.get('api/vxm').then(
+							function(response) {
+								v.vxm = response.data;
+								deferred.resolve(v);
+							},
+							function(error) {
+								deferred.reject("Could not load Vaccine Mappings");
+							}
+						);
+					},
+					function(error) {
+                        deferred.reject("Could not load Vaccine Groups");
+					}
+				);
+                return deferred.promise;
+            }
 	};
 	return VaccineService;
 });

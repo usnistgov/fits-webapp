@@ -1,0 +1,140 @@
+<md-content class="md-padding">
+    <h3>General Information</h3>
+    <table class="table table-condensed table-striped table-bordered">
+        <tr>
+            <td colspan=2 style="text-align : center; color : blue;"><strong>Test Case Information</strong></td>
+        </tr>
+        <tr>
+            <td style="width : 200px;"><strong> Name </strong></td>
+            <td>{{selectedTC.name}}</td>
+        </tr>
+        <tr>
+            <td style="width : 200px;"><strong>Description</strong></td>
+            <td>{{selectedTC.description}}</td>
+        </tr>
+        <tr>
+            <td style="width : 200px;"><strong>Assessment Date</strong></td>
+            <td ng-show="selectedTC.evalDate._type === 'fixed'">
+                {{selectedTC.evalDate.fixed.date | date:'MM/dd/yyyy'}}
+            </td>
+            <td ng-show="selectedTC.evalDate._type === 'relative'">
+                {{selectedTC.evalDate.relative.relativeTo}} {{selectedTC.evalDate.relative.year}}y {{selectedTC.evalDate.relative.month}}m {{selectedTC.evalDate.relative.day}}d
+            </td>
+        </tr>
+        <tr>
+            <td colspan=2 style="text-align : center; color : blue;"><strong>MetaData</strong></td>
+        </tr>
+        <tr>
+            <td style="width : 200px;"><strong> Version </strong></td>
+            <td>{{selectedTC.metaData.version}}</td>
+        </tr>
+        <tr>
+            <td style="width : 200px;"><strong> Date Created </strong></td>
+            <td>{{selectedTC.metaData.dateCreated.fixed.date | date:'MM/dd/yyyy'}}</td>
+        </tr>
+        <tr>
+            <td style="width : 200px;"><strong> Date Last Updated </strong></td>
+            <td>{{selectedTC.metaData.dateLastUpdated.fixed.date | date:'MM/dd/yyyy'}}</td>
+        </tr>
+        <tr>
+            <td style="width : 200px;"><strong> Type </strong></td>
+            <td>
+                {{selectedTC.metaData.imported ? 'Imported' : 'Created'}}
+            </td>
+        </tr>
+        <tr>
+            <td colspan=2 style="text-align : center; color : blue;"><strong>Patient</strong></td>
+        </tr>
+        <tr>
+            <td style="width : 200px;"><strong> Gender </strong></td>
+            <td>{{selectedTC.patient.gender === 'F' ? 'Female' : (selectedTC.patient.gender === 'M' ? 'Male' : '') }}</td>
+        </tr>
+        <tr>
+            <td style="width : 200px;"><strong> Date Of Birth </strong></td>
+            <td ng-show="selectedTC.patient.dob._type === 'fixed'">
+                {{selectedTC.patient.dob.fixed.date | date:'MM/dd/yyyy'}}
+            </td>
+            <td ng-show="selectedTC.patient.dob._type === 'relative'">
+                {{selectedTC.patient.dob.relative.relativeTo}} {{selectedTC.patient.dob.relative.year}}y {{selectedTC.patient.dob.relative.month}}m {{selectedTC.patient.dob.relative.day}}d
+            </td>
+        </tr>
+    </table>
+    <h3>Vaccination History and Expected Evaluations</h3>
+    <table class="table table-condensed table-striped table-bordered" ng-repeat="event in selectedTC.events track by $index">
+        <tr>
+            <td ng-show="event.vaccination.administred.discriminator === 'generic'" colspan=2 style="color : blue;"><strong>{{$index + 1}} - {{event.vaccination.administred.name}} # {{event.vaccination.administred.cvx}}</strong></td>
+            <td ng-show="event.vaccination.administred.discriminator === 'specific'" colspan=2 style="color : blue;"><strong>{{$index + 1}} - {{event.vaccination.administred.name}} - </strong>{{getMapping(event.vaccination.administred).vx.name}} <strong># {{getMapping(event.vaccination.administred).vx.cvx}} - {{event.vaccination.administred.mx.mvx}}</strong></td>
+        </tr>
+        <tr>
+            <td style="width : 200px;"><strong> Date Administred </strong></td>
+            <td ng-show="event.vaccination.date._type === 'fixed'">
+                {{event.vaccination.date.fixed.date | date:'MM/dd/yyyy'}}
+            </td>
+            <td ng-show="event.vaccination.date._type === 'relative'">
+                {{event.vaccination.date.relative.relativeTo}} {{event.vaccination.date.relative.year}}y {{event.vaccination.date.relative.month}}m {{event.vaccination.date.relative.day}}d
+            </td>
+        </tr>
+        <tr>
+            <td style="width : 200px;" ><strong> Evaluations </strong></td>
+            <td>
+                <table class="table table-condensed table-striped table-bordered" ng-repeat="eval in event.vaccination.evaluations">
+                    <tr>
+                        <td><strong> Related To </strong></td>
+                        <td><strong> Status </strong></td>
+                        <td><strong> Reason </strong></td>
+                    </tr>
+                    <tr>
+                        <td>{{eval.relatedTo.name}} # {{eval.relatedTo.cvx}}</td>
+                        <td>{{valueForEnum(eval.status,evalStatus)}}</td>
+                        <td>{{valueForEnum(eval.reason,evalReason)}}</td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+    <h3>Expected Forecasts</h3>
+    <table class="table table-condensed table-striped table-bordered" ng-repeat="fc in selectedTC.forecast track by $index">
+        <tr>
+            <td colspan=2 style="color : blue;"><strong>{{fc.target.name}} # {{fc.target.cvx}}</strong></td>
+        </tr>
+        <tr>
+            <td style="width : 200px;" ><strong> Series Status </strong></td>
+            <td>
+                {{valueForEnum(fc.serieStatus,serieStatus)}}
+            </td>
+        </tr>
+        <tr>
+            <td style="width : 200px;"><strong> Reason </strong></td>
+            <td>
+                {{fc.forecastReason}}
+            </td>
+        </tr>
+        <tr>
+            <td style="width : 200px;"><strong> Earliest Date </strong></td>
+            <td ng-show="fc.earliest._type === 'fixed'">
+                {{fc.earliest.fixed.date | date:'MM/dd/yyyy'}}
+            </td>
+            <td ng-show="fc.earliest._type === 'relative'">
+                {{fc.earliest.relative.relativeTo}} {{fc.earliest.relative.year}}y {{fc.earliest.relative.month}}m {{fc.earliest.relative.day}}d
+            </td>
+        </tr>
+        <tr>
+            <td style="width : 200px;" ><strong> Recommended Date </strong></td>
+            <td ng-show="fc.recommended._type === 'fixed'">
+                {{fc.recommended.fixed.date | date:'MM/dd/yyyy'}}
+            </td>
+            <td ng-show="fc.recommended._type === 'relative'">
+                {{fc.recommended.relative.relativeTo}} {{fc.recommended.relative.year}}y {{fc.recommended.relative.month}}m {{fc.recommended.relative.day}}d
+            </td>
+        </tr>
+        <tr>
+            <td style="width : 200px;" ><strong> Past Due Date </strong></td>
+            <td ng-show="fc.pastDue._type === 'fixed'">
+                {{fc.pastDue.fixed.date | date:'MM/dd/yyyy'}}
+            </td>
+            <td ng-show="fc.pastDue._type === 'relative'">
+                {{fc.pastDue.relative.relativeTo}} {{fc.pastDue.relative.year}}y {{fc.pastDue.relative.month}}m {{fc.pastDue.relative.day}}d
+            </td>
+        </tr>
+    </table>
+</md-content>

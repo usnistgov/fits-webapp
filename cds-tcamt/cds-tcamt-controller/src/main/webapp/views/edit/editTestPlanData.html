@@ -41,7 +41,7 @@
 					</form>
 				</md-content>
 			</md-tab>
-			<md-tab label="Import">
+			<md-tab label="Import" ng-if="!isLocal(selectedTP)">
 				<md-content class="md-padding">
 					<form name="testplanMetaDataForm" class="form-horizontal" novalidate>
 						<div class="row">
