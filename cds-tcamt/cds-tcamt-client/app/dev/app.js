@@ -40,7 +40,8 @@ var app = angular
         'ui-notification',
         'btorfs.multiselect',
         'ui.select',
-        'infinite-scroll'
+        'infinite-scroll',
+        'dndLists'
     ]);
 
 var

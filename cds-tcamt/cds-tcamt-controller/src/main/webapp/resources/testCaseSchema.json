@@ -1,0 +1,27 @@
+{
+    "config" : {
+        "ids" : {
+            "active" : true,
+            "separator" : "-"
+        }
+    },
+    "types" : {
+        "date" : {
+            "id" : "O",
+            "model" : [
+                {
+                    "choice" : [
+                        {
+                            "key" : "fixed",
+                            "typeRef" : "fixedDate",
+                            "usage" : "R"
+                            "discriminator" : function(parent,obj){
+                            return 1;
+                        }
+                    }
+                    ]
+                }
+            ]
+        }
+    }
+}

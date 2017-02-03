@@ -20,13 +20,33 @@ angular.module('tcl').controller('ExecutionCtrl', function ($scope,TestDataServi
         connector : ""
     };
     $scope.selectedConfig = null;
-
+    $scope.heigth = {
+        'heigth' : '100%'
+    };
+    $scope.tabStyle = $scope.heigth;
     $scope.init = function(){
         $scope.loadTestCases();
     };
+    $scope.dragOver = function (index, item, external, type) {
+        if($scope.inQueue(item) && !item.hasOwnProperty("_pg"))
+            return false;
+        else {
+            item._pg = 0;
+            item._pgt = 'determinate';
+            $scope.tcQueue.splice(index, 0, item);
+            return true;
+        }
+
+    };
+
+    $scope.dragMoved = function (index) {
+        console.log(index);
+    };
 
     $scope.inQueue = function(tc){
-        return $scope.tcQueue.indexOf(tc) !== -1;
+        return $scope.tcQueue.find(function (item) {
+            return item.id === tc.id;
+        });
     };
 
     $scope.loadTestCases = function () {
@@ -53,7 +73,21 @@ angular.module('tcl').controller('ExecutionCtrl', function ($scope,TestDataServi
         tc._pgt = 'determinate';
         $scope.tcQueue.push(tc);
     };
+    $scope.models = {
+        selected: null,
+        lists: {"A": [], "B": []}
+    };
 
+    // Generate initial model
+    for (var i = 1; i <= 3; ++i) {
+        $scope.models.lists.A.push({label: "Item A" + i});
+        $scope.models.lists.B.push({label: "Item B" + i});
+    }
+
+    // Model to JSON for demo purpose
+    $scope.$watch('models', function(model) {
+        $scope.modelAsJson = angular.toJson(model, true);
+    }, true);
     $scope.exe = function () {
         $scope.exec = true;
         $scope.execT(0);

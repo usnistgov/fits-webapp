@@ -38,15 +38,15 @@
                                         </button>
                                     </div>
 
-                                    <md-input-container ng-show="addConfig" flex="10" style="width: 100%; margin: 0; margin-top: 15px;">
+                                    <md-input-container ng-show="addConfig" flex="10" style="width: 100%; margin-top: 15px;">
                                         <label>Name</label>
                                         <input ng-model="configStub.name" type="text"/>
                                     </md-input-container>
-                                    <md-input-container ng-show="addConfig" flex="10" style="width: 100%; margin: 0;">
+                                    <md-input-container ng-show="addConfig" flex="10" style="width: 100%;">
                                         <label>End Point</label>
                                         <input ng-model="configStub.endPoint" type="text"/>
                                     </md-input-container>
-                                    <md-input-container ng-model="configStub.connector" ng-show="addConfig" flex="10" style="width: 100%; margin: 0;">
+                                    <md-input-container ng-model="configStub.connector" ng-show="addConfig" flex="10" style="width: 100%;">
                                         <label>Connector Type</label>
                                         <md-select ng-model="export.type" ng-change="typeChange();">
                                             <md-option ng-value="'TCH'">TCH</md-option>
@@ -65,23 +65,53 @@
                                 </div>
                             </td>
                             <td style="width: 70%;">
-                                <table class="table table-condensed table-striped table-bordered">
-                                    <tr ng-class="{'warning' :  tc._pgt === 'indeterminate', 'success' : tc._pg === 100}" ng-repeat="tc in tcQueue track by $index">
-                                        <td><strong>#{{tc.id}}</strong></td>
-                                        <td><strong>{{tc.name}}</strong></td>
-                                        <td ng-init="tc._pg = 0; tc._pgt = 'determinate';" style="width: 40%;"><md-progress-linear md-mode="{{tc._pgt}}" value="{{tc._pg}}"></md-progress-linear></td>
-                                        <td>
-                                            <button ng-click="deleteTCL($index)" ng-hide="exec" class="btn btn-xs btn-danger pull-right"  style="margin: 0px; margin-right: 10px;">
-                                                <i class="fa fa-times" aria-hidden="true"></i>
-                                            </button>
-                                            <button class="btn btn-xs btn-info pull-right" ng-show="exec && tc._pg === 100" style="margin: 0px; margin-right: 10px;">
-                                                <i class="fa fa-search" aria-hidden="true"></i>
-                                            </button>
-                                            <span ng-show="exec && tc._pgt === 'indeterminate'" style="color: blue; text-align : center;">
-                                                Running ...
-                                            </span>
-                                        </td>
-                                    </tr>
+                                <table class="table table-condensed table-bordered" ng-class="{ 'fill' :  !tcQueue.length }" >
+                                    <tbody dnd-list="tcQueue" dnd-drop="dragOver(index, item, external, type)">
+                                        <tr ng-class="{'warning' :  tc._pgt === 'indeterminate', 'success' : tc._pg === 100}" ng-repeat="tc in tcQueue track by $index"
+                                            dnd-draggable="tc"
+                                            dnd-moved="dragMoved($index)"
+                                            dnd-effect-allowed="move"
+                                            dnd-selected="models.selected = tc">
+
+                                            <td ng-hide="exec" dnd-handle style="text-align : center; cursor: move; background-color: #cbcbcb;"><strong>:::</strong></td>
+                                            <td style="text-align : center;"><strong>#{{tc.id}}</strong></td>
+                                            <td style="text-align : center;"><strong>{{tc.name}}</strong></td>
+                                            <td style="width: 40%;"><md-progress-linear md-mode="{{tc._pgt}}" value="{{tc._pg}}"></md-progress-linear></td>
+                                            <td>
+                                                <button ng-click="deleteTCL($index)" ng-hide="exec" class="btn btn-xs btn-danger pull-right"  style="margin: 0px; margin-right: 10px;">
+                                                    <i class="fa fa-times" aria-hidden="true"></i>
+                                                </button>
+                                                <button class="btn btn-xs btn-info pull-right" ng-show="exec && tc._pg === 100" style="margin: 0px; margin-right: 10px;">
+                                                    <i class="fa fa-search" aria-hidden="true"></i>
+                                                </button>
+                                                <span ng-show="exec && tc._pgt === 'indeterminate'" style="color: blue; text-align : center;">
+                                                    Running ...
+                                                </span>
+                                            </td>
+                                        </tr>
+                                        <tr ng-hide="tcQueue.length === 0" class="dndPlaceholder">
+                                            <td colspan="5" style="
+                                                                    text-align: center;
+                                                                      color: black;
+                                                                      background-color: rgb(241, 251, 249);
+                                                                      width: 100%;
+                                                                      height: 100%;
+                                                                      vertical-align: middle;
+                                                                      border: 2px dashed black;">
+                                                <strong>Drop Here</strong></td>
+                                        </tr>
+                                        <tr ng-show="tcQueue.length === 0">
+                                            <td colspan="5" style="
+                                                                    text-align: center;
+                                                                      color: black;
+                                                                      background-color: rgb(241, 251, 249);
+                                                                      width: 100%;
+                                                                      height: 100%;
+                                                                      vertical-align: middle;
+                                                                      border: 2px dashed black;">
+                                                <strong>Drop Here</strong></td>
+                                        </tr>
+                                    </tbody>
                                 </table>
                             </td>
                         </tr>
@@ -96,7 +126,7 @@
                     <strong>Results</strong>
                 </div>
                 <div class="panel-body panel-resizable" layout="row" layout-align="center center">
-                    <img src="images/ajax-loader.gif">
+                    <img src="images/ajax-loader.gif"/>
                 </div>
             </div>
         </div>
@@ -119,7 +149,7 @@
                 <div class="panel-body panel-resizable" style="height: 400px;">
                     <div style="white-space:nowrap;">
                         <div ui-tree="treeOptions">
-                            <ol ui-tree-nodes="" ng-model="tps">
+                            <ol ui-tree-nodes="" dnd-list="tps"  dnd-drop="false" ng-model="tps">
                                 <li data-nodrag ng-repeat="tp in tps track by $index" ui-tree-node>
                                     <div ui-tree-handle ng-click="selectTP(tp)" ng-class="{selected1 : isSelectedTP(tp)}">
                                         <div>
@@ -130,8 +160,11 @@
                                             </span>
                                         </div>
                                     </div>
-                                    <ol ui-tree-nodes="" ng-model="tp.testCases">
-                                        <li data-nodrag ng-repeat="tc in tp.testCases | testcase:tcSearch track by $index" ui-tree-node ng-hide="$parentNodeScope.collapsed">
+                                    <ol dnd-list="tp.testCases" dnd-drop="false" ui-tree-nodes="" ng-model="tp.testCases">
+                                        <li data-nodrag ng-repeat="tc in tp.testCases | testcase:tcSearch track by $index" ui-tree-node ng-hide="$parentNodeScope.collapsed"
+                                            dnd-draggable="tc"
+                                            dnd-effect-allowed="move">
+
                                             <div ui-tree-handle ng-click="selectTC(tc)" ng-class="{selected1 : isSelectedTC(tc), inqueue : inQueue(tc)}">
                                                 <span data-nodrag>
                                                     <span class="label label-component label-icon">T</span>

@@ -2157,6 +2157,15 @@ table.hl7-versions-valueset td {
   color : blue;
 }
 
+.placeHDM {
+  text-align: center;
+  color: black;
+  background-color: rgb(211, 231, 227);
+  width: 100%;
+  height: 100%;
+  vertical-align: middle;
+  border: 2px dashed black;
+}
 
 table.conformance-profiles-table {
   max-height: 500px !important;

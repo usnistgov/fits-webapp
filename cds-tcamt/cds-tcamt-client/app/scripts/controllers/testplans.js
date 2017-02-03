@@ -632,6 +632,18 @@ angular
 							}
 						}
 					};
+
+					$scope.cloneTP = function(tp){
+                        var x = TestObjectUtil.cloneEntity(tp);
+                        x.name = "[CLONE] " + x.name;
+                        for(var t in x.testCases){
+                        	TestObjectUtil.markWithCLID(x.testCases[t]);
+                            TestObjectUtil.sanitizeEvents(x);
+						}
+                        TestObjectUtil.sanitizeDates(x);
+                        $scope.tps.push(x);
+                        $scope.selectTP(x);
+					};
 					
 					$scope.validateVC = function(vc) {
 						var errors = {
@@ -847,7 +859,7 @@ angular
 
 					$scope.has = function(a, b) {
 						return a.hasOwnProperty(b) && a[b];
-					}
+					};
 
 					$scope.newEvaluation = function(list) {
 						var eval = TestObjectFactory.createEvaluation();

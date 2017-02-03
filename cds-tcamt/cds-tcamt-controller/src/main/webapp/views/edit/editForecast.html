@@ -25,7 +25,13 @@
 										</md-select>
 									</md-input-container>
 								</div>
-								<div class="col-md-8">
+								<div class="col-md-4">
+									<md-input-container style="width: 100%;">
+										<label>Dose Number</label>
+										<input ng-model="selectedForecast.doseNumber" ng-change="tcChanged()" type="text"/>
+									</md-input-container>
+								</div>
+								<div class="col-md-4">
 									<md-input-container style="width: 100%;">
 										<label>Forecast Reason</label>
 										<input ng-model="selectedForecast.forecastReason" ng-change="tcChanged()" type="text"/>
@@ -41,6 +47,11 @@
 								</div>
 								<div class="col-md-4" ng-show="selectedForecast.serieStatus !== 'C'">
 									<date-choose  tc="selectedTC" label="'Past Due'" dt="selectedForecast.pastDue"></date-choose>
+								</div>
+							</div>
+							<div class="col-md-12" style="margin-top: 10px;">
+								<div class="col-md-offset-4 col-md-4" ng-show="selectedForecast.serieStatus !== 'C'">
+									<date-choose  tc="selectedTC" label="'Complete'" dt="selectedForecast.complete"></date-choose>
 								</div>
 							</div>
 						</div>

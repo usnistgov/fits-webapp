@@ -19,7 +19,13 @@ body {
 					<form name="testplanMetaDataForm" class="form-horizontal" novalidate>
 						<div class="row">
 							<div class="col-md-12">
-								<div class="col-md-8">
+								<div class="col-md-3">
+									<md-input-container style="width: 100%;">
+										<label>ID</label>
+										<input ng-model="selectedTC.uid" ng-change="tcChanged()" type="text"/>
+									</md-input-container>
+								</div>
+								<div class="col-md-5">
 									<md-input-container style="width: 100%;">
 										<label>Name</label>
 										<input ng-model="selectedTC.name" ng-change="tcChanged()" type="text"/>
