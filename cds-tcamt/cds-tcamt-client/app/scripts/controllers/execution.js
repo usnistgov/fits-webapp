@@ -27,16 +27,81 @@ angular.module('tcl').controller('ExecutionCtrl', function ($scope,TestDataServi
     $scope.init = function(){
         $scope.loadTestCases();
     };
-    $scope.dragOver = function (index, item, external, type) {
-        if($scope.inQueue(item) && !item.hasOwnProperty("_pg"))
-            return false;
-        else {
-            item._pg = 0;
-            item._pgt = 'determinate';
-            $scope.tcQueue.splice(index, 0, item);
-            return true;
-        }
+    $scope.dstartf = false;
+    $scope.dstart = function (a) {
+        $scope.dstartf = a;
+    };
+    $scope.multipleSel = false;
+    $scope.selected = [];
 
+    $scope.multiToggle = function () {
+        $scope.multipleSel = !$scope.multipleSel;
+        $scope.selected = [];
+    };
+    $scope.select = function (tc) {
+        var x = $scope.selected.find(function (item) {
+            return item.id === tc.id;
+        });
+        if(x){
+            $scope.selected = $scope.selected.filter(function (item) {
+                return item.id != x.id;
+            })
+        }
+        else {
+            $scope.selected.push(tc);
+        }
+    };
+
+    $scope.find = function (list,o) {
+        return list.find(function (item) {
+            return item.id === o.id;
+        });
+    };
+
+    $scope.drop = function (list, items, index) {
+        if($scope.multipleSel){
+            var toAdd = [];
+            for(var i in items){
+                if(!$scope.inQueue(items[i])){
+                    items[i]._pg = 0;
+                    items[i]._pgt = 'determinate';
+                    toAdd.push(items[i]);
+                }
+            }
+
+            $scope.tcQueue = $scope.tcQueue.slice(0, index)
+                .concat(toAdd)
+                .concat($scope.tcQueue.slice(index));
+        }
+        else {
+            console.log(items);
+            if(items.hasOwnProperty('testCases')){
+                $scope.multipleSel = true;
+                return $scope.drop($scope.tcQueue,items.testCases,index);
+            }
+            var id = -1;
+            for(var j in $scope.tcQueue){
+                if($scope.tcQueue[j].id === items.id){
+                    id = j;
+                }
+            }
+            console.log("ID "+id);
+            if(id > -1){
+                $scope.tcQueue.splice(id,1);
+                if(index > id)
+                    index = index - 1;
+            }
+            items._pg = 0;
+            items._pgt = 'determinate';
+            $scope.tcQueue.splice(index, 0, items);
+
+        }
+        $scope.multipleSel = false;
+        return true;
+    };
+
+    $scope.onMoved = function(list) {
+        $scope.selected = [];
     };
 
     $scope.dragMoved = function (index) {
@@ -73,21 +138,7 @@ angular.module('tcl').controller('ExecutionCtrl', function ($scope,TestDataServi
         tc._pgt = 'determinate';
         $scope.tcQueue.push(tc);
     };
-    $scope.models = {
-        selected: null,
-        lists: {"A": [], "B": []}
-    };
 
-    // Generate initial model
-    for (var i = 1; i <= 3; ++i) {
-        $scope.models.lists.A.push({label: "Item A" + i});
-        $scope.models.lists.B.push({label: "Item B" + i});
-    }
-
-    // Model to JSON for demo purpose
-    $scope.$watch('models', function(model) {
-        $scope.modelAsJson = angular.toJson(model, true);
-    }, true);
     $scope.exe = function () {
         $scope.exec = true;
         $scope.execT(0);

@@ -66,7 +66,7 @@
                             </td>
                             <td style="width: 70%;">
                                 <table class="table table-condensed table-bordered" ng-class="{ 'fill' :  !tcQueue.length }" >
-                                    <tbody dnd-list="tcQueue" dnd-drop="dragOver(index, item, external, type)">
+                                    <tbody id="qbody" dnd-list="tcQueue"  dnd-drop="drop(list, item, index)">
                                         <tr ng-class="{'warning' :  tc._pgt === 'indeterminate', 'success' : tc._pg === 100}" ng-repeat="tc in tcQueue track by $index"
                                             dnd-draggable="tc"
                                             dnd-moved="dragMoved($index)"
@@ -100,7 +100,7 @@
                                                                       border: 2px dashed black;">
                                                 <strong>Drop Here</strong></td>
                                         </tr>
-                                        <tr ng-show="tcQueue.length === 0">
+                                        <tr ng-show="(dstartf || multipleSel) && tcQueue.length === 0" >
                                             <td colspan="5" style="
                                                                     text-align: center;
                                                                       color: black;
@@ -139,7 +139,12 @@
                         <i class="glyphicon glyphicon-list"></i>
                         <strong> Test Cases </strong>
                     </div>
-                    <div class="col-md-offset-2 col-md-7" style="padding: 0;">
+                    <div class="col-md-2" title="Multiselection">
+                        <button class="btn btn-xs" ng-click="multiToggle()" ng-class="{ 'btn-info' : !multipleSel, 'btn-success' : multipleSel  }" style="margin: 0;">
+                            <i class="fa fa-files-o" style="font-size: 2em;" aria-hidden="true"></i>
+                        </button>
+                    </div>
+                    <div class="col-md-7" style="padding: 0;">
                         <div class="input-group" style="width : 100%;">
                             <span class="input-group-addon"  style="background-color: rgb(240, 240, 240);" id="basic-addon1"><i class="fa fa-search" aria-hidden="true"></i></span>
                             <input type="text" class="form-control" ng-model="tcSearch" ng-model-options="{ debounce: 500 }" style="padding-left: 10px; background-color: white; width : 100%;" placeholder=" Search By TestCase Name"/>
@@ -150,7 +155,12 @@
                     <div style="white-space:nowrap;">
                         <div ui-tree="treeOptions">
                             <ol ui-tree-nodes="" dnd-list="tps"  dnd-drop="false" ng-model="tps">
-                                <li data-nodrag ng-repeat="tp in tps track by $index" ui-tree-node>
+                                <li data-nodrag ng-repeat="tp in tps track by $index" ui-tree-node
+                                    dnd-draggable="tp"
+                                    dnd-moved="onMoved(list)"
+                                    dnd-dragstart="dstart(true)"
+                                    dnd-dragend="dstart(false)"
+                                    dnd-effect-allowed="move">
                                     <div ui-tree-handle ng-click="selectTP(tp)" ng-class="{selected1 : isSelectedTP(tp)}">
                                         <div>
                                             <i data-nodrag ng-click="toggle(this)" class="fa" ng-class="{'fa-caret-right': collapsed, 'fa-caret-down': !collapsed}"></i>
@@ -162,10 +172,14 @@
                                     </div>
                                     <ol dnd-list="tp.testCases" dnd-drop="false" ui-tree-nodes="" ng-model="tp.testCases">
                                         <li data-nodrag ng-repeat="tc in tp.testCases | testcase:tcSearch track by $index" ui-tree-node ng-hide="$parentNodeScope.collapsed"
-                                            dnd-draggable="tc"
+                                            dnd-draggable="multipleSel ? selected : tc"
+                                            dnd-moved="onMoved(list)"
+                                            dnd-selected="select(tc)"
+                                            dnd-dragstart="dstart(true)"
+                                            dnd-dragend="dstart(false)"
                                             dnd-effect-allowed="move">
 
-                                            <div ui-tree-handle ng-click="selectTC(tc)" ng-class="{selected1 : isSelectedTC(tc), inqueue : inQueue(tc)}">
+                                            <div ui-tree-handle ng-click="selectTC(tc)" ng-class="{selected1 : isSelectedTC(tc) && !multipleSel, cdraggable : find(selected,tc) && multipleSel, inqueue : inQueue(tc)}">
                                                 <span data-nodrag>
                                                     <span class="label label-component label-icon">T</span>
                                                     {{tc.name}}

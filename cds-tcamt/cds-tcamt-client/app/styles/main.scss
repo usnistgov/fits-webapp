@@ -33,6 +33,17 @@ multiselect button:after {
 }
 
 
+.cdraggable {
+
+  /* Permalink - use to edit and share this gradient: http://colorzilla.com/gradient-editor/#d1ffeb+0,6dfff2+100 */
+  background: #d1ffeb; /* Old browsers */
+  background: -moz-linear-gradient(top, #d1ffeb 0%, #6dfff2 100%); /* FF3.6-15 */
+  background: -webkit-linear-gradient(top, #d1ffeb 0%,#6dfff2 100%); /* Chrome10-25,Safari5.1-6 */
+  background: linear-gradient(to bottom, #d1ffeb 0%,#6dfff2 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#d1ffeb', endColorstr='#6dfff2',GradientType=0 ); /* IE6-9 */
+
+
+}
 
 .card-media {
   border: solid 1px #000000;
