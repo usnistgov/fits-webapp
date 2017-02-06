@@ -64,7 +64,7 @@ angular.module('tcl').run(function ($httpBackend, $q, $http) {
     $httpBackend.whenGET('api/accounts/cuser').respond(function (method, url, data, headers) {
         return [200, {}, {}];
     });
-    
+
     $httpBackend.whenGET('api/accounts/cuser').respond(function (method, url, data, headers) {
         return [200, {}, {}];
     });
@@ -77,8 +77,8 @@ angular.module('tcl').run(function ($httpBackend, $q, $http) {
     $httpBackend.whenGET(/views\//).passThrough();
 
     $httpBackend.whenGET(/resources\//).passThrough();
-    
-    
+
+
     $httpBackend.whenGET('api/vaccines').respond(function (method, url, data, headers) {
         var request = new XMLHttpRequest();
         request.open('GET', '../../resources/vaccines.json', false);
@@ -86,7 +86,15 @@ angular.module('tcl').run(function ($httpBackend, $q, $http) {
         var profile = angular.fromJson(request.response);
         return [request.status, profile, {}];
     });
-    
+
+    $httpBackend.whenGET('api/exec/userConfigs').respond(function (method, url, data, headers) {
+        var request = new XMLHttpRequest();
+        request.open('GET', '../../resources/configs.json', false);
+        request.send(null);
+        var profile = angular.fromJson(request.response);
+        return [request.status, profile, {}];
+    });
+
     $httpBackend.whenGET('api/vxm').respond(function (method, url, data, headers) {
         var request = new XMLHttpRequest();
         request.open('GET', '../../resources/vxm.json', false);
@@ -94,7 +102,7 @@ angular.module('tcl').run(function ($httpBackend, $q, $http) {
         var profile = angular.fromJson(request.response);
         return [request.status, profile, {}];
     });
-    
+
     $httpBackend.whenGET('api/vxg').respond(function (method, url, data, headers) {
         var request = new XMLHttpRequest();
         request.open('GET', '../../resources/vxg.json', false);
@@ -102,7 +110,7 @@ angular.module('tcl').run(function ($httpBackend, $q, $http) {
         var profile = angular.fromJson(request.response);
         return [request.status, profile, {}];
     });
-    
+
     $httpBackend.whenGET('api/vxp').respond(function (method, url, data, headers) {
         var request = new XMLHttpRequest();
         request.open('GET', '../../resources/products.json', false);
@@ -110,7 +118,7 @@ angular.module('tcl').run(function ($httpBackend, $q, $http) {
         var profile = angular.fromJson(request.response);
         return [request.status, profile, {}];
     });
-    
+
     $httpBackend.whenGET('api/enum/evaluationStatus').respond(function (method, url, data, headers) {
         var request = new XMLHttpRequest();
         request.open('GET', '../../resources/evalStatus.json', false);
@@ -118,7 +126,7 @@ angular.module('tcl').run(function ($httpBackend, $q, $http) {
         var profile = angular.fromJson(request.response);
         return [request.status, profile, {}];
     });
-    
+
     $httpBackend.whenGET('api/enum/evaluationReason').respond(function (method, url, data, headers) {
         var request = new XMLHttpRequest();
         request.open('GET', '../../resources/evalReason.json', false);
@@ -126,7 +134,7 @@ angular.module('tcl').run(function ($httpBackend, $q, $http) {
         var profile = angular.fromJson(request.response);
         return [request.status, profile, {}];
     });
-    
+
     $httpBackend.whenGET('api/enum/gender').respond(function (method, url, data, headers) {
         var request = new XMLHttpRequest();
         request.open('GET', '../../resources/gender.json', false);
@@ -134,7 +142,7 @@ angular.module('tcl').run(function ($httpBackend, $q, $http) {
         var profile = angular.fromJson(request.response);
         return [request.status, profile, {}];
     });
-    
+
     $httpBackend.whenGET('api/enum/serieStatus').respond(function (method, url, data, headers) {
         var request = new XMLHttpRequest();
         request.open('GET', '../../resources/serieStatus.json', false);
@@ -151,7 +159,7 @@ angular.module('tcl').run(function ($httpBackend, $q, $http) {
         var profile = angular.fromJson(request.response);
         return [request.status, profile, {}];
     });
-    
+
     $httpBackend.whenGET('api/testplans').respond(function (method, url, data, headers) {
         var request = new XMLHttpRequest();
         request.open('GET', '../../resources/testCases.json', false);
@@ -175,7 +183,7 @@ angular.module('tcl').run(function ($httpBackend, $q, $http) {
         var profile = angular.fromJson(request.response);
         return [request.status, profile, {}];
     });
-    
+
     $httpBackend.whenGET('api/appInfo').respond(function (method, url, data, headers) {
         var request = new XMLHttpRequest();
         request.open('GET', '../../resources/appInfo/appInfo.json', false);

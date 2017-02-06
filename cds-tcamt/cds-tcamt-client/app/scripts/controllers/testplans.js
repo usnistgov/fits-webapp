@@ -69,17 +69,17 @@ angular.module('tcl').filter('testcase', function () {
         return items.filter(function (item) {
             if(!str || str === "") return true;
             var s = str.toLowerCase();
-            return item.name.toLowerCase().includes(s);
+            return item.name.toLowerCase().includes(s) || item.uid && item.uid.toLowerCase().includes(s) || item.group && item.group.toLowerCase().includes(s);
         });
     };
 });
 
 angular.module('tcl').filter('vxgroup', function () {
-	
+
 	return function(items,groups){
 		if (!items || !items.length) { return; }
 		var filter = function (item) {
-			
+
 				var hasGroup = function(mp,gr) {
 					if(mp.groups && mp.groups.length !== 0){
 						var found = false;
@@ -93,7 +93,7 @@ angular.module('tcl').filter('vxgroup', function () {
 					}
 					return false;
 				};
-				
+
 				if(!groups || groups.length === 0) return true;
 				for(var x in groups){
 					if(!hasGroup(item,groups[x])){
@@ -149,7 +149,9 @@ angular
 							to : 1000,
 							all : true
 					};
-					
+					$scope.tpview = true;
+                    $scope.groups = false;
+
 					// ------------------------------------------------------------------------------------------
 					// CDSI TCAMT
 					$scope.importing = false;
@@ -177,6 +179,7 @@ angular
 							obj : null,
 						}
 					};
+                    $scope.grouping = false;
 					$scope.excelmime = [
                         "application/vnd.ms-excel",
                         "application/msexcel",
@@ -197,7 +200,7 @@ angular
 						}
 						return "";
 					};
-					
+
 					$scope.eventLabel = function(event){
 						if(!event.vaccination.date)
 							return "";
@@ -212,7 +215,7 @@ angular
 						else
 							return "";
 					};
-					
+
 					$scope.newTestPlan = function() {
 						var tp = TestObjectFactory.createTP();
 						$scope.tps.push(tp);
@@ -273,7 +276,7 @@ angular
 							$scope.selectedEvent = e;
 							$scope.selectedForecast = null;
 							$scope.selectedType = "evt";
-							
+
 							// View
 							$scope.subview = "EditEventData.html";
                             $rootScope.$emit('vp_clear', true);
@@ -297,6 +300,26 @@ angular
 						}, 0);
 					};
 
+					$scope.toggleGroups = function () {
+                        var deferred = $q.defer();
+                        $scope.grouping = true;
+                        $timeout(function() {
+                            if ($scope.groups) {
+                                $scope.tp = $scope.selectedTP;
+                                $scope.groups = false;
+                            }
+                            else {
+                                $scope.tp = $scope.selectedTPg;
+                                $scope.groups = true;
+                            }
+                            $scope.grouping = false;
+                            deferred.resolve(true);
+                        },0);
+                        return deferred.promise;
+                    };
+
+                    $scope.toggleGroups();
+
 					$scope.selectTP = function(tp) {
 						waitingDialog.show('Opening Test Plan', {
 							dialogSize : 'xs',
@@ -310,8 +333,17 @@ angular
 							$scope.selectedTC = null;
 							$scope.selectedTG = null;
 							$scope.tpTree = [];
+
+                            $scope.grouping = true;
 							$scope.selectedTP = tp;
-							$scope.tpTree.push($scope.selectedTP);
+                            $scope.selectedTPg = TestObjectUtil.group(tp.testCases);
+                            $scope.grouping = false;
+                            if($scope.groups){
+                                $scope.tp = $scope.selectedTPg;
+							}
+							else {
+                                $scope.tp = $scope.selectedTP;
+                            }
 							$scope.selectedType = "tp";
 
 							// View
@@ -320,6 +352,34 @@ angular
 							waitingDialog.hide();
 						}, 0);
 					};
+
+                    $scope.showSugg = false;
+                    $scope.showS = function () {
+                        $scope.showSugg = true;
+                    };
+					$scope.reGroup = function () {
+                        var deferred = $q.defer();
+                        $scope.grouping = true;
+                        $timeout(function() {
+                            $scope.selectedTPg = TestObjectUtil.group($scope.selectedTP.testCases);
+                            if($scope.groups){
+                                $scope.tp = $scope.selectedTPg;
+                            }
+                            else {
+                                $scope.tp = $scope.selectedTP;
+                            }
+                            $scope.grouping = false;
+                            deferred.resolve(true);
+                        },0);
+                        return deferred.promise;
+
+                    };
+                    $scope.changeGroup = function (key) {
+                    	console.log("HERE");
+                        $scope.selectedTC.group = key;
+                        $scope.reGroup();
+                        $scope.showSugg = false;
+                    };
 
 					$scope.selectTC = function(tc) {
 						waitingDialog.show('Opening Test Case', {
@@ -624,7 +684,7 @@ angular
 						return errors;
 
 					};
-					
+
 					$scope.evalStatusChange = function(evaluation){
 						if(evaluation.status !== 'INVALID'){
 							if(evaluation.hasOwnProperty("reason")){
@@ -644,7 +704,7 @@ angular
                         $scope.tps.push(x);
                         $scope.selectTP(x);
 					};
-					
+
 					$scope.validateVC = function(vc) {
 						var errors = {
 							type : "",
@@ -846,7 +906,7 @@ angular
 						TestObjectUtil.cleanDates(tc);
 						TestObjectUtil.cleanObject(tc,new RegExp("^_.*"));
 					};
-					
+
 					$scope.closeTestPlanEdit = function() {
 						$scope.selectedEvent = null;
 						$scope.selectedForecast = null;
@@ -869,7 +929,7 @@ angular
 					$scope.deleteEvaluation = function(list, index) {
 						list.splice(index, 1);
 					};
-					
+
 					$scope.importButton = function() {
 						$scope.selectTP($scope.selectedTP);
 						$scope.selectedTabTP = 1;
@@ -880,28 +940,29 @@ angular
                         $scope.selectedTabTC = 3;
                     };
 
-					$scope.eventCM = [ 
-					     [ 'Delete Event', 
+					$scope.eventCM = [
+					     [ 'Delete Event',
 					       function(modelValue) {
 					    	$scope.selectedTC.events.splice(modelValue.$index, 1);
 					    	$scope.selectTC($scope.selectedTC);
 					    } ] ];
 
-					$scope.forecastCM = [ 
+					$scope.forecastCM = [
 					        [ 'Delete Forecast',
 					          function(modelValue) {
 								$scope.selectedTC.forecast.splice(modelValue.$index, 1);
 								$scope.selectTC($scope.selectedTC);
 							} ] ];
 
-					$scope.tpCM = [ 
-					        [ 'Add Test Case', 
+					$scope.tpCM = [
+					        [ 'Add Test Case',
 					          function(modelValue) {
 					        	var tc = TestObjectFactory.createTC();
 					        	$scope.selectedTP.testCases.push(tc);
+					        	$scope.selectedTPg.testCases.push(tc);
 					        	$scope.selectTC(tc);
-					        } ], 
-					        [ 'Import Test Case', 
+					        } ],
+					        [ 'Import Test Case',
 					          function(modelValue) {
 					        	$scope.selectTP($scope.selectedTP);
 					        	$scope.selectedTabTP = 1;
@@ -909,6 +970,23 @@ angular
 							function () {
 								return !$scope.isLocal($scope.selectedTP);
                             }] ];
+
+                    $scope.tgCM = [
+                        [ 'Add Test Case',
+                            function(modelValue) {
+                    			var gr = modelValue.$nodeScope.$modelValue.label;
+
+                                var tc = TestObjectFactory.createTC();
+                                tc.group = gr;
+                                $scope.selectedTP.testCases.push(tc);
+                                var grL = $scope.selectedTPg.groups.filter(function (item) {
+									return item.label === gr;
+                                });
+                                if(grL && grL.length === 1)
+                                	grL[0].children.push(tc);
+                                $scope.selectTC(tc);
+                            } ]
+					];
 
 					$scope.tcCM = [
 					         [	'Clone Test Case',
@@ -948,7 +1026,7 @@ angular
 					        		 });
 					        	 }
 					         } ] ];
-					
+
 					$scope.fileChange = function(files) {
 						console.log("change");
                         console.log(files[0].type);
@@ -983,12 +1061,12 @@ angular
                             }
 						}
 					};
-					
+
 					$scope.sanitizeTestCase = function(tc){
 						TestObjectUtil.sanitizeDates(tc);
 						TestObjectUtil.sanitizeEvents(tc);
 					};
-					
+
 					$scope.uploadNIST = function() {
 						if ($scope.sfileO != null && !$scope.fileErr) {
                             $scope.importing = true;
@@ -1044,7 +1122,8 @@ angular
 
                     $scope.$watch('importing', function (newValue, oldValue) {
                         if(newValue === false){
-                            $scope.impDiag.close({});
+                        	if($scope.impDiag)
+                            	$scope.impDiag.close({});
                         }
                         else if(newValue === true){
                             $scope.impDiag = $modal.open({
@@ -1067,7 +1146,7 @@ angular
                         $scope.sfileO = null;
                         $scope.fileErr = false;
                     };
-					
+
 					$scope.upload = function(){
 						console.log($scope.export.type);
 						if($scope.export.type === 'NIST'){
@@ -1077,7 +1156,7 @@ angular
                             $scope.uploadCDC();
                         }
 					};
-					
+
 					$scope.uploadCDC = function() {
 						if ($scope.sfileO != null && !$scope.fileErr) {
                             $scope.importing = true;
@@ -1150,7 +1229,7 @@ angular
 								.vacFilter(query)) : $scope.AllVaccines;
 					};
 
-					
+
 
 					$scope.exportNIST = function() {
 						if ($scope.selectedTC.id != null
@@ -1179,19 +1258,25 @@ angular
 					};
 
 					// --------------------------------------------------------------------------------------------------------
-					
+
 					$scope.initTestCases = function() {
-						$scope.loading = true;
-						$scope.loadTestCases().then(function (a) {
-                            $scope.initEnums().then(function (b) {
-                                $scope.loadVaccines().then(function (c) {
-                                    console.log($scope.tps);
-                                    $scope.loading = false;
-                                    $scope.error = null;
+						if(userInfoService.isAuthenticated()){
+                            $scope.loading = true;
+                            $scope.loadTestCases().then(function (a) {
+                                $scope.initEnums().then(function (b) {
+                                    $scope.loadVaccines().then(function (c) {
+                                        console.log($scope.tps);
+                                        $scope.loading = false;
+                                        $scope.error = null;
+                                    });
                                 });
                             });
-                        });
+						}
 					};
+
+                    $rootScope.$on('event:loginConfirmed', function () {
+                        $scope.initTestCases();
+                    });
 
 
 					$scope.confirmDeleteTestPlan = function(testplan) {
@@ -1208,14 +1293,14 @@ angular
 							}
 						});
 						modalInstance.result.then(function() {
-							
+
 						});
 					};
 
 					$scope.isLocal = function(tp) {
 						return TestObjectUtil.isLocal(tp);
                     };
-//----					
+//----
 					$scope.prefill = function(list,x){
 						var groups = $scope.getGroups(x);
 						if(groups.length === 0){
@@ -1233,7 +1318,7 @@ angular
 							}
 						}
 					};
-					
+
 					$scope.getVx =  function(x){
 						return VaccineService.getVx($scope.vxm,x);
 					};
@@ -1285,7 +1370,7 @@ angular
 							.then(function(response) {
 								console.log("Saving");
 								console.log(tc);
-								
+
 								var newTC = response.data;
 								TestObjectUtil.sanitizeDates(newTC);
 								TestObjectUtil.sanitizeEvents(newTC);
@@ -1297,7 +1382,7 @@ angular
 									status : true,
 									id : i
 								});
-							}, 
+							},
 							function(error) {
 								console.log("Save Error");
 								deferred.resolve({
@@ -1375,7 +1460,7 @@ angular
 								deferred.resolve({
 									status : true
 								});
-							}, 
+							},
 							function(error) {
 								deferred.resolve({
 									status : false
@@ -1427,7 +1512,7 @@ angular
 							// 		delay : 1000
 							// 	});
 							// });
-							
+
 						} else if ($scope.aTCisSelected()) {
 							console.log("Saving");
 							console.log($scope.selectedTC);
@@ -1513,7 +1598,7 @@ angular.module('tcl').controller('ConfirmTestPlanDeleteCtrl',
                 $rootScope.msg().text = "testplanDeleteSuccess";
                 $rootScope.msg().type = "success";
                 $rootScope.msg().show = true;
-			} 
+			}
 			else {
 				$http.post('api/testplan/'+ $scope.testplanToDelete.id + '/delete')
 				.then(function(response) {
@@ -1536,7 +1621,7 @@ angular.module('tcl').controller('ConfirmTestPlanDeleteCtrl',
 					$rootScope.msg().type = "danger";
 					$rootScope.msg().show = true;
 				});
-			}			
+			}
 		};
 
 		$scope.getIndex = function(l, id) {
@@ -1569,7 +1654,7 @@ angular.module('tcl').controller('VaccineBrowseCtrl',
 			$scope.nbPagesS = 0;
 			$scope.pcG = 1;
 			$scope.pcS = 1;
-			
+
 			$scope.pages = function(list){
 				var nb = $scope.nbPages(list);
 				if(nb === 0){
@@ -1578,7 +1663,7 @@ angular.module('tcl').controller('VaccineBrowseCtrl',
 				else
 					return new Array(nb);
 			};
-			
+
 			$scope.nbPages = function(list){
 				if(!list || list.length === 0){
 					return 0;
@@ -1588,29 +1673,29 @@ angular.module('tcl').controller('VaccineBrowseCtrl',
 					return Math.ceil(nb);
 				}
 			};
-			
+
 			$scope.zoom = function(mp){
 				$scope.generic = false;
 				$scope.searchtxt = "";
 				$scope.selectedMapping = mp;
 			};
-			
+
 			$scope.unzoom = function(){
 				$scope.generic = true;
 				$scope.searchtxt = "";
 				$scope.selectedMapping = {};
 			};
-			
+
 			$scope.getNumber = function(num) {
 				if(num == 0 || num < 0)
 					return [];
 				console.log(num);
-			    return new Array(num);   
+			    return new Array(num);
 			};
-			
+
 			$scope.filterList = function(list,search){
-				if (!list || list.length === 0) { 
-					return []; 
+				if (!list || list.length === 0) {
+					return [];
 				}
 				else if(!search || search === ""){
 					return list;
@@ -1625,15 +1710,15 @@ angular.module('tcl').controller('VaccineBrowseCtrl',
 					return l;
 				}
 			};
-			
+
 			$scope.goToPageG = function(num) {
 				$scope.pcG = num;
 			};
-			
+
 			$scope.goToPageS = function(num,v) {
 				$scope.pcS = num;
 			};
-			
+
 			$scope.forward = function() {
 				var nb = ($scope.cbT + 1) % $scope.nbT;
 				if(nb == 0)
@@ -1641,7 +1726,7 @@ angular.module('tcl').controller('VaccineBrowseCtrl',
 				else
 					$scope.cbT = nb;
 			};
-			
+
 			$scope.backward = function() {
 				var nb = ($scope.cbT -1 ) % $scope.nbT;
 				if(nb == -1)
@@ -1649,17 +1734,17 @@ angular.module('tcl').controller('VaccineBrowseCtrl',
 				else
 					$scope.cbT = nb;
 			};
-			
+
 			$scope.ceil = function(x){
 				if(x === 0)
 					return 0;
 				return Math.ceil(x);
 			};
-			
+
 			$scope.cancel = function() {
 				$uibModalInstance.dismiss('cancel');
 			};
-			
+
 			$scope.hasGroup = function(mp,gr){
 				if(mp.groups && mp.groups.length !== 0){
 					var found = false;
@@ -1678,7 +1763,7 @@ angular.module('tcl').controller('VaccineBrowseCtrl',
 				var y = Math.floor(index/2);
 				return { 'x' : x, 'y' : y%2 };
 			};
-			
+
 			$scope.isW = function(index){
 				var coords = $scope.tileCoords(index);
 				if((coords.x - coords.y) === 0)
@@ -1686,12 +1771,12 @@ angular.module('tcl').controller('VaccineBrowseCtrl',
 				else
 					return false;
 			};
-			
+
 			$scope.select = function(x){
 				var v = JSON.parse(JSON.stringify(x));
 				$uibModalInstance.close(v);
 			};
-			
+
 			$scope.vxdataChange = function(){
 				$scope.pcG = 1;
 				$scope.pcS = 1;

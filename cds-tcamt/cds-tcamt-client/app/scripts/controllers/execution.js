@@ -7,24 +7,35 @@
  * # ExecutionCtrl
  * Controller of the clientApp
  */
-angular.module('tcl').controller('ExecutionCtrl', function ($scope,TestDataService,$timeout,ngTreetableParams,$q) {
+angular.module('tcl').controller('ExecutionCtrl', function ($rootScope,$scope,$http,TestDataService,$timeout,ngTreetableParams,$q) {
     $scope.tps = [];
     $scope.selectedTC = null;
     $scope.selectedTP = null;
     $scope.tcQueue = [];
     $scope.exec = false;
     $scope.addConfig = false;
+    $scope.configs = [];
+    $scope.qview = true;
     $scope.configStub = {
         name : "",
         endPoint : "",
         connector : ""
     };
+    $scope.loadConfig = function () {
+        $http.get("api/exec/userConfigs").then(function (result) {
+            $scope.configs = angular.fromJson(result.data);
+        });
+    };
+    $rootScope.$on('event:loginConfirmed', function () {
+        $scope.init();
+    });
     $scope.selectedConfig = null;
     $scope.heigth = {
         'heigth' : '100%'
     };
     $scope.tabStyle = $scope.heigth;
     $scope.init = function(){
+        $scope.loadConfig();
         $scope.loadTestCases();
     };
     $scope.dstartf = false;

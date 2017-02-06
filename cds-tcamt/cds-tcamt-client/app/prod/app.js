@@ -34,7 +34,9 @@ var app = angular
         'ui.codemirror',
         'ui-notification',
         'btorfs.multiselect',
-        'ui.select'
+        'ui.select',
+        'autocomplete'
+
     ]);
 app.config(function(NotificationProvider) {
     NotificationProvider.setOptions({
@@ -237,7 +239,7 @@ app.config(function ($routeProvider, RestangularProvider, $httpProvider, Keepali
                 if (response.status === 401) {
                     //We catch everything but this one. So public users are not bothered
                     //with a login windows when browsing home.
-                    if (response.config.url !== 'api/accounts/cuser') {
+                    if (response.config.url !== 'api/accounts/cuser' &&  response.config.url !== 'api/logout') {
                         //We don't intercept this request
                         if (response.config.url !== 'api/accounts/login') {
                             var deferred = $q.defer(),
@@ -393,7 +395,6 @@ app.run(function ($rootScope, $location, Restangular, $modal, $filter, base64, u
         }
         $rootScope.requests401 = [];
 
-        $location.url('/ig');
     });
 
     /*jshint sub: true */
@@ -425,9 +426,10 @@ app.run(function ($rootScope, $location, Restangular, $modal, $filter, base64, u
      * On 'logoutRequest' invoke logout on the server.
      */
     $rootScope.$on('event:logoutRequest', function () {
+        httpHeaders.common['Authorization'] = 'Basic xxx';
+        $http.get('api/logout');
         httpHeaders.common['Authorization'] = null;
         userInfoService.setCurrentUser(null);
-        $http.get('j_spring_security_logout');
     });
 
     /**

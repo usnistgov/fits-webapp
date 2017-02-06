@@ -15,20 +15,43 @@ body {
 	<md-content>
 		<md-tabs md-selected="selectedTabTC" md-dynamic-height md-border-bottom>
 			<md-tab label="Test Case Information">
-				<md-content class="md-padding">         
+				<md-content class="md-padding">
 					<form name="testplanMetaDataForm" class="form-horizontal" novalidate>
 						<div class="row">
 							<div class="col-md-12">
-								<div class="col-md-3">
+								<div class="col-md-8">
 									<md-input-container style="width: 100%;">
-										<label>ID</label>
-										<input ng-model="selectedTC.uid" ng-change="tcChanged()" type="text"/>
+										<label>Name</label>
+										<input ng-model="selectedTC.name" ng-change="tcChanged()" type="text"/>
 									</md-input-container>
 								</div>
 								<div class="col-md-5">
 									<md-input-container style="width: 100%;">
-										<label>Name</label>
-										<input ng-model="selectedTC.name" ng-change="tcChanged()" type="text"/>
+										<label>Group</label>
+										<input ng-focus="showS()" ng-model="selectedTC.group" ng-blur="reGroup()" type="text"/>
+									</md-input-container>
+									<div ng-show="showSugg" style="margin-top: -45px; z-index: 999;
+position: absolute;
+width: 94%; margin-bottom: 10px; border-top: 1px #bfbfbf solid;  border-left: 1px #bfbfbf solid; border-right: 1px #bfbfbf solid;" layout="column" layout-align="start">
+										<div ng-click="changeGroup(key)" ng-hide="key === selectedTC.group" style="width: 100%;
+																					padding-left: 10px;
+																					border-bottom: 1px #bfbfbf solid;
+																					text-align: center;
+																					height: 26px;
+																					 z-index: 999;
+																					vertical-align: middle;
+																					cursor : pointer;
+																					background-color : white;
+																					" ng-repeat="key in selectedTPg.keys | filter:selectedTC.group">
+											{{key}}
+										</div>
+									</div>
+
+								</div>
+								<div class="col-md-3">
+									<md-input-container style="width: 100%;">
+										<label>ID</label>
+										<input ng-model="selectedTC.uid" ng-change="tcChanged()" type="text"/>
 									</md-input-container>
 								</div>
 								<div class="col-md-4 pull-right">
@@ -71,7 +94,7 @@ body {
 				<md-content class="md-padding">
 					<form name="mdForm" class="form-horizontal" novalidate>
 						<div class="row">
-							<div class="col-md-12">	
+							<div class="col-md-12">
 								<div class="col-md-9">
 									<md-input-container style="width: 100%;">
 										<label>Version</label>
@@ -85,7 +108,7 @@ body {
 									</md-input-container>
 								</div>
 							</div>
-							<div class="col-md-12">	
+							<div class="col-md-12">
 								<div class="col-md-9">
 									<md-input-container style="width: 100%;">
 										<label>Type</label>

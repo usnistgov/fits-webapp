@@ -41,7 +41,8 @@ var app = angular
         'btorfs.multiselect',
         'ui.select',
         'infinite-scroll',
-        'dndLists'
+        'dndLists',
+        'autocomplete'
     ]);
 
 var

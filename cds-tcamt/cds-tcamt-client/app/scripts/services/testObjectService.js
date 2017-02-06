@@ -1,6 +1,6 @@
 angular.module('tcl').factory('TestObjectUtil', function () {
 	var testObjectService = {
-			
+
 			cleanObject : function(obj,exp){
 				if(typeof obj === 'object'){
 					if(!Array.isArray(obj)) {
@@ -20,7 +20,7 @@ angular.module('tcl').factory('TestObjectUtil', function () {
 					}
 				}
 			},
-			
+
 			sanitizeDate : function(obj){
 				if(obj){
 					if(obj.hasOwnProperty("fixed")){
@@ -32,7 +32,7 @@ angular.module('tcl').factory('TestObjectUtil', function () {
 					}
 				}
 			},
-			
+
 			sanitizeDates : function(obj){
 				if(typeof obj === 'object'){
 					if(Array.isArray(obj)) {
@@ -52,7 +52,7 @@ angular.module('tcl').factory('TestObjectUtil', function () {
 					}
 				}
 			},
-			
+
 			sanitizeEvents : function(tc){
 				if(tc.events){
 					for(var e in tc.events){
@@ -60,7 +60,7 @@ angular.module('tcl').factory('TestObjectUtil', function () {
 					}
 				}
 			},
-			
+
 			cleanDates : function(obj){
 				if(typeof obj === 'object'){
 					if(Array.isArray(obj)) {
@@ -80,7 +80,32 @@ angular.module('tcl').factory('TestObjectUtil', function () {
 					}
 				}
 			},
-			
+
+			group : function (list) {
+				var ugroup = [];
+				for(var tc in list){
+					if(list[tc].group && ugroup.indexOf(list[tc].group) === -1){
+						ugroup.push(list[tc].group);
+					}
+				}
+
+				var groups = [];
+				for(var g in ugroup){
+					var tmp = list.filter(function (item) {
+						return item.group === ugroup[g];
+                    });
+
+					groups.push({
+						label : ugroup[g],
+						children : tmp
+					})
+				}
+				var tcs = list.filter(function (item) {
+                    return !item.group;
+                });
+				return { groups : groups, testCases : tcs, keys : ugroup };
+            },
+
 			cleanDate : function(obj){
 				if(obj){
 					if(obj.hasOwnProperty("_type")){
@@ -97,24 +122,24 @@ angular.module('tcl').factory('TestObjectUtil', function () {
 					}
 				}
 			},
-			
+
 			clone : function(obj){
 				var c = JSON.parse(JSON.stringify(obj));
 				testObjectService.cleanObject(c,new RegExp("^id$"));
 				return c;
 			},
-			
+
 			cloneEntity : function(entity){
 				var e = testObjectService.clone(entity);
 				testObjectService.markWithCLID(e);
 				return e;
 			},
-			
+
 			synchronize : function(id , container, remoteObj){
 				var indexOfObj = testObjectService.index(container,"id",id);
 				container[indexOfObj] = remoteObj;
 			},
-			
+
 			index : function(container,key,value){
 				for(var i = 0; i < container.length; i++){
 					if(typeof container[i] === 'object' && container[i].hasOwnProperty(key) && container[i][key]  === value){
@@ -123,19 +148,19 @@ angular.module('tcl').factory('TestObjectUtil', function () {
 				}
 				return -1;
 			},
-			
+
 			markWithCLID : function(obj){
 				obj.id = "cl_"+testObjectService.generateUID();
 			},
-			
+
 			isLocal : function(obj){
-				return obj.hasOwnProperty("id") ? (typeof obj.id === 'string' ? true : false ) : true; 
+				return obj.hasOwnProperty("id") ? (typeof obj.id === 'string' ? true : false ) : true;
 			},
 
 			isLocalID : function(id){
             	return typeof id === 'string' ? true : false;
         	},
-			
+
 			generateUID : function(){
 				var d = new Date().getTime();
 				var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
@@ -151,7 +176,7 @@ angular.module('tcl').factory('TestObjectUtil', function () {
 
 angular.module('tcl').factory('TestObjectFactory', function (TestObjectUtil) {
 	var testObjectService = {
-			
+
 			createTC : function(){
 				var dt = new Date();
 				var tc = {
@@ -184,7 +209,7 @@ angular.module('tcl').factory('TestObjectFactory', function (TestObjectUtil) {
 				TestObjectUtil.markWithCLID(tc);
 				return tc;
 			},
-			
+
 			createTP : function(){
 				var dt = new Date();
 				var tp = {
@@ -210,7 +235,7 @@ angular.module('tcl').factory('TestObjectFactory', function (TestObjectUtil) {
 				TestObjectUtil.markWithCLID(tp);
 				return tp;
 			},
-			
+
 			createEvent : function(){
 				var ev = {
 						_type : "vaccination",
@@ -224,7 +249,7 @@ angular.module('tcl').factory('TestObjectFactory', function (TestObjectUtil) {
 				};
 				return ev;
 			},
-			
+
 			createForecast : function(){
 				var fc = {
 						doseNumber : 0,
@@ -248,7 +273,7 @@ angular.module('tcl').factory('TestObjectFactory', function (TestObjectUtil) {
 				};
 				return fc;
 			},
-			
+
 			createEvaluation : function(){
 				var eval = {
 						relatedTo : null,
@@ -256,7 +281,7 @@ angular.module('tcl').factory('TestObjectFactory', function (TestObjectUtil) {
 				};
 				return eval;
 			}
-			
+
 	};
 	return testObjectService;
 });
@@ -287,7 +312,7 @@ angular.module('tcl').factory('TestObjectSynchronize', function ($q, $http,TestO
                 return deferred.promise;
             }
 
-            if(_validation.saveable){
+            // if(_validation.saveable){
             	var id = tc.id;
             	var _tc = TestObjectSynchronize.prepare(tc);
                 $http.post('api/testcase/' + tp.id + '/save', _tc).then(
@@ -310,14 +335,14 @@ angular.module('tcl').factory('TestObjectSynchronize', function ($q, $http,TestO
                         });
                     }
 				);
-			}
-			else {
-                deferred.reject({
-                    status : false,
-                    message : "TestCase Contains Errors, please fix them and try again",
-					errors : _validation.errors
-                });
-			}
+			// }
+			// else {
+             //    deferred.reject({
+             //        status : false,
+             //        message : "TestCase Contains Errors, please fix them and try again",
+			// 		errors : _validation.errors
+             //    });
+			// }
 			return deferred.promise;
 		},
 		syncTP : function (tps,tp) {

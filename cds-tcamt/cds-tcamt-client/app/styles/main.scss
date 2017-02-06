@@ -32,7 +32,11 @@ multiselect button:after {
    box-shadow:         inset 0 0 10px #000000;
 }
 
-
+.shadowv {
+  -webkit-box-shadow: 7px 6px 5px 0px rgba(0, 0, 0, 1);
+  -moz-box-shadow:    7px 6px 5px 0px rgba(0, 0, 0, 1);
+  box-shadow:         7px 6px 5px 0px rgba(0, 0, 0, 1);
+}
 .cdraggable {
 
   /* Permalink - use to edit and share this gradient: http://colorzilla.com/gradient-editor/#d1ffeb+0,6dfff2+100 */
@@ -159,6 +163,10 @@ body {
 
 .sbadge {
 	background-color : #F24A08;
+}
+
+.qbadge {
+  background-color : #1296ea;
 }
 
 table{

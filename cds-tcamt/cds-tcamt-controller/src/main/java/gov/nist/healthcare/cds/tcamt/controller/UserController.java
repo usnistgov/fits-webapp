@@ -45,4 +45,9 @@ public class UserController {
 		}
 		return cu;
 	}
+
+	@RequestMapping(value = "/logout", method = RequestMethod.GET)
+	public boolean logout() {
+		return true;
+	}
 }
