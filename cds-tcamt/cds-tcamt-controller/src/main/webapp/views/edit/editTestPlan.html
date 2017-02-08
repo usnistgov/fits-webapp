@@ -21,7 +21,7 @@
 								<div class="col-md-5">
 									<md-input-container style="width: 100%;">
 										<label>Group</label>
-										<input ng-focus="showS()" ng-model="selectedTC.group" ng-blur="reGroup()" type="text"/>
+										<input ng-focus="showS()" ng-model="selectedTC.group" type="text"/>
 									</md-input-container>
 									<div ng-show="showSugg" style="margin-top: -45px; z-index: 999;
 position: absolute;
@@ -97,7 +97,7 @@ width: 94%; margin-bottom: 10px; border-top: 1px #bfbfbf solid;  border-left: 1p
 								<div class="col-md-3">
 									<md-input-container style="width: 100%;">
 										<label>Date Created</label>
-										<md-datepicker ng-model="selectedTC.metaData.dateCreated.fixed._dateObj" ng-disabled="true"></md-datepicker>
+										<md-datepicker ng-model="selectedTC.metaData._dateCreated" ng-change="dateChange(selectedTC.metaData,'dateCreated')" ng-disabled="true"></md-datepicker>
 									</md-input-container>
 								</div>
 							</div>
@@ -111,7 +111,7 @@ width: 94%; margin-bottom: 10px; border-top: 1px #bfbfbf solid;  border-left: 1p
 								<div class="col-md-3">
 									<md-input-container style="width: 100%;">
 										<label>Date Last Updated</label>
-										<md-datepicker ng-model="selectedTC.metaData.dateLastUpdated.fixed._dateObj" ng-disabled="true"></md-datepicker>
+										<md-datepicker ng-model="selectedTC.metaData._dateLastUpdated" ng-change="dateChange(selectedTC.metaData,'dateLastUpdated')" ng-disabled="true"></md-datepicker>
 									</md-input-container>
 								</div>
 							</div>

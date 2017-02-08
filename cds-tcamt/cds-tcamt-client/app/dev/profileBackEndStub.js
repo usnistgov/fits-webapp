@@ -87,9 +87,9 @@ angular.module('tcl').run(function ($httpBackend, $q, $http) {
         return [request.status, profile, {}];
     });
 
-    $httpBackend.whenGET('api/exec/userConfigs').respond(function (method, url, data, headers) {
+    $httpBackend.whenGET('api/exec/configs').respond(function (method, url, data, headers) {
         var request = new XMLHttpRequest();
-        request.open('GET', '../../resources/configs.json', false);
+        request.open('GET', '../../resources/softConfigs.json', false);
         request.send(null);
         var profile = angular.fromJson(request.response);
         return [request.status, profile, {}];

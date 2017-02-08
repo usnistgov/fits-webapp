@@ -7,18 +7,9 @@
       "id": 1,
       "version": 1,
       "imported": false,
-      "dateCreated": {
-        "fixed": {
-          "id": "1",
-          "date": 1477594049641
-        }
-      },
-      "dateLastUpdated": {
-        "fixed": {
-          "id": "2",
-          "date": 1477594049641
-        }
-      }
+      "dateCreated": 1477594049641,
+      "dateLastUpdated":  1477594049641
+  
     },
     "testCases": [
       {
@@ -37,22 +28,13 @@
           "gender": "F"
         },
         "metaData": {
-          "id": 1,
-          "version": 1,
-          "imported": false,
-          "dateCreated": {
-            "fixed": {
-              "id": "1",
-              "date": 1477594049641
-            }
-          },
-          "dateLastUpdated": {
-            "fixed": {
-              "id": "2",
-              "date": 1477594049641
-            }
-          }
-        },
+      "id": 1,
+      "version": 1,
+      "imported": false,
+      "dateCreated": 1477594049641,
+      "dateLastUpdated":  1477594049641
+  
+    },
         "evalDate": {
           "fixed": {
             "id": "3",
@@ -201,23 +183,14 @@
           },
           "gender": "F"
         },
-        "metaData": {
-          "id": 1,
-          "version": 1,
-          "imported": false,
-          "dateCreated": {
-            "fixed": {
-              "id": "1",
-              "date": 1477594049641
-            }
-          },
-          "dateLastUpdated": {
-            "fixed": {
-              "id": "2",
-              "date": 1477594049641
-            }
-          }
-        },
+       "metaData": {
+      "id": 1,
+      "version": 1,
+      "imported": false,
+      "dateCreated": 1477594049641,
+      "dateLastUpdated":  1477594049641
+  
+    },
         "evalDate": {
           "fixed": {
             "id": "3",
@@ -366,22 +339,13 @@
           "gender": "F"
         },
         "metaData": {
-          "id": 1,
-          "version": 1,
-          "imported": false,
-          "dateCreated": {
-            "fixed": {
-              "id": "1",
-              "date": 1477594049641
-            }
-          },
-          "dateLastUpdated": {
-            "fixed": {
-              "id": "2",
-              "date": 1477594049641
-            }
-          }
-        },
+      "id": 1,
+      "version": 1,
+      "imported": false,
+      "dateCreated": 1477594049641,
+      "dateLastUpdated":  1477594049641
+  
+    },
         "evalDate": {
           "fixed": {
             "id": "3",

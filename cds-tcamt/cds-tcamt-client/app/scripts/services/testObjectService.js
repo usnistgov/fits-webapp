@@ -30,6 +30,9 @@ angular.module('tcl').factory('TestObjectUtil', function () {
 					else if(obj.hasOwnProperty("relative")){
 						obj['_type'] = "relative";
 					}
+					else {
+						
+					}
 				}
 			},
 
@@ -43,7 +46,12 @@ angular.module('tcl').factory('TestObjectUtil', function () {
 					else {
 						for(var x in obj){
 							if(~x.search(/date/i) || ~x.search(/earliest/i) || ~x.search(/recommended/i) || ~x.search(/dob/i) || ~x.search(/pastDue/i)){
-								testObjectService.sanitizeDate(obj[x]);
+								if(typeof obj[x] === 'number'){
+									obj["_"+x] = new Date(obj[x]);
+								}
+								else {
+									testObjectService.sanitizeDate(obj[x]);
+								}
 							}
 							else {
 								testObjectService.sanitizeDates(obj[x]);
@@ -190,16 +198,8 @@ angular.module('tcl').factory('TestObjectFactory', function (TestObjectUtil) {
 						metaData : {
 							version : 1,
 							imported : false,
-							dateCreated : {
-								fixed : {
-									date : dt.getTime()
-								}
-							},
-							dateLastUpdated : {
-								fixed : {
-									date : dt.getTime()
-								}
-							}
+							dateCreated : dt.getTime(),
+							dateLastUpdated : dt.getTime()
 						},
 						evalDate : null,
 						events : [],
@@ -218,16 +218,8 @@ angular.module('tcl').factory('TestObjectFactory', function (TestObjectUtil) {
 						metaData : {
 							version : "1",
 							imported : false,
-							dateCreated : {
-								fixed : {
-									date : dt.getTime(),
-								}
-							},
-							dateLastUpdated : {
-								fixed : {
-									date : dt.getTime(),
-								}
-							}
+							dateCreated : dt.getTime(),
+							dateLastUpdated : dt.getTime()
 						},
 						testCases : []
 				};

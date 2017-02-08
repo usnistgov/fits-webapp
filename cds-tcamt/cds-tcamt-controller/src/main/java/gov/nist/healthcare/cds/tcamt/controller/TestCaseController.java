@@ -19,7 +19,6 @@ import gov.nist.healthcare.cds.domain.TestCase;
 import gov.nist.healthcare.cds.domain.TestPlan;
 import gov.nist.healthcare.cds.domain.exception.VaccineNotFoundException;
 import gov.nist.healthcare.cds.domain.xml.ErrorModel;
-import gov.nist.healthcare.cds.enumeration.EvaluationReason;
 import gov.nist.healthcare.cds.repositories.TestCaseRepository;
 import gov.nist.healthcare.cds.repositories.TestPlanRepository;
 import gov.nist.healthcare.cds.service.NISTFormatService;
@@ -27,6 +26,9 @@ import gov.nist.healthcare.cds.service.impl.CSSFormatServiceImpl;
 import gov.nist.healthcare.cds.tcamt.domain.ImportResult;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -52,13 +54,7 @@ public class TestCaseController {
 	
 	@Autowired
 	private CSSFormatServiceImpl cdcFormatService;
-	
-	@RequestMapping(value = "/testcases", method = RequestMethod.GET)
-	@ResponseBody
-	public List<TestCase> testCases(){
-		return testCaseRepository.findAll();
-	}
-	
+
 	@RequestMapping(value = "/testplans", method = RequestMethod.GET)
 	@ResponseBody
 	public List<TestPlan> test(Principal p){
@@ -68,15 +64,14 @@ public class TestCaseController {
 	@RequestMapping(value = "/testcase/{id}/save", method = RequestMethod.POST)
 	@ResponseBody
 	public TestCase save(@RequestBody TestCase tc,@PathVariable Long id) throws NotFoundException{
-		TestPlan plan = testPlanRepository.findOne(id);
-		if(plan != null){
-			tc.setTestPlan(plan);
-			TestCase newTC = testCaseRepository.saveAndFlush(tc);
-			return newTC;
+		TestPlan tp = testPlanRepository.findOne(id);
+		if(tp != null){
+			tc.setTestPlan(tp);
 		}
 		else {
 			throw new NotFoundException("TestPlan ("+id+")");
 		}
+		return testCaseRepository.save(tc);
 	}
 	
 	@RequestMapping(value = "/testplan/save", method = RequestMethod.POST)
@@ -198,6 +193,7 @@ public class TestCaseController {
 		}
 	}
 	
+    @CacheEvict(value={"testplans-user","testplans"}, allEntries=true)
 	@RequestMapping(value = "/testcase/{id}/import/cdc", method = RequestMethod.POST)
 	@ResponseBody
 	public ImportResult uploadFileHandlerCDC(@RequestPart("file") MultipartFile file,@RequestPart("config") CDCImportConfig config, @PathVariable Long id) {

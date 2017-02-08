@@ -22,8 +22,13 @@ angular.module('tcl').controller('ExecutionCtrl', function ($rootScope,$scope,$h
         connector : ""
     };
     $scope.loadConfig = function () {
-        $http.get("api/exec/userConfigs").then(function (result) {
+        $http.get("api/exec/configs").then(function (result) {
             $scope.configs = angular.fromJson(result.data);
+        });
+    };
+    $scope.saveConfig = function () {
+        $http.post("api/exec/config",$scope.configStub).then(function (result) {
+        	$scope.loadConfig();
         });
     };
     $rootScope.$on('event:loginConfirmed', function () {
@@ -133,7 +138,7 @@ angular.module('tcl').controller('ExecutionCtrl', function ($rootScope,$scope,$h
             console.log(err);
         });
     };
-
+    
     $scope.selectTC = function (tc) {
         $scope.selectedTC = tc;
         $scope.selectedTP = null;
@@ -154,7 +159,7 @@ angular.module('tcl').controller('ExecutionCtrl', function ($rootScope,$scope,$h
         $scope.exec = true;
         $scope.execT(0);
     };
-
+    
     $scope.execT = function (id) {
         if(id < $scope.tcQueue.length){
             $scope.tcQueue[id]._pgt = 'indeterminate';
