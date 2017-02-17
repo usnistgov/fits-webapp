@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class TestExecutionController {
-
 	
 	@Autowired
 	private SoftwareConfigRepository softwareConfigRepository;
@@ -28,6 +27,7 @@ public class TestExecutionController {
 	@RequestMapping(value = "/exec/configs/save", method = RequestMethod.POST)
 	@ResponseBody
 	public SoftwareConfig save(@RequestBody SoftwareConfig sc,Principal user) {
+		sc.setUser(user.getName());
 		return softwareConfigRepository.save(sc);
 	}
 	

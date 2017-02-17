@@ -32,11 +32,11 @@
                     </tr>
                     <tr>
                         <td style="width : 200px;"><strong> Date Created </strong></td>
-                        <td>{{selectedTC.metaData.dateCreated.fixed.date | date:'MM/dd/yyyy'}}</td>
+                        <td>{{selectedTC.metaData.dateCreated | date:'MM/dd/yyyy'}}</td>
                     </tr>
                     <tr>
                         <td style="width : 200px;"><strong> Date Last Updated </strong></td>
-                        <td>{{selectedTC.metaData.dateLastUpdated.fixed.date | date:'MM/dd/yyyy'}}</td>
+                        <td>{{selectedTC.metaData.dateLastUpdated | date:'MM/dd/yyyy'}}</td>
                     </tr>
                     <tr>
                         <td style="width : 200px;"><strong> Type </strong></td>
@@ -144,6 +144,15 @@
                             {{fc.pastDue.relative.relativeTo}} {{fc.pastDue.relative.year}}y {{fc.pastDue.relative.month}}m {{fc.pastDue.relative.day}}d
                         </td>
                     </tr>
+                    <tr>
+			            <td style="width : 200px;" ><strong> Latest Date </strong></td>
+			            <td ng-show="fc.complete._type === 'fixed'">
+			                {{fc.complete.fixed.date | date:'MM/dd/yyyy'}}
+			            </td>
+			            <td ng-show="fc.complete._type === 'relative'">
+			                {{fc.complete.relative.relativeTo}} {{fc.complete.relative.year}}y {{fc.complete.relative.month}}m {{fc.complete.relative.day}}d
+			            </td>
+        			</tr>
                 </table>
             </md-content>
         </md-tab>

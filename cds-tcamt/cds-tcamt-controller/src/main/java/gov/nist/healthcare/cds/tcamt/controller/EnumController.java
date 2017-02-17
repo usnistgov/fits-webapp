@@ -3,7 +3,7 @@ package gov.nist.healthcare.cds.tcamt.controller;
 import java.util.ArrayList;
 import java.util.List;
 
-import gov.nist.healthcare.cds.domain.EnumContainer;
+import gov.nist.healthcare.cds.domain.wrapper.EnumContainer;
 import gov.nist.healthcare.cds.enumeration.EvaluationReason;
 import gov.nist.healthcare.cds.enumeration.EvaluationStatus;
 import gov.nist.healthcare.cds.enumeration.Gender;

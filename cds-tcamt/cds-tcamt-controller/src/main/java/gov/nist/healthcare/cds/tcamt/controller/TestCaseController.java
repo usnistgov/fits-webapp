@@ -13,11 +13,11 @@ import javassist.NotFoundException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import gov.nist.healthcare.cds.domain.CDCImport;
-import gov.nist.healthcare.cds.domain.CDCImportConfig;
 import gov.nist.healthcare.cds.domain.TestCase;
 import gov.nist.healthcare.cds.domain.TestPlan;
 import gov.nist.healthcare.cds.domain.exception.VaccineNotFoundException;
+import gov.nist.healthcare.cds.domain.wrapper.CDCImport;
+import gov.nist.healthcare.cds.domain.wrapper.CDCImportConfig;
 import gov.nist.healthcare.cds.domain.xml.ErrorModel;
 import gov.nist.healthcare.cds.repositories.TestCaseRepository;
 import gov.nist.healthcare.cds.repositories.TestPlanRepository;

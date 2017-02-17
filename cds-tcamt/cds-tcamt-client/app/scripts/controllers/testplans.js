@@ -20,6 +20,22 @@ angular.module('tcl').filter('vaccine', function () {
   };
 });
 
+angular.module('tcl').filter('groupBy', function($parse) {
+    return _.memoize(function(items, field) {
+    	if (!items || !items.length) { return; }
+        var getter = $parse(field);
+        return _.groupBy(items, function(item) {
+        	var g = getter(item);
+        	return g ? g !== '' ? g : 'Ungrouped' : 'Ungrouped';
+        });
+    }, function(items,field){
+    	if (!items || !items.length) { return "x"; }
+    	return items.reduce(function(acc,item){
+    		return acc+item.id+item.group+'-';
+    	});
+    });
+});
+
 angular.module('tcl').filter('vaccineEpt', function () {
     return function (items,str) {
         if (!items || !items.length) { return; }
@@ -998,16 +1014,18 @@ angular
 					        	 $scope.selectTC(clone);
 					         } ],
 					         [  'Delete Test Case',
-					            function(modelValue) {
-					        	 var tc = $scope.selectedTP.testCases[modelValue.$index];
+					            function($itemScope, $event, modelValue, text, $li) {
+					        	 console.log("ST");
+					        	 var tc = $itemScope.$nodeScope.$modelValue;
+					        	 var index = $scope.selectedTP.testCases.indexOf($itemScope.$nodeScope.$modelValue);
 					        	 if(TestObjectUtil.isLocal(tc)){
-					        		 $scope.selectedTP.testCases.splice(modelValue.$index, 1);
+					        		 $scope.selectedTP.testCases.splice(index, 1);
 					        		 $scope.selectTP($scope.selectedTP);
 					        	 }
-					        	 else{
+					        	 else {
 					        		 $http.post('api/testcase/'+ tc.id +'/delete')
 					        		 .then(function(r) {
-					        			 $scope.selectedTP.testCases.splice(modelValue.$index,1);
+					        			 $scope.selectedTP.testCases.splice(index,1);
 					        			 $scope.selectTP($scope.selectedTP);
 					        			 Notification
 					        			 .success({

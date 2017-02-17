@@ -56,17 +56,29 @@ body {
 <!-- 				</li> -->
 <!-- 			</ol> -->
 			<ol ui-tree-nodes="" ng-model="selectedTP.testCases">
-				<li ng-repeat="tc in selectedTP.testCases | testcase:tcSearch track by $index" ui-tree-node ng-hide="$parentNodeScope.collapsed">
-					<div ng-click="selectTC(tc)" ui-tree-handle ng-class="{selected1 : isSelectedTC(tc)}"
-						 context-menu="tcCM" model="$index">
+				<li collapsed="group === 'Ungrouped' ? false : true" data-collapsed="{{group === 'Ungrouped' ? false : true}}" ng-repeat="(group, tcs) in (selectedTP.testCases | testcase:tcSearch) | groupBy: 'group' track by $index" ui-tree-node ng-hide="$parentNodeScope.collapsed">
+					<div>
 						<div style="margin-left: 5px;">
-							<span data-nodrag> <span
-									class="label label-component label-icon">T</span> <span ng-class="{ 'changedS' : tc.changed }">{{ tc.uid ? '#'+tc.uid+"- " : ""}}{{tc.name}}</span>
-								<i ng-show="this.$modelValue===activeModel"
-								   class="fa fa-pencil fa-fw"></i>
+							<i data-nodrag ng-click="toggle(this)" class="fa" ng-class="{'fa-caret-right': collapsed, 'fa-caret-down': !collapsed}"></i>
+							<span data-nodrag> 
+								<span class="label label-group label-icon">G</span><strong>{{ group ? group : 'No Group' }}</strong> <span style="font-style: italic; color: #e09443;">({{tcs.length}} TC)</span>
 							</span>
 						</div>
 					</div>
+					<ol ui-tree-nodes="" ng-model="tcs">
+						<li ng-repeat="tc in tcs" ui-tree-node ui-tree-node ng-hide="$parentNodeScope.collapsed">
+							<div ng-click="selectTC(tc)" ui-tree-handle ng-class="{selected1 : isSelectedTC(tc)}"
+								 context-menu="tcCM" model="$index">
+								<div style="margin-left: 5px;">
+									<span data-nodrag> <span
+											class="label label-component label-icon">T</span> <span style="font-weight: initial;" ng-class="{ 'changedS' : tc.changed }">{{ tc.uid ? '#'+tc.uid+"- " : ""}}{{tc.name}}</span>
+										<i ng-show="this.$modelValue===activeModel"
+										   class="fa fa-pencil fa-fw"></i>
+									</span>
+								</div>
+							</div>
+						</li>
+					</ol>
 				</li>
 			</ol>
 		</li>

@@ -239,7 +239,7 @@ app.config(function ($routeProvider, RestangularProvider, $httpProvider, Keepali
                 if (response.status === 401) {
                     //We catch everything but this one. So public users are not bothered
                     //with a login windows when browsing home.
-                    if (response.config.url !== 'api/accounts/cuser' &&  response.config.url !== 'api/logout') {
+                    if (response.config.url !== 'api/accounts/cuser') {
                         //We don't intercept this request
                         if (response.config.url !== 'api/accounts/login') {
                             var deferred = $q.defer(),
@@ -426,8 +426,7 @@ app.run(function ($rootScope, $location, Restangular, $modal, $filter, base64, u
      * On 'logoutRequest' invoke logout on the server.
      */
     $rootScope.$on('event:logoutRequest', function () {
-        httpHeaders.common['Authorization'] = 'Basic xxx';
-        $http.get('api/logout');
+        $http.get('logout');
         httpHeaders.common['Authorization'] = null;
         userInfoService.setCurrentUser(null);
     });

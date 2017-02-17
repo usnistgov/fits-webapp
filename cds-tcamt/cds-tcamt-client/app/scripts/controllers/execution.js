@@ -27,7 +27,7 @@ angular.module('tcl').controller('ExecutionCtrl', function ($rootScope,$scope,$h
         });
     };
     $scope.saveConfig = function () {
-        $http.post("api/exec/config",$scope.configStub).then(function (result) {
+        $http.post("api/exec/configs/save",$scope.configStub).then(function (result) {
         	$scope.loadConfig();
         });
     };
@@ -156,16 +156,20 @@ angular.module('tcl').controller('ExecutionCtrl', function ($rootScope,$scope,$h
     };
 
     $scope.exe = function () {
+    	console.log($scope.tcQueue.length);
         $scope.exec = true;
         $scope.execT(0);
     };
     
     $scope.execT = function (id) {
+    	console.log("Exec :"+id);
         if(id < $scope.tcQueue.length){
+        	console.log("Start :"+id);
             $scope.tcQueue[id]._pgt = 'indeterminate';
             $timeout(function () {
                 $scope.tcQueue[id]._pgt = 'determinate';
                 $scope.tcQueue[id]._pg = 100;
+                console.log("End :"+id);
                 $scope.execT(id+1);
             }, 5000);
         }
