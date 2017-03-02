@@ -89,12 +89,44 @@ angular.module('tcl').run(function ($httpBackend, $q, $http) {
 
     $httpBackend.whenGET('api/exec/configs').respond(function (method, url, data, headers) {
         var request = new XMLHttpRequest();
-        request.open('GET', '../../resources/softConfigs.json', false);
+        request.open('GET', '../../resources/configs.json', false);
         request.send(null);
         var profile = angular.fromJson(request.response);
         return [request.status, profile, {}];
     });
+    
+    $httpBackend.whenGET('api/exec/start/1').respond(function (method, url, data, headers) {
+        var request = new XMLHttpRequest();
+        request.open('GET', '../../resources/configs.json', false);
+        request.send(null);
+        var profile = angular.fromJson(request.response);
+        return [request.status, true, {}];
+    });
 
+    $httpBackend.whenGET('api/exec/tc/1').respond(function (method, url, data, headers) {
+        var request = new XMLHttpRequest();
+        request.open('GET', '../../resources/configs.json', false);
+        request.send(null);
+        var profile = angular.fromJson(request.response);
+        return [request.status, true, {}];
+    });
+    
+    $httpBackend.whenGET('api/exec/collect').respond(function (method, url, data, headers) {
+        var request = new XMLHttpRequest();
+        request.open('GET', '../../resources/validation.json', false);
+        request.send(null);
+        var profile = angular.fromJson(request.response);
+        return [request.status, profile, {}];
+    });
+    
+    $httpBackend.whenGET('api/validate').respond(function (method, url, data, headers) {
+        var request = new XMLHttpRequest();
+        request.open('GET', '../../resources/validation.json', false);
+        request.send(null);
+        var profile = angular.fromJson(request.response);
+        return [request.status, profile, {}];
+    });
+    
     $httpBackend.whenGET('api/vxm').respond(function (method, url, data, headers) {
         var request = new XMLHttpRequest();
         request.open('GET', '../../resources/vxm.json', false);

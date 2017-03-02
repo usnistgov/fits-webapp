@@ -5,30 +5,47 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.security.Principal;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javassist.NotFoundException;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import gov.nist.healthcare.cds.domain.FixedDate;
 import gov.nist.healthcare.cds.domain.TestCase;
 import gov.nist.healthcare.cds.domain.TestPlan;
+import gov.nist.healthcare.cds.domain.exception.UnresolvableDate;
 import gov.nist.healthcare.cds.domain.exception.VaccineNotFoundException;
+import gov.nist.healthcare.cds.domain.wrapper.ActualEvaluation;
+import gov.nist.healthcare.cds.domain.wrapper.ActualForecast;
 import gov.nist.healthcare.cds.domain.wrapper.CDCImport;
 import gov.nist.healthcare.cds.domain.wrapper.CDCImportConfig;
+import gov.nist.healthcare.cds.domain.wrapper.EngineResponse;
+import gov.nist.healthcare.cds.domain.wrapper.Report;
+import gov.nist.healthcare.cds.domain.wrapper.ResponseVaccinationEvent;
+import gov.nist.healthcare.cds.domain.wrapper.VaccineRef;
 import gov.nist.healthcare.cds.domain.xml.ErrorModel;
+import gov.nist.healthcare.cds.enumeration.EvaluationStatus;
+import gov.nist.healthcare.cds.enumeration.SerieStatus;
 import gov.nist.healthcare.cds.repositories.TestCaseRepository;
 import gov.nist.healthcare.cds.repositories.TestPlanRepository;
 import gov.nist.healthcare.cds.service.NISTFormatService;
+import gov.nist.healthcare.cds.service.ValidationService;
 import gov.nist.healthcare.cds.service.impl.CSSFormatServiceImpl;
+import gov.nist.healthcare.cds.service.impl.ExecutionService;
 import gov.nist.healthcare.cds.tcamt.domain.ImportResult;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.CachePut;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -54,11 +71,22 @@ public class TestCaseController {
 	
 	@Autowired
 	private CSSFormatServiceImpl cdcFormatService;
+	
+	@Autowired
+	private ExecutionService execService;
 
 	@RequestMapping(value = "/testplans", method = RequestMethod.GET)
 	@ResponseBody
 	public List<TestPlan> test(Principal p){
 		return testPlanRepository.findByUser(p.getName());
+	}
+	
+	
+	@RequestMapping(value = "/validate/{id}", method = RequestMethod.GET)
+	@ResponseBody
+	public Report validate(@PathVariable Long id) throws ParseException, UnresolvableDate{
+		TestCase tc = testCaseRepository.findOne(id);
+		return execService.execute(null, tc, Calendar.getInstance().getTime());
 	}
 	
 	@RequestMapping(value = "/testcase/{id}/save", method = RequestMethod.POST)

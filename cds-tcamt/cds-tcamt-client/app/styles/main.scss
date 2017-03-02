@@ -19,6 +19,10 @@ multiselect button:after {
   color: rgba(15, 15, 15, 0.33);
 }
 
+.unmatched {
+	background-color : rgb(224, 224, 224);
+}
+
 .browsehappy {
   margin: 0.2em 0;
   background: #ccc;

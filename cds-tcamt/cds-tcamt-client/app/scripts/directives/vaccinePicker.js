@@ -87,3 +87,43 @@ angular.module('tcl').directive('vaccinePicker', function() {
 		bindToController: true
 	};
 });
+
+angular.module('tcl').directive('report', function() {
+	return {
+		templateUrl : 'report.html',
+		restrict : 'E',
+		scope	 : {
+			report      : "=",
+			general     : "="
+		},
+		controller : function($scope) {
+			
+		}
+	};
+});
+
+angular.module('tcl').directive('eventReport', function() {
+	return {
+		templateUrl : 'vereport.html',
+		restrict : 'E',
+		scope	 : {
+			reportList      : "=data"
+		},
+		controller : function($scope) {
+			
+		}
+	};
+});
+
+angular.module('tcl').directive('forecastReport', function() {
+	return {
+		templateUrl : 'fcreport.html',
+		restrict : 'E',
+		scope	 : {
+			reportList      : "=data"
+		},
+		controller : function($scope) {
+			
+		}
+	};
+});

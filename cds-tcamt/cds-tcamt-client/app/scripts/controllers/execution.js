@@ -158,23 +158,61 @@ angular.module('tcl').controller('ExecutionCtrl', function ($rootScope,$scope,$h
     $scope.exe = function () {
     	console.log($scope.tcQueue.length);
         $scope.exec = true;
-        $scope.execT(0);
+        $http.get('api/exec/start/'+$scope.selectedConfig.id).then(function(response){
+    		if(response.data){
+    			$scope.execT(0);
+    		}
+    	});
     };
+    
+    $scope.rp = 0;
+    $scope.showResults = false;
+    $scope.valTC = {};
+    $scope.report = {};
     
     $scope.execT = function (id) {
     	console.log("Exec :"+id);
         if(id < $scope.tcQueue.length){
         	console.log("Start :"+id);
             $scope.tcQueue[id]._pgt = 'indeterminate';
-            $timeout(function () {
-                $scope.tcQueue[id]._pgt = 'determinate';
-                $scope.tcQueue[id]._pg = 100;
-                console.log("End :"+id);
-                $scope.execT(id+1);
-            }, 5000);
+            $http.get('api/exec/tc/'+$scope.tcQueue[id].id).then(function(response){
+        		if(response.data){
+        			$scope.tcQueue[id]._pgt = 'determinate';
+                    $scope.tcQueue[id]._pg = 100;
+                    console.log("End :"+id);
+                    $scope.execT(id+1);
+        		}
+        	});
+        }
+        else {
+        	$http.get('api/exec/collect').then(function(response){
+        		$scope.report = response.data;
+        		$scope.showResults = true;
+        		$scope.rp = 0;
+        		console.log($scope.report);
+        	});
         }
     };
 
+    $scope.goToReport = function(i){
+    	 $scope.rp = i;
+    };
+    
+	$scope.eventLabel = function(event){
+		if(!event.vaccination.date)
+			return "";
+		if(event.vaccination.date._type){
+			if(event.vaccination.date._type === 'fixed')
+				return $filter('date')(event.vaccination.date.fixed.date, "MM/dd/yyyy");
+			else if(event.vaccination.date._type === 'relative')
+				return "Relative";
+			else
+				return "Invalid Date";
+		}
+		else
+			return "";
+	};
+	
     $scope.canRun = function () {
         return  $scope.selectedConfig && $scope.tcQueue.length;
     };

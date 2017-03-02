@@ -226,16 +226,7 @@ angular
 					$scope.eventLabel = function(event){
 						if(!event.vaccination.date)
 							return "";
-						if(event.vaccination.date._type){
-							if(event.vaccination.date._type === 'fixed')
-								return $filter('date')(event.vaccination.date.fixed.date, "MM/dd/yyyy");
-							else if(event.vaccination.date._type === 'relative')
-								return "Relative";
-							else
-								return "Invalid Date";
-						}
-						else
-							return "";
+						return $filter('date')(event.vaccination.date.fixed.date, "MM/dd/yyyy");
 					};
 
 					$scope.newTestPlan = function() {

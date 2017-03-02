@@ -20,7 +20,7 @@
                         <button ng-click="clear()" ng-show="!exec && tcQueue.length > 0" class="btn btn-xs btn-danger"  style="margin: 0px; margin-right: 10px;">
                             <i class="fa fa-trash-o" style="font-size : 1.5em;" aria-hidden="true"></i>
                         </button>
-                        <button ng-click="exe()" ng-show="!exec && canRun()" class="btn btn-xs btn-success"  style="margin: 0px; margin-right: 10px;">
+                        <button ng-click="exe()" ng-show="!exec" class="btn btn-xs btn-success"  style="margin: 0px; margin-right: 10px;">
                             <i class="fa fa-play" style="font-size : 1.5em;" aria-hidden="true"></i>
                         </button>
                         <div style="padding: 0;">
@@ -146,8 +146,23 @@
                     <i class="fa fa-th-list" aria-hidden="true"></i>
                     <strong>Results</strong>
                 </div>
-                <div class="panel-body panel-resizable" layout="row" layout-align="center center">
-                    <img src="images/ajax-loader.gif"/>
+                <div class="panel-body panel-resizable" layout="row" layout-align="space-around center">
+                    <img ng-hide="showResults" src="images/ajax-loader.gif"/>
+                    <div flex="100" ng-show="showResults" layout="row" layout-align="space-around center">
+                    	<div flex="25" layout="row" layout-align="center center">
+                    		<button  class="btn" ng-show="rp-1 >= 0" ng-click="goToReport(rp-1)">
+                    			<i class="fa fa-chevron-left" style="font-size : 5em;" aria-hidden="true"></i>
+                    		</button>
+                    	</div>
+                    	<div flex="50">
+                    		<report  general="report" report="report.reports[rp]"></report>
+                    	</div>
+                    	<div flex="25" layout="row" layout-align="center center">
+                    		<button flex="25" class="btn" ng-show="report.reports.length > rp+1" ng-click="goToReport(rp+1)">
+                    			<i class="fa fa-chevron-right" style="font-size : 5em;" aria-hidden="true"></i>
+                    		</button>
+                    	</div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -255,3 +270,202 @@
         </div>
     </div>
 </div>
+<script type="text/ng-template" id="report.html">
+<table class="table table-condensed table-striped table-bordered" style="width: 100%; height: 100%;">
+	<thead>
+		<tr>
+			<th>Validation Report  <span class="pull-right">{{ general.executionDate | date:"MM/dd/yyyy"}}</span></th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr>
+			<td>
+				<table class="table table-condensed table-striped table-bordered">
+					<thead>
+						<tr>
+							<th style="text-align: center;" colspan="2">
+								<h3>
+									<span style="border: 0; color: rgb(93, 93, 189); text-align: center; font-weight: bold;">
+										{{report.tc.name}}
+									</span>
+								</h3>
+							</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<th colspan="2" style="background-color : white;">Evaluation Date <span class="pull-right">{{ report.evaluationDate | date:"MM/dd/yyyy"}}</span></th>
+						</tr>
+						<tr style="text-align: center;">
+							<th colspan="2"><span style="color : blue;">Software</span></th>
+						</tr>
+						<tr>
+							<td>End Point</td>
+							<td>{{general.software.endPoint}}</td>
+						</tr>
+						<tr>
+							<td>Connection Type</td>
+							<td>{{general.software.connector}}</td>
+						</tr>
+						<tr style="text-align: center;">
+							<th colspan="2"><span style="color : blue;">Patient</span></th>
+						</tr>
+						<tr>
+							<td>Date Of Birth</td>
+							<td>{{ report.dob | date:"MM/dd/yyyy"}}</td>
+						</tr>
+						<tr>
+							<td>Gender</td>
+							<td>{{report.tc.patient.gender}}</td>
+						</tr>
+					</tbody>
+				</table>
+			</td>
+		</tr>
+		<tr>
+			<td>
+				<table style="text-align: center;" class="table table-condensed table-bordered">
+					<thead>
+						<tr>
+							<th colspan="3" style="text-align: center;">Summary</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td></td>
+							<td>Evaluations</td>
+							<td>Forecasts</td>
+						</tr>
+						<tr class="success">
+							<td>PASSED</td>
+							<td>{{report.events.p}}</td>
+							<td>{{report.forecasts.p}}</td>
+						</tr>
+						<tr class="danger">
+							<td>FAILED</td>
+							<td>{{report.events.f}}</td>
+							<td>{{report.forecasts.f}}</td>
+						</tr>
+						<tr class="unmatched">
+							<td>NOT FOUND</td>
+							<td>{{report.events.u}}</td>
+							<td>{{report.forecasts.u}}</td>
+						</tr>
+						<tr>
+							<td>COMPLETION</td>
+							<td>{{(report.events.p + report.events.f + report.events.u) === 0 ? 0 : (report.events.u / (report.events.p + report.events.f + report.events.u)) * 100}} %</td>
+							<td>{{(report.forecasts.p + report.forecasts.f + report.forecasts.u) === 0 ? 0 : (report.forecasts.u / (report.forecasts.p + report.forecasts.f + report.forecasts.u)) * 100}} %</td>
+						</tr>
+						<tr>
+							<td>CORRECTNESS</td>
+							<td>{{(report.events.p + report.events.f) === 0 ? 0 : (report.events.p / (report.events.p + report.events.f)) * 100}} %</td>
+							<td>{{(report.forecasts.p + report.forecasts.f) === 0 ? 0 : (report.forecasts.p / (report.forecasts.p + report.forecasts.f)) * 100}} %</td>
+						</tr>
+					</tbody>
+				</table>
+			</td>
+		</tr>
+		<tr>
+			<td>
+				<table class="table table-condensed table-striped table-bordered" style="width: 100%; height: 100%;">
+					<thead>
+						<tr>
+							<th style="text-align: center;">Events</th>
+							<th style="text-align: center;">Forecasts</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td><event-report data="report.veValidation"></event-report></td>
+							<td><forecast-report data="report.fcValidation"></forecast-report></td>
+						</tr>
+					</tbody>
+				</table>
+			</td>
+		</tr>
+	</tbody>
+</table>
+</script>
+<script type="text/ng-template" id="vereport.html">
+<table style="text-align: center;" class="table table-condensed table-bordered">
+	<thead>
+		<th>Criterion</th>
+		<th>Expected</th>
+		<th>Actual</th>
+	</thead>
+	<tbody ng-repeat="rp in reportList">
+		<tr>
+			<td colspan="3" style="background-color: rgb(147, 232, 255);">
+			<span class="badge sbadge" style="vertical-align: middle;"> 
+					Dose {{rp.veRequirement.vEvent.vaccination.doseNumber}}
+			</span> 
+			<strong>
+				{{rp.veRequirement.vEvent.vaccination.administred.name}}
+			</strong>
+			- {{rp.veRequirement.dateAdministred | date:"MM/dd/yyyy"}}</td>
+		</tr>
+		<tr ng-repeat="eval in rp.eValidation"
+			ng-class="{ 'success' : eval.validation.status === 'P', 'danger' : eval.validation.status === 'F', 'unmatched' : eval.validation.status === 'U' }">
+			<td style="background-color: #FFFFFF;">#{{eval.expEval.relatedTo.cvx}}
+				- {{eval.expEval.relatedTo.name}}</td>
+			<td>{{eval.expEval.status}}</td>
+			<td>{{eval.validation.status === 'P' ? 'PASSED' : eval.validation.status
+				=== 'F' ? eval.validation.value : eval.validation.status === 'U' ? 'NO MATCH' : ''}}</td>
+		</tr>
+	</tbody>
+</table>
+</script>
+<script type="text/ng-template" id="fcreport.html">
+<table class="table table-condensed table-bordered">
+	<thead>
+		<th>Criterion</th>
+		<th>Expected</th>
+		<th>Actual</th>
+	</thead>
+	<tbody style="text-align: center;" ng-repeat="fc in reportList">
+		<tr>
+			<td colspan="3" style="background-color: rgb(22, 236, 198);"><strong>{{fc.forecastRequirement.expForecast.target.name}}</strong>
+			</td>
+		</tr>
+		<tr ng-hide="fc.dose.status === 'N'"
+			ng-class="{ 'success' : fc.dose.status === 'P', 'danger' : fc.dose.status === 'F', 'unmatched' : fc.dose.status === 'U' }">
+			<td style="background-color: #FFFFFF;">Dose</td>
+			<td>{{fc.forecastRequirement.expForecast.doseNumber}}</td>
+			<td>{{fc.dose.status === 'P' ? 'PASSED' : fc.dose.status === 'F'
+				? fc.dose.status.value : fc.dose.status === 'U' ? 'NO MATCH' : ''}}</td>
+		</tr>
+		<tr ng-hide="fc.earliest.status === 'N'"
+			ng-class="{ 'success' : fc.earliest.status === 'P', 'danger' : fc.earliest.status === 'F', 'unmatched' : fc.earliest.status === 'U' }">
+			<td style="background-color: #FFFFFF;">Earliest</td>
+			<td>{{fc.forecastRequirement.earliest | date:"MM/dd/yyyy"}}</td>
+			<td>{{fc.earliest.status === 'P' ? 'PASSED' : fc.earliest.status
+				=== 'F' ? fc.earliest.status.value : fc.earliest.status === 'U' ?
+				'NO MATCH' : ''}}</td>
+		</tr>
+		<tr ng-hide="fc.recommended.status === 'N'"
+			ng-class="{ 'success' : fc.recommended.status === 'P', 'danger' : fc.recommended.status === 'F', 'unmatched' : fc.recommended.status === 'U' }">
+			<td style="background-color: #FFFFFF;">Recommended</td>
+			<td>{{fc.forecastRequirement.recommended | date:"MM/dd/yyyy"}}</td>
+			<td>{{fc.recommended.status === 'P' ? 'PASSED' :
+				fc.recommended.status === 'F' ? fc.recommended.status.value :
+				fc.recommended.status === 'U' ? 'NO MATCH' : ''}}</td>
+		</tr>
+		<tr ng-hide="fc.pastDue.status === 'N'"
+			ng-class="{ 'success' : fc.pastDue.status === 'P', 'danger' : fc.pastDue.status === 'F', 'unmatched' : fc.pastDue.status === 'U' }">
+			<td style="background-color: #FFFFFF;">Past Due</td>
+			<td>{{fc.forecastRequirement.pastDue | date:"MM/dd/yyyy"}}</td>
+			<td>{{fc.pastDue.status === 'P' ? 'PASSED' : fc.pastDue.status
+				=== 'F' ? fc.pastDue.status.value : fc.pastDue.status === 'U' ? 'NO
+				MATCH' : ''}}</td>
+		</tr>
+		<tr ng-hide="fc.complete.status === 'N'"
+			ng-class="{ 'success' : fc.complete.status === 'P', 'danger' : fc.complete.status === 'F', 'unmatched' : fc.complete.status === 'U' }">
+			<td style="background-color: #FFFFFF;">Complete</td>
+			<td>{{fc.forecastRequirement.complete | date:"MM/dd/yyyy"}}</td>
+			<td>{{fc.complete.status === 'P' ? 'PASSED' : fc.complete.status
+				=== 'F' ? fc.complete.status.value : fc.complete.status === 'U' ?
+				'NO MATCH' : ''}}</td>
+		</tr>
+	</tbody>
+</table>
+</script>

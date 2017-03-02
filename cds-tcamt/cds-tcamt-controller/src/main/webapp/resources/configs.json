@@ -1,10 +1,12 @@
 [
   {
+    "id" : 1,
     "name" : "Local TCH",
     "endPoint" : "http://localhost:8080/fc",
     "connector" : "TCH"
   },
   {
+  	"id" : 2,
     "name" : "My Interface",
     "endPoint" : "http://localhost:8080/fhir",
     "connector" : "FHIR"
