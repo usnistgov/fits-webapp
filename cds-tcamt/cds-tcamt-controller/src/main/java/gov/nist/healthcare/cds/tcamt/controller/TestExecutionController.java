@@ -12,7 +12,7 @@ import gov.nist.healthcare.cds.domain.TestExecution;
 import gov.nist.healthcare.cds.domain.exception.UnresolvableDate;
 import gov.nist.healthcare.cds.repositories.SoftwareConfigRepository;
 import gov.nist.healthcare.cds.repositories.TestCaseRepository;
-import gov.nist.healthcare.cds.service.impl.ExecutionService;
+import gov.nist.healthcare.cds.service.TestCaseExecutionService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -29,7 +29,7 @@ public class TestExecutionController {
 	private SoftwareConfigRepository softwareConfigRepository;
 
 	@Autowired
-	private ExecutionService execService;
+	private TestCaseExecutionService execService;
 	
 	@Autowired
 	private TestCaseRepository testCaseRepository;

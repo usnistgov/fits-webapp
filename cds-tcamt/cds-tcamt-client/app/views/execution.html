@@ -20,7 +20,7 @@
                         <button ng-click="clear()" ng-show="!exec && tcQueue.length > 0" class="btn btn-xs btn-danger"  style="margin: 0px; margin-right: 10px;">
                             <i class="fa fa-trash-o" style="font-size : 1.5em;" aria-hidden="true"></i>
                         </button>
-                        <button ng-click="exe()" ng-show="!exec" class="btn btn-xs btn-success"  style="margin: 0px; margin-right: 10px;">
+                        <button ng-click="exe()" ng-show="!exec && canRun()" class="btn btn-xs btn-success"  style="margin: 0px; margin-right: 10px;">
                             <i class="fa fa-play" style="font-size : 1.5em;" aria-hidden="true"></i>
                         </button>
                         <div style="padding: 0;">
@@ -43,7 +43,7 @@
                         <tbody>
 	                        <tr>
 	                            <td style="width: 30%;" ng-hide="exec">
-	                                <div layout="column" layout-align="center center" style="height: 100%;">
+	                                <div layout="column" layout-align="start center" style="height: 100%;">
 	
 	                                    <div ng-hide="addConfig" flex="20" layout="row" layout-align="center center">
 	                                        <md-input-container  style="margin-right: 10px; width: 200px;" >
@@ -98,10 +98,10 @@
 	                                            <td style="text-align : center;"><strong>{{tc.name}}</strong></td>
 	                                            <td style="width: 40%;"><md-progress-linear md-mode="{{tc._pgt}}" value="{{tc._pg}}"></md-progress-linear></td>
 	                                            <td>
-	                                                <button ng-click="deleteTCL($index)" ng-hide="exec" class="btn btn-xs btn-danger pull-right"  style="margin: 0px; margin-right: 10px;">
+	                                                <button ng-click="deleteTCL($index)" class="btn btn-xs btn-danger pull-right"  style="margin: 0px; margin-right: 10px;">
 	                                                    <i class="fa fa-times" aria-hidden="true"></i>
 	                                                </button>
-	                                                <button class="btn btn-xs btn-info pull-right" ng-show="exec && tc._pg === 100" style="margin: 0px; margin-right: 10px;">
+	                                                <button ng-click="goToReport($index)" class="btn btn-xs btn-info pull-right" ng-show="exec && tc._pg === 100" style="margin: 0px; margin-right: 10px;">
 	                                                    <i class="fa fa-search" aria-hidden="true"></i>
 	                                                </button>
 	                                                <span ng-show="exec && tc._pgt === 'indeterminate'" style="color: blue; text-align : center;">
@@ -155,7 +155,7 @@
                     		</button>
                     	</div>
                     	<div flex="50">
-                    		<report  general="report" report="report.reports[rp]"></report>
+                    		<report vxm="vxm" general="report" report="report.reports[rp]"></report>
                     	</div>
                     	<div flex="25" layout="row" layout-align="center center">
                     		<button flex="25" class="btn" ng-show="report.reports.length > rp+1" ng-click="goToReport(rp+1)">
@@ -353,13 +353,13 @@
 						</tr>
 						<tr>
 							<td>COMPLETION</td>
-							<td>{{(report.events.p + report.events.f + report.events.u) === 0 ? 0 : (report.events.u / (report.events.p + report.events.f + report.events.u)) * 100}} %</td>
-							<td>{{(report.forecasts.p + report.forecasts.f + report.forecasts.u) === 0 ? 0 : (report.forecasts.u / (report.forecasts.p + report.forecasts.f + report.forecasts.u)) * 100}} %</td>
+							<td>{{(report.events.p + report.events.f + report.events.u) === 0 ? 0 : (1 - (report.events.u / (report.events.p + report.events.f + report.events.u))) * 100}} %</td>
+							<td>{{(report.forecasts.p + report.forecasts.f + report.forecasts.u) === 0 ? 0 : (1 - (report.forecasts.u / (report.forecasts.p + report.forecasts.f + report.forecasts.u))) * 100}} %</td>
 						</tr>
 						<tr>
 							<td>CORRECTNESS</td>
-							<td>{{(report.events.p + report.events.f) === 0 ? 0 : (report.events.p / (report.events.p + report.events.f)) * 100}} %</td>
-							<td>{{(report.forecasts.p + report.forecasts.f) === 0 ? 0 : (report.forecasts.p / (report.forecasts.p + report.forecasts.f)) * 100}} %</td>
+							<td>{{(report.events.p + report.events.f) === 0 ? 0 : (1 - (report.events.p / (report.events.p + report.events.f))) * 100}} %</td>
+							<td>{{(report.forecasts.p + report.forecasts.f) === 0 ? 0 : (1- (report.forecasts.p / (report.forecasts.p + report.forecasts.f))) * 100}} %</td>
 						</tr>
 					</tbody>
 				</table>
@@ -376,7 +376,7 @@
 					</thead>
 					<tbody>
 						<tr>
-							<td><event-report data="report.veValidation"></event-report></td>
+							<td><event-report vxm="vxm" data="report.veValidation"></event-report></td>
 							<td><forecast-report data="report.fcValidation"></forecast-report></td>
 						</tr>
 					</tbody>
@@ -386,23 +386,51 @@
 	</tbody>
 </table>
 </script>
+<!-- 			<td ng-show="rp.veRequirement.vEvent.vaccination.administred.discriminator === 'specific'" colspan="3" style="background-color: rgb(147, 232, 255);"> -->
+
+			
+<!-- 			{{rp.veRequirement.dateAdministred | date:"MM/dd/yyyy"}} -->
+<!-- 			</td> -->
 <script type="text/ng-template" id="vereport.html">
 <table style="text-align: center;" class="table table-condensed table-bordered">
 	<thead>
-		<th>Criterion</th>
-		<th>Expected</th>
-		<th>Actual</th>
-	</thead>
-	<tbody ng-repeat="rp in reportList">
 		<tr>
-			<td colspan="3" style="background-color: rgb(147, 232, 255);">
-			<span class="badge sbadge" style="vertical-align: middle;"> 
-					Dose {{rp.veRequirement.vEvent.vaccination.doseNumber}}
-			</span> 
-			<strong>
-				{{rp.veRequirement.vEvent.vaccination.administred.name}}
-			</strong>
-			- {{rp.veRequirement.dateAdministred | date:"MM/dd/yyyy"}}</td>
+			<th>Criterion</th>
+			<th>Expected</th>
+			<th>Actual</th>
+		</tr>
+	</thead>
+	<tbody ng-repeat="rp in reportList | orderBy:'veRequirement.dateAdministred' ">
+		<tr>
+			<td md-whiteframe="2" ng-show="rp.veRequirement.vEvent.vaccination.administred.discriminator === 'generic'" colspan="3" style="text-align : justify;">
+				<div style="width : 100%;" layout="row" layout-align="start center">
+					<div flex="30" layout="column" layout-align="center center">
+						<span style="background-color: red;" class="badge">G</span>
+						<span class="badge sbadge">Dose {{rp.veRequirement.vEvent.vaccination.doseNumber}}</span> 
+						<span style="background-color: green;" class="badge">CVX#{{rp.veRequirement.vEvent.vaccination.administred.cvx}}</span> 	
+					</div>
+					<div flex="50" layout="column" layout-align="start center">
+						<span><strong>{{rp.veRequirement.vEvent.vaccination.administred.name}}</strong></span>
+						<span>Date Administred : {{rp.veRequirement.dateAdministred | date:"MM/dd/yyyy"}}</span>
+					</div>	
+				</div>
+			</td>
+			<td md-whiteframe="2" ng-show="rp.veRequirement.vEvent.vaccination.administred.discriminator === 'specific'" colspan="3" style="text-align : justify;">
+				<div style="width : 100%;" layout="row" layout-align="start center">
+					<div flex="30" layout="column" layout-align="center center">
+						<span style="background-color: red;" class="badge">S</span>
+						<span class="badge sbadge">Dose {{rp.veRequirement.vEvent.vaccination.doseNumber}}</span> 
+						<span style="background-color: green;" class="badge">CVX#{{getVx(rp.veRequirement.vEvent.vaccination.administred).cvx}}</span>
+						<span style="background-color: blue;" class="badge">MVX#{{rp.veRequirement.vEvent.vaccination.administred.mx.mvx}}</span> 
+					</div>
+					<div flex="50" layout="column" layout-align="start center" style="text-align : left;">
+						<span><strong>{{getVx(rp.veRequirement.vEvent.vaccination.administred).name}}</strong></span></br>
+						<span><strong>By</strong> {{rp.veRequirement.vEvent.vaccination.administred.mx.name}}</span></br>
+						<span><strong>{{rp.veRequirement.vEvent.vaccination.administred.name}}</strong></span>
+						<span>Date Administred : {{rp.veRequirement.dateAdministred | date:"MM/dd/yyyy"}}</span>
+					</div>	
+				</div>
+			</td>
 		</tr>
 		<tr ng-repeat="eval in rp.eValidation"
 			ng-class="{ 'success' : eval.validation.status === 'P', 'danger' : eval.validation.status === 'F', 'unmatched' : eval.validation.status === 'U' }">
@@ -424,7 +452,15 @@
 	</thead>
 	<tbody style="text-align: center;" ng-repeat="fc in reportList">
 		<tr>
-			<td colspan="3" style="background-color: rgb(22, 236, 198);"><strong>{{fc.forecastRequirement.expForecast.target.name}}</strong>
+			<td md-whiteframe="2" colspan="3" style="text-align : left;">
+				<div style="width : 100%;" layout="row" layout-align="start center">
+					<div flex="30" layout="column" layout-align="center center">
+						<span style="background-color: green;" class="badge">CVX#{{fc.forecastRequirement.expForecast.target.cvx}}</span>
+					</div>
+					<div flex="50" layout="column" layout-align="start center">
+						<span><strong>{{fc.forecastRequirement.expForecast.target.name}}</strong></span>
+					</div>	
+				</div>
 			</td>
 		</tr>
 		<tr ng-hide="fc.dose.status === 'N'"
@@ -432,14 +468,14 @@
 			<td style="background-color: #FFFFFF;">Dose</td>
 			<td>{{fc.forecastRequirement.expForecast.doseNumber}}</td>
 			<td>{{fc.dose.status === 'P' ? 'PASSED' : fc.dose.status === 'F'
-				? fc.dose.status.value : fc.dose.status === 'U' ? 'NO MATCH' : ''}}</td>
+				? fc.dose.value : fc.dose.status === 'U' ? 'NO MATCH' : ''}}</td>
 		</tr>
 		<tr ng-hide="fc.earliest.status === 'N'"
 			ng-class="{ 'success' : fc.earliest.status === 'P', 'danger' : fc.earliest.status === 'F', 'unmatched' : fc.earliest.status === 'U' }">
 			<td style="background-color: #FFFFFF;">Earliest</td>
 			<td>{{fc.forecastRequirement.earliest | date:"MM/dd/yyyy"}}</td>
 			<td>{{fc.earliest.status === 'P' ? 'PASSED' : fc.earliest.status
-				=== 'F' ? fc.earliest.status.value : fc.earliest.status === 'U' ?
+				=== 'F' ? fc.earliest.value : fc.earliest.status === 'U' ?
 				'NO MATCH' : ''}}</td>
 		</tr>
 		<tr ng-hide="fc.recommended.status === 'N'"
@@ -447,7 +483,7 @@
 			<td style="background-color: #FFFFFF;">Recommended</td>
 			<td>{{fc.forecastRequirement.recommended | date:"MM/dd/yyyy"}}</td>
 			<td>{{fc.recommended.status === 'P' ? 'PASSED' :
-				fc.recommended.status === 'F' ? fc.recommended.status.value :
+				fc.recommended.status === 'F' ? fc.recommended.value :
 				fc.recommended.status === 'U' ? 'NO MATCH' : ''}}</td>
 		</tr>
 		<tr ng-hide="fc.pastDue.status === 'N'"
@@ -455,7 +491,7 @@
 			<td style="background-color: #FFFFFF;">Past Due</td>
 			<td>{{fc.forecastRequirement.pastDue | date:"MM/dd/yyyy"}}</td>
 			<td>{{fc.pastDue.status === 'P' ? 'PASSED' : fc.pastDue.status
-				=== 'F' ? fc.pastDue.status.value : fc.pastDue.status === 'U' ? 'NO
+				=== 'F' ? fc.pastDue.value : fc.pastDue.status === 'U' ? 'NO
 				MATCH' : ''}}</td>
 		</tr>
 		<tr ng-hide="fc.complete.status === 'N'"
@@ -463,7 +499,7 @@
 			<td style="background-color: #FFFFFF;">Complete</td>
 			<td>{{fc.forecastRequirement.complete | date:"MM/dd/yyyy"}}</td>
 			<td>{{fc.complete.status === 'P' ? 'PASSED' : fc.complete.status
-				=== 'F' ? fc.complete.status.value : fc.complete.status === 'U' ?
+				=== 'F' ? fc.complete.value : fc.complete.status === 'U' ?
 				'NO MATCH' : ''}}</td>
 		</tr>
 	</tbody>

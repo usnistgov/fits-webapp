@@ -254,7 +254,7 @@ angular
                     $scope.loadVaccines = function () {
                         var d = $q.defer();
 						VaccineService.load().then(function (data) {
-							for(k in data){
+							for(var k in data){
 								if(data.hasOwnProperty(k))
 									$scope[k] = data[k];
 							}

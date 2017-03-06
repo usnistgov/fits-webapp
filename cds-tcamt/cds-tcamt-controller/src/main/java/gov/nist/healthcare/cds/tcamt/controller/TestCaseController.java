@@ -38,10 +38,10 @@ import gov.nist.healthcare.cds.enumeration.EvaluationStatus;
 import gov.nist.healthcare.cds.enumeration.SerieStatus;
 import gov.nist.healthcare.cds.repositories.TestCaseRepository;
 import gov.nist.healthcare.cds.repositories.TestPlanRepository;
+import gov.nist.healthcare.cds.service.CDCSpreadSheetFormatService;
 import gov.nist.healthcare.cds.service.NISTFormatService;
+import gov.nist.healthcare.cds.service.TestCaseExecutionService;
 import gov.nist.healthcare.cds.service.ValidationService;
-import gov.nist.healthcare.cds.service.impl.CSSFormatServiceImpl;
-import gov.nist.healthcare.cds.service.impl.ExecutionService;
 import gov.nist.healthcare.cds.tcamt.domain.ImportResult;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -70,10 +70,10 @@ public class TestCaseController {
 	private NISTFormatService nistFormatService;
 	
 	@Autowired
-	private CSSFormatServiceImpl cdcFormatService;
+	private CDCSpreadSheetFormatService cdcFormatService;
 	
 	@Autowired
-	private ExecutionService execService;
+	private TestCaseExecutionService execService;
 
 	@RequestMapping(value = "/testplans", method = RequestMethod.GET)
 	@ResponseBody

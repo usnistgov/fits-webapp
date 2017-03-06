@@ -7,7 +7,7 @@
  * # ExecutionCtrl
  * Controller of the clientApp
  */
-angular.module('tcl').controller('ExecutionCtrl', function ($rootScope,$scope,$http,TestDataService,$timeout,ngTreetableParams,$q) {
+angular.module('tcl').controller('ExecutionCtrl', function ($rootScope,$scope,VaccineService,$http,TestDataService,$timeout,ngTreetableParams,$q) {
     $scope.tps = [];
     $scope.selectedTC = null;
     $scope.selectedTP = null;
@@ -26,6 +26,23 @@ angular.module('tcl').controller('ExecutionCtrl', function ($rootScope,$scope,$h
             $scope.configs = angular.fromJson(result.data);
         });
     };
+    $scope.loadVaccines = function () {
+        var d = $q.defer();
+		VaccineService.load().then(function (data) {
+			for(var k in data){
+				if(data.hasOwnProperty(k))
+					$scope[k] = data[k];
+			}
+			d.resolve(true);
+			console.log("VX");
+			console.log($scope.vxm);
+        },
+		function (err) {
+			console.log(err);
+            d.resolve(false);
+        });
+        return d.promise;
+    };
     $scope.saveConfig = function () {
         $http.post("api/exec/configs/save",$scope.configStub).then(function (result) {
         	$scope.loadConfig();
@@ -42,6 +59,7 @@ angular.module('tcl').controller('ExecutionCtrl', function ($rootScope,$scope,$h
     $scope.init = function(){
         $scope.loadConfig();
         $scope.loadTestCases();
+        $scope.loadVaccines();
     };
     $scope.dstartf = false;
     $scope.dstart = function (a) {
@@ -198,6 +216,10 @@ angular.module('tcl').controller('ExecutionCtrl', function ($rootScope,$scope,$h
     	 $scope.rp = i;
     };
     
+    $scope.deleteReport = function(i){
+    	$scope.report.reports.splice(i,0);
+    };
+    
 	$scope.eventLabel = function(event){
 		if(!event.vaccination.date)
 			return "";
@@ -219,6 +241,9 @@ angular.module('tcl').controller('ExecutionCtrl', function ($rootScope,$scope,$h
 
     $scope.deleteTCL = function (id) {
         $scope.tcQueue.splice(id,1);
+        if($scope.report && $scope.report.reports && $scope.report.reports.length > 0){
+        	$scope.report.reports.splice(i,0);
+        }
     };
 
     $scope.clear = function () {

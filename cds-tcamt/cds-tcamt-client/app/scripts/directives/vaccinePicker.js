@@ -94,7 +94,8 @@ angular.module('tcl').directive('report', function() {
 		restrict : 'E',
 		scope	 : {
 			report      : "=",
-			general     : "="
+			general     : "=",
+			vxm : "="
 		},
 		controller : function($scope) {
 			
@@ -107,10 +108,17 @@ angular.module('tcl').directive('eventReport', function() {
 		templateUrl : 'vereport.html',
 		restrict : 'E',
 		scope	 : {
-			reportList      : "=data"
+			reportList      : "=data",
+			vxm : "="
 		},
-		controller : function($scope) {
-			
+		controller : function($scope,VaccineService) {
+			$scope.getVx = function(p){
+				var mp = VaccineService.getMapping($scope.vxm,p);
+				if(mp)
+					return VaccineService.getVx($scope.vxm,mp.vx.cvx);
+				else
+					return null;
+			};
 		}
 	};
 });
