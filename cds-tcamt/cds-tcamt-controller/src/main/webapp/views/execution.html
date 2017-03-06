@@ -203,7 +203,7 @@
 			<td style="background-color: #FFFFFF;">Earliest</td>
 			<td>{{fc.forecastRequirement.earliest | date:"MM/dd/yyyy"}}</td>
 			<td>{{fc.earliest.status === 'P' ? 'PASSED' : fc.earliest.status
-				=== 'F' ? fc.earliest.value : fc.earliest.status === 'U' ?
+				=== 'F' ? (fc.earliest.value | date:"MM/dd/yyyy") : fc.earliest.status === 'U' ?
 				'NO MATCH' : ''}}</td>
 		</tr>
 		<tr ng-hide="fc.recommended.status === 'N'"
@@ -211,7 +211,7 @@
 			<td style="background-color: #FFFFFF;">Recommended</td>
 			<td>{{fc.forecastRequirement.recommended | date:"MM/dd/yyyy"}}</td>
 			<td>{{fc.recommended.status === 'P' ? 'PASSED' :
-				fc.recommended.status === 'F' ? fc.recommended.value :
+				fc.recommended.status === 'F' ? (fc.recommended.value | date:"MM/dd/yyyy") :
 				fc.recommended.status === 'U' ? 'NO MATCH' : ''}}</td>
 		</tr>
 		<tr ng-hide="fc.pastDue.status === 'N'"
@@ -219,7 +219,7 @@
 			<td style="background-color: #FFFFFF;">Past Due</td>
 			<td>{{fc.forecastRequirement.pastDue | date:"MM/dd/yyyy"}}</td>
 			<td>{{fc.pastDue.status === 'P' ? 'PASSED' : fc.pastDue.status
-				=== 'F' ? fc.pastDue.value : fc.pastDue.status === 'U' ? 'NO
+				=== 'F' ? (fc.pastDue.value | date:"MM/dd/yyyy") : fc.pastDue.status === 'U' ? 'NO
 				MATCH' : ''}}</td>
 		</tr>
 		<tr ng-hide="fc.complete.status === 'N'"
@@ -227,7 +227,7 @@
 			<td style="background-color: #FFFFFF;">Complete</td>
 			<td>{{fc.forecastRequirement.complete | date:"MM/dd/yyyy"}}</td>
 			<td>{{fc.complete.status === 'P' ? 'PASSED' : fc.complete.status
-				=== 'F' ? fc.complete.value : fc.complete.status === 'U' ?
+				=== 'F' ? (fc.complete.value | date:"MM/dd/yyyy)" : fc.complete.status === 'U' ?
 				'NO MATCH' : ''}}</td>
 		</tr>
 	</tbody>

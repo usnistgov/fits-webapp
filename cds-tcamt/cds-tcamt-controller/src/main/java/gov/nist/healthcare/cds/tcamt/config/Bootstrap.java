@@ -11,8 +11,8 @@ import java.util.List;
 import java.util.Set;
 
 import javax.annotation.PostConstruct;
-import javax.transaction.Transactional;
 
+import gov.nist.fhir.client.ir.TestRunnerServiceFhirImpl;
 import gov.nist.healthcare.cds.auth.domain.Account;
 import gov.nist.healthcare.cds.auth.domain.Privilege;
 import gov.nist.healthcare.cds.auth.repo.PrivilegeRepository;
@@ -42,6 +42,7 @@ import gov.nist.healthcare.cds.enumeration.SerieStatus;
 import gov.nist.healthcare.cds.repositories.SoftwareConfigRepository;
 import gov.nist.healthcare.cds.repositories.TestPlanRepository;
 import gov.nist.healthcare.cds.repositories.VaccineMappingRepository;
+import gov.nist.healthcare.cds.service.TestRunnerService;
 import gov.nist.healthcare.cds.service.VaccineImportService;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,6 +50,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.oxm.Marshaller;
 import org.springframework.oxm.castor.CastorMarshaller;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestTemplate;
 
 @Service
 public class Bootstrap {
@@ -76,13 +79,19 @@ public class Bootstrap {
 		return new CastorMarshaller();
 	}
 	
+	@Bean
+	public TestRunnerService testRunner(){
+		return new TestRunnerServiceFhirImpl("http://129.6.59.199:8080/forecast/ImmunizationRecommendations");
+	}
+	
+	
 	@PostConstruct
 	@Transactional
 	public void init() throws ParseException, IOException, VaccineNotFoundException {
 		//Vaccine
 		Set<VaccineMapping> set = vaccineService._import(Bootstrap.class.getResourceAsStream("/web_cvx.xlsx"),Bootstrap.class.getResourceAsStream("/web_vax2vg.xlsx"),Bootstrap.class.getResourceAsStream("/web_mvx.xlsx"),Bootstrap.class.getResourceAsStream("/web_tradename.xlsx"));
 		vaccineRepository.save(new ArrayList<VaccineMapping>(set));
-		
+
 		// Accounts
 		privilegeRepository.deleteAll();
 		accountService.deleteAll();
