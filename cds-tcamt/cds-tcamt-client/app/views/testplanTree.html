@@ -66,7 +66,7 @@ body {
 						</div>
 					</div>
 					<ol ui-tree-nodes="" ng-model="tcs">
-						<li ng-repeat="tc in tcs" ui-tree-node ui-tree-node ng-hide="$parentNodeScope.collapsed">
+						<li ng-repeat="tc in ($parentNodeScope.collapsed ? [] : tcs)" ui-tree-node ui-tree-node ng-hide="$parentNodeScope.collapsed">
 							<div ng-click="selectTC(tc)" ui-tree-handle ng-class="{selected1 : isSelectedTC(tc)}"
 								 context-menu="tcCM" model="$index">
 								<div style="margin-left: 5px;">

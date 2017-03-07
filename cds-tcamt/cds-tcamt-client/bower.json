@@ -39,7 +39,8 @@
     "ngInfiniteScroll": "1.0.0",
     "json-validate": "*",
     "angular-bootstrap-nav-tree": "*",
-    "allmighty-autocomplete": "*"
+    "allmighty-autocomplete": "*",
+    "vkBeautify": "vkbeautify#*"
   },
   "devDependencies": {
     "angular-scenario": "1.5.5",
