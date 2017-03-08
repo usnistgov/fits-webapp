@@ -84,17 +84,17 @@ public class TestCaseController {
 	
 	@RequestMapping(value = "/validate/{id}", method = RequestMethod.GET)
 	@ResponseBody
-	public Report validate(@PathVariable Long id) throws ParseException, UnresolvableDate{
+	public Report validate(@PathVariable String id) throws ParseException, UnresolvableDate{
 		TestCase tc = testCaseRepository.findOne(id);
 		return execService.execute(null, tc, Calendar.getInstance().getTime());
 	}
 	
 	@RequestMapping(value = "/testcase/{id}/save", method = RequestMethod.POST)
 	@ResponseBody
-	public TestCase save(@RequestBody TestCase tc,@PathVariable Long id) throws NotFoundException{
+	public TestCase save(@RequestBody TestCase tc,@PathVariable String id) throws NotFoundException{
 		TestPlan tp = testPlanRepository.findOne(id);
 		if(tp != null){
-			tc.setTestPlan(tp);
+			tc.setTestPlan(tp.getId());
 		}
 		else {
 			throw new NotFoundException("TestPlan ("+id+")");
@@ -122,31 +122,31 @@ public class TestCaseController {
 	
 	@RequestMapping(value = "/testcase/{id}/delete", method = RequestMethod.POST)
 	@ResponseBody
-	public String delete(@PathVariable Long id) throws NotFoundException{
+	public String delete(@PathVariable String id) throws NotFoundException{
 		
 		TestCase tc = testCaseRepository.findOne(id);
 		if(tc == null)
 			throw new NotFoundException("TC not found");
 		else {
-			TestPlan tp = testPlanRepository.findOne(tc.getTestPlan().getId());
+			TestPlan tp = testPlanRepository.findOne(tc.getTestPlan());
 			if(tp == null)
 				throw new NotFoundException("TC not found");
 			tp.getTestCases().remove(tc);
-			testPlanRepository.saveAndFlush(tp);
+			testPlanRepository.save(tp);
 		}
 		return "";
 	}
 	
 	@RequestMapping(value = "/testplan/{id}/delete", method = RequestMethod.POST)
 	@ResponseBody
-	public String deleteTP(@PathVariable Long id) throws NotFoundException{
+	public String deleteTP(@PathVariable String id) throws NotFoundException{
 		testPlanRepository.delete(id);
 		return "";
 	}
 	
 	@RequestMapping(value = "/testcase/{id}/export/{format}", method = RequestMethod.POST)
 	@ResponseBody
-	public void export(@PathVariable Long id,@PathVariable String format,HttpServletRequest request, HttpServletResponse response) throws IOException{
+	public void export(@PathVariable String id,@PathVariable String format,HttpServletRequest request, HttpServletResponse response) throws IOException{
 		TestCase tc = testCaseRepository.findOne(id);
 		if(format.equals("nist") && tc != null){
 			response.setContentType("text/xml");
@@ -159,7 +159,7 @@ public class TestCaseController {
 	
 	@RequestMapping(value = "/testcase/{id}/import/nist", method = RequestMethod.POST)
 	@ResponseBody
-	public ImportResult uploadFileHandler(@RequestParam("file") MultipartFile file,@PathVariable Long id) {
+	public ImportResult uploadFileHandler(@RequestParam("file") MultipartFile file,@PathVariable String id) {
 		if (!file.isEmpty()) {
 			try {
 				byte[] bytes = file.getBytes();
@@ -183,8 +183,8 @@ public class TestCaseController {
 						return ir;
 					}
 
-					tc.setTestPlan(tps);
-					testCaseRepository.saveAndFlush(tc);
+					tc.setTestPlan(tps.getId());
+					testCaseRepository.save(tc);
 					ImportResult ir = new ImportResult();
 					ir.setStatus(true);
 					ir.setErrors(null);
@@ -224,7 +224,7 @@ public class TestCaseController {
     @CacheEvict(value={"testplans-user","testplans"}, allEntries=true)
 	@RequestMapping(value = "/testcase/{id}/import/cdc", method = RequestMethod.POST)
 	@ResponseBody
-	public ImportResult uploadFileHandlerCDC(@RequestPart("file") MultipartFile file,@RequestPart("config") CDCImportConfig config, @PathVariable Long id) {
+	public ImportResult uploadFileHandlerCDC(@RequestPart("file") MultipartFile file,@RequestPart("config") CDCImportConfig config, @PathVariable String id) {
 		if (!file.isEmpty()) {
 			try {
 				byte[] bytes = file.getBytes();
@@ -243,10 +243,12 @@ public class TestCaseController {
 					}
 					
 					for(TestCase tc : importRes.getTestcases()){
-						tc.setTestPlan(tps);
+						tc.setTestPlan(tps.getId());
 					}
 					
+					tps.getTestCases().addAll(importRes.getTestcases());
 					testCaseRepository.save(importRes.getTestcases());
+					testPlanRepository.save(tps);
 					ImportResult ir = new ImportResult();
 					ir.setStatus(true);
 					ir.setErrors(errors);

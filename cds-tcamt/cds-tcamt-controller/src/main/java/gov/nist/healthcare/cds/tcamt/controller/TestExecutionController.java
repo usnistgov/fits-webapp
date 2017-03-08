@@ -48,7 +48,7 @@ public class TestExecutionController {
 	}
 	
 	@RequestMapping(value = "/exec/start/{id}", method = RequestMethod.GET)
-	public boolean start(HttpSession session, @PathVariable Long id,Principal user) {
+	public boolean start(HttpSession session, @PathVariable String id,Principal user) {
 		SoftwareConfig config = softwareConfigRepository.findOne(id);
 		TestExecution exec = new TestExecution();
 		exec.setSoftware(config);
@@ -60,7 +60,7 @@ public class TestExecutionController {
 	}
 	
 	@RequestMapping(value = "/exec/tc/{id}", method = RequestMethod.GET)
-	public boolean add(HttpSession session, @PathVariable Long id,Principal user) throws UnresolvableDate {
+	public boolean add(HttpSession session, @PathVariable String id,Principal user) throws UnresolvableDate {
 		TestExecution exec = (TestExecution) session.getAttribute("exec");
 		if(exec == null){
 			return false;

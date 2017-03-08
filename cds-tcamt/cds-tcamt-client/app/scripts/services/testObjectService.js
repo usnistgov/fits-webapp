@@ -162,11 +162,11 @@ angular.module('tcl').factory('TestObjectUtil', function () {
 			},
 
 			isLocal : function(obj){
-				return obj.hasOwnProperty("id") ? (typeof obj.id === 'string' ? true : false ) : true;
+				return obj.hasOwnProperty("id") ? (obj.id.indexOf("cl_") === 0 ? true : false) : true;
 			},
 
 			isLocalID : function(id){
-            	return typeof id === 'string' ? true : false;
+            	return typeof id === 'string' ? (id.indexOf("cl_") === 0 ? true : false) : true;
         	},
 
 			generateUID : function(){
@@ -267,11 +267,10 @@ angular.module('tcl').factory('TestObjectFactory', function (TestObjectUtil) {
 			},
 
 			createEvaluation : function(){
-				var eval = {
+				return {
 						relatedTo : null,
 						status : ""
 				};
-				return eval;
 			}
 
 	};

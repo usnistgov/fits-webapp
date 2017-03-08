@@ -39,6 +39,7 @@ import gov.nist.healthcare.cds.enumeration.EventType;
 import gov.nist.healthcare.cds.enumeration.FHIRAdapter;
 import gov.nist.healthcare.cds.enumeration.Gender;
 import gov.nist.healthcare.cds.enumeration.SerieStatus;
+import gov.nist.healthcare.cds.repositories.ManufacturerRepository;
 import gov.nist.healthcare.cds.repositories.SoftwareConfigRepository;
 import gov.nist.healthcare.cds.repositories.TestPlanRepository;
 import gov.nist.healthcare.cds.repositories.VaccineMappingRepository;
@@ -82,63 +83,103 @@ public class Bootstrap {
 	@Bean
 	public TestRunnerService testRunner(){
 		return new TestRunnerServiceFhirImpl("http://129.6.59.199:8080/forecast/ImmunizationRecommendations");
+//		return new TestRunnerServiceFhirImpl("https://129.6.59.199:8443/forecast/ImmunizationRecommendations");
+
 	}
 	
+	public void createVaccine() throws IOException{
+		Set<VaccineMapping> set = vaccineService._import(Bootstrap.class.getResourceAsStream("/web_cvx.xlsx"),Bootstrap.class.getResourceAsStream("/web_vax2vg.xlsx"),Bootstrap.class.getResourceAsStream("/web_mvx.xlsx"),Bootstrap.class.getResourceAsStream("/web_tradename.xlsx"));
+		long all = vaccineRepository.count();
+		int i = 0;
+		for(VaccineMapping mp : set){
+			if(!vaccineRepository.exists(mp.getId())){
+				i++;
+				vaccineRepository.save(mp);
+			}
+		}
+		System.out.println("[VACCINE SERVICE IMPORT] IMPORTED "+i+" EXISTING "+all);
+	}
+	
+	public void createPrivileges(){
+		Privilege p;
+		String pr = "";
+		if(privilegeRepository.findByRole("ADMIN") == null){
+			p = new Privilege();
+			p.setId("1");
+			p.setRole("ADMIN");
+			privilegeRepository.save(p);
+			pr = " ADMIN ";
+		}
+		if(privilegeRepository.findByRole("TESTER") == null){
+			p = new Privilege();
+			p.setId("2");
+			p.setRole("TESTER");
+			privilegeRepository.save(p);
+			pr += " TESTER ";
+		}
+		System.out.println("[PRIVILEGE CREATED]"+(pr.isEmpty() ? " NONE " : pr ));
+	}
+	
+	public void createSoftware(){
+		if(!softwareConfRepository.exists("prime")){
+			SoftwareConfig sfC = new SoftwareConfig();
+			sfC.setId("prime");
+			sfC.setConnector(FHIRAdapter.TCH);
+			sfC.setEndPoint("http://tchforecasttester.org/fv/forecast");
+			sfC.setName("Remote TCH");
+			sfC.setUser("hossam");
+			softwareConfRepository.save(sfC);
+			System.out.println("[PRIME SOFTWARE CONFIG] created");
+		}
+		System.out.println("[PRIME SOFTWARE CONFIG] existing");
+	}
 	
 	@PostConstruct
-	@Transactional
 	public void init() throws ParseException, IOException, VaccineNotFoundException {
+		
 		//Vaccine
-		Set<VaccineMapping> set = vaccineService._import(Bootstrap.class.getResourceAsStream("/web_cvx.xlsx"),Bootstrap.class.getResourceAsStream("/web_vax2vg.xlsx"),Bootstrap.class.getResourceAsStream("/web_mvx.xlsx"),Bootstrap.class.getResourceAsStream("/web_tradename.xlsx"));
-		vaccineRepository.save(new ArrayList<VaccineMapping>(set));
-
-		// Accounts
-		privilegeRepository.deleteAll();
+		this.createVaccine();
+		
+		//Privileges
+		this.createPrivileges();
+		
+		//Software
+		this.createSoftware();
+		
 		accountService.deleteAll();
-		Privilege p = new Privilege();
-		p.setId(1L);
-		p.setRole("ADMIN");
-		privilegeRepository.save(p);
-		p = new Privilege();
-		p.setId(2L);
-		p.setRole("TESTER");
-		privilegeRepository.save(p);
-		System.out.println("[HT] Privileges created");
-		System.out.println("[HT] Size "+privilegeRepository.count());
-		System.out.println("[HT] Content : "+privilegeRepository.findAll());
+		
 		Account a = new Account();
 		a.setUsername("admin");
 		a.setPassword("qwerty");
 		accountService.createAdmin(a);
+		
 		Account m = new Account();
 		m.setUsername("michael");
 		m.setPassword("qwerty");
 		accountService.createAdmin(m);
+		
 		Account r = new Account();
 		r.setUsername("robert");
 		r.setPassword("qwerty");
 		accountService.createAdmin(r);
+		
 		Account h = new Account();
 		h.setUsername("hossam");
 		h.setPassword("qwerty");
 		accountService.createAdmin(h);
+		
 		Account ai = new Account();
 		ai.setUsername("aira");
 		ai.setPassword("qwerty");
 		accountService.createAdmin(ai);
+		
 		Account c = new Account();
 		c.setUsername("cdc1");
 		c.setPassword("qwerty");
 		accountService.createAdmin(c);
+	
 		
-		SoftwareConfig sfC = new SoftwareConfig();
-		sfC.setConnector(FHIRAdapter.TCH);
-		sfC.setEndPoint("http://tchforecasttester.org/fv/forecast");
-		sfC.setName("Remote TCH");
-		sfC.setUser("hossam");
-		softwareConfRepository.save(sfC);
-		
-		TestCase tc = new TestCase();
+/*		TestCase tc = new TestCase();
 		tc.setName("DTap Age Below Absolute Minimum");
 		tc.setDescription("DTaP #2 at age 10 weeks-5 days");
 //		
@@ -259,9 +300,7 @@ public class Bootstrap {
 		tp.setUser("hossam");
 		tp.addTestCase(tc);
 		tc.setTestPlan(tp);
-		testPlanRepository.saveAndFlush(tp);
-		
-		
+		testPlanRepository.save(tp);*/
 		
 	}
 }
