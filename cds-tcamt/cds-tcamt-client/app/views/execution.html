@@ -150,15 +150,15 @@
                 <div class="panel-body panel-resizable" layout="row" layout-align="space-around center">
                     <img ng-hide="showResults" src="images/ajax-loader.gif"/>
                     <div flex="100" ng-show="showResults" layout="row" layout-align="space-around center">
-                    	<div flex="10" layout="row" layout-align="center center">
+                    	<div flex="20" layout="row" layout-align="center center">
                     		<button  class="btn" ng-show="rp-1 >= 0" ng-click="goToReport(rp-1)">
                     			<i class="fa fa-chevron-left" style="font-size : 5em;" aria-hidden="true"></i>
                     		</button>
                     	</div>
-                    	<div flex="80">
+                    	<div flex="60">
                     		<report vxm="vxm" general="report" report="report.reports[rp]"></report>
                     	</div>
-                    	<div flex="10" layout="row" layout-align="center center">
+                    	<div flex="20" layout="row" layout-align="center center">
                     		<button flex="25" class="btn" ng-show="report.reports.length > rp+1" ng-click="goToReport(rp+1)">
                     			<i class="fa fa-chevron-right" style="font-size : 5em;" aria-hidden="true"></i>
                     		</button>

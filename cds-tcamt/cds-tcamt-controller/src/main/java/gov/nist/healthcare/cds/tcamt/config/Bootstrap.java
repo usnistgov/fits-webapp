@@ -132,9 +132,9 @@ public class Bootstrap {
 		accountService.createAdmin(c);
 		
 		SoftwareConfig sfC = new SoftwareConfig();
-		sfC.setConnector(FHIRAdapter.FHIR);
-		sfC.setEndPoint("http://localhost:8080/fc");
-		sfC.setName("Local Machine");
+		sfC.setConnector(FHIRAdapter.TCH);
+		sfC.setEndPoint("http://tchforecasttester.org/fv/forecast");
+		sfC.setName("Remote TCH");
 		sfC.setUser("hossam");
 		softwareConfRepository.save(sfC);
 		
