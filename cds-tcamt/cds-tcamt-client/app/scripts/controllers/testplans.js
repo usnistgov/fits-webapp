@@ -927,8 +927,7 @@ angular
 					};
 
 					$scope.newEvaluation = function(list) {
-						var eval = TestObjectFactory.createEvaluation();
-						list.push(eval);
+						list.push(TestObjectFactory.createEvaluation());
 					};
 
 					$scope.deleteEvaluation = function(list, index) {

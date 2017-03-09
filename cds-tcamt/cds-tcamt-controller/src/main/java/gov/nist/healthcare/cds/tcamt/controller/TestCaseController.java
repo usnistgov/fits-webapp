@@ -6,42 +6,28 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.security.Principal;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
-import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import javassist.NotFoundException;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import gov.nist.healthcare.cds.domain.FixedDate;
 import gov.nist.healthcare.cds.domain.TestCase;
 import gov.nist.healthcare.cds.domain.TestPlan;
 import gov.nist.healthcare.cds.domain.exception.UnresolvableDate;
 import gov.nist.healthcare.cds.domain.exception.VaccineNotFoundException;
-import gov.nist.healthcare.cds.domain.wrapper.ActualEvaluation;
-import gov.nist.healthcare.cds.domain.wrapper.ActualForecast;
 import gov.nist.healthcare.cds.domain.wrapper.CDCImport;
 import gov.nist.healthcare.cds.domain.wrapper.CDCImportConfig;
-import gov.nist.healthcare.cds.domain.wrapper.EngineResponse;
 import gov.nist.healthcare.cds.domain.wrapper.Report;
-import gov.nist.healthcare.cds.domain.wrapper.ResponseVaccinationEvent;
-import gov.nist.healthcare.cds.domain.wrapper.VaccineRef;
 import gov.nist.healthcare.cds.domain.xml.ErrorModel;
-import gov.nist.healthcare.cds.enumeration.EvaluationStatus;
-import gov.nist.healthcare.cds.enumeration.SerieStatus;
 import gov.nist.healthcare.cds.repositories.TestCaseRepository;
 import gov.nist.healthcare.cds.repositories.TestPlanRepository;
 import gov.nist.healthcare.cds.service.CDCSpreadSheetFormatService;
 import gov.nist.healthcare.cds.service.NISTFormatService;
 import gov.nist.healthcare.cds.service.TestCaseExecutionService;
-import gov.nist.healthcare.cds.service.ValidationService;
 import gov.nist.healthcare.cds.tcamt.domain.ImportResult;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -228,7 +214,6 @@ public class TestCaseController {
 		if (!file.isEmpty()) {
 			try {
 				byte[] bytes = file.getBytes();
-//				String fileContent = new String(bytes, "UTF-8");
 				ByteArrayInputStream bis = new ByteArrayInputStream(bytes);
 				CDCImport importRes = cdcFormatService._import(bis,config);
 				List<ErrorModel> errors = importRes.getExceptions();

@@ -99,7 +99,7 @@ angular.module('tcl').run(function ($httpBackend, $q, $http) {
         var request = new XMLHttpRequest();
         request.open('GET', '../../resources/configs.json', false);
         request.send(null);
-        var profile = angular.fromJson(request.response);
+        var profile = angular.fromJson('{"events":{"p":0,"f":0,"u":0,"w":0},"forecasts":{"p":1,"f":1,"u":0,"w":2}}');
         return [request.status, true, {}];
     });
 
@@ -107,13 +107,21 @@ angular.module('tcl').run(function ($httpBackend, $q, $http) {
         var request = new XMLHttpRequest();
         request.open('GET', '../../resources/configs.json', false);
         request.send(null);
-        var profile = angular.fromJson(request.response);
-        return [request.status, true, {}];
+        var profile = angular.fromJson('{"events":{"p":0,"f":0,"u":0,"w":0},"forecasts":{"p":1,"f":1,"u":0,"w":2}}');
+        return [request.status, profile, {}];
     });
     
     $httpBackend.whenGET('api/exec/collect').respond(function (method, url, data, headers) {
         var request = new XMLHttpRequest();
         request.open('GET', '../../resources/validation.json', false);
+        request.send(null);
+        var profile = angular.fromJson(request.response);
+        return [request.status, profile, {}];
+    });
+    
+    $httpBackend.whenGET('api/exec/agg').respond(function (method, url, data, headers) {
+        var request = new XMLHttpRequest();
+        request.open('GET', '../../resources/agg.json', false);
         request.send(null);
         var profile = angular.fromJson(request.response);
         return [request.status, profile, {}];

@@ -16,7 +16,11 @@
                         <strong>Queue</strong>
                     </div>
                     <span class="badge qbadge" style="vertical-align:middle; margin-left: 10px;" >{{tcQueue.length}}</span>
+                    
                     <div flex="grow" layout="row" layout-align="end center">
+	                    <div ng-show="running" style="margin-right: 10px;" flex="50">
+	                        {{progress}}%<md-progress-linear md-mode="determinate" value="{{progress}}"></md-progress-linear>
+	                    </div>
                         <button ng-click="clear()" ng-show="!exec && tcQueue.length > 0" class="btn btn-xs btn-danger"  style="margin: 0px; margin-right: 10px;">
                             <i class="fa fa-trash-o" style="font-size : 1.5em;" aria-hidden="true"></i>
                         </button>
@@ -31,14 +35,14 @@
                         </div>
                     </div>
                 </div>
-                <div class="panel-body" style="padding: 0; padding-bottom: 0px;margin: 0;" ng-show="qview">
+                <div class="panel-body" style="padding: 0; padding-bottom: 0px; margin: 0;" ng-show="qview">
+                	<span style="width : 100%; color: white; background-color: rgb(114, 114, 114);" ng-show="exec"><strong>{{selectedConfig.name}}</strong> at {{selectedConfig.endPoint}} ... </span>
                     <table class="table table-condensed table-striped table-bordered" style="height: 100%;">
-                        <thead>
-                            <td style="color: white; background-color: rgb(114, 114, 114);" ng-show="exec">Running On <strong>{{selectedConfig.name}}</strong> at {{selectedConfig.endPoint}} ... </td>
-                        </thead>
                         <thead ng-hide="exec">
-                            <td style="color: blue; text-align: center;"><strong>Configuration</strong></td>
-                            <td style="color: blue; text-align: center;"><strong>Test Cases List</strong></td>
+                        	<tr>
+                            	<th style="color: blue; text-align: center;"><strong>Configuration</strong></th>
+                            	<th style="color: blue; text-align: center;"><strong>Test Cases List</strong></th>
+                            </tr>
                         </thead>
                         <tbody>
 	                        <tr>
@@ -86,8 +90,17 @@
 	                            </td>
 	                            <td style="width: 70%;">
 	                                <table class="table table-condensed table-bordered" ng-class="{ 'fill' :  !tcQueue.length }" >
+	                                	<thead ng-show="tcQueue.length > 0">
+	                                		<tr>
+	                                			<th style="text-align: center;" ng-hide="exec">-</th>
+	                                			<th style="text-align: center;">Name</th>
+	                                			<th style="text-align: center;" ng-show="exec">Evaluations</th>
+	                                			<th style="text-align: center;" ng-show="exec">Forecasts</th>	                      
+	                                			<th style="text-align: center;">Actions</th>
+	                                		</tr>
+	                                	</thead>
 	                                    <tbody id="qbody" dnd-list="tcQueue"  dnd-drop="drop(list, item, index)">
-	                                        <tr ng-class="{'warning' :  tc._pgt === 'indeterminate', 'success' : tc._pg === 100}" ng-repeat="tc in tcQueue track by $index"
+	                                        <tr ng-class="{'warning' :  tc.running, 'info' : $index === rp && showResults }" ng-repeat="tc in tcQueue track by $index"
 	                                            dnd-draggable="tc"
 	                                            dnd-disable-if="exec"
 	                                            dnd-moved="dragMoved($index)"
@@ -95,18 +108,38 @@
 	                                            dnd-selected="models.selected = tc">
 	
 	                                            <td ng-hide="exec" dnd-handle style="text-align : center; cursor: move; background-color: #cbcbcb;"><strong>:::</strong></td>
-	                                            <td style="text-align : center;"><strong>#{{tc.id}}</strong></td>
 	                                            <td style="text-align : center;"><strong>{{tc.name}}</strong></td>
-	                                            <td style="width: 40%;"><md-progress-linear md-mode="{{tc._pgt}}" value="{{tc._pg}}"></md-progress-linear></td>
+	                                            <td ng-show="exec">
+	                                            	<div ng-show="tc._events">
+	                                            		<span style="background-color: green;" class="badge">{{tc._events.p}}</span>
+	                                            		<span style="background-color: red;" class="badge">{{tc._events.f}}</span>
+	                                            		<span style="background-color: orange;" class="badge">{{tc._events.w}}</span>
+	                                            		<span style="background-color: grey;" class="badge">{{tc._events.u}}</span>
+	                                            		<span style="background-color: black;" class="badge">{{tc._events.p + tc._events.f + tc._events.w + tc._events.u}}</span>
+														<span style="background-color: white; color : black;" class="badge">Correctness {{correctness(tc._events.f, tc._events.p, tc._events.u, tc._events.w)}}% </span>
+														<span style="background-color: white; color : black;" class="badge">Completion {{completion(tc._events.f, tc._events.p, tc._events.u, tc._events.w)}}%</span>
+	                                            	</div>
+	                                            </td>
+	                                            <td ng-show="exec">
+	                                            	<div ng-show="tc._fc">
+														<span style="background-color: green;" class="badge">{{tc._fc.p}}</span>
+	                                            		<span style="background-color: red;" class="badge">{{tc._fc.f}}</span>
+	                                            		<span style="background-color: orange;" class="badge">{{tc._fc.w}}</span>
+	                                            		<span style="background-color: grey;" class="badge">{{tc._fc.u}}</span>
+	                                            		<span style="background-color: black;" class="badge">{{tc._fc.p + tc._fc.f + tc._fc.w + tc._fc.u}}</span>
+	                                            		<span style="background-color: white; color : black;" class="badge">Correctness {{correctness(tc._fc.f,tc._fc.p,tc._fc.u,tc._fc.w)}}%</span>
+	                                            		<span style="background-color: white; color : black;" class="badge">Completion {{completion(tc._fc.f,tc._fc.p,tc._fc.u,tc._fc.w)}}%</span>
+	                                            	</div>
+	                                            </td>
 	                                            <td>
 	                                                <button ng-click="deleteTCL($index)" class="btn btn-xs btn-danger pull-right"  style="margin: 0px; margin-right: 10px;">
 	                                                    <i class="fa fa-times" aria-hidden="true"></i>
 	                                                </button>
-	                                                <button ng-click="goToReport($index)" class="btn btn-xs btn-info pull-right" ng-show="exec && tc._pg === 100" style="margin: 0px; margin-right: 10px;">
+	                                                <button ng-click="goToReport($index)" class="btn btn-xs btn-info pull-right" ng-show="exec && showResults" style="margin: 0px; margin-right: 10px;">
 	                                                    <i class="fa fa-search" aria-hidden="true"></i>
 	                                                </button>
-	                                                <span ng-show="exec && tc._pgt === 'indeterminate'" style="color: blue; text-align : center;">
-	                                                    Running ...
+	                                                <span ng-show="exec && tc.running === false && tc._s === false" style="color: red; text-align : center;">
+	                                                    Failure
 	                                                </span>
 	                                            </td>
 	                                        </tr>
@@ -149,263 +182,352 @@
                 </div>
                 <div class="panel-body panel-resizable" layout="row" layout-align="space-around center">
                     <img ng-hide="showResults" src="images/ajax-loader.gif"/>
-                    <div flex="100" ng-show="showResults" layout="row" layout-align="space-around center">
-                    	<div flex="20" layout="row" layout-align="center center">
-                    		<button  class="btn" ng-show="rp-1 >= 0" ng-click="goToReport(rp-1)">
-                    			<i class="fa fa-chevron-left" style="font-size : 5em;" aria-hidden="true"></i>
-                    		</button>
-                    	</div>
-                    	<div flex="60">
-                    		<report vxm="vxm" general="report" report="report.reports[rp]"></report>
-                    	</div>
-                    	<div flex="20" layout="row" layout-align="center center">
-                    		<button flex="25" class="btn" ng-show="report.reports.length > rp+1" ng-click="goToReport(rp+1)">
-                    			<i class="fa fa-chevron-right" style="font-size : 5em;" aria-hidden="true"></i>
-                    		</button>
-                    	</div>
-                    </div>
+                    <md-content ng-show="showResults" flex="100">
+						<md-tabs md-dynamic-height md-border-bottom>
+							<md-tab label="Aggregate Analysis">
+								<md-content class="md-padding" layout="row" layout-align="space-around center">
+									<table class="table table-condensed table-bordered">
+										<thead>
+											<tr>
+												<th style="text-align: center;">Criterion</th>
+												<th style="text-align: center;">Passed</th>
+												<th style="text-align: center;">Failed</th>
+												<th style="text-align: center;">Warning</th>
+												<th style="text-align: center;">Not Found</th>
+												<th style="text-align: center;">Total</th>
+												<th style="text-align: center;">Completion</th>
+												<th style="text-align: center;">Correctness</th>
+											</tr>
+										</thead>
+										<tbody>
+											<tr>
+												<td style="text-align: center;">Evaluations</td>
+												<td class="success" style="text-align: center;">{{aggregate.counts.EvaluationStatus.p}}</td>
+												<td class="danger" style="text-align: center;">{{aggregate.counts.EvaluationStatus.f}}</td>
+												<td class="warning" style="text-align: center;">{{aggregate.counts.EvaluationStatus.w}}</td>
+												<td class="unmatched" style="text-align: center;">{{aggregate.counts.EvaluationStatus.u}}</td>
+												<td style="text-align: center;">{{aggregate.counts.EvaluationStatus.f+aggregate.counts.EvaluationStatus.p+aggregate.counts.EvaluationStatus.u+aggregate.counts.EvaluationStatus.w}}</td>
+												<td style="text-align: center;">{{completion(aggregate.counts.EvaluationStatus.f,aggregate.counts.EvaluationStatus.p,aggregate.counts.EvaluationStatus.u,aggregate.counts.EvaluationStatus.w)}}%</td>
+												<td style="text-align: center;">{{correctness(aggregate.counts.EvaluationStatus.f,aggregate.counts.EvaluationStatus.p,aggregate.counts.EvaluationStatus.u,aggregate.counts.EvaluationStatus.w)}}%</td>
+											</tr>
+											<tr>
+												<td style="text-align: center;">Dose Number</td>
+												<td class="success" style="text-align: center;">{{aggregate.counts.DoseNumber.p}}</td>
+												<td class="danger" style="text-align: center;">{{aggregate.counts.DoseNumber.f}}</td>
+												<td class="warning" style="text-align: center;">{{aggregate.counts.DoseNumber.w}}</td>
+												<td class="unmatched" style="text-align: center;">{{aggregate.counts.DoseNumber.u}}</td>
+												<td style="text-align: center;">{{aggregate.counts.DoseNumber.f+aggregate.counts.DoseNumber.p+aggregate.counts.DoseNumber.u+aggregate.counts.DoseNumber.w}}</td>
+												<td style="text-align: center;">{{completion(aggregate.counts.DoseNumber.f,aggregate.counts.DoseNumber.p,aggregate.counts.DoseNumber.u,aggregate.counts.DoseNumber.w)}}%</td>
+												<td style="text-align: center;">{{correctness(aggregate.counts.DoseNumber.f,aggregate.counts.DoseNumber.p,aggregate.counts.DoseNumber.u,aggregate.counts.DoseNumber.w)}}%</td>
+											</tr>
+											<tr>
+												<td style="text-align: center;">Earliest Date</td>
+												<td class="success" style="text-align: center;">{{aggregate.counts.EarliestDate.p}}</td>
+												<td class="danger" style="text-align: center;">{{aggregate.counts.EarliestDate.f}}</td>
+												<td class="warning" style="text-align: center;">{{aggregate.counts.EarliestDate.w}}</td>
+												<td class="unmatched" style="text-align: center;">{{aggregate.counts.EarliestDate.u}}</td>
+												<td style="text-align: center;">{{aggregate.counts.EarliestDate.f+aggregate.counts.EarliestDate.p+aggregate.counts.EarliestDate.u+aggregate.counts.EarliestDate.w}}</td>
+												<td style="text-align: center;">{{completion(aggregate.counts.EarliestDate.f,aggregate.counts.EarliestDate.p,aggregate.counts.EarliestDate.u,aggregate.counts.EarliestDate.w)}}%</td>
+												<td style="text-align: center;">{{correctness(aggregate.counts.EarliestDate.f,aggregate.counts.EarliestDate.p,aggregate.counts.EarliestDate.u,aggregate.counts.EarliestDate.w)}}%</td>
+											</tr>
+											<tr>
+												<td style="text-align: center;">Recommended Date</td>
+												<td class="success" style="text-align: center;">{{aggregate.counts.RecommendedDate.p}}</td>
+												<td class="danger" style="text-align: center;">{{aggregate.counts.RecommendedDate.f}}</td>
+												<td class="warning" style="text-align: center;">{{aggregate.counts.RecommendedDate.w}}</td>
+												<td class="unmatched" style="text-align: center;">{{aggregate.counts.RecommendedDate.u}}</td>
+												<td style="text-align: center;">{{aggregate.counts.RecommendedDate.f+aggregate.counts.RecommendedDate.p+aggregate.counts.RecommendedDate.u+aggregate.counts.RecommendedDate.w}}</td>
+												<td style="text-align: center;">{{completion(aggregate.counts.RecommendedDate.f,aggregate.counts.RecommendedDate.p,aggregate.counts.RecommendedDate.u,aggregate.counts.RecommendedDate.w)}}%</td>
+												<td style="text-align: center;">{{correctness(aggregate.counts.RecommendedDate.f,aggregate.counts.RecommendedDate.p,aggregate.counts.RecommendedDate.u,aggregate.counts.RecommendedDate.w)}}%</td>
+											</tr>
+											<tr>
+												<td style="text-align: center;">Past Due Date</td>
+												<td class="success" style="text-align: center;">{{aggregate.counts.PastDueDate.p}}</td>
+												<td class="danger" style="text-align: center;">{{aggregate.counts.PastDueDate.f}}</td>
+												<td class="warning" style="text-align: center;">{{aggregate.counts.PastDueDate.w}}</td>
+												<td class="unmatched" style="text-align: center;">{{aggregate.counts.PastDueDate.u}}</td>
+												<td style="text-align: center;">{{aggregate.counts.PastDueDate.f+aggregate.counts.PastDueDate.p+aggregate.counts.PastDueDate.u+aggregate.counts.PastDueDate.w}}</td>
+												<td style="text-align: center;">{{completion(aggregate.counts.PastDueDate.f,aggregate.counts.PastDueDate.p,aggregate.counts.PastDueDate.u,aggregate.counts.PastDueDate.w)}}%</td>
+												<td style="text-align: center;">{{correctness(aggregate.counts.PastDueDate.f,aggregate.counts.PastDueDate.p,aggregate.counts.PastDueDate.u,aggregate.counts.PastDueDate.w)}}%</td>
+											</tr>
+											<tr>
+												<td style="text-align: center;">Latest Date</td>
+												<td class="success" style="text-align: center;">{{aggregate.counts.CompleteDate.p}}</td>
+												<td class="danger" style="text-align: center;">{{aggregate.counts.CompleteDate.f}}</td>
+												<td class="warning" style="text-align: center;">{{aggregate.counts.CompleteDate.w}}</td>
+												<td class="unmatched" style="text-align: center;">{{aggregate.counts.CompleteDate.u}}</td>
+												<td style="text-align: center;">{{aggregate.counts.CompleteDate.f+aggregate.counts.CompleteDate.p+aggregate.counts.CompleteDate.u+aggregate.counts.CompleteDate.w}}</td>
+												<td style="text-align: center;">{{completion(aggregate.counts.CompleteDate.f,aggregate.counts.CompleteDate.p,aggregate.counts.CompleteDate.u,aggregate.counts.CompleteDate.w)}}%</td>
+												<td style="text-align: center;">{{correctness(aggregate.counts.CompleteDate.f,aggregate.counts.CompleteDate.p,aggregate.counts.CompleteDate.u,aggregate.counts.CompleteDate.w)}}%</td>
+											</tr>
+										</tbody>
+									</table>    
+								</md-content>
+							</md-tab>
+							<md-tab label="Reports">
+								<md-content class="md-padding">    
+				                    <div flex="100"  layout="row" layout-align="space-around center">
+				                    	<div flex="20" layout="row" layout-align="center center">
+				                    		<button  class="btn" ng-show="rp-1 >= 0" ng-click="goToReport(rp-1)">
+				                    			<i class="fa fa-chevron-left" style="font-size : 5em;" aria-hidden="true"></i>
+				                    		</button>
+				                    	</div>
+				                    	<div flex="60">
+				                    		<report vxm="vxm" general="report" report="report.reports[rp]"></report>
+				                    	</div>
+				                    	<div flex="20" layout="row" layout-align="center center">
+				                    		<button flex="25" class="btn" ng-show="report.reports.length > rp+1" ng-click="goToReport(rp+1)">
+				                    			<i class="fa fa-chevron-right" style="font-size : 5em;" aria-hidden="true"></i>
+				                    		</button>
+				                    	</div>
+				                    </div>
+			 					</md-content>
+							</md-tab>
+							
+						</md-tabs>
+	            	</md-content>			                    
                 </div>
             </div>
         </div>
-    </div>
-    <div class="row" ng-hide="exec">
-        <div class="col-md-4">
-            <div class="panel panel-primary" style="padding: 0px; margin: 15px;">
-                <div class="panel-heading col-md-12"  layout="row" layout-align="center center" style="background-color: #293856;">
-                    <div flex="5" title="Multiselection">
-                        <button class="btn btn-xs" ng-click="multiToggle()" ng-class="{ 'btn-info' : !multipleSel, 'btn-success' : multipleSel  }" style="margin: 0;">
-                            <i class="fa fa-files-o" style="font-size: 2em;" aria-hidden="true"></i>
-                        </button>
-                    </div>
-                    <div flex="45" style="padding: 0; text-align: center;">
-                        <strong> Test Cases </strong>
-                    </div>
-                    <div flex="50" style="padding: 0;">
-                        <div class="input-group" style="width : 100%;">
-                            <span class="input-group-addon"  style="background-color: rgb(240, 240, 240);" id="basic-addon1"><i class="fa fa-search" aria-hidden="true"></i></span>
-                            <input type="text" class="form-control" ng-model="tcSearch" ng-model-options="{ debounce: 500 }" style="padding-left: 10px; background-color: white; width : 100%;" placeholder="Name, ID, Group"/>
-                        </div>
-                    </div>
-                </div>
-                <div class="panel-body panel-resizable" style="height: 400px;">
-	                <div ng-show="tps.length === 0" layout="row" layout-align="center center">
-	                	<img src="images/import.gif"/>
+	    <div class="row" ng-hide="exec">
+	        <div class="col-md-4">
+	            <div class="panel panel-primary" style="padding: 0px; margin: 15px;">
+	                <div class="panel-heading col-md-12"  layout="row" layout-align="center center" style="background-color: #293856;">
+	                    <div flex="5" title="Multiselection">
+	                        <button class="btn btn-xs" ng-click="multiToggle()" ng-class="{ 'btn-info' : !multipleSel, 'btn-success' : multipleSel  }" style="margin: 0;">
+	                            <i class="fa fa-files-o" style="font-size: 2em;" aria-hidden="true"></i>
+	                        </button>
+	                    </div>
+	                    <div flex="45" style="padding: 0; text-align: center;">
+	                        <strong> Test Cases </strong>
+	                    </div>
+	                    <div flex="50" style="padding: 0;">
+	                        <div class="input-group" style="width : 100%;">
+	                            <span class="input-group-addon"  style="background-color: rgb(240, 240, 240);" id="basic-addon1"><i class="fa fa-search" aria-hidden="true"></i></span>
+	                            <input type="text" class="form-control" ng-model="tcSearch" ng-model-options="{ debounce: 500 }" style="padding-left: 10px; background-color: white; width : 100%;" placeholder="Name, ID, Group"/>
+	                        </div>
+	                    </div>
 	                </div>
-                    <div style="white-space:nowrap;" ng-show="tps.length > 0">
-                        <div ui-tree="treeOptions">
-                            <ol ui-tree-nodes="" dnd-list="tps"  dnd-drop="false" ng-model="tps">
-                                <li data-nodrag ng-repeat="tp in tps track by $index" ui-tree-node
-                                    dnd-draggable="tp"
-                                    dnd-moved="onMoved(list)"
-                                    dnd-dragstart="dstart(true)"
-                                    dnd-dragend="dstart(false)"
-                                    dnd-effect-allowed="move"
-                                    collapsed="false">
-                                    <div ui-tree-handle ng-click="selectTP(tp)" ng-class="{selected1 : isSelectedTP(tp)}">
-                                        <div>
-                                            <i data-nodrag ng-click="toggle(this)" class="fa" ng-class="{'fa-caret-right': collapsed, 'fa-caret-down': !collapsed}"></i>
-                                            <span data-nodrag>
-                                                <span class="label label-sub-component label-icon">P</span>
-                                                {{tp.name}}
-                                            </span>
-                                        </div>
-                                    </div>
-                                    <ol ui-tree-nodes="" ng-model="tp.testCases">
-										<li collapsed="group === 'Ungrouped' ? false : true" data-collapsed="{{group === 'Ungrouped' ? false : true}}" ng-repeat="(group, tcs) in (tp.testCases | testcase:tcSearch) | groupBy: 'group' track by $index" ui-tree-node ng-hide="$parentNodeScope.collapsed">
-											<div>
-												<div style="margin-left: 5px;">
-													<i data-nodrag ng-click="toggle(this)" class="fa" ng-class="{'fa-caret-right': collapsed, 'fa-caret-down': !collapsed}"></i>
-													<span data-nodrag> 
-														<span class="label label-group label-icon">G</span><strong>{{ group }}</strong> <span style="font-style: italic; color: #e09443;">({{tcs.length}} TC)</span>
-													</span>
+	                <div class="panel-body panel-resizable" style="height: 400px;">
+		                <div ng-show="tps.length === 0" layout="row" layout-align="center center">
+		                	<img src="images/import.gif"/>
+		                </div>
+	                    <div style="white-space:nowrap;" ng-show="tps.length > 0">
+	                        <div ui-tree="treeOptions">
+	                            <ol ui-tree-nodes="" dnd-list="tps"  dnd-drop="false" ng-model="tps">
+	                                <li data-nodrag ng-repeat="tp in tps track by $index" ui-tree-node
+	                                    dnd-draggable="tp"
+	                                    dnd-moved="onMoved(list)"
+	                                    dnd-dragstart="dstart(true)"
+	                                    dnd-dragend="dstart(false)"
+	                                    dnd-effect-allowed="move"
+	                                    collapsed="false">
+	                                    <div ui-tree-handle ng-click="selectTP(tp)" ng-class="{selected1 : isSelectedTP(tp)}">
+	                                        <div>
+	                                            <i data-nodrag ng-click="toggle(this)" class="fa" ng-class="{'fa-caret-right': collapsed, 'fa-caret-down': !collapsed}"></i>
+	                                            <span data-nodrag>
+	                                                <span class="label label-sub-component label-icon">P</span>
+	                                                {{tp.name}}
+	                                            </span>
+	                                        </div>
+	                                    </div>
+	                                    <ol ui-tree-nodes="" ng-model="tp.testCases">
+											<li collapsed="group === 'Ungrouped' ? false : true" data-collapsed="{{group === 'Ungrouped' ? false : true}}" ng-repeat="(group, tcs) in (tp.testCases | testcase:tcSearch) | groupBy: 'group' track by $index" ui-tree-node ng-hide="$parentNodeScope.collapsed">
+												<div>
+													<div style="margin-left: 5px;">
+														<i data-nodrag ng-click="toggle(this)" class="fa" ng-class="{'fa-caret-right': collapsed, 'fa-caret-down': !collapsed}"></i>
+														<span data-nodrag> 
+															<span class="label label-group label-icon">G</span><strong>{{ group }}</strong> <span style="font-style: italic; color: #e09443;">({{tcs.length}} TC)</span>
+														</span>
+													</div>
 												</div>
-											</div>
-		                                    <ol dnd-list="tp.testCases" dnd-drop="false" ui-tree-nodes="" ng-model="tcs">
-		                                        <li data-nodrag ng-repeat="tc in tcs track by $index" ui-tree-node ng-hide="$parentNodeScope.collapsed"
-		                                            dnd-draggable="multipleSel ? selected : tc"
-		                                            dnd-moved="onMoved(list)"
-		                                            dnd-selected="select(tc)"
-		                                            dnd-dragstart="dstart(true)"
-		                                            dnd-dragend="dstart(false)"
-		                                            dnd-effect-allowed="move">
-		
-		                                            <div ui-tree-handle ng-click="selectTC(tc)" ng-class="{selected1 : isSelectedTC(tc) && !multipleSel, cdraggable : find(selected,tc) && multipleSel, inqueue : inQueue(tc)}">
-		                                                <span data-nodrag>
-		                                                    <span class="label label-component label-icon">T</span>
-		                                                    {{ tc.uid ? '#'+tc.uid+"- " : ""}}{{tc.name}}
-		                                                </span>
-		                                            </div>
-		                                        </li>
-		                                    </ol>
-		                        		</li>
-		                        	</ol>
-                                </li>
-                            </ol>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-
-        <div class="col-md-8">
-            <div class="panel panel-primary" style="padding: 0px; margin: 15px;">
-                <div class="panel-heading" style="background-color: #293856">
-                    <i class="fa fa-file" aria-hidden="true"></i>
-                    <strong style="margin-left: 10px;">Test View</strong>
-                    <button ng-click="addQueue(selectedTC); exe()"ng-show="selectedTC && selectedConfig && tcQueue.length === 0" class="btn btn-xs btn-success pull-right"  style="margin: 0px;">
-                        <i class="fa fa-play" aria-hidden="true"></i>
-                    </button>
-                    <button ng-click="addQueue(selectedTC)" ng-show="selectedTC && !inQueue(selectedTC)" class="btn btn-xs btn-info pull-right"  style="margin: 0px; margin-right: 10px;">
-                        <i class="fa fa-plus" aria-hidden="true"></i>
-                    </button>
-                </div>
-                <div class="panel-body panel-resizable" style="padding-bottom: 10px; height : 100%; bottom : 0; min-height: 400px; background-color: #FAFAFA;">
-                    <div ng-show="selectedTC">
-                        <h1 style="border: 0; color: rgb(93, 93, 189);text-align: center; font-weight: bold;">{{selectedTC.name}}</h1>
-                        <hr/>
-                        <ng-include src="'views/testViewer.html'" />
-                    </div>
-                    <p ng-show="!selectedTC" style="text-align: center; margin-top: 10px;"><strong>No TestCase Selected</strong></p>
-                </div>
-            </div>
-        </div>
-    </div>
+			                                    <ol dnd-list="tp.testCases" dnd-drop="false" ui-tree-nodes="" ng-model="tcs">
+			                                        <li data-nodrag ng-repeat="tc in tcs track by $index" ui-tree-node ng-hide="$parentNodeScope.collapsed"
+			                                            dnd-draggable="multipleSel ? selected : tc"
+			                                            dnd-moved="onMoved(list)"
+			                                            dnd-selected="select(tc)"
+			                                            dnd-dragstart="dstart(true)"
+			                                            dnd-dragend="dstart(false)"
+			                                            dnd-effect-allowed="move">
+			
+			                                            <div ui-tree-handle ng-click="selectTC(tc)" ng-class="{selected1 : isSelectedTC(tc) && !multipleSel, cdraggable : find(selected,tc) && multipleSel, inqueue : inQueue(tc)}">
+			                                                <span data-nodrag>
+			                                                    <span class="label label-component label-icon">T</span>
+			                                                    {{ tc.uid ? '#'+tc.uid+"- " : ""}}{{tc.name}}
+			                                                </span>
+			                                            </div>
+			                                        </li>
+			                                    </ol>
+			                        		</li>
+			                        	</ol>
+	                                </li>
+	                            </ol>
+	                        </div>
+	                    </div>
+	                </div>
+	            </div>
+	        </div>
+	
+	
+	        <div class="col-md-8">
+	            <div class="panel panel-primary" style="padding: 0px; margin: 15px;">
+	                <div class="panel-heading" style="background-color: #293856">
+	                    <i class="fa fa-file" aria-hidden="true"></i>
+	                    <strong style="margin-left: 10px;">Test View</strong>
+	                    <button ng-click="addQueue(selectedTC); exe()"ng-show="selectedTC && selectedConfig && tcQueue.length === 0" class="btn btn-xs btn-success pull-right"  style="margin: 0px;">
+	                        <i class="fa fa-play" aria-hidden="true"></i>
+	                    </button>
+	                    <button ng-click="addQueue(selectedTC)" ng-show="selectedTC && !inQueue(selectedTC)" class="btn btn-xs btn-info pull-right"  style="margin: 0px; margin-right: 10px;">
+	                        <i class="fa fa-plus" aria-hidden="true"></i>
+	                    </button>
+	                </div>
+	                <div class="panel-body panel-resizable" style="padding-bottom: 10px; height : 100%; bottom : 0; min-height: 400px; background-color: #FAFAFA;">
+	                    <div ng-show="selectedTC">
+	                        <h1 style="border: 0; color: rgb(93, 93, 189);text-align: center; font-weight: bold;">{{selectedTC.name}}</h1>
+	                        <hr/>
+	                        <ng-include src="'views/testViewer.html'" />
+	                    </div>
+	                    <p ng-show="!selectedTC" style="text-align: center; margin-top: 10px;"><strong>No TestCase Selected</strong></p>
+	                </div>
+	            </div>
+	        </div>
+	    </div>
+	</div>
 </div>
 <script type="text/ng-template" id="report.html">
-<table class="table table-condensed table-striped table-bordered" style="width: 100%; height: 100%;">
-	<thead>
-		<tr>
-			<th>Validation Report  <span class="pull-right">{{ general.executionDate | date:"MM/dd/yyyy"}}</span></th>
-		</tr>
-	</thead>
-	<tbody>
-		<tr>
-			<td>
-				<table class="table table-condensed table-striped table-bordered">
-					<thead>
-						<tr>
-							<th style="text-align: center;" colspan="2">
-								<h3>
-									<span style="border: 0; color: rgb(93, 93, 189); text-align: center; font-weight: bold;">
-										{{report.tc.name}}
-									</span>
-								</h3>
-							</th>
-						</tr>
-					</thead>
-					<tbody>
-						<tr>
-							<th colspan="2" style="background-color : white;">Evaluation Date <span class="pull-right">{{ report.evaluationDate | date:"MM/dd/yyyy"}}</span></th>
-						</tr>
-						<tr style="text-align: center;">
-							<th colspan="2"><span style="color : blue;">Software</span></th>
-						</tr>
-						<tr>
-							<td>End Point</td>
-							<td>{{general.software.endPoint}}</td>
-						</tr>
-						<tr>
-							<td>Connection Type</td>
-							<td>{{general.software.connector}}</td>
-						</tr>
-						<tr style="text-align: center;">
-							<th colspan="2"><span style="color : blue;">Patient</span></th>
-						</tr>
-						<tr>
-							<td>Date Of Birth</td>
-							<td>{{ report.dob | date:"MM/dd/yyyy"}}</td>
-						</tr>
-						<tr>
-							<td>Gender</td>
-							<td>{{report.tc.patient.gender}}</td>
-						</tr>
-					</tbody>
-				</table>
-			</td>
-		</tr>
-		<tr>
-			<td>
-				<table style="text-align: center;" class="table table-condensed table-bordered">
-					<thead>
-						<tr>
-							<th colspan="3" style="text-align: center;">Summary</th>
-						</tr>
-					</thead>
-					<tbody>
-						<tr>
-							<td></td>
-							<td>Evaluations</td>
-							<td>Forecasts</td>
-						</tr>
-						<tr class="success">
-							<td>PASSED</td>
-							<td>{{report.events.p}}</td>
-							<td>{{report.forecasts.p}}</td>
-						</tr>
-						<tr class="danger">
-							<td>FAILED</td>
-							<td>{{report.events.f}}</td>
-							<td>{{report.forecasts.f}}</td>
-						</tr>
-						<tr class="warning">
-							<td>WARNING</td>
-							<td>{{report.events.w}}</td>
-							<td>{{report.forecasts.w}}</td>
-						</tr>
-						<tr class="unmatched">
-							<td>NOT FOUND</td>
-							<td>{{report.events.u}}</td>
-							<td>{{report.forecasts.u}}</td>
-						</tr>
-						<tr>
-							<td>COMPLETION</td>
-							<td>{{completion(report.events.f, report.events.p, report.events.u, report.events.w)}} %</td>
-							<td>{{completion(report.forecasts.f, report.forecasts.p, report.forecasts.u, report.forecasts.w)}} %</td>
-						</tr>
-						<tr>
-							<td>CORRECTNESS</td>
-							<td>{{correctness(report.events.f, report.events.p, report.events.u, report.events.w)}} %</td>
-							<td>{{correctness(report.forecasts.f, report.forecasts.p, report.forecasts.u, report.forecasts.w)}} %</td>
-						</tr>
-					</tbody>
-				</table>
-			</td>
-		</tr>
-		<tr>
-			<td >
-				<table class="table table-condensed table-striped table-bordered" style="width: 100%; height: 100%;">
-					<thead>
-						<tr>
-							<th style="text-align: center;">Events</th>
-							<th style="text-align: center;">Forecasts</th>
-						</tr>
-					</thead>
-					<tbody ng-init="report.showXML = false">
-						<tr>
-							<td><event-report vxm="vxm" data="report.veValidation"></event-report></td>
-							<td><forecast-report data="report.fcValidation"></forecast-report></td>
-						</tr>
-						<tr>
-							<td md-whiteframe="2" colspan="2" style="text-align : center;">
-								XML Response
-								<button style="margin : 0px;" class="btn btn-xs pull-right" ng-click="report.showXML = !report.showXML" >
-									<i ng-show="report.showXML" class="fa fa-eye" aria-hidden="true" style="font-size : 1.5em; color: #2d5634;"></i>
-									<i ng-show="!report.showXML" class="fa fa-eye-slash" aria-hidden="true" style="font-size : 1.5em; color: rgb(203, 167, 167);"></i>
-								</button>
-							<td>
-						</tr>
-						<tr ng-show="report.showXML" >
-							<td colspan="2" class="panel-resizable">
-								<pre style="height : 300px; overflow-y : scroll;" class="prettyprint">{{beauty}}</pre>
-							<td>
-						</tr>
-					</tbody>
-				</table>
-			</td>
-		</tr>
-	</tbody>
-</table>
+	<table class="table table-condensed table-striped table-bordered" style="width: 100%; height: 100%;">
+		<thead>
+			<tr>
+				<th>Validation Report  <span class="pull-right">{{ general.executionDate | date:"MM/dd/yyyy"}}</span></th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr>
+				<td>
+					<table class="table table-condensed table-striped table-bordered">
+						<thead>
+							<tr>
+								<th style="text-align: center;" colspan="2">
+									<h3>
+										<span style="border: 0; color: rgb(93, 93, 189); text-align: center; font-weight: bold;">
+											{{report.tc.name}}
+										</span>
+									</h3>
+								</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr>
+								<th colspan="2" style="background-color : white;">Evaluation Date <span class="pull-right">{{ report.evaluationDate | date:"MM/dd/yyyy"}}</span></th>
+							</tr>
+							<tr style="text-align: center;">
+								<th colspan="2"><span style="color : blue;">Software</span></th>
+							</tr>
+							<tr>
+								<td>End Point</td>
+								<td>{{general.software.endPoint}}</td>
+							</tr>
+							<tr>
+								<td>Connection Type</td>
+								<td>{{general.software.connector}}</td>
+							</tr>
+							<tr style="text-align: center;">
+								<th colspan="2"><span style="color : blue;">Patient</span></th>
+							</tr>
+							<tr>
+								<td>Date Of Birth</td>
+								<td>{{ report.dob | date:"MM/dd/yyyy"}}</td>
+							</tr>
+							<tr>
+								<td>Gender</td>
+								<td>{{report.tc.patient.gender}}</td>
+							</tr>
+						</tbody>
+					</table>
+				</td>
+			</tr>
+			<tr>
+				<td>
+					<table style="text-align: center;" class="table table-condensed table-bordered">
+						<thead>
+							<tr>
+								<th colspan="3" style="text-align: center;">Summary</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr>
+								<td></td>
+								<td>Evaluations</td>
+								<td>Forecasts</td>
+							</tr>
+							<tr class="success">
+								<td>PASSED</td>
+								<td>{{report.events.p}}</td>
+								<td>{{report.forecasts.p}}</td>
+							</tr>
+							<tr class="danger">
+								<td>FAILED</td>
+								<td>{{report.events.f}}</td>
+								<td>{{report.forecasts.f}}</td>
+							</tr>
+							<tr class="warning">
+								<td>WARNING</td>
+								<td>{{report.events.w}}</td>
+								<td>{{report.forecasts.w}}</td>
+							</tr>
+							<tr class="unmatched">
+								<td>NOT FOUND</td>
+								<td>{{report.events.u}}</td>
+								<td>{{report.forecasts.u}}</td>
+							</tr>
+							<tr>
+								<td>COMPLETION</td>
+								<td>{{completion(report.events.f, report.events.p, report.events.u, report.events.w)}} %</td>
+								<td>{{completion(report.forecasts.f, report.forecasts.p, report.forecasts.u, report.forecasts.w)}} %</td>
+							</tr>
+							<tr>
+								<td>CORRECTNESS</td>
+								<td>{{correctness(report.events.f, report.events.p, report.events.u, report.events.w)}} %</td>
+								<td>{{correctness(report.forecasts.f, report.forecasts.p, report.forecasts.u, report.forecasts.w)}} %</td>
+							</tr>
+						</tbody>
+					</table>
+				</td>
+			</tr>
+			<tr>
+				<td >
+					<table class="table table-condensed table-striped table-bordered" style="width: 100%; height: 100%;">
+						<thead>
+							<tr>
+								<th style="text-align: center;">Events</th>
+								<th style="text-align: center;">Forecasts</th>
+							</tr>
+						</thead>
+						<tbody ng-init="report.showXML = false">
+							<tr>
+								<td><event-report vxm="vxm" data="report.veValidation"></event-report></td>
+								<td><forecast-report data="report.fcValidation"></forecast-report></td>
+							</tr>
+							<tr>
+								<td md-whiteframe="2" colspan="2" style="text-align : center;">
+									XML Response
+									<button style="margin : 0px;" class="btn btn-xs pull-right" ng-click="report.showXML = !report.showXML" >
+										<i ng-show="report.showXML" class="fa fa-eye" aria-hidden="true" style="font-size : 1.5em; color: #2d5634;"></i>
+										<i ng-show="!report.showXML" class="fa fa-eye-slash" aria-hidden="true" style="font-size : 1.5em; color: rgb(203, 167, 167);"></i>
+									</button>
+								<td>
+							</tr>
+							<tr ng-show="report.showXML" >
+								<td colspan="2" class="panel-resizable">
+									<pre style="height : 300px; overflow-y : scroll;" class="prettyprint">{{beauty}}</pre>
+								<td>
+							</tr>
+						</tbody>
+					</table>
+				</td>
+			</tr>
+		</tbody>
+	</table>			
 </script>
 <script type="text/ng-template" id="vereport.html">
 <table style="text-align: center;" class="table table-condensed table-bordered">

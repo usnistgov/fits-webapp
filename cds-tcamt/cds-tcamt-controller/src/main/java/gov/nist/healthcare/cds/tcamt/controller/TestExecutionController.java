@@ -10,10 +10,13 @@ import gov.nist.healthcare.cds.domain.SoftwareConfig;
 import gov.nist.healthcare.cds.domain.TestCase;
 import gov.nist.healthcare.cds.domain.TestExecution;
 import gov.nist.healthcare.cds.domain.exception.UnresolvableDate;
+import gov.nist.healthcare.cds.domain.wrapper.AggregateReport;
+import gov.nist.healthcare.cds.domain.wrapper.Counts;
+import gov.nist.healthcare.cds.domain.wrapper.Report;
 import gov.nist.healthcare.cds.repositories.SoftwareConfigRepository;
 import gov.nist.healthcare.cds.repositories.TestCaseRepository;
+import gov.nist.healthcare.cds.service.AggregateReportService;
 import gov.nist.healthcare.cds.service.TestCaseExecutionService;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -33,6 +36,9 @@ public class TestExecutionController {
 	
 	@Autowired
 	private TestCaseRepository testCaseRepository;
+	
+	@Autowired
+	private AggregateReportService aggregateService;
 
 	@RequestMapping(value = "/exec/configs", method = RequestMethod.GET)
 	@ResponseBody
@@ -60,15 +66,16 @@ public class TestExecutionController {
 	}
 	
 	@RequestMapping(value = "/exec/tc/{id}", method = RequestMethod.GET)
-	public boolean add(HttpSession session, @PathVariable String id,Principal user) throws UnresolvableDate {
+	public Counts add(HttpSession session, @PathVariable String id,Principal user) throws UnresolvableDate {
 		TestExecution exec = (TestExecution) session.getAttribute("exec");
 		if(exec == null){
-			return false;
+			return null;
 		}
 		else {
 			TestCase tc = testCaseRepository.findOne(id);
-			exec.getReports().add(execService.execute(exec.getSoftware(), tc, exec.getExecutionDate()));
-			return true;
+			Report report = execService.execute(exec.getSoftware(), tc, exec.getExecutionDate());
+			exec.getReports().add(report);
+			return new Counts(report.getEvents(),report.getForecasts());
 		}
 	}
 	
@@ -76,6 +83,12 @@ public class TestExecutionController {
 	public TestExecution collect(HttpSession session, Principal user) {
 		TestExecution exec = (TestExecution) session.getAttribute("exec");
 		return exec;
+	}
+	
+	@RequestMapping(value = "/exec/agg", method = RequestMethod.GET)
+	public AggregateReport aggregate(HttpSession session, Principal user) {
+		TestExecution exec = (TestExecution) session.getAttribute("exec");
+		return aggregateService.aggregate(exec.getReports());
 	}
 	
 }
