@@ -1,5 +1,14 @@
 'use strict';
 
+angular.module('tcl').filter('reportF', function() {
+    return function(input, f) {
+    	 if (!input || !input.length) { return; }
+    	 return input.filter(function(elm){
+    		 return elm._events.crt >= f.ev.crt && elm._events.cmp >= f.ev.cmp && elm._fc.crt >= f.fc.crt && elm._fc.cmp >= f.fc.cmp;
+    	 })
+    }
+});
+
 /**
  * @ngdoc function
  * @name clientApp.controller:ExecutionCtrl
@@ -16,6 +25,16 @@ angular.module('tcl').controller('ExecutionCtrl', function($filter,$rootScope, $
   $scope.addConfig = false;
   $scope.configs = [];
   $scope.qview = true;
+  $scope.filter = {
+		  ev : {
+			  cmp : 0,
+			  crt : 0
+		  },
+		  fc : {
+			  cmp : 0,
+			  crt : 0  
+		  }
+  };
   $scope.configStub = {
     name: "",
     endPoint: "",
@@ -68,6 +87,24 @@ angular.module('tcl').controller('ExecutionCtrl', function($filter,$rootScope, $
   $scope.multipleSel = false;
   $scope.selected = [];
 
+  $scope.reset = function(n){
+	n.cmp = 0;
+	n.crt = 0;
+  };
+  
+  $scope.back = function(){
+	  $scope.exec = false;
+	  $scope.rp = 0;
+	  $scope.showResults = false;
+	  $scope.report = {};
+	  $scope.aggregate = {};
+	  $scope.running = false;
+	  $scope.executed = 0;
+	  $scope.all = 0;
+	  $scope.progress = 0;
+	  $scope.tcQueue = [];
+  };
+  
   $scope.multiToggle = function() {
     $scope.multipleSel = !$scope.multipleSel;
     $scope.selected = [];
@@ -183,7 +220,6 @@ angular.module('tcl').controller('ExecutionCtrl', function($filter,$rootScope, $
 
   $scope.rp = 0;
   $scope.showResults = false;
-  $scope.valTC = {};
   $scope.report = {};
   $scope.aggregate = {};
   $scope.running = false;
@@ -193,16 +229,21 @@ angular.module('tcl').controller('ExecutionCtrl', function($filter,$rootScope, $
 
   $scope.execT = function(id) {
     console.log("Exec :" + id);
-    $scope.progress = ($scope.executed / $scope.all) * 100;
+    $scope.progress = Math.floor(($scope.executed / $scope.all) * 100);
     if (id < $scope.tcQueue.length) {
       console.log("Start :" + id);
       $scope.tcQueue[id].running = true;
       $http.get('api/exec/tc/' + $scope.tcQueue[id].id).then(function(response) {
         if (response.data) {
+          var tc =  $scope.tcQueue[id];
           $scope.tcQueue[id].running = false;
           $scope.tcQueue[id]._s = true;
           $scope.tcQueue[id]._events = response.data.events;
+          $scope.tcQueue[id]._events.cmp = $scope.completion(tc._events.f, tc._events.p, tc._events.u, tc._events.w);
+          $scope.tcQueue[id]._events.crt = $scope.correctness(tc._events.f, tc._events.p, tc._events.u, tc._events.w);
           $scope.tcQueue[id]._fc = response.data.forecasts;
+          $scope.tcQueue[id]._fc.cmp = $scope.completion(tc._fc.f,tc._fc.p,tc._fc.u,tc._fc.w)
+          $scope.tcQueue[id]._fc.crt = $scope.correctness(tc._fc.f,tc._fc.p,tc._fc.u,tc._fc.w)
         } else {
           $scope.tcQueue[id].running = false;
           $scope.tcQueue[id]._s = false;

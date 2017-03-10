@@ -4,11 +4,11 @@
             can also <a href="#/registration"><i class="fa fa-chevron-circle-right"></i>&nbsp;register</a></p>
     </div>
     <div class="row" ng-show="isAuthenticated()">
-        <div class="col-md-12">
+        <div >
             <div class="panel panel-primary" style="padding: 0px; margin: 15px;">
                 <div class="panel-heading col-md-12"  layout="row" layout-align="start center" style="background-color: #293856;">
                     <div style="padding: 0;" ng-show="exec">
-                        <button class="btn btn-xs btn-info" ng-click="exec = false;" style="margin: 0; margin-right: 10px;">
+                        <button class="btn btn-xs btn-info" ng-click="back()" style="margin: 0; margin-right: 10px;">
                             <i class="fa fa-chevron-left" aria-hidden="true" style="font-size : 1.8em;"></i>
                         </button>
                     </div>
@@ -18,7 +18,7 @@
                     <span class="badge qbadge" style="vertical-align:middle; margin-left: 10px;" >{{tcQueue.length}}</span>
                     
                     <div flex="grow" layout="row" layout-align="end center">
-	                    <div ng-show="running" style="margin-right: 10px;" flex="50">
+	                    <div ng-show="exec" style="margin-right: 10px;" flex="50">
 	                        {{progress}}%<md-progress-linear md-mode="determinate" value="{{progress}}"></md-progress-linear>
 	                    </div>
                         <button ng-click="clear()" ng-show="!exec && tcQueue.length > 0" class="btn btn-xs btn-danger"  style="margin: 0px; margin-right: 10px;">
@@ -36,8 +36,14 @@
                     </div>
                 </div>
                 <div class="panel-body" style="padding: 0; padding-bottom: 0px; margin: 0;" ng-show="qview">
-                	<span style="width : 100%; color: white; background-color: rgb(114, 114, 114);" ng-show="exec"><strong>{{selectedConfig.name}}</strong> at {{selectedConfig.endPoint}} ... </span>
                     <table class="table table-condensed table-striped table-bordered" style="height: 100%;">
+                    	<thead ng-show="exec">
+                    		<tr layout="row">
+                    			<td flex="100" style="background-color: rgb(114, 114, 114);">
+                    				<span style="color: white; background-color: rgb(114, 114, 114);" ><strong>{{selectedConfig.name}}</strong> at {{selectedConfig.endPoint}} ... </span>
+                    			</td>
+                    		</tr>
+                    	</thead>
                         <thead ng-hide="exec">
                         	<tr>
                             	<th style="color: blue; text-align: center;"><strong>Configuration</strong></th>
@@ -88,50 +94,97 @@
 	                                    </div>
 	                                </div>                                   
 	                            </td>
-	                            <td style="width: 70%;">
-	                                <table class="table table-condensed table-bordered" ng-class="{ 'fill' :  !tcQueue.length }" >
-	                                	<thead ng-show="tcQueue.length > 0">
+	                            <td style="width: 70%;">	                                	
+	                                <table ng-show="exec" class="table table-condensed" >
+	                                	<thead>
 	                                		<tr>
-	                                			<th style="text-align: center;" ng-hide="exec">-</th>
-	                                			<th style="text-align: center;">Name</th>
-	                                			<th style="text-align: center;" ng-show="exec">Evaluations</th>
-	                                			<th style="text-align: center;" ng-show="exec">Forecasts</th>	                      
-	                                			<th style="text-align: center;">Actions</th>
+	                                			<th style="text-align : center;">Evaluations</th>
+	                                			<th style="text-align : center;">Forecasts</th>
 	                                		</tr>
 	                                	</thead>
-	                                    <tbody id="qbody" dnd-list="tcQueue"  dnd-drop="drop(list, item, index)">
-	                                        <tr ng-class="{'warning' :  tc.running, 'info' : $index === rp && showResults }" ng-repeat="tc in tcQueue track by $index"
+	                                	<tbody>
+	                                		<tr>
+	                           					<td>
+	                           						<div layout="row" layout-align="center center">
+		                           						<md-input-container style="margin-bottom : 0;"> 
+		                           							<label>Completion %</label>
+		                           							<input min=0 max=100 ng-model="filter.ev.cmp" type="number">
+		                           						</md-input-container>
+		                           						<md-input-container style="margin-bottom : 0;">
+		                           							<label>Correctness %</label>
+		                           							<input min=0 max=100 ng-model="filter.ev.crt" type="number">
+		                           						</md-input-container>
+		                           						<div layout="column" layout-align="center center">
+		                           							<button ng-click="reset(filter.ev)" class="btn btn-warning btn-xs" style="margin : 0;" >
+		                           								Reset
+		                           							</button>
+		                           						</div>
+	                           						</div>
+	                           					</td>
+                           						<td>
+                           							<div layout="row" layout-align="center center">
+		                           						<md-input-container style="margin-bottom : 0;"> 
+		                           							<label>Completion %</label>
+		                           							<input min=0 max=100 ng-model="filter.fc.cmp" type="number">
+		                           						</md-input-container>
+		                           						<md-input-container style="margin-bottom : 0;">
+		                           							<label>Correctness %</label>
+		                           							<input min=0 max=100 ng-model="filter.fc.crt" type="number">
+		                           						</md-input-container>
+		                           						<div layout="column" layout-align="center center">
+		                           							<button ng-click="reset(filter.fc)" class="btn btn-warning btn-xs" style="margin : 0;" >
+		                           								Reset
+		                           							</button>
+		                           						</div>
+	                           						</div>
+	                           					</td>
+	                                		</tr>
+	                                	</tbody>
+	                                </table>
+	                                <table class="table table-condensed" ng-class="{ 'fill' :  !tcQueue.length }" >
+	                                	<thead ng-show="tcQueue.length > 0" style="display : block;">
+	                                		<tr layout="row">
+	                                			<th flex="5" ng-hide="exec"></th>
+	                                			<th flex="{{exec ? 35 : 80 }}" >Name</th>
+	                                			<th flex="25"  ng-show="exec">Evaluations</th>
+	                                			<th flex="25"  ng-show="exec">Forecasts</th>	                      
+	                                			<th flex="15" >Actions</th>
+	                                		</tr>
+	                                	</thead>
+	                                    <tbody style="display : block; max-height : 500px; overflow-y : scroll;" id="qbody" dnd-list="tcQueue"  dnd-drop="drop(list, item, index)">
+	                                        <tr ng-class="{'warning' :  tc.running, 'info' : $index === rp && showResults }" ng-repeat="tc in (!showResults ? tcQueue : (tcQueue | reportF:filter )) track by $index"
 	                                            dnd-draggable="tc"
 	                                            dnd-disable-if="exec"
 	                                            dnd-moved="dragMoved($index)"
 	                                            dnd-effect-allowed="move"
-	                                            dnd-selected="models.selected = tc">
+	                                            dnd-selected="models.selected = tc"
+	                                            layout="row" >
 	
-	                                            <td ng-hide="exec" dnd-handle style="text-align : center; cursor: move; background-color: #cbcbcb;"><strong>:::</strong></td>
-	                                            <td style="text-align : center;"><strong>{{tc.name}}</strong></td>
-	                                            <td ng-show="exec">
+	                                            <td flex="5" ng-hide="exec" dnd-handle style="text-align : center; cursor: move; background-color: #cbcbcb;"><strong>:::</strong></td>
+	                                            <td flex="{{exec ? 35 : 80 }}" style="text-align : center;"><strong>{{tc.name}}</strong></td>
+	                                            <td flex="25" ng-show="exec">
 	                                            	<div ng-show="tc._events">
 	                                            		<span style="background-color: green;" class="badge">{{tc._events.p}}</span>
 	                                            		<span style="background-color: red;" class="badge">{{tc._events.f}}</span>
 	                                            		<span style="background-color: orange;" class="badge">{{tc._events.w}}</span>
 	                                            		<span style="background-color: grey;" class="badge">{{tc._events.u}}</span>
 	                                            		<span style="background-color: black;" class="badge">{{tc._events.p + tc._events.f + tc._events.w + tc._events.u}}</span>
-														<span style="background-color: white; color : black;" class="badge">Correctness {{correctness(tc._events.f, tc._events.p, tc._events.u, tc._events.w)}}% </span>
-														<span style="background-color: white; color : black;" class="badge">Completion {{completion(tc._events.f, tc._events.p, tc._events.u, tc._events.w)}}%</span>
+														<span style="background-color: white; color : black;" class="badge">Correctness {{tc._events.crt}}% </span>
+														<span style="background-color: white; color : black;" class="badge">Completion {{tc._events.cmp}}%</span>
 	                                            	</div>
 	                                            </td>
-	                                            <td ng-show="exec">
+	                                            <td flex="25" ng-show="exec">
 	                                            	<div ng-show="tc._fc">
 														<span style="background-color: green;" class="badge">{{tc._fc.p}}</span>
 	                                            		<span style="background-color: red;" class="badge">{{tc._fc.f}}</span>
 	                                            		<span style="background-color: orange;" class="badge">{{tc._fc.w}}</span>
 	                                            		<span style="background-color: grey;" class="badge">{{tc._fc.u}}</span>
 	                                            		<span style="background-color: black;" class="badge">{{tc._fc.p + tc._fc.f + tc._fc.w + tc._fc.u}}</span>
-	                                            		<span style="background-color: white; color : black;" class="badge">Correctness {{correctness(tc._fc.f,tc._fc.p,tc._fc.u,tc._fc.w)}}%</span>
-	                                            		<span style="background-color: white; color : black;" class="badge">Completion {{completion(tc._fc.f,tc._fc.p,tc._fc.u,tc._fc.w)}}%</span>
+	                                            		<span style="background-color: white; color : black;" class="badge">Correctness {{tc._fc.crt}}%</span>
+	                                            		<span style="background-color: white; color : black;" class="badge">Completion {{tc._fc.cmp}}%</span>
 	                                            	</div>
 	                                            </td>
-	                                            <td>
+	                                            <td flex="15">
 	                                                <button ng-click="deleteTCL($index)" class="btn btn-xs btn-danger pull-right"  style="margin: 0px; margin-right: 10px;">
 	                                                    <i class="fa fa-times" aria-hidden="true"></i>
 	                                                </button>
@@ -143,7 +196,7 @@
 	                                                </span>
 	                                            </td>
 	                                        </tr>
-	                                        <tr ng-hide="tcQueue.length === 0" class="dndPlaceholder">
+	                                        <tr ng-hide="tcQueue.length === 0" class="dndPlaceholder" layout="row" >
 	                                            <td colspan="5" style="
 	                                                                    text-align: center;
 	                                                                      color: black;
@@ -151,10 +204,11 @@
 	                                                                      width: 100%;
 	                                                                      height: 100%;
 	                                                                      vertical-align: middle;
-	                                                                      border: 2px dashed black;">
+	                                                                      border: 2px dashed black;"
+	                              										  flex="100">
 	                                                <strong>Drop Here</strong></td>
 	                                        </tr>
-	                                        <tr ng-show="(dstartf || multipleSel) && tcQueue.length === 0" >
+	                                        <tr ng-show="(dstartf || multipleSel) && tcQueue.length === 0"  layout="row">
 	                                            <td colspan="5" style="
 	                                                                    text-align: center;
 	                                                                      color: black;
@@ -162,7 +216,8 @@
 	                                                                      width: 100%;
 	                                                                      height: 100%;
 	                                                                      vertical-align: middle;
-	                                                                      border: 2px dashed black;">
+	                                                                      border: 2px dashed black;"
+	                                                                      flex="100" >
 	                                                <strong>Drop Here</strong></td>
 	                                        </tr>
 	                                    </tbody>
