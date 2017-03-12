@@ -3,7 +3,7 @@
         <p>Please <a href="" ng-click="loginReq()"><i class="fa fa-sign-in"></i>&nbsp;login</a> to access this page. You
             can also <a href="#/registration"><i class="fa fa-chevron-circle-right"></i>&nbsp;register</a></p>
     </div>
-    <div class="row" ng-show="isAuthenticated()">
+    <div ng-show="isAuthenticated()">
         <div >
             <div class="panel panel-primary" style="padding: 0px; margin: 15px;">
                 <div class="panel-heading col-md-12"  layout="row" layout-align="start center" style="background-color: #293856;">
@@ -473,10 +473,10 @@
 						</thead>
 						<tbody>
 							<tr>
-								<th colspan="2" style="background-color : white;">Evaluation Date <span class="pull-right">{{ report.evaluationDate | date:"MM/dd/yyyy"}}</span></th>
+								<td colspan="2" style="background-color : white;">Evaluation Date <span class="pull-right">{{ report.evaluationDate | date:"MM/dd/yyyy"}}</span></td>
 							</tr>
 							<tr style="text-align: center;">
-								<th colspan="2"><span style="color : blue;">Software</span></th>
+								<td colspan="2"><span style="color : blue;">Software</span></td>
 							</tr>
 							<tr>
 								<td>End Point</td>
@@ -487,7 +487,7 @@
 								<td>{{general.software.connector}}</td>
 							</tr>
 							<tr style="text-align: center;">
-								<th colspan="2"><span style="color : blue;">Patient</span></th>
+								<td colspan="2"><span style="color : blue;">Patient</span></td>
 							</tr>
 							<tr>
 								<td>Date Of Birth</td>
@@ -595,8 +595,8 @@
 	</thead>
 	<tbody ng-repeat="rp in reportList | orderBy:'veRequirement.dateAdministred' ">
 		<tr>
-			<td md-whiteframe="2" ng-show="rp.veRequirement.vEvent.vaccination.administred.discriminator === 'generic'" colspan="3" style="text-align : justify;">
-				<div style="width : 100%;" layout="row" layout-align="start center">
+			<td md-whiteframe="2"  colspan="3" style="text-align : justify;">
+				<div style="width : 100%;" layout="row" layout-align="start center" ng-show="rp.veRequirement.vEvent.vaccination.administred.discriminator === 'generic'">
 					<div flex="30" layout="column" layout-align="center center">
 						<span style="background-color: red;" class="badge">G</span>
 						<span class="badge sbadge">Dose {{rp.veRequirement.vEvent.vaccination.doseNumber}}</span> 
@@ -607,21 +607,19 @@
 						<span>Date Administred : {{rp.veRequirement.dateAdministred | date:"MM/dd/yyyy"}}</span>
 					</div>	
 				</div>
-			</td>
-			<td md-whiteframe="2" ng-show="rp.veRequirement.vEvent.vaccination.administred.discriminator === 'specific'" colspan="3" style="text-align : justify;">
-				<div style="width : 100%;" layout="row" layout-align="start center">
+				<div style="width : 100%;" layout="row" layout-align="start center" ng-show="rp.veRequirement.vEvent.vaccination.administred.discriminator === 'specific'">
 					<div flex="30" layout="column" layout-align="center center">
 						<span style="background-color: red;" class="badge">S</span>
-						<span class="badge sbadge">Dose {{rp.veRequirement.vEvent.vaccination.doseNumber}}</span> 
+						<span class="badge sbadge">Dose {{rp.veRequirement.vEvent.vaccination.doseNumber}}</span>
 						<span style="background-color: green;" class="badge">CVX#{{getVx(rp.veRequirement.vEvent.vaccination.administred).cvx}}</span>
-						<span style="background-color: blue;" class="badge">MVX#{{rp.veRequirement.vEvent.vaccination.administred.mx.mvx}}</span> 
+						<span style="background-color: blue;" class="badge">MVX#{{rp.veRequirement.vEvent.vaccination.administred.mx.mvx}}</span>
 					</div>
 					<div flex="50" layout="column" layout-align="start center" style="text-align : left;">
 						<span><strong>{{getVx(rp.veRequirement.vEvent.vaccination.administred).name}}</strong></span></br>
 						<span><strong>By</strong> {{rp.veRequirement.vEvent.vaccination.administred.mx.name}}</span></br>
 						<span><strong>{{rp.veRequirement.vEvent.vaccination.administred.name}}</strong></span>
 						<span>Date Administred : {{rp.veRequirement.dateAdministred | date:"MM/dd/yyyy"}}</span>
-					</div>	
+					</div>
 				</div>
 			</td>
 		</tr>

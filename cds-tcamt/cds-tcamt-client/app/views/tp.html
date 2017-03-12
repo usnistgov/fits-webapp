@@ -29,10 +29,15 @@
   					<span class="label label-segment label-icon" style="vertical-align:middle;">Forecast</span> {{selectedForecast.target.name}}
   				</li>
 			</ol>
-			<div uib-alert style="background-color : rgb(219, 67, 67);" ng-show="control.error.isSet" >
-				<md-button style="background-color : rgb(234, 152, 45);" class="md-accent md-raised md-hue-1">SHOW</md-button>
-				TestCase cannot be saved due to errors 
-
+			<div ng-show="control.error.isSet">
+                <div ng-repeat="error in control.error.list track by $index" uib-alert class="alert-danger" close="dismissError($index)">
+                    <table>
+                        <tr>
+                            <td><strong>{{error.path}}</strong></td>
+                            <td>{{error.message}}</td>
+                        </tr>
+                    </table>
+                </div>
 			</div>
             <div class="pull-left">
                 <span ng-show="accordi.tpList" class="header4" style="margin-top:50px !important;">List of Test Plans</span>
@@ -103,6 +108,28 @@
     </div>
     </div>
 </script>
+
+    <script type="text/ng-template" id="ExitTC.html">
+        <div class="modal-header">
+            <h3 class="modal-title">Unsaved Changes</h3>
+        </div>
+        <div class="modal-body">
+            <p>Your TestCase has Unsaved Changes please choose an action to do :</p>
+        </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-default btn-sm" ng-disabled="loading" ng-click="cancel()">
+                <span><i class="fa fa-times fa-fw">&nbsp; </i>Save Now</span>
+            </button>
+            <button class="btn btn-danger btn-sm" ng-disabled="loading" ng-click="deleteTestPlan()">
+                <span><i class="fa fa-trash-o fa-fw">&nbsp; </i>Discard Changes</span>
+            </button>
+            <button class="btn btn-danger btn-sm" ng-disabled="loading" ng-click="deleteTestPlan()">
+                <span><i class="fa fa-trash-o fa-fw">&nbsp; </i>Save Later</span>
+            </button>
+        </div>
+        </div>
+    </script>
 
 <div ng-show="!isAuthenticated()" style="font-size: 18px;text-align: center">
     <p>Please <a href="" ng-click="loginReq()"><i class="fa fa-sign-in"></i>&nbsp;login</a> to access this page. You

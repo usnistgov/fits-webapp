@@ -1,6 +1,18 @@
 angular.module('tcl').factory('TestObjectUtil', function () {
 	var testObjectService = {
-
+			hash : function (list) {
+				for(var i in list){
+                    testObjectService.updateHash(list[i]);
+				}
+            },
+			hashChanged : function (tc) {
+                var _tc = testObjectService.prepare(tc);
+                return md5(angular.toJson(_tc)) !== tc._hash;
+            },
+			updateHash : function (tc) {
+                var _tc = testObjectService.prepare(tc);
+                tc._hash = md5(angular.toJson(_tc));
+            },
 			cleanObject : function(obj,exp){
 				if(typeof obj === 'object'){
 					if(!Array.isArray(obj)) {
@@ -163,6 +175,7 @@ angular.module('tcl').factory('TestObjectUtil', function () {
 
 			isLocal : function(obj){
 				return obj.hasOwnProperty("id") ? (obj.id.indexOf("cl_") === 0 ? true : false) : true;
+				//return true;
 			},
 
 			isLocalID : function(id){
@@ -177,6 +190,18 @@ angular.module('tcl').factory('TestObjectUtil', function () {
 					return (c=='x' ? r : (r&0x3|0x8)).toString(16);
 				});
 				return uuid;
+			},
+			prepare : function(tc){
+				var _tc = JSON.parse(JSON.stringify(tc));
+				if (_tc.hasOwnProperty("position")) {
+					delete _tc.position;
+				}
+				if(testObjectService.isLocal(_tc)){
+					delete _tc.id;
+				}
+                testObjectService.cleanDates(_tc);
+                testObjectService.cleanObject(_tc,new RegExp("^_.*"));
+				return _tc;
 			}
 	};
 	return testObjectService;
@@ -193,7 +218,7 @@ angular.module('tcl').factory('TestObjectFactory', function (TestObjectUtil) {
 						description : "",
 						patient : {
 							dob : null,
-							gender : "",
+							gender : null,
 						},
 						metaData : {
 							version : 1,
@@ -269,7 +294,7 @@ angular.module('tcl').factory('TestObjectFactory', function (TestObjectUtil) {
 			createEvaluation : function(){
 				return {
 						relatedTo : null,
-						status : ""
+						status : null
 				};
 			}
 
@@ -279,81 +304,52 @@ angular.module('tcl').factory('TestObjectFactory', function (TestObjectUtil) {
 
 angular.module('tcl').factory('TestObjectSynchronize', function ($q, $http,TestObjectUtil) {
     var TestObjectSynchronize = {
-    	syncTC : function(tps, tp,tc, _validation){
+    	syncTC : function(id,tc){
             var deferred = $q.defer();
-            // var _validation = TestObjectValidation.validateTC(tc);
-
-            if(TestObjectUtil.isLocal(tp)){
+            if(TestObjectUtil.isLocalID(id)){
                 console.log("Cannot Save, Local TP, Must Save");
-                TestObjectSynchronize.syncTP(tps,tp).then(
-                	function(response){
-                        TestObjectSynchronize.syncTC(tps, response.tp, tc, _validation).then(
-                        	function (response) {
-                                deferred.resolve(response);
-                            },
-                            function (response) {
-                                deferred.reject(response);
-                            }
-						);
-					},
-                    function(response){
-                        deferred.reject(response);
-                    }
-				);// deferred.reject({ status : false, message : 'Cannot Save TestCase, please save the TestPlan before saving TestCase'})
-                return deferred.promise;
+                deferred.reject({
+                	message : "TestPlan must be saved",
+                	tp : "local"
+				});
             }
-
-            // if(_validation.saveable){
-            	var id = tc.id;
-            	var _tc = TestObjectSynchronize.prepare(tc);
-                $http.post('api/testcase/' + tp.id + '/save', _tc).then(
-                	function(response){
+            else {
+                var _tc = TestObjectSynchronize.prepare(tc);
+                $http.post('api/testcase/' + id + '/save', _tc).then(
+                    function(response){
                         var newTC = response.data;
+                        TestObjectUtil.updateHash(newTC);
                         TestObjectUtil.sanitizeDates(newTC);
                         TestObjectUtil.sanitizeEvents(newTC);
-                        TestObjectUtil.synchronize(id,tp.testCases,newTC);
 
                         deferred.resolve({
                             status : true,
                             message : "TestCase Saved",
-							tc : newTC
+                            tc : newTC
                         });
-					},
+                    },
                     function(response){
                         deferred.reject({
                             status : false,
-                            message : "Error While Saving TestCase"
+                            message : "Error While Saving TestCase",
+                            response : response.data
                         });
                     }
-				);
-			// }
-			// else {
-             //    deferred.reject({
-             //        status : false,
-             //        message : "TestCase Contains Errors, please fix them and try again",
-			// 		errors : _validation.errors
-             //    });
-			// }
+                );
+			}
 			return deferred.promise;
 		},
-		syncTP : function (tps,tp) {
+		syncTP : function (tp) {
             var deferred = $q.defer();
-            var _tp = JSON.parse(JSON.stringify(tp));
+            var _tp = TestObjectUtil.clone(tp);
             delete _tp.testCases;
-            var id = _tp.id;
-            if(TestObjectUtil.isLocal(_tp)){
-                delete _tp.id;
-            }
-            TestObjectUtil.cleanObject(_tp,new RegExp("^_.*"));
+            _tp = TestObjectUtil.prepare(_tp);
+
             $http.post('api/testplan/partial/save', _tp).then(
 				function(response){
                     var newTP = response.data;
-                    for(var tc in newTP.testCases){
-                        TestObjectUtil.sanitizeEvents(newTP.testCases[tc]);
-                    }
-                    TestObjectUtil.sanitizeDates(newTP);
-                    TestObjectUtil.synchronize(id,tps,newTP);
-                    TestObjectSynchronize.mergeTP(tp,newTP);
+                    newTP.testCases = tp.testCases;
+                    tp = newTP;
                     deferred.resolve({
                         status : true,
 						tp : tp,
@@ -363,7 +359,8 @@ angular.module('tcl').factory('TestObjectSynchronize', function ($q, $http,TestO
 				function(response){
 					deferred.reject({
 						status : false,
-						message : "Error While Saving TestPlan"
+						message : "Error While Saving TestPlan",
+						response : response.data
 					});
 				}
 			);
@@ -404,7 +401,11 @@ angular.module('tcl').factory('TestDataService', function ($http,$q,TestObjectUt
             var tps = [];
             $http.get('api/testplans').then(
 				function(response) {
+					console.log("LOAD TP");
 					tps = angular.fromJson(response.data);
+                    for(var tp in tps){
+                        TestObjectUtil.hash(tps[tp].testCases);
+                    }
 					TestObjectUtil.sanitizeDates(tps);
 					for(var tp in tps){
 						for(var tc in tps[tp].testCases){

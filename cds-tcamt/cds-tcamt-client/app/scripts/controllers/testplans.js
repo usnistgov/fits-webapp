@@ -182,6 +182,7 @@ angular
 					$scope.selectedForecast = null;
 					$scope.selectedTP = null;
 					$scope.selectedTC = null;
+                    $scope.selectedTCB = null;
 					$scope.selectedTG = null;
 					$scope.tps = [];
 					$scope.tpTree = [];
@@ -198,9 +199,10 @@ angular
 						error : {
 							isSet : false,
 							tc : null,
-							obj : null,
+							list : [],
 						}
 					};
+					$scope.changesMap = {};
                     $scope.grouping = false;
 					$scope.excelmime = [
                         "application/vnd.ms-excel",
@@ -313,26 +315,6 @@ angular
 						}, 0);
 					};
 
-//					$scope.toggleGroups = function () {
-//                        var deferred = $q.defer();
-//                        $scope.grouping = true;
-//                        $timeout(function() {
-//                            if ($scope.groups) {
-//                                $scope.tp = $scope.selectedTP;
-//                                $scope.groups = false;
-//                            }
-//                            else {
-//                                $scope.tp = $scope.selectedTPg;
-//                                $scope.groups = true;
-//                            }
-//                            $scope.grouping = false;
-//                            deferred.resolve(true);
-//                        },0);
-//                        return deferred.promise;
-//                    };
-//
-//                    $scope.toggleGroups();
-
 					$scope.selectTP = function(tp) {
 						waitingDialog.show('Opening Test Plan', {
 							dialogSize : 'xs',
@@ -358,44 +340,25 @@ angular
 						}, 0);
 					};
 
-                    $scope.showSugg = false;
-                    $scope.showS = function () {
-                        $scope.showSugg = true;
-                    };
-//					$scope.reGroup = function () {
-//                        var deferred = $q.defer();
-//                        $scope.grouping = true;
-//                        $timeout(function() {
-//                            $scope.selectedTPg = TestObjectUtil.group($scope.selectedTP.testCases);
-//                            if($scope.groups){
-//                                $scope.tp = $scope.selectedTPg;
-//                            }
-//                            else {
-//                                $scope.tp = $scope.selectedTP;
-//                            }
-//                            $scope.grouping = false;
-//                            deferred.resolve(true);
-//                        },0);
-//                        return deferred.promise;
-//
-//                    };
-                    $scope.changeGroup = function (key) {
-                    	console.log("HERE");
-                        $scope.selectedTC.group = key;
-                        $scope.reGroup();
-                        $scope.showSugg = false;
-                    };
+                    $scope.hasChanges = function(tc)  {
+                    	if(tc)
+							return TestObjectUtil.hashChanged(tc);
+                    	else
+                    		return false;
+					};
 
 					$scope.selectTC = function(tc) {
 						waitingDialog.show('Opening Test Case', {
 							dialogSize : 'xs',
 							progressType : 'info'
 						});
+						// $scope.exitTC();
 						$timeout(function() {
 							// Selection
 							$scope.selectedEvent = null;
 							$scope.selectedForecast = null;
 							$scope.selectedTC = tc;
+                            $scope.selectedTCB = TestObjectUtil.clone(tc);
 							$scope.selectedTG = null;
 							$scope.selectedType = "tc";
 
@@ -403,291 +366,6 @@ angular
 							$scope.subview = "EditTestPlanMetadata.html";
 							waitingDialog.hide();
 						}, 0);
-					};
-
-					$scope.validateTC = function(tc) {
-						var errors = {
-							type : "",
-							id : "",
-							errorMessages : [],
-							within : []
-						};
-						var has = $scope.has;
-						errors.type = "TestCase";
-						errors.id = "1";
-
-						if (tc) {
-							if (!has(tc, "name"))
-								errors.errorMessages
-										.push("Test Case must have a name");
-
-							if (!has(tc, "description"))
-								errors.errorMessages
-										.push("Test Case must have a description");
-
-							if (!has(tc, "patient"))
-								errors.errorMessages
-										.push("Test Case must have a patient");
-							else
-								$scope.mergeErrors(errors.within, $scope
-										.validatePT(tc.patient));
-
-							if (!has(tc, "metaData"))
-								errors.errorMessages
-										.push("Test Case must have meta-data");
-							else
-								$scope.mergeErrors(errors.within, $scope
-										.validateMD(tc.metaData));
-
-							if (!has(tc, "evalDate"))
-								errors.errorMessages
-										.push("Test Case must have an evaluation date");
-							else {
-								$scope.mergeErrors(errors.within, $scope
-										.validateDT(tc.evalDate,
-												"Evaluation Date"));
-							}
-
-							if (has(tc, "events")) {
-								if (tc.events.length > 0) {
-									for ( var x in tc.events) {
-										$scope.mergeErrors(errors.within,
-												$scope.validateEV(tc.events[x],
-														x));
-									}
-								}
-							}
-
-							if (has(tc, "forecast")) {
-								if (tc.forecast.length > 0) {
-									for ( var x in tc.forecast) {
-										$scope.mergeErrors(errors.within,
-												$scope.validateFC(
-														tc.forecast[x], x));
-									}
-								}
-							}
-						} else {
-							errors.errorMessages.push("Internal Error");
-						}
-
-						return errors;
-					};
-
-					$scope.validatePT = function(pt) {
-						var errors = {
-							type : "",
-							id : "",
-							errorMessages : [],
-							within : []
-						};
-						var has = $scope.has;
-						errors.type = "Patient";
-						errors.id = "1";
-
-						if (pt) {
-							if (!has(pt, "gender")) {
-								errors.errorMessages
-										.push("Patient must have a gender");
-							} else {
-								if (pt.gender !== 'F' && pt.gender !== 'M') {
-									errors.errorMessages
-											.push("Patient gender must be M or F");
-								}
-							}
-
-							if (!has(pt, "dob"))
-								errors.errorMessages
-										.push("Patient must have date of birth");
-							else
-								$scope.mergeErrors(errors.within, $scope
-										.validateDT(pt.dob, "Date Of Birth"));
-
-						} else {
-							errors.errorMessages.push("Internal Error");
-						}
-
-						return errors;
-					};
-
-					$scope.validateMD = function(md) {
-						var errors = {
-							type : "",
-							id : "",
-							errorMessages : [],
-							within : []
-						};
-						var has = $scope.has;
-						errors.type = "Metadata";
-						errors.id = "1";
-
-						if (md) {
-							if (!has(md, "version"))
-								errors.errorMessages
-										.push("Meta-data must have a 'version' attribute");
-
-							if (!md.hasOwnProperty("imported"))
-								errors.errorMessages
-										.push("Meta-data must have an 'imported' attribute");
-
-							if (!has(md, "version"))
-								errors.errorMessages
-										.push("Meta-data must have a version attribute");
-
-							if (!has(md, "dateCreated"))
-								errors.errorMessages
-										.push("Meta-data must have a creation date attribute");
-							else
-								$scope.mergeErrors(errors.within, $scope
-										.validateDT(md.dateCreated,
-												"Date Created"));
-
-							if (!has(md, "dateLastUpdated"))
-								errors.errorMessages
-										.push("Meta-data must have a last update date attribute");
-							else
-								$scope.mergeErrors(errors.within, $scope
-										.validateDT(md.dateLastUpdated,
-												"Date Last Updated"));
-
-						} else {
-							errors.errorMessages.push("Internal Error");
-						}
-
-						return errors;
-					};
-
-					$scope.validateDT = function(dt, id) {
-						var errors = {
-							type : "",
-							id : "",
-							errorMessages : [],
-							within : []
-						};
-						var has = $scope.has;
-						errors.type = "Date";
-						errors.id = id;
-
-						if (dt) {
-
-							if ((has(dt, "_type") && dt._type === "fixed")
-									|| (!has(dt, "_type") && has(dt, "fixed"))) {
-								errors.errorMessages.push.apply(
-										errors.errorMessages, $scope
-												.validateDTFX(dt.fixed));
-							} else if ((has(dt, "_type") && dt._type === "relative")
-									|| (!has(dt, "_type") && has(dt, "relative"))) {
-								errors.errorMessages.push.apply(
-										errors.errorMessages, $scope
-												.validateDTRL(dt.relative));
-							} else {
-								errors.errorMessages.push("Date Error");
-							}
-
-						} else {
-							errors.errorMessages.push("Internal Error");
-						}
-
-						return errors;
-					};
-
-					$scope.validateDTFX = function(dt) {
-						var errors = [];
-						var has = $scope.has;
-
-						if (dt) {
-							if (!has(dt, "date"))
-								errors.push("Malformed Fixed Date");
-						} else {
-							errors.push("Internal Error");
-						}
-
-						return errors;
-					};
-
-					$scope.validateDTRL = function(dt) {
-						var errors = [];
-						var has = $scope.has;
-						if (dt) {
-							if (!has(dt, "relativeTo"))
-								errors
-										.push("Malformed relative date relativeTo attibute not set");
-
-							if (!dt.hasOwnProperty("year"))
-								errors
-										.push("Malformed relative date year attibute not set");
-
-							if (!dt.hasOwnProperty("day"))
-								errors
-										.push("Malformed relative date day attibute not set");
-
-							if (!dt.hasOwnProperty("month"))
-								errors
-										.push("Malformed relative date month attibute not set");
-
-						} else {
-							errors.push("Internal Error");
-						}
-
-						return errors;
-					};
-
-					$scope.validateEV = function(ev, id) {
-						var errors = {
-							type : "",
-							id : "",
-							errorMessages : [],
-							within : []
-						};
-						var has = $scope.has;
-						errors.type = "Event";
-						errors.id = id;
-
-						if (ev) {
-							if (!has(ev, "vaccination"))
-								errors.errorMessages.push("Event error");
-							else {
-								var vaccination = ev.vaccination;
-
-								if (!has(vaccination, "date"))
-									errors.errorMessages
-											.push("Event must have a date");
-								else {
-									$scope.mergeErrors(errors.within, $scope
-											.validateDT(vaccination.date,
-													"Event Date"));
-								}
-
-								if (!has(vaccination, "administred"))
-									errors.errorMessages
-											.push("Event must have an administred vaccine");
-								else {
-									$scope
-											.mergeErrors(
-													errors.within,
-													$scope
-															.validateVC(vaccination.administred));
-								}
-
-								if (has(vaccination, "evaluations")) {
-									if (vaccination.evaluations.length > 0) {
-										for ( var x in vaccination.evaluations) {
-											$scope
-													.mergeErrors(
-															errors.within,
-															$scope
-																	.validateEL(vaccination.evaluations[x]));
-										}
-									}
-								}
-							}
-
-						} else {
-							errors.push("Internal Error");
-						}
-
-						return errors;
-
 					};
 
 					$scope.evalStatusChange = function(evaluation){
@@ -708,147 +386,6 @@ angular
                         TestObjectUtil.sanitizeDates(x);
                         $scope.tps.push(x);
                         $scope.selectTP(x);
-					};
-
-					$scope.validateVC = function(vc) {
-						var errors = {
-							type : "",
-							id : "",
-							errorMessages : [],
-							within : []
-						};
-						var has = $scope.has;
-						errors.type = "Vaccine";
-						errors.id = "none";
-
-						if (vc) {
-							if (!has(vc, "id")) {
-								errors.errorMessages.push("Invalid vaccine");
-								return errors;
-							}
-						} else {
-							errors.errorMessages.push("Internal Error");
-						}
-
-						return errors;
-					};
-
-					$scope.validateEL = function(el) {
-						var errors = {
-							type : "",
-							id : "",
-							errorMessages : [],
-							within : []
-						};
-						var has = $scope.has;
-						errors.type = "Evaluation";
-						errors.id = "none";
-
-						if (el) {
-							if (!has(el, "status"))
-								errors.errorMessages
-										.push("Evaluation must have a status");
-							else {
-								if (el.status !== "VALID"
-										&& el.status !== "INVALID") {
-									errors.errorMessages
-											.push("Evaluation status must be 'Valid' or 'Invalid'");
-								}
-							}
-
-							if (!has(el, "relatedTo"))
-								errors.errorMessages
-										.push("Evaluation must specify the vaccine it is related to");
-							else {
-								$scope.mergeErrors(errors.within, $scope
-										.validateVC(el.relatedTo));
-								if (has(el.relatedTo, "name")) {
-									errors.id = el.relatedTo.name;
-								}
-							}
-
-						} else {
-							errors.push("Internal Error");
-						}
-
-						return errors;
-					};
-
-					$scope.mergeErrors = function(ls, obj) {
-						var has = $scope.has;
-						if (has(obj, "errorMessages") && has(obj, "within")) {
-							if (obj.errorMessages.length > 0) {
-								ls.push(obj);
-							} else {
-								if (obj.within.length > 0) {
-									ls.push(obj);
-								}
-							}
-						}
-					};
-
-					$scope.validateFC = function(fc, id) {
-						var errors = {
-							type : "",
-							id : "",
-							errorMessages : [],
-							within : []
-						};
-						var has = $scope.has;
-						errors.type = "Forecast";
-						errors.id = id;
-
-						if (fc) {
-
-							if (!has(fc, "serieStatus"))
-								errors.errorMessages
-										.push("Forecast must have a status");
-							else {
-
-								if (fc.serieStatus !== 'C') {
-									if (!has(fc, "earliest"))
-										errors.errorMessages
-												.push("Forecast must have an earliest date");
-									else {
-										$scope.mergeErrors(errors.within,
-												$scope.validateDT(fc.earliest,
-														"Earliest"));
-									}
-
-									if (!has(fc, "recommended"))
-										errors.errorMessages
-												.push("Forecast must have a recommended date");
-									else {
-										$scope.mergeErrors(errors.within,
-												$scope.validateDT(
-														fc.recommended,
-														"Recommended"));
-									}
-
-									if (!has(fc, "pastDue"))
-										errors.errorMessages
-												.push("Forecast must have a pastDue date");
-									else {
-										$scope.mergeErrors(errors.within,
-												$scope.validateDT(fc.pastDue,
-														"Past Due"));
-									}
-								}
-							}
-
-							if (!has(fc, "target"))
-								errors.errorMessages
-										.push("Forecast must have a target");
-							else {
-								$scope.mergeErrors(errors.within, $scope
-										.validateVC(fc.target));
-							}
-
-						} else {
-							errors.errorMessages.push("Internal Error");
-						}
-
-						return errors;
 					};
 
 					$scope.isSelectedTC = function(t) {
@@ -974,23 +511,6 @@ angular
 							function () {
 								return !$scope.isLocal($scope.selectedTP);
                             }] ];
-
-//                    $scope.tgCM = [
-//                        [ 'Add Test Case',
-//                            function(modelValue) {
-//                    			var gr = modelValue.$nodeScope.$modelValue.label;
-//
-//                                var tc = TestObjectFactory.createTC();
-//                                tc.group = gr;
-//                                $scope.selectedTP.testCases.push(tc);
-//                                var grL = $scope.selectedTPg.groups.filter(function (item) {
-//									return item.label === gr;
-//                                });
-//                                if(grL && grL.length === 1)
-//                                	grL[0].children.push(tc);
-//                                $scope.selectTC(tc);
-//                            } ]
-//					];
 
 					$scope.tcCM = [
 					         [	'Clone Test Case',
@@ -1126,7 +646,23 @@ angular
 						}
 					};
 
-                    $scope.$watch('importing', function (newValue, oldValue) {
+					$scope.exitTC = function () {
+						if($scope.hasChanges($scope.selectedTC)){
+                            $scope.exit = $modal.open({
+                                templateUrl : 'ExitTC.html',
+                                controller : 'ConfirmTestPlanDeleteCtrl',
+                                resolve : {
+                                    testplanToDelete : function() {
+                                        return null;
+                                    },
+                                    tps : function() {
+                                        return $scope.tps;
+                                    }
+                                }
+                            });
+						}
+                    };
+                    $scope.$watch('importing', function (newValue) {
                         if(newValue === false){
                         	if($scope.impDiag)
                             	$scope.impDiag.close({});
@@ -1154,7 +690,6 @@ angular
                     };
 
 					$scope.upload = function(){
-						console.log($scope.export.type);
 						if($scope.export.type === 'NIST'){
 							$scope.uploadNIST();
 						}
@@ -1218,24 +753,6 @@ angular
 						}
 					};
 
-					$scope.vacFilter = function(query) {
-						var lowercaseQuery = angular.lowercase(query);
-						return function filterFn(vaccine) {
-							var n = angular.lowercase(vaccine.name);
-							var d = angular.lowercase(vaccine.details);
-							var c = vaccine.cvx;
-							return (n.indexOf(lowercaseQuery) === 0
-									|| d.indexOf(lowercaseQuery) === 0 || c
-									.indexOf(lowercaseQuery) === 0);
-						};
-					};
-
-					$scope.searchV = function(query) {
-						return query ? $scope.AllVaccines.filter($scope
-								.vacFilter(query)) : $scope.AllVaccines;
-					};
-
-
 
 					$scope.exportNIST = function() {
 						if ($scope.selectedTC.id != null
@@ -1249,18 +766,6 @@ angular
 							document.body.appendChild(form);
 							form.submit();
 						}
-					};
-
-					$scope.tpChanged = function() {
-
-					};
-
-					$scope.tcChanged = function() {
-
-					};
-
-					$scope.unsaved = function() {
-						return false;
 					};
 
 					// --------------------------------------------------------------------------------------------------------
@@ -1306,7 +811,7 @@ angular
 					$scope.isLocal = function(tp) {
 						return TestObjectUtil.isLocal(tp);
                     };
-//----
+
 					$scope.prefill = function(list,x){
 						var groups = $scope.getGroups(x);
 						if(groups.length === 0){
@@ -1334,7 +839,7 @@ angular
 					$scope.getGroups =  function(x){
 						return VaccineService.getGroups($scope.vxm,x);
 					};
-//----
+
 					$scope.selectTPTab = function(value) {
 						if (value === 1) {
 							$scope.accordi.tpList = false;
@@ -1345,147 +850,18 @@ angular
 						}
 					};
 
-					$scope.saveableTC = function(tc) {
-						var obj = $scope.validateTC(tc);
-						if (obj.errorMessages.length > 0 || obj.within.length > 0) {
-							console.log(tc);
-							console.log(obj);
-							$scope.control.error.isSet = true;
-							$scope.control.error.obj.push(obj);
-							$scope.control.error.tc = tc;
-							return null;
-						} else {
-							var _tc = JSON.parse(JSON.stringify(tc));
-							$scope.prepareTestCase(_tc);
-							return _tc;
-						}
-					};
-                    // TestObjectSynchronize
-					$scope.saveTC = function(tp, tc, id) {
-						var deferred = $q.defer();
-						if (tc === null) {
-							deferred.resolve(false);
-						} else {
-							if(TestObjectUtil.isLocal(tp)){
-								console.log("TP is Local => Save TP");
-								return $scope.saveTP(tp);
-							}
-							console.log("DIRECT SAVE");
-							console.log(tc);
-							$http.post('api/testcase/' + tp.id + '/save', tc)
-							.then(function(response) {
-								console.log("Saving");
-								console.log(tc);
-
-								var newTC = response.data;
-								TestObjectUtil.sanitizeDates(newTC);
-								TestObjectUtil.sanitizeEvents(newTC);
-								var i = TestObjectUtil.index(tp.testCases,"id",id);
-								TestObjectUtil.synchronize(id,tp.testCases,newTC);
-								tc = newTC;
-								//$scope.selectTC(newTC);
-								deferred.resolve({
-									status : true,
-									id : i
-								});
-							},
-							function(error) {
-								console.log("Save Error");
-								deferred.resolve({
-									status : false
-								});
-							});
-						}
-						return deferred.promise;
-					};
-
-                    $scope.saveTPOnly = function(tp) {
-                        var deferred = $q.defer();
-                        var _tp = JSON.parse(JSON.stringify(tp));
-                        var id = _tp.id;
-                        if(TestObjectUtil.isLocal(_tp)){
-                            delete _tp.id;
-                        }
-                        delete _tp.testCases;
-                        TestObjectUtil.cleanObject(_tp,new RegExp("^_.*"));
-                        $http.post('api/testplan/save', _tp).then(function(response) {
-								var newTP = response.data;
-								TestObjectUtil.sanitizeDates(newTP);
-								TestObjectUtil.sanitizeEvents(newTP);
-								TestObjectUtil.synchronize(id,$scope.tps,newTP);
-								tp = newTP;
-								$scope.selectTP(newTP);
-								deferred.resolve({
-									status : true
-								});
-							},
-							function(error) {
-                        		deferred.resolve({
-									status : false
-								});
-                        });
+					$scope.dismissError = function (i) {
+                        $scope.control.error.list.splice(i,1);
                     };
-
-					$scope.saveTP = function(tp) {
-						var deferred = $q.defer();
-						var ready = true;
-						var _tp = JSON.parse(JSON.stringify(tp));
-						for ( var tc in tp.testCases) {
-							var _tc = $scope.saveableTC(_tp.testCases[tc]);
-							if (_tc === null) {
-								console.log("NOT S");
-								deferred.resolve({
-									status : false
-								});
-								ready = false;
-								break;
-							} else {
-								_tp.testCases[tc] = _tc;
-							}
-						}
-
-						if (ready) {
-							var id = _tp.id;
-							if(TestObjectUtil.isLocal(_tp)){
-								delete _tp.id;
-							}
-                            TestObjectUtil.cleanObject(_tp,new RegExp("^_.*"));
-							console.log("DIRECT SAVE");
-							console.log(_tp);
-							$http.post('api/testplan/save', _tp)
-							.then(function(response) {
-
-								var newTP = response.data;
-								for(var tc in newTP.testCases){
-									TestObjectUtil.sanitizeEvents(newTP.testCases[tc]);
-								}
-								TestObjectUtil.sanitizeDates(newTP);
-								TestObjectUtil.synchronize(id,$scope.tps,newTP);
-								tp = newTP;
-								$scope.selectTP(newTP);
-								deferred.resolve({
-									status : true
-								});
-							},
-							function(error) {
-								deferred.resolve({
-									status : false
-								});
-							});
-						}
-						return deferred.promise;
-					};
 
 					$scope.saveAllChangedTestPlans = function() {
 						$scope.message = "Saving ...";
-						$scope.loadSpin = true;
+						$scope.loading = true;
 						$scope.control.error.isSet = false;
 						$scope.control.error.obj = [];
 
 						if ($scope.aTPisSelected() && !$scope.aTCisSelected()) {
-                            console.log($scope.selectedTP);
-
-                            TestObjectSynchronize.syncTP($scope.tps,$scope.selectedTP).then(
+                            TestObjectSynchronize.syncTP($scope.selectedTP).then(
                                 function (result) {
                                     Notification.success({
                                         message : result.message,
@@ -1494,6 +870,11 @@ angular
             						$scope.loading = false;
                                 },
                                 function (result) {
+                                    if(result.response.hasOwnProperty("errors")){
+                                        $scope.control.error.isSet = true;
+                                        $scope.control.error.tc = $scope.selectedTP;
+                                        $scope.control.error.list = result.response.errors;
+                                    }
                                     Notification.error({
                                         message : result.message,
                                         delay : 1000
@@ -1502,76 +883,36 @@ angular
                                 }
                             );
 
-						} else if ($scope.aTCisSelected()) {
-							$scope.message = "Saving ...";
-							$scope.loadSpin = true;
-
-							//------ Validation
-                            var obj = $scope.validateTC($scope.selectedTC);
-                            var validation = {};
-                            if (obj.errorMessages.length > 0 || obj.within.length > 0) {
-                                validation.saveable = false;
-                                validation.errors = ["ER1","ER2"];
-                                console.log(obj);
-                            }
-                            else {
-                                validation.saveable = true;
-							}
-							//------- Validation
-
-                            TestObjectSynchronize.syncTC($scope.tps, $scope.selectedTP, $scope.selectedTC, validation).then(
+						}
+						else if ($scope.aTCisSelected()) {
+                            TestObjectSynchronize.syncTC($scope.selectedTP.id, $scope.selectedTC).then(
                             	function (result) {
-                            		$scope.selectTC(result.tc);
+                                    var id = TestObjectUtil.index($scope.selectedTP.testCases,"id",$scope.selectedTC.id);
+                                    TestObjectUtil.synchronize($scope.selectedTC.id,$scope.selectedTP.testCases,result.tc);
+                                    $scope.selectedTC = $scope.selectedTP.testCases[id];
 									Notification.success({
 										message : result.message,
 										delay : 1000
 									});
-									$scope.loadSpin = false;
+									$scope.loading = false;
                                 },
                                 function (result) {
-
-                            		if(result.hasOwnProperty("errors")){
+                            		if(result.response.hasOwnProperty("errors")){
                                         $scope.control.error.isSet = true;
+                                        $scope.control.error.tc = $scope.selectedTC;
+                                        $scope.control.error.list = result.response.errors;
 									}
                                     Notification.error({
                                         message : result.message,
                                         delay : 1000
                                     });
-                                    $scope.loadSpin = false;
+                                    $scope.loading = false;
                                 }
 							);
-							// if (tc !== null) {
-							// 	$scope.saveTC($scope.selectedTP, tc , $scope.selectedTC.id)
-							// 	.then(function(response) {
-							// 		console.log(response);
-							// 		if (response.status) {
-							// 			Notification
-							// 			.success({
-							// 				message : "Test Case Saved",
-							// 				delay : 1000
-							// 			});
-							// 			$scope.selectTC($scope.selectedTP.testCases[response.id]);
-							// 		}
-							// 		else {
-							// 			Notification
-							// 			.error({
-							// 				message : "Error Saving",
-							// 				delay : 1000
-							// 			});
-							// 		}
-							// 	},
-							// 	function(error) {
-							// 		Notification
-							// 		.error({
-							// 			message : "Error Saving",
-							// 			delay : 1000
-							// 		});
-							// 	});
-							// }
 						}
 					};
-
-				});
+				}
+		);
 
 angular.module('tcl').controller('ConfirmTestPlanDeleteCtrl',
 	function($scope, $uibModalInstance, testplanToDelete, tps, $http) {

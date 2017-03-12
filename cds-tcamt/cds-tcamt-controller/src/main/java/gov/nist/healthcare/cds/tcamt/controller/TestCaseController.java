@@ -14,6 +14,7 @@ import javassist.NotFoundException;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
 
 import gov.nist.healthcare.cds.domain.TestCase;
 import gov.nist.healthcare.cds.domain.TestPlan;
@@ -21,6 +22,8 @@ import gov.nist.healthcare.cds.domain.exception.UnresolvableDate;
 import gov.nist.healthcare.cds.domain.exception.VaccineNotFoundException;
 import gov.nist.healthcare.cds.domain.wrapper.CDCImport;
 import gov.nist.healthcare.cds.domain.wrapper.CDCImportConfig;
+import gov.nist.healthcare.cds.domain.wrapper.ModelError;
+import gov.nist.healthcare.cds.domain.wrapper.ModelValidationFailed;
 import gov.nist.healthcare.cds.domain.wrapper.Report;
 import gov.nist.healthcare.cds.domain.xml.ErrorModel;
 import gov.nist.healthcare.cds.repositories.TestCaseRepository;
@@ -30,9 +33,17 @@ import gov.nist.healthcare.cds.service.NISTFormatService;
 import gov.nist.healthcare.cds.service.TestCaseExecutionService;
 import gov.nist.healthcare.cds.tcamt.domain.ImportResult;
 
+import org.apache.http.HttpResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.util.FileCopyUtils;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
+import org.springframework.validation.ObjectError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -40,8 +51,11 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+
+import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 
 @RestController
 public class TestCaseController {
@@ -77,15 +91,23 @@ public class TestCaseController {
 	
 	@RequestMapping(value = "/testcase/{id}/save", method = RequestMethod.POST)
 	@ResponseBody
-	public TestCase save(@RequestBody TestCase tc,@PathVariable String id) throws NotFoundException{
+	public TestCase save(@RequestBody @Valid TestCase tc,@PathVariable String id) throws NotFoundException {
 		TestPlan tp = testPlanRepository.findOne(id);
+		boolean newt = tc.getId() == null || tc.getId().isEmpty();
 		if(tp != null){
 			tc.setTestPlan(tp.getId());
 		}
 		else {
 			throw new NotFoundException("TestPlan ("+id+")");
 		}
-		return testCaseRepository.save(tc);
+		TestCase stc = testCaseRepository.save(tc);
+		if(newt){
+			System.out.println("[HTNEW]");
+			tp.addTestCase(stc);
+			testPlanRepository.save(tp);
+		}
+		return stc;
+		
 	}
 	
 	@RequestMapping(value = "/testplan/save", method = RequestMethod.POST)

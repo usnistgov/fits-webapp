@@ -16,13 +16,13 @@ body {
 		<md-tabs md-selected="selectedTabTC" md-dynamic-height md-border-bottom>
 			<md-tab label="Test Case Information">
 				<md-content class="md-padding">
-					<form name="testplanMetaDataForm" class="form-horizontal" novalidate>
+					<form name="testCaseGeneralForm" class="form-horizontal" novalidate>
 						<div class="row">
 							<div class="col-md-12">
 								<div class="col-md-8">
 									<md-input-container style="width: 100%;">
 										<label>Name</label>
-										<input ng-model="selectedTC.name" ng-change="tcChanged()" type="text"/>
+										<input ng-model="selectedTC.name" ng-change="tcChanged()" type="text" required/>
 									</md-input-container>
 								</div>
 								<div class="col-md-5">
@@ -60,7 +60,7 @@ body {
 								<div class="col-md-8">
 									<md-input-container style="width: 100%;">
 										<label>Gender</label>
-										<md-select ng-model="selectedTC.patient.gender" ng-model-options="{trackBy: '$value'}">
+										<md-select ng-model="selectedTC.patient.gender" ng-model-options="{trackBy: '$value'}" required>
 											<md-option ng-repeat=" enum in gender " ng-value="enum.code">{{enum.details}}</md-option>
 										</md-select>
 									</md-input-container>

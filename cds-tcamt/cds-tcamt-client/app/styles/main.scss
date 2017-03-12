@@ -32,6 +32,10 @@ multiselect button:after {
   padding: 0.2em 0;
 }
 
+.unsaved {
+  font-style: oblique;
+  color: #ab891d;
+}
 .view-active {
    -moz-box-shadow:    inset 0 0 10px #000000;
    -webkit-box-shadow: inset 0 0 10px #000000;

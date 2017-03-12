@@ -36,6 +36,11 @@ body {
 							<i ng-show="tpview" class="fa fa-eye-slash" aria-hidden="true" style="font-size : 1.8em; color: rgb(203, 167, 167);"></i>
 						</button>
 					</div>
+					<div ng-show="hasChanges(selectedTC)" title="Unsaved Changes" layout="row">
+						<i class="fa fa-exclamation-triangle unsaved"  aria-hidden="true" style="margin-right: 5px;"></i>
+						<i class="fa fa-refresh unsaved" aria-hidden="true"></i>
+					</div>
+
 					<div flex="40" style="text-align: center;">
 						<strong> Test Browser </strong>
 					</div>

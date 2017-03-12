@@ -40,7 +40,8 @@
     "json-validate": "*",
     "angular-bootstrap-nav-tree": "*",
     "allmighty-autocomplete": "*",
-    "vkBeautify": "vkbeautify#*"
+    "vkBeautify": "vkbeautify#*",
+    "js-md5": "md5#^0.4.2"
   },
   "devDependencies": {
     "angular-scenario": "1.5.5",
