@@ -12,6 +12,7 @@ angular.module('tcl').factory('TestObjectUtil', function () {
 			updateHash : function (tc) {
                 var _tc = testObjectService.prepare(tc);
                 tc._hash = md5(angular.toJson(_tc));
+                console.log("Updating Hash : "+tc._hash);
             },
 			cleanObject : function(obj,exp){
 				if(typeof obj === 'object'){
@@ -192,7 +193,7 @@ angular.module('tcl').factory('TestObjectUtil', function () {
 				return uuid;
 			},
 			prepare : function(tc){
-				var _tc = JSON.parse(JSON.stringify(tc));
+				var _tc = JSON.parse(angular.toJson(tc));
 				if (_tc.hasOwnProperty("position")) {
 					delete _tc.position;
 				}
@@ -309,7 +310,7 @@ angular.module('tcl').factory('TestObjectSynchronize', function ($q, $http,TestO
             if(TestObjectUtil.isLocalID(id)){
                 console.log("Cannot Save, Local TP, Must Save");
                 deferred.reject({
-                	message : "TestPlan must be saved",
+                	message : "TestPlan must be saved first",
                 	tp : "local"
 				});
             }
@@ -318,7 +319,6 @@ angular.module('tcl').factory('TestObjectSynchronize', function ($q, $http,TestO
                 $http.post('api/testcase/' + id + '/save', _tc).then(
                     function(response){
                         var newTC = response.data;
-                        TestObjectUtil.updateHash(newTC);
                         TestObjectUtil.sanitizeDates(newTC);
                         TestObjectUtil.sanitizeEvents(newTC);
 
@@ -348,11 +348,9 @@ angular.module('tcl').factory('TestObjectSynchronize', function ($q, $http,TestO
             $http.post('api/testplan/partial/save', _tp).then(
 				function(response){
                     var newTP = response.data;
-                    newTP.testCases = tp.testCases;
-                    tp = newTP;
                     deferred.resolve({
                         status : true,
-						tp : tp,
+						tp : newTP,
 						message : "TestPlan Saved"
                     });
 				},
@@ -379,7 +377,7 @@ angular.module('tcl').factory('TestObjectSynchronize', function ($q, $http,TestO
 			}
 		},
 		prepare : function(tc){
-            var _tc = JSON.parse(JSON.stringify(tc));
+            var _tc = JSON.parse(angular.toJson(tc));
             if (_tc.hasOwnProperty("position")) {
                 delete _tc.position;
             }

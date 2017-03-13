@@ -318,7 +318,7 @@ angular.module('tcl').controller('ExecutionCtrl', function($filter,$rootScope, $
   };
 
   $scope.isSelectedTC = function(tc) {
-    return $scope.selectedTC.id === tc.id;
+    return $scope.selectedTC && $scope.selectedTC.id === tc.id;
   };
 
   $scope.isSelectedTP = function(tp) {
