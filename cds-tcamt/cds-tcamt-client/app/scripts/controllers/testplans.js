@@ -225,7 +225,6 @@ angular
 						return "";
 					};
 
-
 					$scope.groupBy = _.memoize(function(items, field) {
                         if (!items || !items.length) { return; }
                         var getter = $parse(field);
@@ -235,7 +234,7 @@ angular
                         });
                     }, function(items,field){
                         if (!items || !items.length) { return "x"; }
-                        return md5(angular.toJson(items));
+                        return angular.toJson(items);
                         // return items.reduce(function(acc,item){
                         //     return acc+item.id+item.group+'-';
                         // });
@@ -417,6 +416,7 @@ angular
                                                 else if(response.action === "discard"){
                                                     console.log("Discarding");
                                                     $scope.selectedTP.testCases.splice(i,1,$scope.tcBackups[id]);
+                                                    $scope.groupBy.cache = new _.memoize.Cache;
                                                 }
                                             }
                                         }, function () {
@@ -426,7 +426,6 @@ angular
                                     else {
                                         tc._changed = false;
                                     }
-                                    $scope.groupBy.cache = new _.memoize.Cache;
                                 }
 
                             }
@@ -943,7 +942,7 @@ angular
 						$scope.control.error.isSet = false;
 						$scope.control.error.obj = [];
 
-						if (stc && !stp) {
+						if (!stc && stp) {
                             TestObjectSynchronize.syncTP(stp).then(
                                 function (result) {
                                     result.tp.testCases = stp.testCases;
@@ -953,6 +952,7 @@ angular
                                         delay : 1000
                                     });
             						$scope.loading = false;
+            						$scope.groupBy.cache = new _.memoize.Cache;
                                 },
                                 function (result) {
                                     if(result.response.hasOwnProperty("errors")){
