@@ -18,29 +18,32 @@ body {
 <!-- <span ng-show="!aTCisSelected()">No test case selected.</span> -->
 <div>
 	<md-list ng-cloak>
-		 <md-list-item
-		 			   ng-repeat="event in selectedTC.events track by $index"
-		 			   ng-click="selectEvent(event)" 
-		 			   style="cursor: pointer; height : 50px;"
-						ng-class="{'sinfo' : isSelectedEvent(event), 'fle' : $index === 0, 'le' : true}"
-						context-menu="eventCM" model="$index" >
+		<div ng-repeat="(group, events) in selectedTC.events | groupEvents">
+			<md-list-item
+					ng-repeat="event in events track by $index"
+					ng-click="selectEvent(event)"
+					style="cursor: pointer; height : 50px;"
+					ng-class="{'sinfo' : isSelectedEvent(event), 'fle' : $index === 0, 'le' : true}"
+					context-menu="eventCM" model="$index" >
 
-		 			<table style="width : 100%;">
-		 				<tr>
-		 					<td>
-		 						<span class="badge sbadge" style="vertical-align:middle;" >{{$index+1}}</span>
-		 					</td>
-		 					<td style="margin-bottom : 0;" ng-hide="event.vaccination.administred === null">
-		 						<strong>{{event.vaccination.administred.name}}</strong> - 
-		 						{{eventLabel(event)}}
-		 					</td>
-		 					<td ng-show="event.vaccination.administred === null">
-		 						<strong>New Event</strong>
-		 					</td>
-		 				</tr>
-		 			</table>
+				<table style="width : 100%;">
+					<tr>
+						<td>
+							<span class="badge sbadge" style="vertical-align:middle;" >Dose {{$index+1}}</span>
+						</td>
+						<td style="margin-bottom : 0;" ng-hide="event.vaccination.administred === null">
+							<strong>{{event.vaccination.administred.name}}</strong> -
+							{{eventLabel(event)}}
+						</td>
+						<td ng-show="event.vaccination.administred === null">
+							<strong>New Event</strong>
+						</td>
+					</tr>
+				</table>
 
-		 </md-list-item>
+			</md-list-item>
+		</div>
+
 	</md-list>
 <!-- 	<table class="table table-hover"> -->
 <!-- 		<tr ng-repeat="event in selectedTC.events track by $index"> -->

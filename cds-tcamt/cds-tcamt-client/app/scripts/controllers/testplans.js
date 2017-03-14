@@ -1,13 +1,6 @@
 /**
  * Created by Jungyub on 5/12/16
  */
-angular.module('tcl').filter('startFrom', function() {
-    return function(input, start) {
-    	 if (!input || !input.length) { return; }
-        start = +start; //parse to int
-        return input.slice(start);
-    }
-});
 
 angular.module('tcl').filter('vaccine', function () {
   return function (items,str) {
@@ -20,19 +13,35 @@ angular.module('tcl').filter('vaccine', function () {
   };
 });
 
+angular.module('tcl').filter('groupEvents', function() {
+    return _.memoize(function(items) {
+        if (!items || !items.length) {
+            return;
+        }
+        return _.groupBy(items, function (item) {
+            return item.vaccination.administred ? item.vaccination.administred.name : "new";
+        });
+    },
+        function(items){
+            if (!items || !items.length) { return "x"; }
+            return angular.toJson(items);
+        }
+	)
+});
+
 angular.module('tcl').filter('groupBy', function($parse) {
     return _.memoize(function(items, field) {
-    	if (!items || !items.length) { return; }
+        if (!items || !items.length) { return; }
         var getter = $parse(field);
         return _.groupBy(items, function(item) {
-        	var g = getter(item);
-        	return g ? g !== '' ? g : 'Ungrouped' : 'Ungrouped';
+            var g = getter(item);
+            return g ? g !== '' ? g : 'Ungrouped' : 'Ungrouped';
         });
     }, function(items,field){
-    	if (!items || !items.length) { return "x"; }
-    	return items.reduce(function(acc,item){
-    		return acc+item.id+item.group+'-';
-    	});
+        if (!items || !items.length) { return "x"; }
+        return items.reduce(function(acc,item){
+            return acc+item.id+item.group+'-';
+        });
     });
 });
 
@@ -215,6 +224,10 @@ angular
                         "application/x-xls",
                         "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 					];
+
+					$scope.print = function (x) {
+						console.log(x);
+                    };
 
 					$scope.valueForEnum = function(code,enumList){
 						for(var i in enumList){
@@ -803,6 +816,7 @@ angular
 												if (data.status) {
 													for(var i in data.testCases){
 														$scope.sanitizeTestCase(data.testCases[i]);
+                                                        TestObjectUtil.updateHash(data.testCases[i]);
 														$scope.selectedTP.testCases.push(data.testCases[i]);
 													}
                                                     Notification
