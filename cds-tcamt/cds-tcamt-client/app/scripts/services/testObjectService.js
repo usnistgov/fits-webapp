@@ -7,6 +7,8 @@ angular.module('tcl').factory('TestObjectUtil', function () {
             },
 			hashChanged : function (tc) {
                 var _tc = testObjectService.prepare(tc);
+                console.log("prepared");
+                console.log(_tc);
                 return md5(angular.toJson(_tc)) !== tc._hash;
             },
 			updateHash : function (tc) {
@@ -36,15 +38,10 @@ angular.module('tcl').factory('TestObjectUtil', function () {
 
 			sanitizeDate : function(obj){
 				if(obj){
-					if(obj.hasOwnProperty("fixed")){
-						obj['_type'] = "fixed";
-						obj.fixed['_dateObj'] = new Date(obj.fixed.date);
-					}
-					else if(obj.hasOwnProperty("relative")){
-						obj['_type'] = "relative";
-					}
-					else {
-						
+					if(obj.hasOwnProperty("type")){
+						if(obj.type === 'fixed'){
+							obj._dateObj = new Date(obj.date);
+						}
 					}
 				}
 			},
@@ -76,8 +73,9 @@ angular.module('tcl').factory('TestObjectUtil', function () {
 
 			sanitizeEvents : function(tc){
 				if(tc.events){
-					for(var e in tc.events){
+					for(var e = 0; e < tc.events.length; e++){
 						tc.events[e]._type = "vaccination";
+                        tc.events[e].vaccination.id = e;
 					}
 				}
 			},
@@ -129,16 +127,9 @@ angular.module('tcl').factory('TestObjectUtil', function () {
 
 			cleanDate : function(obj){
 				if(obj){
-					if(obj.hasOwnProperty("_type")){
-						var type = obj._type;
-						if(type === "fixed"){
-							delete obj.relative;
-						}
-						else if(type === "relative"){
-							delete obj.fixed;
-						}
-						else {
-							obj = null;
+					if(obj.hasOwnProperty("type")){
+						if(obj.type === "fixed"){
+							delete obj._dateObj;
 						}
 					}
 				}
@@ -175,8 +166,8 @@ angular.module('tcl').factory('TestObjectUtil', function () {
 			},
 
 			isLocal : function(obj){
-				//return obj.hasOwnProperty("id") ? (obj.id.indexOf("cl_") === 0 ? true : false) : true;
-				return true;
+				return obj.hasOwnProperty("id") ? (obj.id.indexOf("cl_") === 0 ? true : false) : true;
+				//return true;
 			},
 
 			isLocalID : function(id){
@@ -202,6 +193,9 @@ angular.module('tcl').factory('TestObjectUtil', function () {
 				}
                 testObjectService.cleanDates(_tc);
                 testObjectService.cleanObject(_tc,new RegExp("^_.*"));
+                if(_tc.hasOwnProperty("events")){
+                    testObjectService.updateDose(_tc.events);
+                }
 				return _tc;
 			},
 			updateDose : function (events) {
@@ -222,7 +216,54 @@ angular.module('tcl').factory('TestObjectUtil', function () {
 
 angular.module('tcl').factory('TestObjectFactory', function (TestObjectUtil) {
 	var testObjectService = {
-
+			createFD : function () {
+                var dt = new Date();
+				return {
+					type : 'fixed',
+					date : null,
+					_dateObj : null
+				}
+            },
+			createRD : function () {
+				return {
+					type : 'relative',
+					rules : []
+				}
+			},
+			createREVD : function () {
+				return {
+					type : 'relative',
+					rules : [
+						{
+							position : 'BEFORE',
+							year : 0,
+							month : 0,
+							day : 0,
+							relativeTo : {
+								reference : 'static',
+								id : 'EVALDATE'
+							}
+						}
+					]
+				}
+			},
+			createRDOB : function () {
+				return {
+					type : 'relative',
+					rules : [
+						{
+							position : 'BEFORE',
+							year : 0,
+							month : 0,
+							day : 0,
+							relativeTo : {
+								reference : 'static',
+								id : 'EVALDATE'
+							}
+						}
+					]
+				}
+			},
 			createTC : function(){
 				var dt = new Date();
 				var tc = {
@@ -266,16 +307,23 @@ angular.module('tcl').factory('TestObjectFactory', function (TestObjectUtil) {
 				return tp;
 			},
 
-			createEvent : function(){
+			createEvent : function(pos,t){
+                var dt;
+				if(t === 'FIXED'){
+                	dt = testObjectService.createFD();
+				}
+				else {
+					dt = testObjectService.createRD();
+				}
 				var ev = {
 						_type : "vaccination",
 						vaccination : {
 							administred : null,
 							evaluations : [],
 							type : "VACCINATION",
-							date : null,
+							date : dt,
 							doseNumber : 1,
-							id : TestObjectUtil.generateUID()
+							id : pos
 						}
 				};
 				return ev;
@@ -285,21 +333,9 @@ angular.module('tcl').factory('TestObjectFactory', function (TestObjectUtil) {
 				var fc = {
 						doseNumber : 0,
 						forecastReason : "",
-						earliest : {
-							fixed : {
-								date : null
-							}
-						},
-						recommended : {
-							fixed : {
-								date : null
-							}
-						},
-						pastDue : {
-							fixed : {
-								date : null
-							}
-						},
+						earliest : null,
+						recommended : null,
+						pastDue : null,
 						target : null
 				};
 				return fc;
@@ -428,6 +464,7 @@ angular.module('tcl').factory('TestDataService', function ($http,$q,TestObjectUt
 					TestObjectUtil.sanitizeDates(tps);
 					for(var tp in tps){
 						for(var tc in tps[tp].testCases){
+                            tps[tp].testCases[tc]._dateType = tps[tp].testCases[tc].dateType;
 							TestObjectUtil.sanitizeEvents(tps[tp].testCases[tc]);
 						}
 					}

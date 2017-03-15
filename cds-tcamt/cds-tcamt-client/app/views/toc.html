@@ -20,22 +20,23 @@ body {
 	<md-list ng-cloak>
 		<div ng-repeat="(group, events) in selectedTC.events | groupEvents">
 			<md-list-item
-					ng-repeat="event in events track by $index"
-					ng-click="selectEvent(event)"
+					ng-repeat="ev in events track by $index"
+					ng-click="selectEvent(ev)"
 					style="cursor: pointer; height : 50px;"
-					ng-class="{'sinfo' : isSelectedEvent(event), 'fle' : $index === 0, 'le' : true}"
+					ng-class="{'sinfo' : isSelectedEvent(ev), 'fle' : $index === 0, 'le' : true}"
 					context-menu="eventCM" model="$index" >
 
 				<table style="width : 100%;">
 					<tr>
 						<td>
 							<span class="badge sbadge" style="vertical-align:middle;" >Dose {{$index+1}}</span>
+							<span style="background-color: green;" class="badge">ID # {{ev[ev._type].id}}</span>
 						</td>
-						<td style="margin-bottom : 0;" ng-hide="event.vaccination.administred === null">
-							<strong>{{event.vaccination.administred.name}}</strong> -
-							{{eventLabel(event)}}
+						<td style="margin-bottom : 0;" ng-hide="ev.vaccination.administred === null">
+							<strong>{{ev.vaccination.administred.name}}</strong> -
+							{{eventLabel(ev)}}
 						</td>
-						<td ng-show="event.vaccination.administred === null">
+						<td ng-show="ev.vaccination.administred === null">
 							<strong>New Event</strong>
 						</td>
 					</tr>

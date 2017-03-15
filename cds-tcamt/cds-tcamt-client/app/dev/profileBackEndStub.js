@@ -202,7 +202,7 @@ angular.module('tcl').run(function ($httpBackend, $q, $http) {
 
     $httpBackend.whenGET('api/testplans').respond(function (method, url, data, headers) {
         var request = new XMLHttpRequest();
-        request.open('GET', '../../resources/testCases.json', false);
+        request.open('GET', '../../resources/tp.json', false);
         request.send(null);
         var profile = angular.fromJson(request.response);
         return [request.status, profile, {}];

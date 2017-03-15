@@ -19,28 +19,37 @@ body {
 					<form name="testCaseGeneralForm" class="form-horizontal" novalidate>
 						<div class="row">
 							<div class="col-md-12">
-								<div class="col-md-8">
+								<div class="col-md-offset-2 col-md-8"  ng-if="selectedTC.dateType === 'FIXED'">
+									<date-choose birth="false" style="margin-bottom: 10px;" nullable="false" type="selectedTC.dateType" label="'Assessment Date'" dt="selectedTC.evalDate" events="selectedTC.events"></date-choose>
+								</div>
+								<div class="col-md-12">
 									<md-input-container style="width: 100%;">
 										<label>Name</label>
 										<input ng-model="selectedTC.name" ng-change="tcChanged()" type="text" required/>
 									</md-input-container>
 								</div>
-								<div class="col-md-5">
+								<div class="col-md-4">
 									<md-input-container style="width: 100%;">
 										<label>Group</label>
 										<input ng-model-options="{ updateOn: 'blur'}" ng-model="selectedTC.group" type="text"/>
 									</md-input-container>
 								</div>
-								<div class="col-md-3">
+								<div class="col-md-4">
 									<md-input-container style="width: 100%;">
 										<label>ID</label>
 										<input ng-model="selectedTC.uid" ng-change="tcChanged()" type="text"/>
 									</md-input-container>
 								</div>
-								<div class="col-md-4 pull-right">
-									<date-choose exclude="'EvalDate'" tc="selectedTC" label="'Assessment Date'" dt="selectedTC.evalDate"></date-choose>
+								<div class="col-md-4">
+									<md-input-container style="width: 100%;">
+										<label>Date Type</label>
+										<md-select ng-model="selectedTC._dateType" ng-change="dateTypeChange(selectedTC)" ng-model-options="{trackBy: '$value'}" required>
+											<md-option ng-value="'FIXED'">Fix Dates</md-option>
+											<md-option ng-value="'RELATIVE'">Relative Dates</md-option>
+										</md-select>
+									</md-input-container>
 								</div>
-								<div class="col-md-8">
+								<div class="col-md-12">
 									<md-input-container style="width: 100%;">
 										<label>Description</label>
 										<textarea style="border: 1px solid rgb(221, 216, 216); padding : 10px;"  ng-model="selectedTC.description" rows="5">
@@ -57,7 +66,7 @@ body {
 					<form name="patientForm" class="form-horizontal" novalidate>
 						<div class="row">
 							<div class="col-md-12">
-								<div class="col-md-8">
+								<div class="col-md-12">
 									<md-input-container style="width: 100%;">
 										<label>Gender</label>
 										<md-select ng-model="selectedTC.patient.gender" ng-model-options="{trackBy: '$value'}" required>
@@ -65,8 +74,8 @@ body {
 										</md-select>
 									</md-input-container>
 								</div>
-								<div class="col-md-4 pull-right">
-									<date-choose  exclude="'DOB'" tc="selectedTC" label="'Date Of Birth'" dt="selectedTC.patient.dob"></date-choose>
+								<div class="col-md-offset-2 col-md-8">
+									<date-choose  birth="true" nullable="false" type="selectedTC.dateType" label="'Date Of Birth'" dt="selectedTC.patient.dob" events="selectedTC.events"></date-choose>
 								</div>
 							</div>
 						</div>

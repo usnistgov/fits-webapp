@@ -47,19 +47,17 @@ body {
 								</div>
 							</div>
 							<div class="col-md-12">
-								<div class="col-md-4" ng-show="selectedForecast.serieStatus !== 'C'">
-									<date-choose  tc="selectedTC" label="'Earliest'" dt="selectedForecast.earliest"></date-choose>
+								<div class="col-md-6" ng-show="selectedForecast.serieStatus !== 'C'">
+									<date-choose birth="false" style="margin-bottom: 10px;" nullable="true" type="selectedTC.dateType" label="'Earliest'" dt="selectedForecast.earliest" events="selectedTC.events"></date-choose>
 								</div>
-								<div class="col-md-4" ng-show="selectedForecast.serieStatus !== 'C'">
-									<date-choose  tc="selectedTC" label="'Recommended'" dt="selectedForecast.recommended"></date-choose>
+								<div class="col-md-6" ng-show="selectedForecast.serieStatus !== 'C'">
+									<date-choose birth="false" style="margin-bottom: 10px;" nullable="true" type="selectedTC.dateType" label="'Recommended'" dt="selectedForecast.recommended" events="selectedTC.events"></date-choose>
 								</div>
-								<div class="col-md-4" ng-show="selectedForecast.serieStatus !== 'C'">
-									<date-choose  tc="selectedTC" label="'Past Due'" dt="selectedForecast.pastDue"></date-choose>
+								<div class="col-md-6" ng-show="selectedForecast.serieStatus !== 'C'">
+									<date-choose birth="false" style="margin-bottom: 10px;" nullable="true" type="selectedTC.dateType" label="'Past Due'" dt="selectedForecast.pastDue" events="selectedTC.events"></date-choose>
 								</div>
-							</div>
-							<div class="col-md-12" style="margin-top: 10px;">
-								<div class="col-md-offset-4 col-md-4" ng-show="selectedForecast.serieStatus !== 'C'">
-									<date-choose  tc="selectedTC" label="'Latest'" dt="selectedForecast.complete"></date-choose>
+								<div class="col-md-6" ng-show="selectedForecast.serieStatus !== 'C'">
+									<date-choose birth="false" style="margin-bottom: 10px;" nullable="true" type="selectedTC.dateType" label="'Latest'" dt="selectedForecast.complete" events="selectedTC.events"></date-choose>
 								</div>
 							</div>
 						</div>

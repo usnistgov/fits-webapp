@@ -1,0 +1,157 @@
+[
+  {
+    "id": "xxxxx",
+    "name": "CDC",
+    "description": "CDS TestCases for CDSi Specification v2",
+    "metaData": {
+      "version": "1",
+      "imported": false,
+      "dateCreated": 1489516366355,
+      "dateLastUpdated": 1489516366355
+    },
+    "testCases": [
+      {
+        "id": "1",
+        "name": "DTap Age Below Absolute Minimum",
+        "description": "DTaP #2 at age 10 weeks-5 days",
+        "dateType": "RELATIVE",
+        "patient": {
+          "dob": {
+            "type": "relative",
+            "rules": [
+              {
+                "position": "AFTER",
+                "year": 18,
+                "month": 0,
+                "day": 0,
+                "relativeTo": {
+                  "reference": "static",
+                  "id": "EVALDATE"
+                }
+              }
+            ]
+          },
+          "gender": "F"
+        },
+        "metaData": {
+          "version": "1",
+          "imported": false,
+          "dateCreated": 1489516366355,
+          "dateLastUpdated": 1489516366355
+        },
+        "evalDate": {
+          "type": "relative",
+          "rules": [
+            {
+              "position": "AT",
+              "year": 0,
+              "month": 0,
+              "day": 0,
+              "relativeTo": {
+                "reference": "static",
+                "id": "EVALDATE"
+              }
+            }
+          ]
+        },
+        "events": [
+          {
+            "vaccination": {
+              "date": {
+                "type": "relative",
+                "rules": [
+                  {
+                    "position": "AFTER",
+                    "year": 0,
+                    "month": 10,
+                    "day": 0,
+                    "relativeTo": {
+                      "reference": "static",
+                      "id": "DOB"
+                    }
+                  }
+                ]
+              },
+              "type": "VACCINATION",
+              "doseNumber": 1,
+              "administred": {
+                "discriminator": "generic",
+                "id": "107",
+                "name": "DTaP, unspecified formulation",
+                "details": "diphtheria, tetanus toxoids and acellular pertussis vaccine, unspecified formulation",
+                "cvx": "107"
+              },
+              "evaluations": [
+                {
+                  "status": "VALID",
+                  "relatedTo": {
+                    "discriminator": "generic",
+                    "id": "107",
+                    "name": "DTaP, unspecified formulation",
+                    "details": "diphtheria, tetanus toxoids and acellular pertussis vaccine, unspecified formulation",
+                    "cvx": "107"
+                  }
+                },
+                {
+                  "status": "VALID",
+                  "relatedTo": {
+                    "discriminator": "generic",
+                    "id": "100",
+                    "name": "pneumococcal conjugate PCV 7",
+                    "details": "pneumococcal conjugate vaccine, 7 valent",
+                    "cvx": "100"
+                  }
+                }
+              ],
+              "id": "1"
+            }
+          },
+          {
+            "vaccination": {
+              "date": {
+                "type": "relative",
+                "rules": [
+                  {
+                    "position": "AFTER",
+                    "year": 0,
+                    "month": 10,
+                    "day": 0,
+                    "relativeTo": {
+                      "reference": "dynamic",
+                      "id": 0
+                    }
+                  }
+                ]
+              },
+              "type": "VACCINATION",
+              "doseNumber": 2,
+              "administred": {
+                "discriminator": "generic",
+                "id": "107",
+                "name": "DTaP, unspecified formulation",
+                "details": "diphtheria, tetanus toxoids and acellular pertussis vaccine, unspecified formulation",
+                "cvx": "107"
+              },
+              "evaluations": [
+                {
+                  "evaluationReason": "Age too young",
+                  "status": "INVALID",
+                  "relatedTo": {
+                    "discriminator": "generic",
+                    "id": "107",
+                    "name": "DTaP, unspecified formulation",
+                    "details": "diphtheria, tetanus toxoids and acellular pertussis vaccine, unspecified formulation",
+                    "cvx": "107"
+                  }
+                }
+              ],
+              "id": "2"
+            }
+          }
+        ],
+        "forecast" : [],
+        "testPlan": "xxxxx"
+      }
+    ]
+  }
+]

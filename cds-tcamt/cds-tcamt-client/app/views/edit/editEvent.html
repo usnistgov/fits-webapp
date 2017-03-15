@@ -19,18 +19,14 @@ body {
 	class="md-padding">
 <div style="min-height: 350px;">
 	<div class="row">
-		<div class="col-md-8">
-			<div class="col-md-12">
-				<div style="width: 100%; margin-top : 10px;">
-					<label class="col-md-12" style="color: rgb(117, 117, 139);">Vaccine</label>	
-					<vaccine-picker allow-mvx="true" vxm="vxm"  vxg="vxgs" model="selectedEvent[selectedEvent._type].administred"></vaccine-picker>
-				</div>
+		<div class="col-md-12">
+			<div style="width: 100%; margin-top : 10px;">
+				<label class="col-md-12" style="color: rgb(117, 117, 139);">Vaccine</label>
+				<vaccine-picker allow-mvx="true" vxm="vxm"  vxg="vxgs" model="selectedEvent[selectedEvent._type].administred"></vaccine-picker>
 			</div>
 		</div>
-		<div class="col-md-4" style="margin-top: 10px;">
-			<date-choose ng-init="ctrl.init()" tc="selectedTC"
-				label="'Date Of Vaccination'"
-				dt="selectedEvent[selectedEvent._type].date"></date-choose>
+		<div class="col-md-offset-2 col-md-8" style="margin-top: 10px;">
+			<date-choose  birth="false" nullable="false" type="selectedTC.dateType" label="'Date Of Vaccination'" dt="selectedEvent[selectedEvent._type].date" events="selectedTC.events"></date-choose>
 		</div>
 	</div>
 </div>

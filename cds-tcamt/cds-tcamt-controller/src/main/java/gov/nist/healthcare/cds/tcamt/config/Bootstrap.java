@@ -12,20 +12,24 @@ import java.util.Set;
 
 import javax.annotation.PostConstruct;
 
-import gov.nist.fhir.client.ir.TestRunnerServiceFhirImpl;
 import gov.nist.healthcare.cds.auth.domain.Account;
 import gov.nist.healthcare.cds.auth.domain.Privilege;
 import gov.nist.healthcare.cds.auth.repo.PrivilegeRepository;
 import gov.nist.healthcare.cds.auth.service.AccountService;
+import gov.nist.healthcare.cds.domain.DateReference;
 import gov.nist.healthcare.cds.domain.ExpectedEvaluation;
 import gov.nist.healthcare.cds.domain.ExpectedForecast;
 import gov.nist.healthcare.cds.domain.FixedDate;
 import gov.nist.healthcare.cds.domain.Patient;
+import gov.nist.healthcare.cds.domain.RelativeDate;
+import gov.nist.healthcare.cds.domain.RelativeDateRule;
 import gov.nist.healthcare.cds.domain.SoftwareConfig;
+import gov.nist.healthcare.cds.domain.StaticDateReference;
 import gov.nist.healthcare.cds.domain.TestCase;
 import gov.nist.healthcare.cds.domain.TestPlan;
 import gov.nist.healthcare.cds.domain.VaccinationEvent;
 import gov.nist.healthcare.cds.domain.Vaccine;
+import gov.nist.healthcare.cds.domain.VaccineDateReference;
 import gov.nist.healthcare.cds.domain.VaccineMapping;
 import gov.nist.healthcare.cds.domain.exception.VaccineNotFoundException;
 import gov.nist.healthcare.cds.domain.wrapper.ActualEvaluation;
@@ -34,17 +38,22 @@ import gov.nist.healthcare.cds.domain.wrapper.EngineResponse;
 import gov.nist.healthcare.cds.domain.wrapper.MetaData;
 import gov.nist.healthcare.cds.domain.wrapper.ResponseVaccinationEvent;
 import gov.nist.healthcare.cds.domain.wrapper.VaccineRef;
+import gov.nist.healthcare.cds.enumeration.DatePosition;
+import gov.nist.healthcare.cds.enumeration.DateType;
 import gov.nist.healthcare.cds.enumeration.EvaluationStatus;
 import gov.nist.healthcare.cds.enumeration.EventType;
 import gov.nist.healthcare.cds.enumeration.FHIRAdapter;
 import gov.nist.healthcare.cds.enumeration.Gender;
+import gov.nist.healthcare.cds.enumeration.RelativeTo;
 import gov.nist.healthcare.cds.enumeration.SerieStatus;
 import gov.nist.healthcare.cds.repositories.ManufacturerRepository;
 import gov.nist.healthcare.cds.repositories.SoftwareConfigRepository;
+import gov.nist.healthcare.cds.repositories.TestCaseRepository;
 import gov.nist.healthcare.cds.repositories.TestPlanRepository;
 import gov.nist.healthcare.cds.repositories.VaccineMappingRepository;
 import gov.nist.healthcare.cds.service.TestRunnerService;
 import gov.nist.healthcare.cds.service.VaccineImportService;
+import gov.nist.healthcare.cds.service.impl.MockTestRunner;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -73,6 +82,9 @@ public class Bootstrap {
 	private TestPlanRepository testPlanRepository;
 	
 	@Autowired
+	private TestCaseRepository testCaseRepository;
+	
+	@Autowired
 	private SoftwareConfigRepository softwareConfRepository;
 	
 	@Bean
@@ -82,7 +94,8 @@ public class Bootstrap {
 	
 	@Bean
 	public TestRunnerService testRunner(){
-		return new TestRunnerServiceFhirImpl("http://129.6.59.199:8080/forecast/ImmunizationRecommendations");
+		return new MockTestRunner();
+//		return new TestRunnerServiceFhirImpl("http://129.6.59.199:8080/forecast/ImmunizationRecommendations");
 //		return new TestRunnerServiceFhirImpl("https://129.6.59.199:8443/forecast/ImmunizationRecommendations");
 
 	}
@@ -179,34 +192,33 @@ public class Bootstrap {
 		accountService.createAdmin(c);
 	
 		
-/*		TestCase tc = new TestCase();
+		TestCase tc = new TestCase();
 		tc.setName("DTap Age Below Absolute Minimum");
 		tc.setDescription("DTaP #2 at age 10 weeks-5 days");
-//		
-		SimpleDateFormat dateformat = new SimpleDateFormat("dd/MM/yyyy");
-		Date birth    = dateformat.parse("26/02/2011");
-		Date evalDate = dateformat.parse("01/02/2012");
-		FixedDate eval = new FixedDate();
-		eval.setDate(evalDate);
-		tc.setEvalDate(eval);
-		FixedDate dob = new FixedDate();
-		dob.setDate(birth);
-//		
+		tc.setDateType(DateType.RELATIVE);
+		
+		//Eval
+		RelativeDate evalDate = new RelativeDate();
+		evalDate.add(new RelativeDateRule(DatePosition.AFTER, 0, 0, 0, new StaticDateReference(RelativeTo.EVALDATE)));
+		tc.setEvalDate(evalDate);
+		
 		//Patient
 		Patient pt = new Patient();
-		pt.setDob(dob);
-		pt.setGender(Gender.F);
-//		
+		RelativeDate birth = new RelativeDate();
+		birth.add(new RelativeDateRule(DatePosition.BEFORE, 18, 0, 0, new StaticDateReference(RelativeTo.EVALDATE)));
+		pt.setDob(birth);
+		pt.setGender(Gender.F);		
 		tc.setPatient(pt);
 		
 		Vaccine vx = vaccineRepository.findMapping("107").getVx();
 		Vaccine vx1 = vaccineRepository.findMapping("100").getVx();
+		
 //		//Events
 		VaccinationEvent vcEvent1 = new VaccinationEvent();
-		Date e1d = dateformat.parse("06/04/2011");
-		FixedDate e1do = new FixedDate();
-		e1do.setDate(e1d);
-		vcEvent1.setDate(e1do);
+		vcEvent1.setId(0);
+		RelativeDate vced1 = new RelativeDate();
+		vced1.add(new RelativeDateRule(DatePosition.AFTER, 0, 10, 0, new StaticDateReference(RelativeTo.DOB)));
+		vcEvent1.setDate(vced1);
 		vcEvent1.setAdministred(vx);
 		vcEvent1.setDoseNumber(1);
 		vcEvent1.setType(EventType.VACCINATION);
@@ -221,10 +233,10 @@ public class Bootstrap {
 		vcEvent1.setEvaluations(new HashSet<>(Arrays.asList(ee1,ee11)));
 		
 		VaccinationEvent vcEvent2 = new VaccinationEvent();
-		Date e2d = dateformat.parse("02/05/2011");
-		FixedDate e2do = new FixedDate();
-		e2do.setDate(e2d);
-		vcEvent2.setDate(e2do);
+		vcEvent2.setId(1);
+		RelativeDate vced2 = new RelativeDate();
+		vced2.add(new RelativeDateRule(DatePosition.AFTER, 0, 10, 0, new VaccineDateReference(0)));
+		vcEvent2.setDate(vced2);
 		vcEvent2.setAdministred(vx);
 		vcEvent2.setDoseNumber(2);
 		vcEvent2.setType(EventType.VACCINATION);
@@ -235,51 +247,36 @@ public class Bootstrap {
 		ee2.setEvaluationReason("Age too young");
 		vcEvent2.setEvaluations(new HashSet<>(Arrays.asList(ee2)));
 		
-		VaccinationEvent vcEvent3 = new VaccinationEvent();
-		Date e3d = dateformat.parse("02/06/2011");
-		FixedDate e3do = new FixedDate();
-		e3do.setDate(e3d);
-		vcEvent3.setDate(e3do);
-		vcEvent3.setAdministred(vx1);
-		vcEvent3.setDoseNumber(1);
-		vcEvent3.setType(EventType.VACCINATION);
-		
-		ExpectedEvaluation ee3 = new ExpectedEvaluation();
-		ee3.setRelatedTo(vx1);
-		ee3.setStatus(EvaluationStatus.INVALID);
-		ee3.setEvaluationReason("Age too young");
-		vcEvent3.setEvaluations(new HashSet<>(Arrays.asList(ee3)));
 		
 		tc.addEvent(vcEvent1);
 		tc.addEvent(vcEvent2);
-		tc.addEvent(vcEvent3);
 		
-		//Expected Forecast
-		ExpectedForecast ef = new ExpectedForecast();
-		ef.setDoseNumber("2");
-		ef.setTarget(vx);
-		ef.setSerieStatus(SerieStatus.O);
-		ef.setForecastReason("Second dose was administed too early");
-		Date earliest = dateformat.parse("30/05/2011");
-		Date recommended = dateformat.parse("26/06/2011");
-		Date pastDue = dateformat.parse("22/08/2011");
-		ef.setEarliest(new FixedDate(earliest));
-		ef.setRecommended(new FixedDate(recommended));
-		ef.setPastDue(new FixedDate(pastDue));
-
-		
-		ExpectedForecast eff = new ExpectedForecast();
-		eff.setDoseNumber("2");
-		eff.setTarget(vx1);
-		eff.setSerieStatus(SerieStatus.O);
-		eff.setForecastReason("Second dose was administed too early");
-		Date earliest1 = dateformat.parse("30/05/2011");
-		Date recommended1 = dateformat.parse("26/06/2011");
-		Date pastDue1 = dateformat.parse("22/08/2011");
-		eff.setEarliest(new FixedDate(earliest1));
-		eff.setRecommended(new FixedDate(recommended1));
-		eff.setPastDue(new FixedDate(pastDue1));
-		tc.setForecast(new HashSet<>(Arrays.asList(ef,eff)));
+//		//Expected Forecast
+//		ExpectedForecast ef = new ExpectedForecast();
+//		ef.setDoseNumber("2");
+//		ef.setTarget(vx);
+//		ef.setSerieStatus(SerieStatus.O);
+//		ef.setForecastReason("Second dose was administed too early");
+//		Date earliest = dateformat.parse("30/05/2011");
+//		Date recommended = dateformat.parse("26/06/2011");
+//		Date pastDue = dateformat.parse("22/08/2011");
+//		ef.setEarliest(new FixedDate(earliest));
+//		ef.setRecommended(new FixedDate(recommended));
+//		ef.setPastDue(new FixedDate(pastDue));
+//
+//		
+//		ExpectedForecast eff = new ExpectedForecast();
+//		eff.setDoseNumber("2");
+//		eff.setTarget(vx1);
+//		eff.setSerieStatus(SerieStatus.O);
+//		eff.setForecastReason("Second dose was administed too early");
+//		Date earliest1 = dateformat.parse("30/05/2011");
+//		Date recommended1 = dateformat.parse("26/06/2011");
+//		Date pastDue1 = dateformat.parse("22/08/2011");
+//		eff.setEarliest(new FixedDate(earliest1));
+//		eff.setRecommended(new FixedDate(recommended1));
+//		eff.setPastDue(new FixedDate(pastDue1));
+//		tc.setForecast(new HashSet<>(Arrays.asList(ef,eff)));
 		
 		MetaData md = new MetaData();
 		md.setDateCreated(new Date());
@@ -289,6 +286,7 @@ public class Bootstrap {
 		tc.setMetaData(md);
 		
 		TestPlan tp = new TestPlan();
+		tp.setId("xxxxx");
 		MetaData mdp = new MetaData();
 		mdp.setDateCreated(new Date());
 		mdp.setDateLastUpdated(new Date());
@@ -299,8 +297,10 @@ public class Bootstrap {
 		tp.setName("CDC");
 		tp.setUser("hossam");
 		tp.addTestCase(tc);
-		tc.setTestPlan(tp);
-		testPlanRepository.save(tp);*/
+		tc.setTestPlan("xxxxx");
+		tc.setId("1");
+		testCaseRepository.save(tc);
+		testPlanRepository.save(tp);
 		
 	}
 }

@@ -127,6 +127,21 @@
         </div>
         </div>
     </script>
+    <script type="text/ng-template" id="DTChange.html">
+        <div class="modal-body">
+            <p>You are about to change dates type of this test case, please note that all dates will be lost</p>
+        </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-success btn-sm" ng-disabled="loading" ng-click="continue()">
+                <span>Continue</span>
+            </button>
+            <button class="btn btn-danger btn-sm" ng-disabled="loading" ng-click="abort()">
+                <span>Abort</span>
+            </button>
+        </div>
+        </div>
+    </script>
 
 <div ng-show="!isAuthenticated()" style="font-size: 18px;text-align: center">
     <p>Please <a href="" ng-click="loginReq()"><i class="fa fa-sign-in"></i>&nbsp;login</a> to access this page. You

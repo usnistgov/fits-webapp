@@ -19,6 +19,14 @@ multiselect button:after {
   color: rgba(15, 15, 15, 0.33);
 }
 
+.invalid-date {
+  background-color : rgba(255, 224, 218, 0.69);
+}
+
+.valid-date {
+  background-color : #eceefd;
+}
+
 .unmatched {
 	background-color : rgb(224, 224, 224);
 }

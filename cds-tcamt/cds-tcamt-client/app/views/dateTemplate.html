@@ -1,48 +1,92 @@
 <script type="text/ng-template" id="date.html">
 	<div>
-		<label style="color: rgb(117, 117, 139);" ng-bind="ctrl.label"></label>
-		<div class="btn-group btn-group-justified">
-			<label class="btn btn-primary" ng-model="ctrl.dt._type" uib-btn-radio="'fixed'" uncheckable>Fixed</label> 
-			<label class="btn btn-primary" ng-model="ctrl.dt._type" uib-btn-radio="'relative'" uncheckable>Relative</label>
+		<md-checkbox ng-show="ctrl.nullable" class="md-primary" ng-checked="ctrl.dt" ng-click="ctrl.toggle()" aria-label="Checkbox 1">
+			<h4 style="color: #5771ff;" ng-bind="ctrl.label"><strong>{{ctrl.label}}</strong></h4>
+		</md-checkbox>
+		<h4 ng-hide="ctrl.nullable" style="color: #5771ff;" ng-bind="ctrl.label"><strong>{{ctrl.label}}</strong></h4>
+		<div ng-show="ctrl.type === 'FIXED' && ctrl.dt" ng-class="{'invalid-date' : !ctrl.dt || !ctrl.dt._dateObj, 'valid-date' : ctrl.dt && ctrl.dt._dateObj}" style="padding: 10px; border: 1px solid #e1e1e1;" layout="row" layout-align="center center">
+			<form name="fform">
+				<md-input-container>
+					<md-datepicker
+							ng-model="ctrl.dt._dateObj"
+							md-placeholder="Enter date"
+							ng-change="ctrl.dateChange(ctrl.dt)" required>
+					</md-datepicker>
+				</md-input-container>
+			</form>
+			<div ng-show="ctrl.dt.date" style="font-size: 15px; color: #0740C7; margin-left : 20px;">{{ctrl.dt.date | date : 'fullDate'}}</div>
 		</div>
-		<div ng-show="ctrl.dt._type === 'fixed'" style="padding: 10px; background: #f6f6f6; border: 1px solid #e1e1e1;" class="col-md-12">
-			<div class="col-md-12" style="font-size: 15px; color: #0740C7;" class="pull-left">{{ctrl.dt.fixed.date | date : 'fullDate'}}</div>
-			<md-input-container class="col-md-offset-2 col-md-5"> 
-				<md-datepicker
-					ng-model="ctrl.dt.fixed._dateObj"
-					md-placeholder="Enter date"
-					ng-change="ctrl.dateChange(ctrl.dt.fixed)">
-				</md-datepicker>
-			</md-input-container>
-		</div>
-		<div ng-show="ctrl.dt._type === 'relative'" style="padding: 10px; background: #f6f6f6; border: 1px solid #e1e1e1;">
-			<md-input-container style="width: 100%;"> 
-				<label>Relative To</label>
-				<md-select ng-model="ctrl.dt.relative.relativeTo">
-					<md-option ng-value="'DOB'" ng-disabled="ctrl.exclude === 'DOB'">Date Of Birth</md-option>
-					<md-option ng-value="'EVALDATE'" ng-disabled="ctrl.exclude === 'EvalDate'">Evaluation Date</md-option>
-					<md-option ng-value="'TODAY'">Today</md-option>
-				</md-select>
-			</md-input-container>
-			<md-input-container style="width: 31%;"> 
-				<label>Years</label>
-				<input ng-model="ctrl.dt.relative.year" type="number"> 
-			</md-input-container>
-			<md-input-container style="width: 33%;"> 
-				<label>Months</label>
-				<input ng-model="ctrl.dt.relative.month" type="number"> 
-			</md-input-container>
-			<md-input-container style="width: 32%;"> 
-				<label>Days</label>
-				<input ng-model="ctrl.dt.relative.day" type="number">
-			</md-input-container>
-		</div>
-		<div ng-show="ctrl.dt._type === 'error'" style="padding: 10px; background: #ffdde3; border: 1px solid #e1e1e1;">
-			<span> Impossible to make date relative to {{errRelative}} </span>
-			<button class="btn btn-danger" ng-click="ctrl.dismiss()">
-				<i class="fa fa-times" aria-hidden="true"></i> 
-				Dismiss
-			</button>
+		<div ng-show="ctrl.type === 'RELATIVE' && ctrl.dt" ng-class="{'invalid-date' : rform.$invalid || ctrl.dt.rules.length === 0, 'valid-date' : !rform.$invalid && ctrl.dt.rules.length > 0}" style="border: 1px solid #e1e1e1;" >
+			<form name="rform" layout="column" layout-align="center start">
+				<table class="table table-condensed table-boredred table-striped">
+					<caption>
+						<button class="btn btn-info btn-xs" ng-click="ctrl.dt.rules.push(ctrl.createRule())">
+							Add Rule
+						</button>
+						<button class="btn btn-danger btn-xs" ng-click="ctrl.dt.rules = []">
+							Clear Rules
+						</button>
+					</caption>
+					<thead>
+						<tr>
+							<th></th>
+							<th>Position</th>
+							<th>Years</th>
+							<th>Months</th>
+							<th>Days</th>
+							<th>Relative To</th>
+							<th>Delete</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr ng-repeat="rule in ctrl.dt.rules track by $index">
+							<td style="vertical-align: middle; text-align: center;">
+								<span  ng-show="$index !== 0"><strong>BUT NOT</strong></span>
+							</td>
+							<td>
+								<md-input-container style="width : 100%;">
+									<md-select ng-model="rule.position" required>
+										<md-option ng-value="'BEFORE'" ng-disabled="rule.relativeTo.type === 'DOB'">Before</md-option>
+										<md-option ng-value="'AFTER'">After</md-option>
+									</md-select>
+								</md-input-container>
+							</td>
+							<td>
+								<md-input-container style="width : 100%;" >
+									<input min='0' ng-model="rule.year" type="number" required>
+								</md-input-container>
+							</td>
+							<td>
+								<md-input-container style="width : 100%;" required>
+									<input min='0' ng-model="rule.month" type="number" required>
+								</md-input-container>
+							</td>
+							<td>
+								<md-input-container style="width : 100%;" required>
+									<input min='0' ng-model="rule.day" type="number" required>
+								</md-input-container>
+							</td>
+							<td>
+								<md-input-container style="width : 100%;" >
+									<md-select ng-model="rule.relativeTo" ng-model-options="{trackBy: '$value.id'}" ng-change="ctrl.refType(rule)" required>
+										<md-option ng-value="{ reference : 'static', id : 'DOB' }" ng-disabled="ctrl.birth">Birth</md-option>
+										<md-option ng-value="{ reference : 'static', id : 'EVALDATE'}">Assessment Date</md-option>
+										<md-option ng-repeat="event in ctrl.events track by $index" ng-if="event.vaccination.administred" ng-value="{ reference : 'dynamic', id : $index }">{{event.vaccination.administred.name}} - ID # {{$index}}</md-option>
+									</md-select>
+								</md-input-container>
+							</td>
+							<td>
+								<div layout="column" layout-align="center center">
+									<button class="btn btn-danger btn-xs">
+										-
+									</button>
+								</div>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+
+			</form>
 		</div>
 	</div>
 </script>

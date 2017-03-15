@@ -253,11 +253,104 @@ angular
                         // });
                     });
 
+                    $scope.dateTypeChange = function (tc) {
+                        $scope.exit = $modal.open({
+                            templateUrl : 'DTChange.html',
+                            controller : 'DateCtrl'
+                        });
+
+                        $scope.exit.result.then(function (response) {
+
+                        	tc.dateType = tc._dateType;
+                        	if(tc.dateType === 'FIXED'){
+                        		tc.evalDate = TestObjectFactory.createFD();
+                                tc.patient.dob = TestObjectFactory.createFD();
+                        		for(var i = 0; i < $scope.selectedTC.events.length; i ++){
+                        			var ev = $scope.selectedTC.events[i];
+                        			if(ev[ev._type].date){
+                                        ev[ev._type].date = TestObjectFactory.createFD();
+									}
+								}
+                                for(var j = 0; j < $scope.selectedTC.forecast.length; j++){
+                                    var fc = $scope.selectedTC.forecast[i];
+                                    if(fc.earliest){
+                                        fc.earliest = TestObjectFactory.createFD();
+                                    }
+                                    if(fc.recommended){
+                                        fc.recommended = TestObjectFactory.createFD();
+                                    }
+                                    if(fc.pastDue){
+                                        fc.pastDue = TestObjectFactory.createFD();
+                                    }
+                                    if(fc.complete){
+                                        fc.complete = TestObjectFactory.createFD();
+                                    }
+                                }
+							}
+							else if(tc.dateType === 'RELATIVE'){
+                                tc.evalDate = TestObjectFactory.createREVD();
+                                tc.patient.dob = TestObjectFactory.createRDOB();
+                                for(var i = 0; i < $scope.selectedTC.events.length; i ++){
+                                    var ev = $scope.selectedTC.events[i];
+                                    if(ev[ev._type].date){
+                                        ev[ev._type].date = TestObjectFactory.createRD();
+                                    }
+                                }
+                                for(var j = 0; j < $scope.selectedTC.forecast.length; j++){
+                                    var fc = $scope.selectedTC.forecast[i];
+                                    if(fc.earliest){
+                                        fc.earliest = TestObjectFactory.createRD();
+                                    }
+                                    if(fc.recommended){
+                                        fc.recommended = TestObjectFactory.createRD();
+                                    }
+                                    if(fc.pastDue){
+                                        fc.pastDue = TestObjectFactory.createRD();
+                                    }
+                                    if(fc.complete){
+                                        fc.complete = TestObjectFactory.createRD();
+                                    }
+                                }
+							}
+
+                        }, function () {
+
+							tc._dateType = tc.dateType;
+
+                        });
+                    };
+
 					$scope.eventLabel = function(event){
-						if(!event.vaccination.date)
-							return "";
-						return $filter('date')(event.vaccination.date.fixed.date, "MM/dd/yyyy");
+						if(event.vaccination.date){
+							if(event.vaccination.date.type && event.vaccination.date.type === "fixed"){
+								if(event.vaccination.date.date){
+                                    return $filter('date')(event.vaccination.date.date, "MM/dd/yyyy");
+								}
+								else {
+									return 'Fixed Date';
+								}
+
+							}
+							else {
+								if(event.vaccination.date.type && event.vaccination.date.rules && event.vaccination.date.rules.length > 0){
+									var rule = event.vaccination.date.rules[0];
+									if(rule.relativeTo){
+										if(rule.relativeTo.reference && rule.relativeTo.reference === "static" && rule.relativeTo.hasOwnProperty('id')){
+											return "Relative to "+(rule.relativeTo.type === 'DOB' ? 'Birth' : 'Assessment Date');
+										}
+										else if(rule.relativeTo.reference && rule.relativeTo.reference === "dynamic" && rule.relativeTo.hasOwnProperty('id')){
+                                            return "Relative to vaccination # "+ rule.relativeTo.id;
+										}
+									}
+								}
+							}
+								return "Relative Date";
+						}
 					};
+
+                    $scope.eventID = function(list,event){
+                        return list.indexOf(event);
+                    };
 
 					$scope.newTestPlan = function() {
 						var tp = TestObjectFactory.createTP();
@@ -527,7 +620,7 @@ angular
 					};
 
 					$scope.addEvent = function() {
-						var event = TestObjectFactory.createEvent();
+						var event = TestObjectFactory.createEvent($scope.selectedTC.events.length,$scope.selectedTC.dateType);
 						$scope.selectedTC.events.push(event);
 						$scope.selectEvent(event);
 					};
@@ -583,10 +676,31 @@ angular
 
 					$scope.eventCM = [
 					     [ 'Delete Event',
-					       function(modelValue) {
-					    	$scope.selectedTC.events.splice(modelValue.$index, 1);
-					    	$scope.selectTC($scope.selectedTC);
-					    	$scope.groupBy.cache = new _.memoize.Cache;
+					       function($itemScope) {
+                               	var ev = $itemScope.ev;
+                               	var index = ev[ev._type].id;
+
+                               	if($scope.selectedTC.dateType === 'RELATIVE'){
+                                    for(var evt in $scope.selectedTC.events){
+										var v = $scope.selectedTC.events[evt];
+										if(v && v.vaccination && v.vaccination.date){
+											console.log("HERE");
+											for(var r = 0; r < v.vaccination.date.rules.length; r++){
+                                                console.log("r");
+												var rule = 	v.vaccination.date.rules[r];
+                                                console.log(rule);
+                                                console.log(index);
+                                                console.log(rule.relativeTo.id === index);
+												if(rule && rule.relativeTo && rule.relativeTo.reference && rule.relativeTo.reference === 'dynamic' && rule.relativeTo.id+'' === index+'' ){
+													console.log("ENTER");
+                                                    v.vaccination.date.rules.splice(r,1);
+												}
+											}
+										}
+                                    }
+								}
+							   	$scope.selectedTC.events.splice(index, 1);
+					    		$scope.selectTC($scope.selectedTC);
 					    } ] ];
 
 					$scope.forecastCM = [
@@ -751,9 +865,6 @@ angular
 						}
 					};
 
-					$scope.exitTC = function (id) {
-
-                    };
 
                     $scope.$watch('importing', function (newValue) {
                         if(newValue === false){
@@ -1081,6 +1192,21 @@ angular.module('tcl').controller('ExitCtrl',
 
         $scope.saveChanges = function () {
             $uibModalInstance.close({action : 'save'});
+        };
+
+        $scope.dismiss = function() {
+            $uibModalInstance.dismiss('cancel');
+        };
+    });
+
+angular.module('tcl').controller('DateCtrl',
+    function($scope, $uibModalInstance) {
+        $scope.continue = function () {
+            $uibModalInstance.close({action : 'continue'});
+        };
+
+        $scope.abort = function () {
+            $uibModalInstance.dismiss('cancel');
         };
 
         $scope.dismiss = function() {
