@@ -1,9 +1,10 @@
 <script type="text/ng-template" id="date.html">
 	<div>
-		<md-checkbox ng-show="ctrl.nullable" class="md-primary" ng-checked="ctrl.dt" ng-click="ctrl.toggle()" aria-label="Checkbox 1">
-			<h4 style="color: #5771ff;" ng-bind="ctrl.label"><strong>{{ctrl.label}}</strong></h4>
-		</md-checkbox>
-		<h4 ng-hide="ctrl.nullable" style="color: #5771ff;" ng-bind="ctrl.label"><strong>{{ctrl.label}}</strong></h4>
+		<div style="width: 100%; background-color: rgb(73, 100, 154); text-align: center; border: 1px solid black" >
+			<md-checkbox style="margin : 10px;" ng-show="ctrl.nullable" class="md-primary pull-right" ng-checked="ctrl.dt" ng-click="ctrl.toggle()" aria-label="Checkbox 1">
+			</md-checkbox>
+			<h4 style="color: #ffffff;" ng-bind="ctrl.label"><strong>{{ctrl.label}}</strong></h4>
+		</div>
 		<div ng-show="ctrl.type === 'FIXED' && ctrl.dt" ng-class="{'invalid-date' : !ctrl.dt || !ctrl.dt._dateObj, 'valid-date' : ctrl.dt && ctrl.dt._dateObj}" style="padding: 10px; border: 1px solid #e1e1e1;" layout="row" layout-align="center center">
 			<form name="fform">
 				<md-input-container>
@@ -30,10 +31,10 @@
 					<thead>
 						<tr>
 							<th></th>
-							<th>Position</th>
 							<th>Years</th>
 							<th>Months</th>
 							<th>Days</th>
+							<th>Position</th>
 							<th>Relative To</th>
 							<th>Delete</th>
 						</tr>
@@ -41,15 +42,7 @@
 					<tbody>
 						<tr ng-repeat="rule in ctrl.dt.rules track by $index">
 							<td style="vertical-align: middle; text-align: center;">
-								<span  ng-show="$index !== 0"><strong>BUT NOT</strong></span>
-							</td>
-							<td>
-								<md-input-container style="width : 100%;">
-									<md-select ng-model="rule.position" required>
-										<md-option ng-value="'BEFORE'" ng-disabled="rule.relativeTo.type === 'DOB'">Before</md-option>
-										<md-option ng-value="'AFTER'">After</md-option>
-									</md-select>
-								</md-input-container>
+								<span  ng-show="$index !== 0"><strong>BUT NOT BEFORE</strong></span>
 							</td>
 							<td>
 								<md-input-container style="width : 100%;" >
@@ -67,17 +60,25 @@
 								</md-input-container>
 							</td>
 							<td>
-								<md-input-container style="width : 100%;" >
+								<md-input-container style="width : 100%;">
+									<md-select ng-model="rule.position" required>
+										<md-option ng-value="'BEFORE'" ng-disabled="rule.relativeTo.type === 'DOB'">Before</md-option>
+										<md-option ng-value="'AFTER'">After</md-option>
+									</md-select>
+								</md-input-container>
+							</td>
+							<td>
+								<md-input-container>
 									<md-select ng-model="rule.relativeTo" ng-model-options="{trackBy: '$value.id'}" ng-change="ctrl.refType(rule)" required>
-										<md-option ng-value="{ reference : 'static', id : 'DOB' }" ng-disabled="ctrl.birth">Birth</md-option>
-										<md-option ng-value="{ reference : 'static', id : 'EVALDATE'}">Assessment Date</md-option>
-										<md-option ng-repeat="event in ctrl.events track by $index" ng-if="event.vaccination.administred" ng-value="{ reference : 'dynamic', id : $index }">{{event.vaccination.administred.name}} - ID # {{$index}}</md-option>
+										<md-option ng-value="{ reference : 'static', id : 'DOB' }" ng-disabled="ctrl.exclude === 'DOB'">Birth</md-option>
+										<md-option ng-value="{ reference : 'static', id : 'EVALDATE'}" ng-disabled="ctrl.exclude === 'EVALDATE'">Assessment Date</md-option>
+										<md-option ng-repeat="event in ctrl.events" ng-if="event.vaccination.administred" ng-disabled="ctrl.exclude === event.vaccination.position" ng-value="{ reference : 'dynamic', id : event.vaccination.position }">{{event.vaccination.administred.name}} - ID # {{event.vaccination.position}}</md-option>
 									</md-select>
 								</md-input-container>
 							</td>
 							<td>
 								<div layout="column" layout-align="center center">
-									<button class="btn btn-danger btn-xs">
+									<button class="btn btn-danger btn-xs" ng-click="ctrl.dt.rules.splice($index,1)">
 										-
 									</button>
 								</div>

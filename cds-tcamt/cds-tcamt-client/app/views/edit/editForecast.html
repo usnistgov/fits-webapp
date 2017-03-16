@@ -46,19 +46,17 @@ body {
 									</md-input-container>
 								</div>
 							</div>
-							<div class="col-md-12">
-								<div class="col-md-6" ng-show="selectedForecast.serieStatus !== 'C'">
-									<date-choose birth="false" style="margin-bottom: 10px;" nullable="true" type="selectedTC.dateType" label="'Earliest'" dt="selectedForecast.earliest" events="selectedTC.events"></date-choose>
-								</div>
-								<div class="col-md-6" ng-show="selectedForecast.serieStatus !== 'C'">
-									<date-choose birth="false" style="margin-bottom: 10px;" nullable="true" type="selectedTC.dateType" label="'Recommended'" dt="selectedForecast.recommended" events="selectedTC.events"></date-choose>
-								</div>
-								<div class="col-md-6" ng-show="selectedForecast.serieStatus !== 'C'">
-									<date-choose birth="false" style="margin-bottom: 10px;" nullable="true" type="selectedTC.dateType" label="'Past Due'" dt="selectedForecast.pastDue" events="selectedTC.events"></date-choose>
-								</div>
-								<div class="col-md-6" ng-show="selectedForecast.serieStatus !== 'C'">
-									<date-choose birth="false" style="margin-bottom: 10px;" nullable="true" type="selectedTC.dateType" label="'Latest'" dt="selectedForecast.complete" events="selectedTC.events"></date-choose>
-								</div>
+							<div ng-show="selectedForecast.serieStatus !== 'C'">
+								<date-choose class="col-md-12" exclude="''" style="margin-bottom: 10px;" nullable="false" type="selectedTC.dateType" label="'Earliest'" dt="selectedForecast.earliest" events="selectedTC.events"></date-choose>
+							</div>
+							<div ng-show="selectedForecast.serieStatus !== 'C'">
+								<date-choose class="col-md-12" exclude="''" style="margin-bottom: 10px;" nullable="false" type="selectedTC.dateType" label="'Recommended'" dt="selectedForecast.recommended" events="selectedTC.events"></date-choose>
+							</div>
+							<div ng-show="selectedForecast.serieStatus !== 'C'">
+								<date-choose class="col-md-12" exclude="''" style="margin-bottom: 10px;" nullable="true" type="selectedTC.dateType" label="'Past Due'" dt="selectedForecast.pastDue" events="selectedTC.events"></date-choose>
+							</div>
+							<div ng-show="selectedForecast.serieStatus !== 'C'">
+								<date-choose class="col-md-12" exclude="''" style="margin-bottom: 10px;" nullable="true" type="selectedTC.dateType" label="'Latest'" dt="selectedForecast.complete" events="selectedTC.events"></date-choose>
 							</div>
 						</div>
 					</form>

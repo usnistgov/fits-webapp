@@ -8,7 +8,7 @@ angular.module('tcl').directive('dateChoose', function() {
 			label    : "=",
 			events : "=",
 			nullable : "=",
-			birth : "="
+			exclude : "="
 		},
 		controller : function($scope) {
 			var ctrl = this;
@@ -83,6 +83,7 @@ angular.module('tcl').directive('dateChoose', function() {
                     id : id
                 }
             };
+
             ctrl.staticDOB = ctrl.createStaticReference('DOB');
             ctrl.staticEVAL = ctrl.createStaticReference('EVALDATE');
 			

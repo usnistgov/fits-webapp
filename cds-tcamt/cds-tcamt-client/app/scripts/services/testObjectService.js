@@ -166,7 +166,7 @@ angular.module('tcl').factory('TestObjectUtil', function () {
 			},
 
 			isLocal : function(obj){
-				return obj.hasOwnProperty("id") ? (obj.id.indexOf("cl_") === 0 ? true : false) : true;
+				return obj.hasOwnProperty("id") && typeof obj.id === 'string' ? (obj.id.indexOf("cl_") === 0 ? true : false) : true;
 				//return true;
 			},
 
@@ -193,9 +193,6 @@ angular.module('tcl').factory('TestObjectUtil', function () {
 				}
                 testObjectService.cleanDates(_tc);
                 testObjectService.cleanObject(_tc,new RegExp("^_.*"));
-                if(_tc.hasOwnProperty("events")){
-                    testObjectService.updateDose(_tc.events);
-                }
 				return _tc;
 			},
 			updateDose : function (events) {
@@ -270,9 +267,11 @@ angular.module('tcl').factory('TestObjectFactory', function (TestObjectUtil) {
 						name : "New TC",
 						_changed : true,
 						description : "",
+						dateType : 'FIXED',
+						_dateType : 'FIXED',
 						patient : {
-							dob : null,
-							gender : null,
+							dob : testObjectService.createFD(),
+							gender : null
 						},
 						metaData : {
 							version : 1,
@@ -280,7 +279,7 @@ angular.module('tcl').factory('TestObjectFactory', function (TestObjectUtil) {
 							dateCreated : dt.getTime(),
 							dateLastUpdated : dt.getTime()
 						},
-						evalDate : null,
+						evalDate : testObjectService.createFD(),
 						events : [],
 						forecast : []
 				};
@@ -323,18 +322,28 @@ angular.module('tcl').factory('TestObjectFactory', function (TestObjectUtil) {
 							type : "VACCINATION",
 							date : dt,
 							doseNumber : 1,
-							id : pos
+							position : pos
 						}
 				};
 				return ev;
 			},
 
-			createForecast : function(){
+			createForecast : function(t){
+				var earliest;
+                var recomm;
+                if(t === 'FIXED'){
+                    earliest = testObjectService.createFD();
+                    recomm = testObjectService.createFD();
+                }
+                else {
+                    earliest = testObjectService.createRD();
+                    recomm = testObjectService.createRD();
+                }
 				var fc = {
 						doseNumber : 0,
 						forecastReason : "",
-						earliest : null,
-						recommended : null,
+						earliest : earliest,
+						recommended : recomm,
 						pastDue : null,
 						target : null
 				};
@@ -355,9 +364,6 @@ angular.module('tcl').factory('TestObjectFactory', function (TestObjectUtil) {
 angular.module('tcl').factory('TestObjectSynchronize', function ($q, $http,TestObjectUtil) {
     var TestObjectSynchronize = {
     	syncTC : function(id,tc){
-            var _tc = TestObjectSynchronize.prepare(tc);
-            console.log("Saving ");
-            console.log(_tc);
             var deferred = $q.defer();
             if(TestObjectUtil.isLocalID(id)){
                 console.log("Cannot Save, Local TP, Must Save");
@@ -367,14 +373,14 @@ angular.module('tcl').factory('TestObjectSynchronize', function ($q, $http,TestO
 				});
             }
             else {
-                // var _tc = TestObjectSynchronize.prepare(tc);
-                // console.log("Saving "+_tc);
+                var _tc = TestObjectSynchronize.prepare(tc);
+                console.log("Saving "+_tc);
                 $http.post('api/testcase/' + id + '/save', _tc).then(
                     function(response){
                         var newTC = response.data;
                         TestObjectUtil.sanitizeDates(newTC);
                         TestObjectUtil.sanitizeEvents(newTC);
-
+                        newTC._dateType = newTC.dateType;
                         deferred.resolve({
                             status : true,
                             message : "TestCase Saved",
@@ -429,22 +435,18 @@ angular.module('tcl').factory('TestObjectSynchronize', function ($q, $http,TestO
 				local.testCases[i] = remote.testCases[tc];
 			}
 		},
-		prepare : function(tc){
+        prepare : function(tc){
             var _tc = JSON.parse(angular.toJson(tc));
             if (_tc.hasOwnProperty("position")) {
                 delete _tc.position;
             }
             if(TestObjectUtil.isLocal(_tc)){
-            	console.log("is local");
                 delete _tc.id;
             }
             TestObjectUtil.cleanDates(_tc);
             TestObjectUtil.cleanObject(_tc,new RegExp("^_.*"));
-            if(_tc.hasOwnProperty("events")){
-                TestObjectUtil.updateDose(_tc.events);
-			}
             return _tc;
-		}
+        }
     };
     return TestObjectSynchronize;
 });
@@ -458,9 +460,6 @@ angular.module('tcl').factory('TestDataService', function ($http,$q,TestObjectUt
 				function(response) {
 					console.log("LOAD TP");
 					tps = angular.fromJson(response.data);
-                    for(var tp in tps){
-                        TestObjectUtil.hash(tps[tp].testCases);
-                    }
 					TestObjectUtil.sanitizeDates(tps);
 					for(var tp in tps){
 						for(var tc in tps[tp].testCases){
@@ -468,6 +467,9 @@ angular.module('tcl').factory('TestDataService', function ($http,$q,TestObjectUt
 							TestObjectUtil.sanitizeEvents(tps[tp].testCases[tc]);
 						}
 					}
+                    for(var tp in tps){
+                        TestObjectUtil.hash(tps[tp].testCases);
+                    }
                     deferred.resolve(tps);
 				},
 				function(error) {

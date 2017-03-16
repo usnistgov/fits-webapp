@@ -15,17 +15,17 @@
     <div ng-show="!isPending()">
         <div class="row">
 			<ol ng-show="!accordi.tpList" class="breadcrumb" style="width : 100%; margin : 0px;">
-           		<li style="cursor: pointer;" ng-click="selectTP(selectedTP)" ng-show="aTPisSelected()" ng-class="{'activeBC' : aTPisSelected() && !aTCisSelected()}">
+           		<li style="cursor: pointer;" ng-click="selectTP(selectedTP)" ng-if="aTPisSelected()" ng-class="{'activeBC' : aTPisSelected() && !aTCisSelected()}">
            			<span class="label label-sub-component label-icon" style="vertical-align:middle;">Test Plan</span> {{selectedTP.name}}
            		</li>
-  				<li style="cursor: pointer;" ng-click="selectTC(selectedTC)" ng-show="aTCisSelected()" ng-class="{'activeBC' : aTCisSelected() && !anEvisSelected() && !aFisSelected()}">
+  				<li style="cursor: pointer;" ng-click="selectTC(selectedTC)" ng-if="aTCisSelected()" ng-class="{'activeBC' : aTCisSelected() && !anEvisSelected() && !aFisSelected()}">
   					<span class="label label-component label-icon" style="vertical-align:middle;">Test Case</span> {{selectedTC.name}}
   				</li>
-  				<li style="cursor: pointer;" ng-click="selectEvent(selectedEvent)" ng-show="anEvisSelected()" class="activeBC">
+  				<li style="cursor: pointer;" ng-click="selectEvent(selectedEvent)" ng-if="anEvisSelected()" class="activeBC">
   					<span class="label label-field label-icon " style="vertical-align:middle;">Event</span> {{selectedEvent.vaccination.administred.name}} -
-					{{selectedEvent.vaccination.date.fixed.date | date:'MM/dd/yyyy'}}
+					{{eventLabel(selectedEvent)}}
 				</li>
-  				<li style="cursor: pointer;" ng-click="selectForecast(selectedForecast)" ng-show="aFisSelected()" class="activeBC">
+  				<li style="cursor: pointer;" ng-click="selectForecast(selectedForecast)" ng-if="aFisSelected()" class="activeBC">
   					<span class="label label-segment label-icon" style="vertical-align:middle;">Forecast</span> {{selectedForecast.target.name}}
   				</li>
 			</ol>
@@ -40,11 +40,7 @@
                 </div>
 			</div>
             <div class="pull-left">
-                <span ng-show="accordi.tpList" class="header4" style="margin-top:50px !important;">List of Test Plans</span>
-
-<!--                 <span ng-show="accordi.tpDetails && isSelectedTCv()" class="header4" style="margin-top:50px !important;">Test Case : {{selectedTC.name}}</span> -->
-<!--                 <span ng-show="accordi.tpDetails && !isSelectedTCv()" class="header4" style="margin-top:50px !important;">Test Plan : {{selectedTP.name}}</span> -->
-                
+                <span ng-show="accordi.tpList" class="header4" style="margin-top:50px !important;">Test Plans List</span>
             </div>
 
             <div class="pull-right">
@@ -81,9 +77,9 @@
         </div>
     </div>
 
-    <div style="font-size: 18px;text-align: center" ng-show="isPending()">
-        <div msg key='account.pendingSection'></div>
-    </div>
+    <!--<div style="font-size: 18px;text-align: center" ng-show="isPending()">-->
+        <!--<div msg key='account.pendingSection'></div>-->
+    <!--</div>-->
 
 </div>
 

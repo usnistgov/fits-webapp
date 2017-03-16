@@ -25,8 +25,8 @@ body {
 				<vaccine-picker allow-mvx="true" vxm="vxm"  vxg="vxgs" model="selectedEvent[selectedEvent._type].administred"></vaccine-picker>
 			</div>
 		</div>
-		<div class="col-md-offset-2 col-md-8" style="margin-top: 10px;">
-			<date-choose  birth="false" nullable="false" type="selectedTC.dateType" label="'Date Of Vaccination'" dt="selectedEvent[selectedEvent._type].date" events="selectedTC.events"></date-choose>
+		<div class="col-md-12" style="margin-top: 10px;">
+			<date-choose  exclude="selectedEvent[selectedEvent._type].position" nullable="false" type="selectedTC.dateType" label="'Date Of Vaccination'" dt="selectedEvent[selectedEvent._type].date" events="selectedTC.events"></date-choose>
 		</div>
 	</div>
 </div>
@@ -43,6 +43,7 @@ body {
 		class="btn btn-sm btn-info pull-right"
 		ng-click="prefill(selectedEvent[selectedEvent._type].evaluations,selectedEvent[selectedEvent._type].administred)" style="margin-top: 0px;"">
 		<span><i class="fa fa-pencil" aria-hidden="true"></i> Pre Fill </span>
+
 	</button>
 </div>
 <form

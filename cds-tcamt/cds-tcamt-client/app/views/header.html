@@ -10,10 +10,12 @@
     <div class="navbar navbar-default" role="navigation">
     <div class="brand" id="appheader">
         <a style="display: inline-block; text-shadow:none" href="#">
-            <div id="apptitle"><div><span>Immunization CDS Testing</span><span style='color:red; font-size:12px'> <span style='color:red; font-size:12px'> {{appInfo.version}}</span></span></div></div>
+            <div id="apptitle">
+                <span style="color: #F3C60D;">NIST</span> <span>FITS</span><span> - Forecasting for Immunization Test Suite</span><span style='color:red; font-size:12px'> {{appInfo.version}}</span>
+            </div>
         </a>
     </div>
-    <div class="navbar-collapse collapse">
+    <div class="navbar-collapse collapse" style="padding-left : 0px; padding-right: 0px;">
         <ul class="nav navbar-nav">
             <li ng-class="activeWhen(path()=='/home')">
                 <a class="point" href="#/home"><i class="fa fa-home"></i>&nbsp;<span msg key="navbar.home"></span></a>

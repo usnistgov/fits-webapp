@@ -22,14 +22,14 @@ body {
 				<div class="col-md-6">
 					<md-input-container style="width: 100%;">
 						<label>Name</label>
-						<input ng-model="selectedTestCase.name" ng-change="recordChanged()" type="text"/>
+						<input ng-model="selectedTestCase.name" type="text"/>
 					</md-input-container>
 				</div>
 
 				<div class="col-md-6">
 					<md-input-container style="width: 100%;">
 						<label>Description</label>
-						<input ng-model="selectedTestCase.description" ng-change="recordChanged()" type="text"/>
+						<input ng-model="selectedTestCase.description" type="text"/>
 					</md-input-container>
 				</div>
 			</div>
@@ -37,7 +37,7 @@ body {
 				<div class="col-md-6">
 					<md-input-container style="width: 100%;">
 						<label>Protocol</label>
-						<md-select ng-model="selectedTestCase.protocol" ng-change="recordChanged();">
+						<md-select ng-model="selectedTestCase.protocol" >
 							<md-option ng-value="soap">SOAP</md-option>
 						</md-select>
 					</md-input-container>

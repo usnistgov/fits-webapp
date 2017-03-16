@@ -11,6 +11,10 @@ multiselect .caret {
 	display : none;
 }
 
+md-checkbox .md-icon {
+  background-color: white;
+}
+
 multiselect button:after {
   content: 'Vaccine Group';
 }
@@ -20,11 +24,11 @@ multiselect button:after {
 }
 
 .invalid-date {
-  background-color : rgba(255, 224, 218, 0.69);
+  background-color : #fff3f3;
 }
 
 .valid-date {
-  background-color : #eceefd;
+  background-color : #fafaff;
 }
 
 .unmatched {
@@ -108,7 +112,7 @@ multiselect button:after {
 }
 
 .breadcrumb {
-	background-color : #efefef;
+	background-color : #ffeea7;
 }
 
 .fle {
@@ -127,13 +131,15 @@ multiselect button:after {
 
 #wrapper {
 	position: relative;
-	width: 100%;
-	height: 100%;
+	width: 99%;
 	margin: 0 auto;
 	background: white;
 	color: black;
-	background-color: #fafafa;
 	border:0px;
+}
+
+html {
+  background-color: #021a4c;
 }
 
 .fill {
@@ -153,7 +159,6 @@ multiselect button:after {
 
 #appcontainer {
 	border: 0px;
-	min-height: 500px;
 }
 
 #testplan-header {
@@ -1553,7 +1558,7 @@ input.account-input {
 
 #appheader {
   float: none;
-  font-family: fantasy;
+  font-family: Verdana;
   font-weight: bold;
   background-color: #021a4c;
   margin-left: 0px;
@@ -1932,8 +1937,7 @@ ul.dropdown-menu, ul.dropdown-menu > li {
   border-radius: 0px;
   border-bottom: 1px solid #ffec9d;
   border-width: 0 0 0px;
-  background: #ffec9d;
-  background-color: #ffec9d;
+  background-color: #F3C60D;
 
   color: black;
 }
@@ -2059,8 +2063,7 @@ ul.dropdown-menu, ul.dropdown-menu > li {
 }
 
 li.active {
-  background-color: #ffcc00;
-  background-color: #4ca0af;
+  background-color: #ffec9d;
 }
 
 

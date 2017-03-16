@@ -599,8 +599,7 @@
 				<div style="width : 100%;" layout="row" layout-align="start center" ng-show="rp.veRequirement.vEvent.vaccination.administred.discriminator === 'generic'">
 					<div flex="30" layout="column" layout-align="center center">
 						<span style="background-color: red;" class="badge">G</span>
-						<span class="badge sbadge">Dose {{rp.veRequirement.vEvent.vaccination.doseNumber}}</span> 
-						<span style="background-color: green;" class="badge">CVX#{{rp.veRequirement.vEvent.vaccination.administred.cvx}}</span> 	
+						<span style="background-color: green;" class="badge">CVX#{{rp.veRequirement.vEvent.vaccination.administred.cvx}}</span>
 					</div>
 					<div flex="50" layout="column" layout-align="start center">
 						<span><strong>{{rp.veRequirement.vEvent.vaccination.administred.name}}</strong></span>
@@ -610,13 +609,12 @@
 				<div style="width : 100%;" layout="row" layout-align="start center" ng-show="rp.veRequirement.vEvent.vaccination.administred.discriminator === 'specific'">
 					<div flex="30" layout="column" layout-align="center center">
 						<span style="background-color: red;" class="badge">S</span>
-						<span class="badge sbadge">Dose {{rp.veRequirement.vEvent.vaccination.doseNumber}}</span>
 						<span style="background-color: green;" class="badge">CVX#{{getVx(rp.veRequirement.vEvent.vaccination.administred).cvx}}</span>
 						<span style="background-color: blue;" class="badge">MVX#{{rp.veRequirement.vEvent.vaccination.administred.mx.mvx}}</span>
 					</div>
 					<div flex="50" layout="column" layout-align="start center" style="text-align : left;">
-						<span><strong>{{getVx(rp.veRequirement.vEvent.vaccination.administred).name}}</strong></span></br>
-						<span><strong>By</strong> {{rp.veRequirement.vEvent.vaccination.administred.mx.name}}</span></br>
+						<span><strong>{{getVx(rp.veRequirement.vEvent.vaccination.administred).name}}</strong></span>
+						<span><strong>By</strong> {{rp.veRequirement.vEvent.vaccination.administred.mx.name}}</span>
 						<span><strong>{{rp.veRequirement.vEvent.vaccination.administred.name}}</strong></span>
 						<span>Date Administred : {{rp.veRequirement.dateAdministred | date:"MM/dd/yyyy"}}</span>
 					</div>

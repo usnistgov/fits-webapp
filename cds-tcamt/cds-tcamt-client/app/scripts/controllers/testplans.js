@@ -336,7 +336,7 @@ angular
 									var rule = event.vaccination.date.rules[0];
 									if(rule.relativeTo){
 										if(rule.relativeTo.reference && rule.relativeTo.reference === "static" && rule.relativeTo.hasOwnProperty('id')){
-											return "Relative to "+(rule.relativeTo.type === 'DOB' ? 'Birth' : 'Assessment Date');
+											return "Relative to "+(rule.relativeTo.id === 'DOB' ? 'Birth' : 'Assessment Date');
 										}
 										else if(rule.relativeTo.reference && rule.relativeTo.reference === "dynamic" && rule.relativeTo.hasOwnProperty('id')){
                                             return "Relative to vaccination # "+ rule.relativeTo.id;
@@ -485,12 +485,9 @@ angular
                         if(newValue && newValue._jsave){
                             console.log("Just Saved");
                             var i = TestObjectUtil.index($scope.selectedTP.testCases,"id",newValue.id);
-                            if(~i){
-                                console.log(i);
-                                var tc = $scope.selectedTP.testCases[i];
-                                delete tc._jsave;
-                                TestObjectUtil.updateHash(tc);
-                            }
+							var tc = $scope.selectedTP.testCases[i];
+							delete tc._jsave;
+                            TestObjectUtil.updateHash(tc);
 						}
 						else {
                         	if(!newValue && TestObjectUtil.index($scope.selectedTP.testCases,"id",oldValue.id) === -1){
@@ -498,7 +495,6 @@ angular
 							}
                             else if(oldValue !== null && (!newValue || oldValue.id !== newValue.id)){
                                 var i = TestObjectUtil.index($scope.selectedTP.testCases,"id",oldValue.id);
-                                console.log("Changing TC");
                                 if(~i){
                                     console.log(i);
                                     var tc = $scope.selectedTP.testCases[i];
@@ -626,21 +622,11 @@ angular
 					};
 
 					$scope.addForecast = function() {
-						var fc = TestObjectFactory.createForecast();
+						var fc = TestObjectFactory.createForecast($scope.selectedTC.dateType);
 						$scope.selectedTC.forecast.push(fc);
 						$scope.selectForecast(fc);
 					};
 
-					$scope.prepareTestCase = function(tc) {
-						if (tc.hasOwnProperty("position")) {
-							delete tc.position;
-						}
-						if(TestObjectUtil.isLocal(tc)){
-							delete tc.id;
-						}
-						TestObjectUtil.cleanDates(tc);
-						TestObjectUtil.cleanObject(tc,new RegExp("^_.*"));
-					};
 
 					$scope.closeTestPlanEdit = function() {
 						$scope.selectedEvent = null;
@@ -807,10 +793,13 @@ angular
 						}
 					};
 
-					$scope.sanitizeTestCase = function(tc){
-						TestObjectUtil.sanitizeDates(tc);
-						TestObjectUtil.sanitizeEvents(tc);
-					};
+					$scope.sanitizeTestCase = function(tcs){
+						TestObjectUtil.sanitizeDates(tcs);
+						TestObjectUtil.sanitizeEvents(tcs);
+						for(var tc in tcs){
+                            tcs[tc]._dateType = tcs[tc].dateType;
+                        }
+                    };
 
 					$scope.uploadNIST = function() {
 						if ($scope.sfileO != null && !$scope.fileErr) {
@@ -1038,6 +1027,15 @@ angular
 					$scope.getVx =  function(x){
 						return VaccineService.getVx($scope.vxm,x);
 					};
+
+                    $scope.getV =  function(x){
+                        var mp = VaccineService.getMapping($scope.vxm, x);
+                        if (mp)
+                            return VaccineService.getVx($scope.vxm, mp.vx.cvx);
+                        else
+                            return null;
+					};
+
 					$scope.getMapping =  function(x){
 						return VaccineService.getMapping($scope.vxm,x);
 					};
@@ -1061,8 +1059,6 @@ angular
 
 					$scope.saveAllChangedTestPlans = function(stc,stp) {
 						$scope.message = "Saving ...";
-						console.log(stc);
-                        console.log(stp);
 						$scope.loading = true;
 						$scope.control.error.isSet = false;
 						$scope.control.error.obj = [];
@@ -1095,13 +1091,13 @@ angular
 
 						}
 						else if (stc) {
-							console.log("Saving");
+							console.log("TC");
                             TestObjectSynchronize.syncTC(stp.id, stc).then(
                             	function (result) {
-									TestObjectUtil.synchronize(stc.id,stp.testCases,result.tc);
                                     result.tc._jsave = true;
+									TestObjectUtil.synchronize(stc.id,stp.testCases,result.tc);
 									stc = result.tc;
-                                    TestObjectUtil.updateHash(stc);
+                                    TestObjectUtil.updateHash(result.tc);
                                     $scope.groupBy.cache = new _.memoize.Cache;
 									Notification.success({
 										message : result.message,
