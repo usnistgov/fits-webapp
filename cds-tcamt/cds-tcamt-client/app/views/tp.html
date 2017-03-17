@@ -30,13 +30,22 @@
   				</li>
 			</ol>
 			<div ng-show="control.error.isSet">
-                <div uib-alert class="alert-danger" close="dismissError($index)">
-                    <table ng-repeat="error in control.error.list track by $index">
-                        <tr>
-                            <td><strong>{{error.path}}</strong></td>
-                            <td>{{error.message}}</td>
-                        </tr>
-                    </table>
+                <div uib-alert class="alert-danger" close="dismissError()" >
+                    <div style="width: 100%;" layout="row" layout-align="center center">
+                        <table flex="50" class="table table-condensed">
+                            <tbody ng-repeat="errorObj in control.error.list track by $index">
+                                <tr>
+                                    <td colspan="2" style="text-align: center;">
+                                         <strong>{{errorObj.action === 'IMPORT_NIST' ? 'Import Errors' : errorObj.action === 'SAVE_TC' ? 'Saving TestCase '+ errorObj.obj.name : 'Errors'}}</strong>
+                                    </td>
+                                </tr>
+                                <tr ng-repeat="e in errorObj.errors track by $index" >
+                                    <td><strong>{{e.path}}</strong></td>
+                                    <td>{{e.message}}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
 			</div>
             <div class="pull-left">

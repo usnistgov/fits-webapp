@@ -192,65 +192,65 @@ public class Bootstrap {
 		accountService.createAdmin(c);
 	
 		
-		TestCase tc = new TestCase();
-		tc.setName("DTap Age Below Absolute Minimum");
-		tc.setDescription("DTaP #2 at age 10 weeks-5 days");
-		tc.setDateType(DateType.RELATIVE);
-		
-		//Eval
-		RelativeDate evalDate = new RelativeDate();
-		evalDate.add(new RelativeDateRule(DatePosition.AFTER, 0, 0, 0, new StaticDateReference(RelativeTo.EVALDATE)));
-		tc.setEvalDate(evalDate);
-		
-		//Patient
-		Patient pt = new Patient();
-		RelativeDate birth = new RelativeDate();
-		birth.add(new RelativeDateRule(DatePosition.BEFORE, 18, 0, 0, new StaticDateReference(RelativeTo.EVALDATE)));
-		pt.setDob(birth);
-		pt.setGender(Gender.F);		
-		tc.setPatient(pt);
-		
-		Vaccine vx = vaccineRepository.findMapping("107").getVx();
-		Vaccine vx1 = vaccineRepository.findMapping("100").getVx();
-		
-//		//Events
-		VaccinationEvent vcEvent1 = new VaccinationEvent();
-		vcEvent1.setId(0);
-		RelativeDate vced1 = new RelativeDate();
-		vced1.add(new RelativeDateRule(DatePosition.AFTER, 0, 10, 0, new StaticDateReference(RelativeTo.DOB)));
-		vcEvent1.setDate(vced1);
-		vcEvent1.setAdministred(vx);
-		vcEvent1.setDoseNumber(1);
-		vcEvent1.setType(EventType.VACCINATION);
-		
-		ExpectedEvaluation ee1 = new ExpectedEvaluation();
-		ee1.setRelatedTo(vx);
-		ee1.setStatus(EvaluationStatus.VALID);
-		
-		ExpectedEvaluation ee11 = new ExpectedEvaluation();
-		ee11.setRelatedTo(vx1);
-		ee11.setStatus(EvaluationStatus.VALID);
-		vcEvent1.setEvaluations(new HashSet<>(Arrays.asList(ee1,ee11)));
-		
-		VaccinationEvent vcEvent2 = new VaccinationEvent();
-		vcEvent2.setId(1);
-		RelativeDate vced2 = new RelativeDate();
-		vced2.add(new RelativeDateRule(DatePosition.AFTER, 0, 10, 0, new VaccineDateReference(0)));
-		vcEvent2.setDate(vced2);
-		vcEvent2.setAdministred(vx);
-		vcEvent2.setDoseNumber(2);
-		vcEvent2.setType(EventType.VACCINATION);
-		
-		ExpectedEvaluation ee2 = new ExpectedEvaluation();
-		ee2.setRelatedTo(vx);
-		ee2.setStatus(EvaluationStatus.INVALID);
-		ee2.setEvaluationReason("Age too young");
-		vcEvent2.setEvaluations(new HashSet<>(Arrays.asList(ee2)));
-		
-		
-		tc.addEvent(vcEvent1);
-		tc.addEvent(vcEvent2);
-		
+//		TestCase tc = new TestCase();
+//		tc.setName("DTap Age Below Absolute Minimum");
+//		tc.setDescription("DTaP #2 at age 10 weeks-5 days");
+//		tc.setDateType(DateType.RELATIVE);
+//		
+//		//Eval
+//		RelativeDate evalDate = new RelativeDate();
+//		evalDate.add(new RelativeDateRule(DatePosition.AFTER, 0, 0, 0, new StaticDateReference(RelativeTo.EVALDATE)));
+//		tc.setEvalDate(evalDate);
+//		
+//		//Patient
+//		Patient pt = new Patient();
+//		RelativeDate birth = new RelativeDate();
+//		birth.add(new RelativeDateRule(DatePosition.BEFORE, 18, 0, 0, new StaticDateReference(RelativeTo.EVALDATE)));
+//		pt.setDob(birth);
+//		pt.setGender(Gender.F);		
+//		tc.setPatient(pt);
+//		
+//		Vaccine vx = vaccineRepository.findMapping("107").getVx();
+//		Vaccine vx1 = vaccineRepository.findMapping("100").getVx();
+//		
+////		//Events
+//		VaccinationEvent vcEvent1 = new VaccinationEvent();
+//		vcEvent1.setPosition(0);
+//		RelativeDate vced1 = new RelativeDate();
+//		vced1.add(new RelativeDateRule(DatePosition.AFTER, 0, 10, 0, new StaticDateReference(RelativeTo.DOB)));
+//		vcEvent1.setDate(vced1);
+//		vcEvent1.setAdministred(vx);
+//		vcEvent1.setDoseNumber(1);
+//		vcEvent1.setType(EventType.VACCINATION);
+//		
+//		ExpectedEvaluation ee1 = new ExpectedEvaluation();
+//		ee1.setRelatedTo(vx);
+//		ee1.setStatus(EvaluationStatus.VALID);
+//		
+//		ExpectedEvaluation ee11 = new ExpectedEvaluation();
+//		ee11.setRelatedTo(vx1);
+//		ee11.setStatus(EvaluationStatus.VALID);
+//		vcEvent1.setEvaluations(new HashSet<>(Arrays.asList(ee1,ee11)));
+//		
+//		VaccinationEvent vcEvent2 = new VaccinationEvent();
+//		vcEvent2.setPosition(1);
+//		RelativeDate vced2 = new RelativeDate();
+//		vced2.add(new RelativeDateRule(DatePosition.AFTER, 0, 10, 0, new VaccineDateReference(0)));
+//		vcEvent2.setDate(vced2);
+//		vcEvent2.setAdministred(vx);
+//		vcEvent2.setDoseNumber(2);
+//		vcEvent2.setType(EventType.VACCINATION);
+//		
+//		ExpectedEvaluation ee2 = new ExpectedEvaluation();
+//		ee2.setRelatedTo(vx);
+//		ee2.setStatus(EvaluationStatus.INVALID);
+//		ee2.setEvaluationReason("Age too young");
+//		vcEvent2.setEvaluations(new HashSet<>(Arrays.asList(ee2)));
+//		
+//		
+//		tc.addEvent(vcEvent1);
+//		tc.addEvent(vcEvent2);
+//		
 //		//Expected Forecast
 //		ExpectedForecast ef = new ExpectedForecast();
 //		ef.setDoseNumber("2");
@@ -278,29 +278,29 @@ public class Bootstrap {
 //		eff.setPastDue(new FixedDate(pastDue1));
 //		tc.setForecast(new HashSet<>(Arrays.asList(ef,eff)));
 		
-		MetaData md = new MetaData();
-		md.setDateCreated(new Date());
-		md.setDateLastUpdated(new Date());
-		md.setImported(false);
-		md.setVersion("1");
-		tc.setMetaData(md);
-		
-		TestPlan tp = new TestPlan();
-		tp.setId("xxxxx");
-		MetaData mdp = new MetaData();
-		mdp.setDateCreated(new Date());
-		mdp.setDateLastUpdated(new Date());
-		mdp.setImported(false);
-		mdp.setVersion("1");
-		tp.setMetaData(mdp);
-		tp.setDescription("CDS TestCases for CDSi Specification v2");
-		tp.setName("CDC");
-		tp.setUser("hossam");
-		tp.addTestCase(tc);
-		tc.setTestPlan("xxxxx");
-		tc.setId("1");
-		testCaseRepository.save(tc);
-		testPlanRepository.save(tp);
+//		MetaData md = new MetaData();
+//		md.setDateCreated(new Date());
+//		md.setDateLastUpdated(new Date());
+//		md.setImported(false);
+//		md.setVersion("1");
+//		tc.setMetaData(md);
+//		
+//		TestPlan tp = new TestPlan();
+//		tp.setId("xxxxx");
+//		MetaData mdp = new MetaData();
+//		mdp.setDateCreated(new Date());
+//		mdp.setDateLastUpdated(new Date());
+//		mdp.setImported(false);
+//		mdp.setVersion("1");
+//		tp.setMetaData(mdp);
+//		tp.setDescription("CDS TestCases for CDSi Specification v2");
+//		tp.setName("CDC");
+//		tp.setUser("hossam");
+//		tp.addTestCase(tc);
+//		tc.setTestPlan("xxxxx");
+//		tc.setId("1");
+//		testCaseRepository.save(tc);
+//		testPlanRepository.save(tp);
 		
 	}
 }

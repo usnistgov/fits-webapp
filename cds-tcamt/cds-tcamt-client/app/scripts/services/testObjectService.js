@@ -217,8 +217,8 @@ angular.module('tcl').factory('TestObjectFactory', function (TestObjectUtil) {
                 var dt = new Date();
 				return {
 					type : 'fixed',
-					date : null,
-					_dateObj : null
+					date : dt.getTime(),
+					_dateObj : dt
 				}
             },
 			createRD : function () {

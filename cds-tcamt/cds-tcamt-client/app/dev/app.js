@@ -27,9 +27,7 @@ var app = angular
         'restangular',
         'angularjs-dropdown-multiselect',
         'dndLists',
-        'froala',
-        'ngNotificationsBar'
-        ,
+        'ngNotificationsBar',
         'ngMockE2E',
         'ngDragDrop',
         'ui.tree',

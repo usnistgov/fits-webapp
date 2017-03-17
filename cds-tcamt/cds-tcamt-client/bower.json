@@ -30,7 +30,6 @@
     "angularjs-dropdown-multiselect": "~1.5.2",
     "lodash": "~3.10.1",
     "angular-drag-and-drop-lists": "^2.1.0",
-    "angular-froala": "~2.2.0",
     "ng-notifications-bar": "^0.0.16",
     "codemirror": "5.18.2",
     "angular-ui-codemirror": "0.3.0",

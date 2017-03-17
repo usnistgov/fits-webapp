@@ -33,21 +33,21 @@
                         </tr>
                         </thead>
                         <tbody>
-                        <tr ng-repeat="releaseNote in releaseNotes">
-                            <td>
-                                {{releaseNote.version}}
-                            </td>
-                            <td>
-                                {{releaseNote.date | date: 'MM/dd/yyyy HH:mm:ss'}}
-                            </td>
-                            <td>
-                                <ul>
-                                    <li ng-repeat="update in releaseNote.updates">
-                                       {{update}}
-                                    </li>
-                                </ul>
-                            </td>
-                        </tr>
+                        <!--<tr ng-repeat="releaseNote in releaseNotes">-->
+                            <!--<td>-->
+                                <!--{{releaseNote.version}}-->
+                            <!--</td>-->
+                            <!--<td>-->
+                                <!--{{releaseNote.date | date: 'MM/dd/yyyy HH:mm:ss'}}-->
+                            <!--</td>-->
+                            <!--<td>-->
+                                <!--<ul>-->
+                                    <!--<li ng-repeat="update in releaseNote.updates">-->
+                                       <!--{{update}}-->
+                                    <!--</li>-->
+                                <!--</ul>-->
+                            <!--</td>-->
+                        <!--</tr>-->
                         </tbody>
                     </table>
                 </div>

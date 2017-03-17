@@ -25,7 +25,6 @@ var app = angular
         'restangular',
         'angularjs-dropdown-multiselect',
         'dndLists',
-        'froala',
         'ngNotificationsBar',
         'ngDragDrop',
         'ui.tree', 
@@ -36,8 +35,8 @@ var app = angular
         'btorfs.multiselect',
         'ui.select',
         'autocomplete'
-
     ]);
+
 app.config(function(NotificationProvider) {
     NotificationProvider.setOptions({
         delay: 10000,

@@ -199,7 +199,9 @@ angular
 					$scope.evalReason = [];
 					$scope.serieStatus = [];
 					$scope.gender = [];
-                    $scope.selectedTabTC = 0;
+                    $scope.tabs = {
+                    	selectedTabTC : 0
+                    };
                     $scope.tcSearch = "";
                     $scope.export = {
                     	type : 'NIST'
@@ -657,7 +659,7 @@ angular
 
 					$scope.summary = function () {
                         $scope.selectTC($scope.selectedTC);
-                        $scope.selectedTabTC = 3;
+                        $scope.tabs.selectedTabTC = 3;
                     };
 
 					$scope.eventCM = [
@@ -793,12 +795,10 @@ angular
 						}
 					};
 
-					$scope.sanitizeTestCase = function(tcs){
-						TestObjectUtil.sanitizeDates(tcs);
-						TestObjectUtil.sanitizeEvents(tcs);
-						for(var tc in tcs){
-                            tcs[tc]._dateType = tcs[tc].dateType;
-                        }
+					$scope.sanitizeTestCase = function(tc){
+						TestObjectUtil.sanitizeDates(tc);
+						TestObjectUtil.sanitizeEvents(tc);
+						tc._dateType = tc.dateType;
                     };
 
 					$scope.uploadNIST = function() {
@@ -832,6 +832,20 @@ angular
                                                         });
 												} else {
                                                     $scope.importing = false;
+                                                    $scope.control.error.isSet = true;
+                                                    var erObj = {
+                                                    	action : "IMPORT_NIST",
+														errors : []
+													};
+                                                    for(var er in data.errors){
+                                                    	if(data.errors.hasOwnProperty(er)){
+                                                            erObj.errors.push({
+                                                            	path : 'Line : ' + data.errors[er].line + ', Column : ' + data.errors[er].column,
+																message : data.errors[er].message
+															});
+														}
+													}
+                                                    $scope.control.error.list.push(erObj);
 													Notification
 															.error({
 																message : "Error While Importing",
@@ -949,16 +963,21 @@ angular
 
 
 					$scope.exportNIST = function() {
-						if ($scope.selectedTC.id != null
-								&& $scope.selectedTC.id != undefined) {
+						if (!TestObjectUtil.isLocal($scope.selectedTC) && !TestObjectUtil.hashChanged($scope.selectedTC)) {
 							var form = document.createElement("form");
 							form.action = $rootScope.api('api/testcase/'
-									+ $scope.selectedTC.id + '/export/nist');
+								+ $scope.selectedTC.id + '/export/nist');
 							form.method = "POST";
 							form.target = "_target";
 							form.style.display = 'none';
 							document.body.appendChild(form);
 							form.submit();
+						}
+						else {
+                            Notification.error({
+                                message : "Your TestCase has unsaved changes please save before exporting",
+                                delay : 3000
+                            });
 						}
 					};
 
@@ -1054,7 +1073,8 @@ angular
 					};
 
 					$scope.dismissError = function (i) {
-                        $scope.control.error.list.splice(i,1);
+                        $scope.control.error.isSet = false;
+                        $scope.control.error.list = []
                     };
 
 					$scope.saveAllChangedTestPlans = function(stc,stp) {
@@ -1076,10 +1096,16 @@ angular
             						$scope.groupBy.cache = new _.memoize.Cache;
                                 },
                                 function (result) {
-                                    if(result.response.hasOwnProperty("errors")){
+                                    if(result.response && result.response.hasOwnProperty("errors")){
                                         $scope.control.error.isSet = true;
-                                        $scope.control.error.tc = stp;
-                                        $scope.control.error.list = result.response.errors;
+                                        var erObj = {
+                                        	action : 'SAVE_TP',
+											obj : stp,
+											errors : []
+										};
+                                        erObj.errors = result.response.errors;
+                                        $scope.control.error.list.push(erObj);
+
                                     }
                                     Notification.error({
                                         message : result.message,
@@ -1106,11 +1132,23 @@ angular
 									$scope.loading = false;
                                 },
                                 function (result) {
-                            		if(result.response && result.response.hasOwnProperty("errors")){
+
+                                    if(result.response.hasOwnProperty("errors")){
                                         $scope.control.error.isSet = true;
-                                        $scope.control.error.tc = stc;
-                                        $scope.control.error.list = result.response.errors;
-									}
+                                        var erObj = {
+                                            action : 'SAVE_TC',
+                                            obj : stc,
+                                            errors : []
+                                        };
+                                        for(var i = 0; i < result.response.errors.length; i++){
+                                            erObj.errors.push({
+                                            	path : $scope.sanitizeErrorPath(result.response.errors[i].path),
+												message : result.response.errors[i].message
+											});
+										}
+                                        $scope.control.error.list.push(erObj);
+
+                                    }
                                     Notification.error({
                                         message : result.message,
                                         delay : 1000
@@ -1120,7 +1158,35 @@ angular
 							);
 						}
 					};
+
+                    $scope.sanitizeErrorPath = function (path) {
+                        var result;
+                        var elements = path.split(".");
+                        for(var i = 0; i < elements.length; i++){
+                            elements[i] = $scope.capitalize(elements[i]);
+                        }
+                        path = elements.join(" ");
+                        result = path.replace('\\.',' ');
+                        if(result.indexOf('Events[') !== -1){
+                            result = result.replace('Events[', 'Vaccination Event ID # ');
+                            result = result.replace(']', ' ');
+						}
+
+                        result = result.replace('Forecast', 'Forecast');
+                        result = result.replace('EvalDate Date', 'Assessment Date');
+                        result = result.replace('EvalDate', 'Assessment Date');
+                        result = result.replace('Dob Date', 'Date Of Birth');
+                        result = result.replace('Dob', 'Date Of Birth');
+                        result = result.replace('Dob Date', 'Date Of Birth');
+                        result = result.replace('Date Date', 'Date');
+                        return result;
+                    };
+
+                    $scope.capitalize = function(string) {
+                        return string.charAt(0).toUpperCase() + string.slice(1);
+                    };
 				}
+
 		);
 
 angular.module('tcl').controller('ConfirmTestPlanDeleteCtrl',

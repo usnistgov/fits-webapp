@@ -193,6 +193,8 @@ public class TestCaseController {
 
 					tc.setTestPlan(tps.getId());
 					testCaseRepository.save(tc);
+					tps.addTestCase(tc);
+					testPlanRepository.save(tps);
 					ImportResult ir = new ImportResult();
 					ir.setStatus(true);
 					ir.setErrors(null);

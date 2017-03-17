@@ -19,7 +19,6 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
     protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException e, HttpHeaders headers, HttpStatus status, WebRequest request) {
     	ModelValidationFailed mvf = new ModelValidationFailed();
 		for(FieldError oe : e.getBindingResult().getFieldErrors()){
-			
 			mvf.add(new ModelError(oe.getField(), oe.getDefaultMessage()));
 		}
 		return new ResponseEntity<Object>(mvf,HttpStatus.BAD_REQUEST);
