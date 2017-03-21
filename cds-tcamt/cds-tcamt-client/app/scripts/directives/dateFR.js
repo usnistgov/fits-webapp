@@ -42,6 +42,17 @@ angular.module('tcl').directive('dateChoose', function() {
 				}
             };
 
+            ctrl.notCircular = function (event) {
+            	if(event && event.date && event.date.rules && event.date.rules.length > 0){
+            		for(var i = 0; i < event.date.rules.length; i++){
+            			if(event.date.rules[i] && event.date.rules[i].relativeTo && event.date.rules[i].relativeTo.reference === 'dynamic' && event.date.rules[i].relativeTo.id === ctrl.exclude){
+							return false;
+						}
+					}
+				}
+				return true;
+            };
+
 			ctrl.createFixed = function(){
 				return {
 					type : "fixed",

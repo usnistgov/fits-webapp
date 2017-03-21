@@ -2,6 +2,7 @@
   "name": "tcl",
   "version": "0.0.0",
   "dependencies": {
+    "angular-ui-scroll": "^1.6.1",
     "imagemin": "^4.0.0"
   },
   "devDependencies": {

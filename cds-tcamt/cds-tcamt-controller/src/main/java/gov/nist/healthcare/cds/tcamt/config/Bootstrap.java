@@ -12,6 +12,7 @@ import java.util.Set;
 
 import javax.annotation.PostConstruct;
 
+import gov.nist.fhir.client.ir.TestRunnerServiceFhirImpl;
 import gov.nist.healthcare.cds.auth.domain.Account;
 import gov.nist.healthcare.cds.auth.domain.Privilege;
 import gov.nist.healthcare.cds.auth.repo.PrivilegeRepository;
@@ -94,9 +95,9 @@ public class Bootstrap {
 	
 	@Bean
 	public TestRunnerService testRunner(){
-		return new MockTestRunner();
-//		return new TestRunnerServiceFhirImpl("http://129.6.59.199:8080/forecast/ImmunizationRecommendations");
-//		return new TestRunnerServiceFhirImpl("https://129.6.59.199:8443/forecast/ImmunizationRecommendations");
+//		return new MockTestRunner();
+		return new TestRunnerServiceFhirImpl("https://p860556.campus.nist.gov:8443/forecast/ImmunizationRecommendations");
+//		return new TestRunnerServiceFhirImpl("https://localhost:15001/forecast/ImmunizationRecommendations");
 
 	}
 	

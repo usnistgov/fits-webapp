@@ -46,7 +46,7 @@ multiselect button:after {
 
 .unsaved {
   font-style: oblique;
-  color: #ab891d;
+  color: #f6223d;
 }
 .view-active {
    -moz-box-shadow:    inset 0 0 10px #000000;
@@ -136,6 +136,10 @@ multiselect button:after {
 	background: white;
 	color: black;
 	border:0px;
+}
+
+.report-item:hover {
+  background-color: #F3C60D;
 }
 
 html {
@@ -2443,12 +2447,8 @@ table.forumline > tr > td {
 }
 .selected1{
 /* Permalink - use to edit and share this gradient: http://colorzilla.com/gradient-editor/#7abcff+0,60abf8+44,4096ee+100;Blue+3D+%2314 */
-background: #7abcff; /* Old browsers */
-background: -moz-linear-gradient(top, #7abcff 0%, #60abf8 44%, #4096ee 100%); /* FF3.6-15 */
-background: -webkit-linear-gradient(top, #7abcff 0%,#60abf8 44%,#4096ee 100%); /* Chrome10-25,Safari5.1-6 */
-background: linear-gradient(to bottom, #7abcff 0%,#60abf8 44%,#4096ee 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
-filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#7abcff', endColorstr='#4096ee',GradientType=0 ); /* IE6-9 */
-color : #FFFFFF;
+background: #d3dae2; /* Old browsers */
+color : #000000;
 }
 
 tabset{

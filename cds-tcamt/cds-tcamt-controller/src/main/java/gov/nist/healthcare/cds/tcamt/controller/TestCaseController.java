@@ -26,10 +26,14 @@ import gov.nist.healthcare.cds.domain.wrapper.ModelError;
 import gov.nist.healthcare.cds.domain.wrapper.ModelValidationFailed;
 import gov.nist.healthcare.cds.domain.wrapper.Report;
 import gov.nist.healthcare.cds.domain.xml.ErrorModel;
+import gov.nist.healthcare.cds.repositories.ReportRepository;
 import gov.nist.healthcare.cds.repositories.TestCaseRepository;
 import gov.nist.healthcare.cds.repositories.TestPlanRepository;
 import gov.nist.healthcare.cds.service.CDCSpreadSheetFormatService;
+import gov.nist.healthcare.cds.service.DeleteTestObjectService;
+import gov.nist.healthcare.cds.service.MetaDataService;
 import gov.nist.healthcare.cds.service.NISTFormatService;
+import gov.nist.healthcare.cds.service.PropertyService;
 import gov.nist.healthcare.cds.service.TestCaseExecutionService;
 import gov.nist.healthcare.cds.tcamt.domain.ImportResult;
 
@@ -67,13 +71,22 @@ public class TestCaseController {
 	private TestPlanRepository testPlanRepository;
 	
 	@Autowired
+	private ReportRepository reportRepository;
+	
+	@Autowired
 	private NISTFormatService nistFormatService;
 	
 	@Autowired
 	private CDCSpreadSheetFormatService cdcFormatService;
 	
 	@Autowired
-	private TestCaseExecutionService execService;
+	private MetaDataService mdService;
+	
+	@Autowired
+	private PropertyService ledger;
+	
+	@Autowired
+	private DeleteTestObjectService trash;
 
 	@RequestMapping(value = "/testplans", method = RequestMethod.GET)
 	@ResponseBody
@@ -82,38 +95,35 @@ public class TestCaseController {
 	}
 	
 	
-	@RequestMapping(value = "/validate/{id}", method = RequestMethod.GET)
-	@ResponseBody
-	public Report validate(@PathVariable String id) throws ParseException, UnresolvableDate{
-		TestCase tc = testCaseRepository.findOne(id);
-		return execService.execute(null, tc, Calendar.getInstance().getTime());
-	}
-	
 	@RequestMapping(value = "/testcase/{id}/save", method = RequestMethod.POST)
 	@ResponseBody
-	public TestCase save(@RequestBody @Valid TestCase tc,@PathVariable String id) throws NotFoundException {
-		TestPlan tp = testPlanRepository.findOne(id);
-		boolean newt = tc.getId() == null || tc.getId().isEmpty();
+	public TestCase save(@RequestBody @Valid TestCase tc,@PathVariable String id, Principal p) throws NotFoundException {
+		TestPlan tp = ledger.tpBelongsTo(id, p.getName());
 		if(tp != null){
+			boolean newt = tc.getId() == null || tc.getId().isEmpty();
 			tc.setTestPlan(tp.getId());
+			mdService.update(tp.getMetaData());
+			mdService.update(tc.getMetaData());
+			TestCase stc = testCaseRepository.save(tc);
+			if(newt){
+				tp.addTestCase(stc);
+				testPlanRepository.save(tp);
+			}
+			return stc;
 		}
 		else {
 			throw new NotFoundException("TestPlan ("+id+")");
 		}
-		TestCase stc = testCaseRepository.save(tc);
-		if(newt){
-			System.out.println("[HTNEW]");
-			tp.addTestCase(stc);
-			testPlanRepository.save(tp);
-		}
-		return stc;
-		
 	}
 	
 	@RequestMapping(value = "/testplan/save", method = RequestMethod.POST)
 	@ResponseBody
 	public TestPlan save(@RequestBody TestPlan tp,Principal p) throws NotFoundException {
-		tp.setUser(p.getName());
+		boolean newt = tp.getId() == null || tp.getId().isEmpty();
+		if(newt){
+			tp.setUser(p.getName());
+		}
+		mdService.update(tp.getMetaData());
 		return testPlanRepository.save(tp);
 	}
 	
@@ -125,37 +135,40 @@ public class TestCaseController {
 			tp.setTestCases(_tp.getTestCases());
 		}
 		tp.setUser(p.getName());
+		mdService.update(tp.getMetaData());
 		return testPlanRepository.save(tp);
 	}
 	
 	@RequestMapping(value = "/testcase/{id}/delete", method = RequestMethod.POST)
 	@ResponseBody
-	public String delete(@PathVariable String id) throws NotFoundException{
-		
-		TestCase tc = testCaseRepository.findOne(id);
-		if(tc == null)
-			throw new NotFoundException("TC not found");
-		else {
-			TestPlan tp = testPlanRepository.findOne(tc.getTestPlan());
-			if(tp == null)
-				throw new NotFoundException("TC not found");
-			tp.getTestCases().remove(tc);
-			testPlanRepository.save(tp);
+	public String delete(@PathVariable String id, Principal p) throws NotFoundException{
+		TestCase tc = ledger.tcBelongsTo(id, p.getName());
+		if(tc != null){
+			trash.deleteTestCase(tc);
+			return "";
 		}
-		return "";
+		else {
+			throw new NotFoundException("TC not found");
+		}
 	}
 	
 	@RequestMapping(value = "/testplan/{id}/delete", method = RequestMethod.POST)
 	@ResponseBody
-	public String deleteTP(@PathVariable String id) throws NotFoundException{
-		testPlanRepository.delete(id);
+	public String deleteTP(@PathVariable String id, Principal p) throws NotFoundException{
+		TestPlan tp = ledger.tpBelongsTo(id, p.getName());
+		if(tp != null){
+			trash.deleteTestPlan(tp);
+		}
+		else {
+			throw new NotFoundException("TP not found");
+		}
 		return "";
 	}
 	
 	@RequestMapping(value = "/testcase/{id}/export/{format}", method = RequestMethod.POST)
 	@ResponseBody
-	public void export(@PathVariable String id,@PathVariable String format,HttpServletRequest request, HttpServletResponse response) throws IOException{
-		TestCase tc = testCaseRepository.findOne(id);
+	public void export(@PathVariable String id,@PathVariable String format,HttpServletRequest request, HttpServletResponse response, Principal p) throws IOException{
+		TestCase tc = ledger.tcBelongsTo(id, p.getName());
 		if(format.equals("nist") && tc != null){
 			response.setContentType("text/xml");
 			response.setHeader("Content-disposition", "attachment;filename="+tc.getName().replace(" ", "_")+".xml" );
@@ -167,15 +180,15 @@ public class TestCaseController {
 	
 	@RequestMapping(value = "/testcase/{id}/import/nist", method = RequestMethod.POST)
 	@ResponseBody
-	public ImportResult uploadFileHandler(@RequestParam("file") MultipartFile file,@PathVariable String id) {
+	public ImportResult uploadFileHandler(@RequestParam("file") MultipartFile file,@PathVariable String id, Principal p) {
 		if (!file.isEmpty()) {
 			try {
 				byte[] bytes = file.getBytes();
 				String fileContent = new String(bytes, "UTF-8");
 				List<ErrorModel> errors = nistFormatService._validate(fileContent);
 				if(errors.isEmpty()){
-					TestCase tc = nistFormatService._import(fileContent);
-					TestPlan tps = testPlanRepository.findOne(id);
+					
+					TestPlan tps = ledger.tpBelongsTo(id, p.getName());
 					if(tps == null){
 						ImportResult ir = new ImportResult();
 						ir.setStatus(false);
@@ -183,6 +196,8 @@ public class TestCaseController {
 						ir.setMessages(Arrays.asList("Test plan not found"));
 						return ir;
 					}
+					
+					TestCase tc = nistFormatService._import(fileContent);
 					if(tc == null){
 						ImportResult ir = new ImportResult();
 						ir.setStatus(false);
@@ -194,6 +209,7 @@ public class TestCaseController {
 					tc.setTestPlan(tps.getId());
 					testCaseRepository.save(tc);
 					tps.addTestCase(tc);
+					mdService.update(tps.getMetaData());
 					testPlanRepository.save(tps);
 					ImportResult ir = new ImportResult();
 					ir.setStatus(true);
@@ -231,10 +247,9 @@ public class TestCaseController {
 		}
 	}
 	
-    @CacheEvict(value={"testplans-user","testplans"}, allEntries=true)
 	@RequestMapping(value = "/testcase/{id}/import/cdc", method = RequestMethod.POST)
 	@ResponseBody
-	public ImportResult uploadFileHandlerCDC(@RequestPart("file") MultipartFile file,@RequestPart("config") CDCImportConfig config, @PathVariable String id) {
+	public ImportResult uploadFileHandlerCDC(@RequestPart("file") MultipartFile file,@RequestPart("config") CDCImportConfig config, @PathVariable String id, Principal p) {
 		if (!file.isEmpty()) {
 			try {
 				byte[] bytes = file.getBytes();
@@ -242,7 +257,8 @@ public class TestCaseController {
 				CDCImport importRes = cdcFormatService._import(bis,config);
 				List<ErrorModel> errors = importRes.getExceptions();
 				if(importRes.getTestcases().size() > 0){
-					TestPlan tps = testPlanRepository.findOne(id);
+					
+					TestPlan tps = ledger.tpBelongsTo(id, p.getName());
 					if(tps == null){
 						ImportResult ir = new ImportResult();
 						ir.setStatus(false);
@@ -257,6 +273,7 @@ public class TestCaseController {
 					
 					tps.getTestCases().addAll(importRes.getTestcases());
 					testCaseRepository.save(importRes.getTestcases());
+					mdService.update(tps.getMetaData());
 					testPlanRepository.save(tps);
 					ImportResult ir = new ImportResult();
 					ir.setStatus(true);

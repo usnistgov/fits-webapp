@@ -109,7 +109,7 @@
 
 	</dependencies>
 	<build>
-		<finalName>cds-tcamt</finalName>
+		<finalName>fits</finalName>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>

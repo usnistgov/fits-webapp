@@ -17,7 +17,7 @@ body {
 </script>
 <!-- <span ng-show="!aTCisSelected()">No test case selected.</span> -->
 <div>
-	<table style="width: 100%;">
+	<table style="width: 100%;" class="table-hover">
 		<tbody>
 			<tr ng-repeat="ev in selectedTC.events | orderBy:'ev.vaccination.position' " ng-click="selectEvent(ev)"
 				style="cursor: pointer; height : 50px;"

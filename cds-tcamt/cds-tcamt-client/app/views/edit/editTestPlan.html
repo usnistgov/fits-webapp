@@ -19,9 +19,6 @@ body {
 					<form name="testCaseGeneralForm" class="form-horizontal" novalidate>
 						<div class="row">
 							<div class="col-md-12">
-								<div class="col-md-offset-2 col-md-8"  ng-if="selectedTC.dateType === 'FIXED'">
-									<date-choose exclude="'EVALDATE'" style="margin-bottom: 10px;" nullable="false" type="selectedTC.dateType" label="'Assessment Date'" dt="selectedTC.evalDate" events="selectedTC.events"></date-choose>
-								</div>
 								<div class="col-md-12">
 									<md-input-container style="width: 100%;">
 										<label>Name</label>
@@ -60,46 +57,6 @@ body {
 						</div>
 					</form>
 				</md-content>
-			</md-tab>
-			<md-tab label="Patient Information">
-				<md-content class="md-padding">
-					<form name="patientForm" class="form-horizontal" novalidate>
-						<div layout="row" layout-align="start center">
-							<div flex="100" layout="column" layout-align="center">
-								<div flex="100">
-									<div style="width: 100%;">
-										<md-input-container style="width: 100%;">
-											<label>Gender</label>
-											<md-select ng-model="selectedTC.patient.gender" ng-model-options="{trackBy: '$value'}" required>
-												<md-option ng-repeat=" enum in gender " ng-value="enum.code">{{enum.details}}</md-option>
-											</md-select>
-										</md-input-container>
-									</div>
-									<date-choose  style="width: 100%;" exclude="'DOB'" ng-if="selectedTC.dateType === 'FIXED'" nullable="false" type="selectedTC.dateType" label="'Date Of Birth'" dt="selectedTC.patient.dob" events="selectedTC.events"></date-choose>
-									<div style="width: 100%;" ng-if="selectedTC.dateType === 'RELATIVE'" layout="column" layout-align="start start">
-										<label>Age</label>
-										<div layout="column" layout-align="center center">
-											<md-input-container >
-												<label>Years</label>
-												<input min='0' ng-model="selectedTC.patient.dob.rules[0].year" type="number" required>
-											</md-input-container>
-											<md-input-container >
-												<label>Months</label>
-												<input min='0' ng-model="selectedTC.patient.dob.rules[0].month" type="number" required>
-											</md-input-container>
-											<md-input-container >
-												<label>Days</label>
-												<input min='0' ng-model="selectedTC.patient.dob.rules[0].day" type="number" required>
-											</md-input-container>
-										</div>
-									</div>
-								</div>
-							</div>
-						</div>
-					</form>
-				</md-content>
-			</md-tab>
-			<md-tab label="MetaData">
 				<md-content class="md-padding">
 					<form name="mdForm" class="form-horizontal" novalidate>
 						<div class="row">

@@ -16,10 +16,8 @@ body {
 <ng-include src="'views/edit/editTestPlan.html'"></ng-include>
 <ng-include src="'views/edit/editTestPlanData.html'"></ng-include>
 <ng-include src="'views/edit/editEvent.html'"></ng-include>
-<ng-include src="'views/edit/editTestCaseGroup.html'"></ng-include>
-<ng-include src="'views/edit/editTestCase.html'"></ng-include>
-<ng-include src="'views/edit/editTestStep.html'"></ng-include>
 <ng-include src="'views/edit/editForecast.html'"></ng-include>
+<ng-include src="'views/edit/editPatient.html'"></ng-include>
 <div class="row" ng-show="!selectedTestPlan1">
 	<div class="col-md-12">
 		<p>No Test Case Selected.</p>
@@ -60,8 +58,98 @@ body {
 			<br />
 			<div class="panel panel-primary" ng-show="aTCisSelected()" style="margin-top: 10px;">
 				<div class="panel-heading panel-heading-collapsable"
+					 style="background-color: #293856">
+					<strong style="text-align: center">Assessment Date</strong>
+				</div>
+				<div class="panel-body">
+					<div class="toc-container">
+						<table class="table table-condensed table-bordered table-hover">
+							<tbody>
+								<tr>
+									<td>
+										<div ng-show="selectedTC.dateType === 'FIXED'"  ng-class="{'invalid-date' : !selectedTC.evalDate || !selectedTC.evalDate._dateObj, 'valid-date' : selectedTC.evalDate && selectedTC.evalDate._dateObj}" style="padding: 10px; border: 1px solid #e1e1e1;" layout="row" layout-align="center center">
+											<form name="fform">
+												<md-input-container>
+													<md-datepicker
+															ng-model="selectedTC.evalDate._dateObj"
+															md-placeholder="Enter date"
+															ng-change="dateChangeX(selectedTC.evalDate)" required>
+													</md-datepicker>
+												</md-input-container>
+											</form>
+											<div ng-show="selectedTC.evalDate.date" style="font-size: 15px; color: #0740C7; margin-left : 20px;">{{selectedTC.evalDate.date | date : 'fullDate'}}</div>
+										</div>
+										<div ng-show="selectedTC.dateType === 'RELATIVE'" style="text-align: center; padding: 10px;">
+											<strong>Relative Dates</strong>
+										</div>
+									</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+				</div>
+			</div>
+			<br />
+			<div class="panel panel-primary" ng-show="aTCisSelected()" style="margin-top: 10px;">
+				<div class="panel-heading panel-heading-collapsable"
+					 style="background-color: #293856">
+					<strong style="text-align: center">Patient Information</strong>
+				</div>
+				<div class="panel-body">
+					<div class="toc-container">
+						<table class="table table-condensed table-bordered table-hover">
+							<tbody>
+								<tr ng-click="selectPatient()" style="cursor: pointer;" ng-class="{'sinfo' : patientSelected}">
+									<td>
+										<table style="width : 100%;">
+											<tr style="text-align: center;">
+												<td>
+													<strong>Gender</strong>
+												</td>
+												<td>
+													{{selectedTC.patient.gender === 'F' ? 'Female' : (selectedTC.patient.gender === 'M' ? 'Male' : '') }}
+												</td>
+											</tr>
+											<tr style="text-align: center;">
+												<td>
+													<strong>Date Of Birth</strong>
+												</td>
+												<td style="text-align: center;">
+													<div layout="row" layout-align="center center">
+														<span ng-if="selectedTC.patient.dob.type === 'fixed'">{{selectedTC.patient.dob.date | date:'MM/dd/yyyy'}}</span>
+														<table ng-if="selectedTC.patient.dob.type === 'relative'">
+															<tr ng-repeat="rule in selectedTC.patient.dob.rules track by $index">
+																<td><span ng-if="$index !== 0"><strong>BUT NOT BEFORE</strong></span></td>
+																<td>{{rule.year}} <strong>Years</strong></td>
+																<td>{{rule.month}} <strong>Months</strong></td>
+																<td>{{rule.day}} <strong>Days</strong></td>
+																<td><strong>{{rule.position}}</strong></td>
+																<td>
+																	<div ng-if="rule.relativeTo.reference === 'static'">
+																		{{rule.relativeTo.id === 'DOB' ? 'Birth' : rule.relativeTo.id === 'EVALDATE' ? 'Assessment Date' : '#'}}
+																	</div>
+																	<div ng-if="rule.relativeTo.reference === 'dynamic'">
+																		Vaccination ID # {{rule.relativeTo.id}}
+																	</div>
+																</td>
+															</tr>
+														</table>
+													</div>
+												</td>
+											</tr>
+										</table>
+									</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+				</div>
+			</div>
+			<br />
+			<div class="panel panel-primary" ng-show="aTCisSelected()" style="margin-top: 10px;">
+				<div class="panel-heading panel-heading-collapsable"
 					style="background-color: #293856;">
-					<strong style="text-align: center;">Events</strong>
+					<strong style="text-align: center;">Vaccination History and Expected Evaluations</strong>
 					<button title="Add Event" type="button"
 						class="btn btn-xs btn-info pull-right"
 						ng-click="addEvent(); tcChanged()"

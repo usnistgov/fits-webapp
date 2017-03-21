@@ -407,6 +407,7 @@ angular.module('tcl').factory('TestObjectSynchronize', function ($q, $http,TestO
             $http.post('api/testplan/partial/save', _tp).then(
 				function(response){
                     var newTP = response.data;
+
                     deferred.resolve({
                         status : true,
 						tp : newTP,

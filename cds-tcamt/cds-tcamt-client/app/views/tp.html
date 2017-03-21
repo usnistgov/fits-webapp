@@ -18,7 +18,7 @@
            		<li style="cursor: pointer;" ng-click="selectTP(selectedTP)" ng-if="aTPisSelected()" ng-class="{'activeBC' : aTPisSelected() && !aTCisSelected()}">
            			<span class="label label-sub-component label-icon" style="vertical-align:middle;">Test Plan</span> {{selectedTP.name}}
            		</li>
-  				<li style="cursor: pointer;" ng-click="selectTC(selectedTC)" ng-if="aTCisSelected()" ng-class="{'activeBC' : aTCisSelected() && !anEvisSelected() && !aFisSelected()}">
+  				<li style="cursor: pointer;" ng-click="selectTC(selectedTC)" ng-if="aTCisSelected()" ng-class="{'activeBC' : aTCisSelected() && !anEvisSelected() && !aFisSelected() && !aPisSelected()}">
   					<span class="label label-component label-icon" style="vertical-align:middle;">Test Case</span> {{selectedTC.name}}
   				</li>
   				<li style="cursor: pointer;" ng-click="selectEvent(selectedEvent)" ng-if="anEvisSelected()" class="activeBC">
@@ -28,6 +28,9 @@
   				<li style="cursor: pointer;" ng-click="selectForecast(selectedForecast)" ng-if="aFisSelected()" class="activeBC">
   					<span class="label label-segment label-icon" style="vertical-align:middle;">Forecast</span> {{selectedForecast.target.name}}
   				</li>
+                <li style="cursor: pointer;" ng-click="selectPatient()" ng-if="aPisSelected()" class="activeBC">
+                    Patient
+                </li>
 			</ol>
 			<div ng-show="control.error.isSet">
                 <div uib-alert class="alert-danger" close="dismissError()" >
@@ -74,7 +77,7 @@
                         <li><a class="point" ng-click="exportNIST()">NIST Format</a></li>
                     </ul>
                 </div>
-                <button title="Save Changes" type="button" class="btn btn-sm btn-success" ng-click="saveAllChangedTestPlans(selectedTC,selectedTP)" >
+                <button title="Save Changes" type="button" class="btn btn-sm btn-success" ng-show="aTPisSelected()" ng-click="saveAllChangedTestPlans(selectedTC,selectedTP)" >
                     <span><i class="fa fa-floppy-o fa-fw"></i> Save</span>
                 </button>
             </div>

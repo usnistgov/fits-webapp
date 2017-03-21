@@ -93,20 +93,19 @@ angular.module('tcl').directive('report', function() {
     restrict: 'E',
     scope: {
       report: "=",
-      general: "=",
       vxm: "="
     },
     controller: function($scope,$filter) {
-      $scope.correctness = function(f, p, u, w) {
-        var total = f + p + w;
-        var correct = p;
-        return total === 0 ? 100 : $filter('number')(correct / total,2) * 100;
-      };
-      $scope.completion = function(f, p, u, w) {
-        var total = f + p + w + u;
-        var found = f + p + w;
-        return total === 0 ? 100 : $filter('number')(found / total,2) * 100;
-      };
+        $scope.correctness = function (f, p, u, w) {
+            var total = f + p;
+            var correct = p;
+            return total === 0 ? 100 : $filter('number')(correct / total, 2) * 100;
+        };
+        $scope.completion = function (f, p, u, w) {
+            var total = f + p + w + u;
+            var found = f + p + w;
+            return total === 0 ? 100 : $filter('number')(found / total, 2) * 100;
+        };
     }
   };
 });

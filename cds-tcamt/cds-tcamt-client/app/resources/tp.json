@@ -74,6 +74,7 @@
               },
               "type": "VACCINATION",
               "doseNumber": 1,
+              "position": 0,
               "administred": {
                 "discriminator": "generic",
                 "id": "107",
@@ -125,6 +126,7 @@
               },
               "type": "VACCINATION",
               "doseNumber": 2,
+              "position": 1,
               "administred": {
                 "discriminator": "generic",
                 "id": "107",

@@ -1,8 +1,0 @@
-{
-	{
-		'id' : 1,
-		'name' : 'My Config'
-		'endPoint' : 'http://localhost:8080/tp',
-		'connector' : 'FHIR'
-	}
-}

@@ -159,6 +159,7 @@ angular
 						tpList : true,
 						tpDetails : false
 					};
+                    $scope.patientSelected = false;
 					$scope.message = "";
 					$scope.loadSpin = false;
 					$rootScope.usageViewFilter = 'All';
@@ -182,7 +183,10 @@ angular
                     $scope.dateChange = function(obj,key){
         				obj[key] = obj["_"+key].getTime();
         			};
-        			
+
+                    $scope.dateChangeX = function(dateObj){
+                        dateObj.date = dateObj._dateObj.getTime();
+                    };
 					// ------------------------------------------------------------------------------------------
 					// CDSI TCAMT
 					$scope.importing = false;
@@ -240,10 +244,27 @@ angular
 						return "";
 					};
 
+					$scope.unGrouped = _.memoize(function(items) {
+                        if (!items || !items.length) { return; }
+                        return items.filter(function (item) {
+                            return !(item && item.group && item.group !== "");
+                        });
+
+                    }, function(items){
+                        if (!items || !items.length) { return "x"; }
+                        return angular.toJson(items);
+                        // return items.reduce(function(acc,item){
+                        //     return acc+item.id+item.group+'-';
+                        // });
+                    });
+
 					$scope.groupBy = _.memoize(function(items, field) {
                         if (!items || !items.length) { return; }
+                        var list = items.filter(function (item) {
+							return item && item.group && item.group !== "";
+                        });
                         var getter = $parse(field);
-                        return _.groupBy(items, function(item) {
+                        return _.groupBy(list, function(item) {
                             var g = getter(item);
                             return g ? g !== '' ? g : 'Ungrouped' : 'Ungrouped';
                         });
@@ -413,6 +434,7 @@ angular
 							// Selection
 							$scope.selectedEvent = e;
 							$scope.selectedForecast = null;
+                            $scope.patientSelected = false;
 							$scope.selectedType = "evt";
 
 							// View
@@ -432,6 +454,7 @@ angular
 							$scope.selectedForecast = f;
 							$scope.selectedEvent = null;
 							$scope.selectedType = "fc";
+                            $scope.patientSelected = false;
 							// View
 							$scope.subview = "EditForecastData.html";
 							waitingDialog.hide();
@@ -449,9 +472,8 @@ angular
 							$scope.selectedEvent = null;
 							$scope.selectedForecast = null;
 							$scope.selectedTC = null;
-							$scope.selectedTG = null;
 							$scope.tpTree = [];
-
+                            $scope.patientSelected = false;
                             $scope.grouping = true;
 							$scope.selectedTP = tp;
 							$scope.selectedType = "tp";
@@ -521,6 +543,7 @@ angular
                                                     console.log("Discarding");
                                                     $scope.selectedTP.testCases.splice(i,1,$scope.tcBackups[id]);
                                                     $scope.groupBy.cache = new _.memoize.Cache;
+                                                    $scope.unGrouped.cache = new _.memoize.Cache;
                                                 }
                                             }
                                         }, function () {
@@ -549,15 +572,28 @@ angular
 							$scope.selectedEvent = null;
 							$scope.selectedForecast = null;
 							$scope.selectedTC = tc;
-                            $scope.selectedTCB = TestObjectUtil.clone(tc);
-							$scope.selectedTG = null;
 							$scope.selectedType = "tc";
-
+							$scope.patientSelected = false;
 							// View
 							$scope.subview = "EditTestPlanMetadata.html";
 							waitingDialog.hide();
 						}, 0);
 					};
+
+                    $scope.selectPatient = function() {
+                        waitingDialog.show('Opening Patient Information', {
+                            dialogSize : 'xs',
+                            progressType : 'info'
+                        });
+                        $timeout(function() {
+                            // View
+                            $scope.selectedEvent = null;
+                            $scope.selectedForecast = null;
+                            $scope.patientSelected = true;
+                            $scope.subview = "EditPatientInformation.html";
+                            waitingDialog.hide();
+                        }, 0);
+                    };
 
 					$scope.evalStatusChange = function(evaluation){
 						if(evaluation.status !== 'INVALID'){
@@ -616,6 +652,10 @@ angular
 						return $scope.selectedForecast
 								&& $scope.selectedForecast !== {};
 					};
+
+                    $scope.aPisSelected = function() {
+                        return $scope.patientSelected;
+                    };
 
 					$scope.addEvent = function() {
 						var event = TestObjectFactory.createEvent($scope.selectedTC.events.length,$scope.selectedTC.dateType);
@@ -697,7 +737,9 @@ angular
 								$scope.selectedTC.forecast.splice(modelValue.$index, 1);
 								$scope.selectTC($scope.selectedTC);
 								$scope.groupBy.cache = new _.memoize.Cache;
-							} ] ];
+								$scope.unGrouped.cache = new _.memoize.Cache;
+
+                              } ] ];
 
 					$scope.tpCM = [
 					        [ 'Add Test Case',
@@ -707,7 +749,9 @@ angular
 //					        	$scope.selectedTPg.testCases.push(tc);
 					        	$scope.selectTC(tc);
 					        	$scope.groupBy.cache = new _.memoize.Cache;
-					        } ],
+					        	$scope.unGrouped.cache = new _.memoize.Cache;
+
+                              } ],
 					        [ 'Import Test Case',
 					          function(modelValue) {
 					        	$scope.selectTP($scope.selectedTP);
@@ -737,13 +781,16 @@ angular
 					        		 $scope.selectedTP.testCases.splice(index, 1);
 					        		 $scope.selectTP($scope.selectedTP);
                                      $scope.groupBy.cache = new _.memoize.Cache;
-					        	 }
+                                     $scope.unGrouped.cache = new _.memoize.Cache;
+                                 }
 					        	 else {
 					        		 $http.post('api/testcase/'+ tc.id +'/delete')
 					        		 .then(function(r) {
 					        			 $scope.selectedTP.testCases.splice(index,1);
 					        			 $scope.selectTP($scope.selectedTP);
 					        			 $scope.groupBy.cache = new _.memoize.Cache;
+					        			 $scope.unGrouped.cache = new _.memoize.Cache;
+
 					        			 Notification
 					        			 .success({
 					        				 message : "Test Case Deleted",
@@ -1086,6 +1133,8 @@ angular
 						if (!stc && stp) {
                             TestObjectSynchronize.syncTP(stp).then(
                                 function (result) {
+                                	delete result.tp.testCases;
+                                    TestObjectUtil.sanitizeDates(result.tp);
                                     result.tp.testCases = stp.testCases;
                                     angular.copy(result.tp,stp);
                                     Notification.success({
@@ -1094,6 +1143,8 @@ angular
                                     });
             						$scope.loading = false;
             						$scope.groupBy.cache = new _.memoize.Cache;
+                                    $scope.unGrouped.cache = new _.memoize.Cache;
+
                                 },
                                 function (result) {
                                     if(result.response && result.response.hasOwnProperty("errors")){
@@ -1125,7 +1176,8 @@ angular
 									stc = result.tc;
                                     TestObjectUtil.updateHash(result.tc);
                                     $scope.groupBy.cache = new _.memoize.Cache;
-									Notification.success({
+                                    $scope.unGrouped.cache = new _.memoize.Cache;
+                                    Notification.success({
 										message : result.message,
 										delay : 1000
 									});
