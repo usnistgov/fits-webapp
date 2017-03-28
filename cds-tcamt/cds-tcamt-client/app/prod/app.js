@@ -303,12 +303,12 @@ app.config(function ($routeProvider, RestangularProvider, $httpProvider, Keepali
 });
 
 
-app.run(function ($rootScope, $location, Restangular, $modal, $filter, base64, userInfoService, $http, AppInfo, StorageService, $templateCache, $window, notifications) {
+app.run(function ($rootScope, $location, $anchorScroll, Restangular, $modal, $filter, base64, userInfoService, $http, AppInfo, StorageService, $templateCache, $window, notifications) {
     $rootScope.appInfo = {};
     //Check if the login dialog is already displayed.
     $rootScope.loginDialogShown = false;
     $rootScope.subActivePath = null;
-
+    $anchorScroll.yOffset = 9999999;
     // load app info
 //    AppInfo.get().then(function (appInfo) {
 //        $rootScope.appInfo = appInfo;

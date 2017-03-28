@@ -118,21 +118,42 @@
 </script>
 
     <script type="text/ng-template" id="ExitTC.html">
-        <div class="modal-body">
-            <p>Your TestCase has Unsaved Changes</p>
+        <div class="modal-body" style="text-align: center;">
+            <strong><p>Your Test Case has Unsaved Changes</p></strong>
         </div>
+        <div class="modal-footer" layout="column" layout-align="center start">
+            <md-checkbox ng-model="remember" aria-label="Remember my choice">
+                Remember my choice (temporary)
+            </md-checkbox>
+            <div layout="row" layout-align="center center">
+                <button class="btn btn-success btn-sm" ng-disabled="loading" ng-click="saveChanges()">
+                    <span><i class="fa fa-floppy-o fa-fw"></i> Save Now</span>
+                </button>
+                <button class="btn btn-danger btn-sm" ng-show="!canDiscard" ng-disabled="loading" ng-click="discardChanges()">
+                    <span><i class="fa fa-trash-o fa-fw">&nbsp; </i>Discard Changes</span>
+                </button>
+                <button class="btn btn-info btn-sm" ng-disabled="loading" ng-click="saveLater()">
+                    <span>Save Later</span>
+                </button>
+            </div>
+        </div>
+    </script>
+    <script type="text/ng-template" id="GrpName.html">
+        <div class="modal-body">
+            <div class="col-md-12">
+                <md-input-container style="width: 100%;">
+                    <label>Test Case Group Name</label>
+                    <input ng-model="name" type="text" />
+                </md-input-container>
+            </div>
         </div>
         <div class="modal-footer">
-            <button class="btn btn-success btn-sm" ng-disabled="loading" ng-click="saveChanges()">
-                <span><i class="fa fa-floppy-o fa-fw"></i> Save Now</span>
+            <button class="btn btn-success btn-sm" ng-click="ok()">
+                <span>Rename</span>
             </button>
-            <button class="btn btn-danger btn-sm" ng-disabled="loading" ng-click="discardChanges()">
-                <span><i class="fa fa-trash-o fa-fw">&nbsp; </i>Discard Changes</span>
+            <button class="btn btn-danger btn-sm" ng-click="dismiss()">
+                <span>Cancel</span>
             </button>
-            <button class="btn btn-default btn-sm" ng-disabled="loading" ng-click="dismiss()">
-                <span><i class="fa fa-sync fa-fw">&nbsp; </i>Save Later</span>
-            </button>
-        </div>
         </div>
     </script>
     <script type="text/ng-template" id="DTChange.html">

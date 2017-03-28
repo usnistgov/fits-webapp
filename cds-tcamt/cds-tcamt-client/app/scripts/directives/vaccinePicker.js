@@ -149,22 +149,30 @@ angular.module('tcl').directive('forecastReport', function() {
       reportList: "=data"
     },
     controller: function($scope, $filter) {
-      $scope.actual = function(exp, node) {
+      $scope.assessment = function(node) {
         if (node.status === 'P') {
           return "PASSED";
-        } else if (node.status === 'F' || node.status === 'W') {
-          return $filter('date')(node.value, "MM/dd/yyyy") + " ( " + $scope.diff(exp, node.value) + " )";
+        } else if (node.status === 'F') {
+          return "FAILED";
+        } else if (node.status === 'W') {
+          return "WARNING";
         } else if (node.status === 'U') {
           return "NO MATCH";
         }
         return "ERROR";
       };
 
+      $scope.printDiff = function (exp,node) {
+          return $filter('date')(node.value, "MM/dd/yyyy") + $scope.diff(exp, node.value);
+      };
+
       $scope.diff = function(expected, actual) {
         var days = (expected - actual) / 86400000;
         var ds = Math.round(days);
-        
-        return (ds > 0 ? "minus " : "plus ") +  Math.abs(Math.round(days)) + " days";
+        if(ds !== 0){
+            return " ( "+(ds > 0 ? "minus " : "plus ") +  Math.abs(Math.round(days)) + " days )";
+        }
+        return "";
       };
     }
   };

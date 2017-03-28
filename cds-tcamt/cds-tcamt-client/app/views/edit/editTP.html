@@ -23,79 +23,49 @@ body {
 		<p>No Test Case Selected.</p>
 	</div>
 </div>
-<div ng-show="selectedTestPlan1" class="fill">
+<div ng-show="selectedTP" class="fill">
 	<div class="row">
 		<div ng-show="!hideLoe" class="col-md-4">
 			<div class="panel panel-primary" ng-style="!tpview ? { 'margin-bottom' : '40px' } : {}">
-				<div class="panel-heading col-md-12"  layout="row" layout-align="center center" style="background-color: #293856;">
-					<div flex="10" style="padding: 0;">
+				<div class="panel-heading col-md-12"  layout="row" layout-align="start center" style="background-color: #293856;">
+					<div flex="15" style="padding: 0;">
 						<button class="btn btn-xs" ng-style="!tpview ? { 'background-color' : '#44bf6b' } : {}" ng-click="tpview = !tpview" style="margin: 0; margin-right: 10px;">
 							<i ng-show="!tpview" class="fa fa-eye" aria-hidden="true" style="font-size : 1.8em; color: #2d5634;"></i>
 							<i ng-show="tpview" class="fa fa-eye-slash" aria-hidden="true" style="font-size : 1.8em; color: rgb(203, 167, 167);"></i>
 						</button>
 					</div>
-					<div ng-show="changes(selectedTP)" title="Unsaved Changes" layout="row">
+					<div flex="5" ng-show="changes(testCases)" title="Unsaved Changes" layout="row">
 						<i class="fa fa-exclamation-triangle unsaved"  aria-hidden="true" style="margin-right: 5px;"></i>
 						<i class="fa fa-refresh unsaved" aria-hidden="true"></i>
 					</div>
-
 					<div flex="40" style="text-align: center;">
 						<strong> Test Browser </strong>
 					</div>
-					<div flex="50" style="padding: 0;">
+					<div flex="{{changes(testCases) ? 40 : 45 }}" style="padding: 0;">
 						<div class="input-group" style="width : 100%;">
 							<span class="input-group-addon"  style="background-color: rgb(240, 240, 240);" id="basic-addon1"><i class="fa fa-search" aria-hidden="true"></i></span>
 							<input type="text" class="form-control" ng-model="tcSearch" ng-model-options="{ debounce: 500 }" style="padding-left: 10px; background-color: white; width : 100%;" placeholder="Name, ID, Group"/>
 						</div>
 					</div>
 				</div>
-				<div class="panel-body panel-resizable" style="height: 400px;" ng-show="tpview">
+				<div class="panel-body panel-resizable" style="height: 260px;" ng-show="tpview">
 					<div style="white-space:nowrap;">
 						<ng-include src="'views/testplanTree.html'" />
 					</div>
 				</div>
 			</div>
 			<br />
-			<div class="panel panel-primary" ng-show="aTCisSelected()" style="margin-top: 10px;">
-				<div class="panel-heading panel-heading-collapsable"
-					 style="background-color: #293856">
-					<strong style="text-align: center">Assessment Date</strong>
-				</div>
-				<div class="panel-body">
-					<div class="toc-container">
-						<table class="table table-condensed table-bordered table-hover">
-							<tbody>
-								<tr>
-									<td>
-										<div ng-show="selectedTC.dateType === 'FIXED'"  ng-class="{'invalid-date' : !selectedTC.evalDate || !selectedTC.evalDate._dateObj, 'valid-date' : selectedTC.evalDate && selectedTC.evalDate._dateObj}" style="padding: 10px; border: 1px solid #e1e1e1;" layout="row" layout-align="center center">
-											<form name="fform">
-												<md-input-container>
-													<md-datepicker
-															ng-model="selectedTC.evalDate._dateObj"
-															md-placeholder="Enter date"
-															ng-change="dateChangeX(selectedTC.evalDate)" required>
-													</md-datepicker>
-												</md-input-container>
-											</form>
-											<div ng-show="selectedTC.evalDate.date" style="font-size: 15px; color: #0740C7; margin-left : 20px;">{{selectedTC.evalDate.date | date : 'fullDate'}}</div>
-										</div>
-										<div ng-show="selectedTC.dateType === 'RELATIVE'" style="text-align: center; padding: 10px;">
-											<strong>Relative Dates</strong>
-										</div>
-									</td>
-								</tr>
-							</tbody>
-						</table>
+			<div class="panel panel-primary" ng-show="aTCisSelected()" style="margin-top: 10px;" ng-init="ptview = true;">
+				<div class="panel-heading panel-heading-collapsable" style="background-color: #293856" layout="row" layout-align="start center">
+					<button flex="15" class="btn btn-xs" ng-style="!ptview ? { 'background-color' : '#44bf6b' } : {}" ng-click="ptview = !ptview" style="margin: 0; margin-right: 10px;">
+						<i ng-show="!ptview" class="fa fa-eye" aria-hidden="true" style="font-size : 1.8em; color: #2d5634;"></i>
+						<i ng-show="ptview" class="fa fa-eye-slash" aria-hidden="true" style="font-size : 1.8em; color: rgb(203, 167, 167);"></i>
+					</button>
+					<div flex="85" style="text-align: center">
+						<strong>Assessment Date and Patient Information</strong>
 					</div>
 				</div>
-			</div>
-			<br />
-			<div class="panel panel-primary" ng-show="aTCisSelected()" style="margin-top: 10px;">
-				<div class="panel-heading panel-heading-collapsable"
-					 style="background-color: #293856">
-					<strong style="text-align: center">Patient Information</strong>
-				</div>
-				<div class="panel-body">
+				<div class="panel-body" ng-show="ptview">
 					<div class="toc-container">
 						<table class="table table-condensed table-bordered table-hover">
 							<tbody>
@@ -104,37 +74,47 @@ body {
 										<table style="width : 100%;">
 											<tr style="text-align: center;">
 												<td>
-													<strong>Gender</strong>
+													<strong>Assessment Date</strong>
 												</td>
-												<td>
-													{{selectedTC.patient.gender === 'F' ? 'Female' : (selectedTC.patient.gender === 'M' ? 'Male' : '') }}
+												<td style="text-align: center;">
+													<div layout="row" layout-align="center center">
+														<span ng-if="selectedTC.dateType === 'RELATIVE'">Today (Relative)</span>
+														<span ng-if="selectedTC.dateType === 'FIXED'">{{selectedTC.evalDate.date | date:'MM/dd/yyyy'}}</span>
+													</div>
 												</td>
 											</tr>
-											<tr style="text-align: center;">
+											<tr style="text-align: center;" ng-if="selectedTC.patient.dob.type === 'fixed'">
 												<td>
 													<strong>Date Of Birth</strong>
 												</td>
 												<td style="text-align: center;">
 													<div layout="row" layout-align="center center">
-														<span ng-if="selectedTC.patient.dob.type === 'fixed'">{{selectedTC.patient.dob.date | date:'MM/dd/yyyy'}}</span>
+														<span>{{selectedTC.patient.dob.date | date:'MM/dd/yyyy'}}</span>
+													</div>
+												</td>
+											</tr>
+											<tr style="text-align: center;" ng-if="selectedTC.patient.dob.type === 'relative'">
+												<td>
+													<strong>Age</strong>
+												</td>
+												<td style="text-align: center;">
+													<div layout="row" layout-align="center center">
 														<table ng-if="selectedTC.patient.dob.type === 'relative'">
 															<tr ng-repeat="rule in selectedTC.patient.dob.rules track by $index">
-																<td><span ng-if="$index !== 0"><strong>BUT NOT BEFORE</strong></span></td>
-																<td>{{rule.year}} <strong>Years</strong></td>
-																<td>{{rule.month}} <strong>Months</strong></td>
-																<td>{{rule.day}} <strong>Days</strong></td>
-																<td><strong>{{rule.position}}</strong></td>
-																<td>
-																	<div ng-if="rule.relativeTo.reference === 'static'">
-																		{{rule.relativeTo.id === 'DOB' ? 'Birth' : rule.relativeTo.id === 'EVALDATE' ? 'Assessment Date' : '#'}}
-																	</div>
-																	<div ng-if="rule.relativeTo.reference === 'dynamic'">
-																		Vaccination ID # {{rule.relativeTo.id}}
-																	</div>
-																</td>
+																<td><span ng-if="rule.year && rule.years !== 0">{{rule.year}} <strong ng-show="rule.year !== 1 && rule.year !== -1">Years</strong><strong ng-show="rule.year === 1 || rule.year === -1">Year</strong></span></td>
+																<td><span ng-if="rule.month && rule.month !== 0">{{rule.month}} <strong ng-show="rule.month !== 1 && rule.month !== -1">Months</strong><strong ng-show="rule.month === 1 || rule.month === -1">Month</strong></span></td>
+																<td><span ng-if="rule.day && rule.day !== 0">{{rule.day}} <strong ng-show="rule.day !== 1 && rule.day !== -1">Days</strong><strong ng-show="rule.day === 1 || rule.day === -1">Day</strong></span></td>
 															</tr>
 														</table>
 													</div>
+												</td>
+											</tr>
+											<tr style="text-align: center;">
+												<td>
+													<strong>Gender</strong>
+												</td>
+												<td>
+													{{selectedTC.patient.gender === 'F' ? 'Female' : (selectedTC.patient.gender === 'M' ? 'Male' : '') }}
 												</td>
 											</tr>
 										</table>
@@ -146,30 +126,40 @@ body {
 				</div>
 			</div>
 			<br />
-			<div class="panel panel-primary" ng-show="aTCisSelected()" style="margin-top: 10px;">
-				<div class="panel-heading panel-heading-collapsable"
-					style="background-color: #293856;">
-					<strong style="text-align: center;">Vaccination History and Expected Evaluations</strong>
-					<button title="Add Event" type="button"
+			<div class="panel panel-primary" ng-show="aTCisSelected()" style="margin-top: 10px;" ng-init="vxview = true;">
+				<div class="panel-heading panel-heading-collapsable" style="background-color: #293856;" layout="row" layout-align="start center">
+					<button flex="15" class="btn btn-xs" ng-style="!vxview ? { 'background-color' : '#44bf6b' } : {}" ng-click="vxview = !vxview" style="margin: 0; margin-right: 10px;">
+						<i ng-show="!vxview" class="fa fa-eye" aria-hidden="true" style="font-size : 1.8em; color: #2d5634;"></i>
+						<i ng-show="vxview" class="fa fa-eye-slash" aria-hidden="true" style="font-size : 1.8em; color: rgb(203, 167, 167);"></i>
+					</button>
+					<div flex="70" style="text-align: center;">
+						<strong>Vaccination History and Expected Evaluations</strong>
+					</div>
+					<button flex="15" title="Add Event" type="button"
 						class="btn btn-xs btn-info pull-right"
-						ng-click="addEvent(); tcChanged()"
+						ng-click="addEvent();"
 						ng-show="aTCisSelected()"
 						style="margin: 0px;">
 						<span><i class="fa fa-plus fa-fw"></i></span>
 					</button>
 				</div>
-				<div class="panel-body" ng-show="selectedTC.events.length > 0">
+				<div class="panel-body" ng-show="selectedTC.events.length > 0 && vxview">
 					<div class="toc-container">
 						<ng-include src="'views/toc.html'" />
 					</div>
 				</div>
 			</div>
 			<br />
-			<div class="panel panel-primary" ng-show="aTCisSelected()" style="margin-bottom: 100px;">
-				<div class="panel-heading panel-heading-collapsable"
-					style="background-color: #293856">
-					<strong style="text-align: center">Expected Forecasts</strong>
-					<button title="Add Forecast" type="button"
+			<div class="panel panel-primary" ng-show="aTCisSelected()" style="margin-bottom: 100px;" ng-init="fcview = true;">
+				<div class="panel-heading panel-heading-collapsable" style="background-color: #293856" layout="row" layout-align="start center">
+					<button flex="15" class="btn btn-xs" ng-style="!fcview ? { 'background-color' : '#44bf6b' } : {}" ng-click="fcview = !fcview" style="margin: 0; margin-right: 10px;">
+						<i ng-show="!fcview" class="fa fa-eye" aria-hidden="true" style="font-size : 1.8em; color: #2d5634;"></i>
+						<i ng-show="fcview" class="fa fa-eye-slash" aria-hidden="true" style="font-size : 1.8em; color: rgb(203, 167, 167);"></i>
+					</button>
+					<div flex="70" style="text-align: center;">
+						<strong>Expected Forecasts</strong>
+					</div>
+					<button flex="15" title="Add Forecast" type="button"
 						class="btn btn-xs btn-info pull-right"
 						style="margin: 0px;"
 						ng-show="aTCisSelected()"
@@ -177,7 +167,7 @@ body {
 						<span><i class="fa fa-plus fa-fw"></i></span>
 					</button>
 				</div>
-				<div class="panel-body" ng-show="selectedTC.forecast.length > 0">
+				<div class="panel-body" ng-show="selectedTC.forecast.length > 0 && fcview">
 					<div class="toc-container">
 					<ng-include src="'views/forecasts.html'" />
 					</div>
@@ -191,6 +181,12 @@ body {
 					<strong>Dashboard</strong>
 					<button  ng-show="aTCisSelected()" ng-click="summary()" class="btn btn-xs btn-info pull-right" style="margin: 0px;">
 						Summary
+					</button>
+					<button style="margin: 0px; margin-right: 10px;" ng-show="aTCisSelected() && selectedTC._changed && !isLocal(selectedTC)" class="btn btn-xs btn-danger pull-right" ng-click="discardChanges(selectedTC)">
+						<span><i class="fa fa-trash-o fa-fw">&nbsp; </i>Discard Changes</span>
+					</button>
+					<button style="margin: 0px; margin-right: 10px;" ng-show="aTCisSelected()" class="btn btn-xs btn-info pull-right" ng-click="scrollTo('tc-'+selectedTC.id)">
+						<span> Locate Test Case </span>
 					</button>
 				</div>
 				<div class="panel-body panel-resizable"

@@ -1,0 +1,95 @@
+<style id="antiClickjack">
+    body {
+        display: none !important;
+    }
+
+    .handle-custom {
+        background-color: red;
+    }
+</style>
+<script type="text/javascript">
+    if (self === top) {
+        var antiClickjack = document.getElementById("antiClickjack");
+        antiClickjack.parentNode.removeChild(antiClickjack);
+    } else {
+        top.location = self.location;
+    }
+</script>
+<md-content class="md-padding" layout="row" layout-align="space-around center">
+    <table class="table table-condensed table-bordered">
+        <thead>
+        <tr>
+            <th style="text-align: center;">Criterion</th>
+            <th style="text-align: center;">Passed</th>
+            <th style="text-align: center;">Failed</th>
+            <th style="text-align: center;">Warning</th>
+            <th style="text-align: center;">Not Found</th>
+            <th style="text-align: center;">Total</th>
+            <th style="text-align: center;">Completion</th>
+            <th style="text-align: center;">Correctness</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td style="text-align: center;">Evaluations</td>
+            <td class="success" style="text-align: center;">{{aggregate.counts.EvaluationStatus.p}}</td>
+            <td class="danger" style="text-align: center;">{{aggregate.counts.EvaluationStatus.f}}</td>
+            <td class="warning" style="text-align: center;">{{aggregate.counts.EvaluationStatus.w}}</td>
+            <td class="unmatched" style="text-align: center;">{{aggregate.counts.EvaluationStatus.u}}</td>
+            <td style="text-align: center;">{{aggregate.counts.EvaluationStatus.f+aggregate.counts.EvaluationStatus.p+aggregate.counts.EvaluationStatus.u+aggregate.counts.EvaluationStatus.w}}</td>
+            <td style="text-align: center;">{{completion(aggregate.counts.EvaluationStatus.f,aggregate.counts.EvaluationStatus.p,aggregate.counts.EvaluationStatus.u,aggregate.counts.EvaluationStatus.w)}}%</td>
+            <td style="text-align: center;">{{correctness(aggregate.counts.EvaluationStatus.f,aggregate.counts.EvaluationStatus.p,aggregate.counts.EvaluationStatus.u,aggregate.counts.EvaluationStatus.w)}}%</td>
+        </tr>
+        <tr>
+            <td style="text-align: center;">Dose Number</td>
+            <td class="success" style="text-align: center;">{{aggregate.counts.DoseNumber.p}}</td>
+            <td class="danger" style="text-align: center;">{{aggregate.counts.DoseNumber.f}}</td>
+            <td class="warning" style="text-align: center;">{{aggregate.counts.DoseNumber.w}}</td>
+            <td class="unmatched" style="text-align: center;">{{aggregate.counts.DoseNumber.u}}</td>
+            <td style="text-align: center;">{{aggregate.counts.DoseNumber.f+aggregate.counts.DoseNumber.p+aggregate.counts.DoseNumber.u+aggregate.counts.DoseNumber.w}}</td>
+            <td style="text-align: center;">{{completion(aggregate.counts.DoseNumber.f,aggregate.counts.DoseNumber.p,aggregate.counts.DoseNumber.u,aggregate.counts.DoseNumber.w)}}%</td>
+            <td style="text-align: center;">{{correctness(aggregate.counts.DoseNumber.f,aggregate.counts.DoseNumber.p,aggregate.counts.DoseNumber.u,aggregate.counts.DoseNumber.w)}}%</td>
+        </tr>
+        <tr>
+            <td style="text-align: center;">Earliest Date</td>
+            <td class="success" style="text-align: center;">{{aggregate.counts.EarliestDate.p}}</td>
+            <td class="danger" style="text-align: center;">{{aggregate.counts.EarliestDate.f}}</td>
+            <td class="warning" style="text-align: center;">{{aggregate.counts.EarliestDate.w}}</td>
+            <td class="unmatched" style="text-align: center;">{{aggregate.counts.EarliestDate.u}}</td>
+            <td style="text-align: center;">{{aggregate.counts.EarliestDate.f+aggregate.counts.EarliestDate.p+aggregate.counts.EarliestDate.u+aggregate.counts.EarliestDate.w}}</td>
+            <td style="text-align: center;">{{completion(aggregate.counts.EarliestDate.f,aggregate.counts.EarliestDate.p,aggregate.counts.EarliestDate.u,aggregate.counts.EarliestDate.w)}}%</td>
+            <td style="text-align: center;">{{correctness(aggregate.counts.EarliestDate.f,aggregate.counts.EarliestDate.p,aggregate.counts.EarliestDate.u,aggregate.counts.EarliestDate.w)}}%</td>
+        </tr>
+        <tr>
+            <td style="text-align: center;">Recommended Date</td>
+            <td class="success" style="text-align: center;">{{aggregate.counts.RecommendedDate.p}}</td>
+            <td class="danger" style="text-align: center;">{{aggregate.counts.RecommendedDate.f}}</td>
+            <td class="warning" style="text-align: center;">{{aggregate.counts.RecommendedDate.w}}</td>
+            <td class="unmatched" style="text-align: center;">{{aggregate.counts.RecommendedDate.u}}</td>
+            <td style="text-align: center;">{{aggregate.counts.RecommendedDate.f+aggregate.counts.RecommendedDate.p+aggregate.counts.RecommendedDate.u+aggregate.counts.RecommendedDate.w}}</td>
+            <td style="text-align: center;">{{completion(aggregate.counts.RecommendedDate.f,aggregate.counts.RecommendedDate.p,aggregate.counts.RecommendedDate.u,aggregate.counts.RecommendedDate.w)}}%</td>
+            <td style="text-align: center;">{{correctness(aggregate.counts.RecommendedDate.f,aggregate.counts.RecommendedDate.p,aggregate.counts.RecommendedDate.u,aggregate.counts.RecommendedDate.w)}}%</td>
+        </tr>
+        <tr>
+            <td style="text-align: center;">Past Due Date</td>
+            <td class="success" style="text-align: center;">{{aggregate.counts.PastDueDate.p}}</td>
+            <td class="danger" style="text-align: center;">{{aggregate.counts.PastDueDate.f}}</td>
+            <td class="warning" style="text-align: center;">{{aggregate.counts.PastDueDate.w}}</td>
+            <td class="unmatched" style="text-align: center;">{{aggregate.counts.PastDueDate.u}}</td>
+            <td style="text-align: center;">{{aggregate.counts.PastDueDate.f+aggregate.counts.PastDueDate.p+aggregate.counts.PastDueDate.u+aggregate.counts.PastDueDate.w}}</td>
+            <td style="text-align: center;">{{completion(aggregate.counts.PastDueDate.f,aggregate.counts.PastDueDate.p,aggregate.counts.PastDueDate.u,aggregate.counts.PastDueDate.w)}}%</td>
+            <td style="text-align: center;">{{correctness(aggregate.counts.PastDueDate.f,aggregate.counts.PastDueDate.p,aggregate.counts.PastDueDate.u,aggregate.counts.PastDueDate.w)}}%</td>
+        </tr>
+        <tr>
+            <td style="text-align: center;">Latest Date</td>
+            <td class="success" style="text-align: center;">{{aggregate.counts.CompleteDate.p}}</td>
+            <td class="danger" style="text-align: center;">{{aggregate.counts.CompleteDate.f}}</td>
+            <td class="warning" style="text-align: center;">{{aggregate.counts.CompleteDate.w}}</td>
+            <td class="unmatched" style="text-align: center;">{{aggregate.counts.CompleteDate.u}}</td>
+            <td style="text-align: center;">{{aggregate.counts.CompleteDate.f+aggregate.counts.CompleteDate.p+aggregate.counts.CompleteDate.u+aggregate.counts.CompleteDate.w}}</td>
+            <td style="text-align: center;">{{completion(aggregate.counts.CompleteDate.f,aggregate.counts.CompleteDate.p,aggregate.counts.CompleteDate.u,aggregate.counts.CompleteDate.w)}}%</td>
+            <td style="text-align: center;">{{correctness(aggregate.counts.CompleteDate.f,aggregate.counts.CompleteDate.p,aggregate.counts.CompleteDate.u,aggregate.counts.CompleteDate.w)}}%</td>
+        </tr>
+        </tbody>
+    </table>
+</md-content>

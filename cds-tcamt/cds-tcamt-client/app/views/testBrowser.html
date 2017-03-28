@@ -16,31 +16,50 @@
     }
 </script>
 <div ui-tree="treeOptions">
-    <ol ui-tree-nodes="" ng-model="tps">
-        <li ng-repeat="tp in tps track by $index" ui-tree-node>
-            <div ng-click="selectTP(tp)" ui-tree-handle ng-class="{selected1 : isSelectedTPv()}"
-                 context-menu="tpCM" model="$index">
-                <div style="margin-left: 5px;">
+    <ol ui-tree-nodes="" dnd-list="tps"  dnd-drop="false" ng-model="tps">
+        <li data-nodrag ng-repeat="tp in tps track by $index" ui-tree-node
+            dnd-draggable="tp"
+            dnd-moved="onMoved(list)"
+            dnd-dragstart="dstart(true)"
+            dnd-dragend="dstart(false)"
+            dnd-effect-allowed="move"
+            collapsed="false">
+            <div ui-tree-handle ng-click="selectTP(tp)" ng-class="{selected1 : isSelectedTP(tp)}">
+                <div>
                     <i data-nodrag ng-click="toggle(this)" class="fa" ng-class="{'fa-caret-right': collapsed, 'fa-caret-down': !collapsed}"></i>
-                    <span data-nodrag> <span
-                            class="label label-sub-component label-icon">P</span> <span ng-class="{ 'changedS' : tp.changed }">{{tp.name}} <span style="font-style: italic; color: #e09443;">({{tp.testCases.length}} TC)</span></span>
-						<i ng-show="this.$modelValue===activeModel"
-                           class="fa fa-pencil fa-fw"></i>
-					</span>
+                    <span data-nodrag>
+	                                                <span class="label label-sub-component label-icon">P</span>
+	                                                {{tp.name}}
+	                                            </span>
                 </div>
             </div>
             <ol ui-tree-nodes="" ng-model="tp.testCases">
-                <li ng-repeat="tc in tp.testCases | testcase:tcSearch track by $index" ui-tree-node ng-hide="$parentNodeScope.collapsed">
-                    <div ng-click="selectTC(tc)" ui-tree-handle ng-class="{selected1 : isSelectedTC(tc)}"
-                         context-menu="tcCM" model="$index">
+                <li collapsed="group === 'Ungrouped' ? false : true" data-collapsed="{{group === 'Ungrouped' ? false : true}}" ng-repeat="(group, tcs) in groupBy((tp.testCases | testcase:tcSearch),'group') track by $index" ui-tree-node ng-hide="$parentNodeScope.collapsed">
+                    <div>
                         <div style="margin-left: 5px;">
-							<span data-nodrag> <span
-                                    class="label label-component label-icon">T</span> <span ng-class="{ 'changedS' : tc.changed }">{{tc.name}}</span>
-								<i ng-show="this.$modelValue===activeModel"
-                                   class="fa fa-pencil fa-fw"></i>
-							</span>
+                            <i data-nodrag ng-click="toggle(this)" class="fa" ng-class="{'fa-caret-right': collapsed, 'fa-caret-down': !collapsed}"></i>
+                            <span data-nodrag>
+															<span class="label label-group label-icon">G</span><strong>{{ group }}</strong> <span style="font-style: italic; color: #e09443;">({{tcs.length}} TC)</span>
+														</span>
                         </div>
                     </div>
+                    <ol dnd-list="tp.testCases" dnd-drop="false" ui-tree-nodes="" ng-model="tcs">
+                        <li data-nodrag ng-repeat="tc in tcs track by $index" ui-tree-node ng-hide="$parentNodeScope.collapsed"
+                            dnd-draggable="multipleSel ? selected : tc"
+                            dnd-moved="onMoved(list)"
+                            dnd-selected="select(tc)"
+                            dnd-dragstart="dstart(true)"
+                            dnd-dragend="dstart(false)"
+                            dnd-effect-allowed="move">
+
+                            <div ui-tree-handle ng-click="selectTC(tc)" ng-class="{selected1 : isSelectedTC(tc) && !multipleSel, cdraggable : find(selected,tc) && multipleSel, inqueue : inQueue(tc)}">
+			                                                <span data-nodrag>
+			                                                    <span class="label label-component label-icon">T</span>
+			                                                    {{ tc.uid ? '#'+tc.uid+"- " : ""}}{{tc.name}}
+			                                                </span>
+                            </div>
+                        </li>
+                    </ol>
                 </li>
             </ol>
         </li>

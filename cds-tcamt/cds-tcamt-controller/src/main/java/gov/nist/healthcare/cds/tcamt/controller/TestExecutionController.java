@@ -12,6 +12,7 @@ import gov.nist.healthcare.cds.domain.TestExecution;
 import gov.nist.healthcare.cds.domain.exception.UnresolvableDate;
 import gov.nist.healthcare.cds.domain.wrapper.AggregateReport;
 import gov.nist.healthcare.cds.domain.wrapper.Counts;
+import gov.nist.healthcare.cds.domain.wrapper.ExecutionConfig;
 import gov.nist.healthcare.cds.domain.wrapper.Report;
 import gov.nist.healthcare.cds.repositories.SoftwareConfigRepository;
 import gov.nist.healthcare.cds.repositories.TestCaseRepository;
@@ -57,14 +58,20 @@ public class TestExecutionController {
 		return softwareConfigRepository.save(sc);
 	}
 	
-	@RequestMapping(value = "/exec/start/{id}", method = RequestMethod.GET)
-	public boolean start(HttpSession session, @PathVariable String id,Principal user) {
-		SoftwareConfig config = softwareConfigRepository.findOne(id);
+	@RequestMapping(value = "/exec/start", method = RequestMethod.POST)
+	public boolean start(@RequestBody ExecutionConfig sc, HttpSession session, Principal user) {
+		SoftwareConfig config = softwareConfigRepository.findOne(sc.getSoftware());
 		if(config.getUser().equals(user.getName())){
 			TestExecution exec = new TestExecution();
 			exec.setSoftware(config);
-			exec.setExecutionDate(Calendar.getInstance().getTime());
+			if(sc.getDate() != null){
+				exec.setExecutionDate(sc.getDate());
+			}
+			else {
+				exec.setExecutionDate(Calendar.getInstance().getTime());
+			}		
 			session.setAttribute("exec", exec);
+			session.setAttribute("defaultConfig", config);
 			session.setAttribute("set", true);
 			return true;
 		}
@@ -72,6 +79,31 @@ public class TestExecutionController {
 			return false;
 		}
 	}
+	
+	@RequestMapping(value = "/exec/configs/delete/{id}", method = RequestMethod.POST)
+	public void defaultConfig(HttpSession session, @PathVariable String id, Principal user) {
+		SoftwareConfig config = softwareConfigRepository.findOne(id);
+		if(config != null && config.getUser().equals(user.getName())){
+			SoftwareConfig defaultC = (SoftwareConfig) session.getAttribute("defaultConfig");
+			if(defaultC != null && config.getId().equals(defaultC.getId())){
+				session.setAttribute("defaultConfig",null);
+			}
+			softwareConfigRepository.delete(id);
+		}
+	}
+	
+	@RequestMapping(value = "/exec/configs/default", method = RequestMethod.GET)
+	public String defaultConfig(HttpSession session, Principal user) {
+		SoftwareConfig config = (SoftwareConfig) session.getAttribute("defaultConfig");
+		if(config != null){
+			return config.getId();
+		}
+		else {
+			return "";
+		}
+	}
+	
+	
 	
 	@RequestMapping(value = "/exec/tc/{id}", method = RequestMethod.GET)
 	public Counts add(HttpSession session, @PathVariable String id,Principal user) throws UnresolvableDate {

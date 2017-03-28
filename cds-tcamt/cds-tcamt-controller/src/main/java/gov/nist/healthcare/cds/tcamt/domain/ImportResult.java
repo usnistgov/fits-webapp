@@ -1,6 +1,8 @@
 package gov.nist.healthcare.cds.tcamt.domain;
 
 import gov.nist.healthcare.cds.domain.TestCase;
+import gov.nist.healthcare.cds.domain.TestCaseGroup;
+import gov.nist.healthcare.cds.domain.TestPlan;
 import gov.nist.healthcare.cds.domain.xml.ErrorModel;
 
 import java.util.List;
@@ -11,10 +13,21 @@ public class ImportResult {
 	private List<String> messages;
 	private TestCase imported;
 	private List<TestCase> testCases;
+	private List<TestCaseGroup> testCaseGroups;
+	private TestPlan testPlan;
 	
 	public List<ErrorModel> getErrors() {
 		return errors;
 	}
+	
+	public TestPlan getTestPlan() {
+		return testPlan;
+	}
+
+	public void setTestPlan(TestPlan testPlan) {
+		this.testPlan = testPlan;
+	}
+
 	public void setErrors(List<ErrorModel> errors) {
 		this.errors = errors;
 	}
@@ -42,6 +55,13 @@ public class ImportResult {
 	public void setTestCases(List<TestCase> testCases) {
 		this.testCases = testCases;
 	}
+	public List<TestCaseGroup> getTestCaseGroups() {
+		return testCaseGroups;
+	}
+	public void setTestCaseGroups(List<TestCaseGroup> testCaseGroups) {
+		this.testCaseGroups = testCaseGroups;
+	}
+	
 	
 	
 	

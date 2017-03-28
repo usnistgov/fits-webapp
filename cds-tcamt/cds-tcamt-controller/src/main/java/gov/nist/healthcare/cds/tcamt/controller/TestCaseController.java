@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.security.Principal;
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
@@ -17,6 +18,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import gov.nist.healthcare.cds.domain.TestCase;
+import gov.nist.healthcare.cds.domain.TestCaseGroup;
 import gov.nist.healthcare.cds.domain.TestPlan;
 import gov.nist.healthcare.cds.domain.exception.UnresolvableDate;
 import gov.nist.healthcare.cds.domain.exception.VaccineNotFoundException;
@@ -95,7 +97,7 @@ public class TestCaseController {
 	}
 	
 	
-	@RequestMapping(value = "/testcase/{id}/save", method = RequestMethod.POST)
+	@RequestMapping(value = "/testcase/tp/{id}/save", method = RequestMethod.POST)
 	@ResponseBody
 	public TestCase save(@RequestBody @Valid TestCase tc,@PathVariable String id, Principal p) throws NotFoundException {
 		TestPlan tp = ledger.tpBelongsTo(id, p.getName());
@@ -104,15 +106,64 @@ public class TestCaseController {
 			tc.setTestPlan(tp.getId());
 			mdService.update(tp.getMetaData());
 			mdService.update(tc.getMetaData());
-			TestCase stc = testCaseRepository.save(tc);
 			if(newt){
-				tp.addTestCase(stc);
-				testPlanRepository.save(tp);
+				tp.addTestCase(tc);
 			}
-			return stc;
+			else {
+				TestCase _tc = testCaseRepository.findOne(tc.getId());
+				if(_tc.getGroupTag() != null && !_tc.getGroupTag().isEmpty()){
+					TestCaseGroup tcg = tp.getGroup(_tc.getGroupTag());
+					tcg.getTestCases().remove(_tc);
+					tp.getTestCases().add(tc);
+				}
+			}
+			
+			testCaseRepository.save(tc);
+			testPlanRepository.save(tp);		
+			return tc;
 		}
 		else {
 			throw new NotFoundException("TestPlan ("+id+")");
+		}
+	}
+	
+	@RequestMapping(value = "/testcase/tg/{id}/save", method = RequestMethod.POST)
+	@ResponseBody
+	public TestCase saveTG(@RequestBody @Valid TestCase tc,@PathVariable String id, Principal p) throws NotFoundException {
+		TestPlan tp = ledger.tgBelongsTo(id, p.getName());
+		boolean newt = tc.getId() == null || tc.getId().isEmpty();
+		if(tp != null){
+			TestCaseGroup tcg = tp.getGroup(id);
+			tc.setTestPlan(tp.getId());
+			tc.setGroupTag(id);
+			mdService.update(tp.getMetaData());
+			mdService.update(tc.getMetaData());
+			if(newt){
+				tcg.getTestCases().add(tc);
+			}
+			else {
+				TestCase _tc = testCaseRepository.findOne(tc.getId());
+				if(_tc.getGroupTag() == null || _tc.getGroupTag().isEmpty()){
+					//No Group To Group
+					TestCaseGroup tcgN = tp.getGroup(tc.getGroupTag());
+					tp.getTestCases().remove(_tc);
+					tcgN.getTestCases().add(tc);
+				}
+				else {
+					// Group To Group
+					TestCaseGroup tcgO = tp.getGroup(_tc.getGroupTag());
+					TestCaseGroup tcgN = tp.getGroup(tc.getGroupTag());
+					tcgO.getTestCases().remove(_tc);
+					tcgN.getTestCases().add(tc);
+				}
+			}
+			
+			testCaseRepository.save(tc);
+			testPlanRepository.save(tp);
+			return tc;
+		}
+		else {
+			throw new NotFoundException("TestCaseGroup ("+id+")");
 		}
 	}
 	
@@ -127,12 +178,59 @@ public class TestCaseController {
 		return testPlanRepository.save(tp);
 	}
 	
+	@RequestMapping(value = "/testCaseGroup/partial/save", method = RequestMethod.POST)
+	@ResponseBody
+	public TestCaseGroup saveG(@RequestBody TestCaseGroup tg,Principal p) throws NotFoundException {
+		if(tg.getTestPlan() != null && !tg.getTestPlan().isEmpty()){
+			if(tg.getId() != null){
+				TestPlan _tp = ledger.tgBelongsTo(tg.getId(), p.getName());
+				if(_tp != null){
+					TestCaseGroup tcg = _tp.getGroup(tg.getId());
+					if(tcg != null){
+						tcg.setName(tg.getName());
+						mdService.update(_tp.getMetaData());
+						testPlanRepository.save(_tp);
+						return tcg;
+					}
+					else {
+						throw new NotFoundException("TestCaseGroup ("+tg.getId()+")");
+					}
+				}
+				else {
+					throw new NotFoundException("TestCaseGroup ("+tg.getId()+")");
+				}
+			}
+			else {
+				TestPlan _tp = ledger.tpBelongsTo(tg.getTestPlan(), p.getName());
+				if(_tp != null){
+					TestCaseGroup tcg = _tp.createGroup(tg.getName());
+					mdService.update(_tp.getMetaData());
+					testPlanRepository.save(_tp);
+					return tcg;
+				}
+				else {
+					throw new NotFoundException("TestPlan ("+tg.getTestPlan()+")");
+				}
+			}
+		}
+		else {
+			throw new NotFoundException("TestCaseGroup Must Belong to a TestPlan");
+		}
+	}
+	
+	
 	@RequestMapping(value = "/testplan/partial/save", method = RequestMethod.POST)
 	@ResponseBody
 	public TestPlan saveP(@RequestBody TestPlan tp,Principal p) throws NotFoundException {
 		if(tp.getId() != null){
-			TestPlan _tp = testPlanRepository.findOne(tp.getId());
-			tp.setTestCases(_tp.getTestCases());
+			TestPlan _tp = ledger.tpBelongsTo(tp.getId(), p.getName());
+			if(_tp != null){
+				tp.setTestCases(_tp.getTestCases());
+				tp.setTestCaseGroups(_tp.getTestCaseGroups());
+			}
+			else {
+				throw new NotFoundException("TestPlan ("+tp.getId()+")");
+			}
 		}
 		tp.setUser(p.getName());
 		mdService.update(tp.getMetaData());
@@ -267,18 +365,26 @@ public class TestCaseController {
 						return ir;
 					}
 					
-					for(TestCase tc : importRes.getTestcases()){
-						tc.setTestPlan(tps.getId());
+					List<TestCase> testCases = new ArrayList<>();
+					for(TestCaseGroup tcg : importRes.getTestcases()){
+						for(TestCase tc : tcg.getTestCases()){
+							TestCaseGroup tpcg = tps.getByNameOrCreateGroup(tcg.getName());
+							tc.setGroupTag(tpcg.getId());
+							tc.setTestPlan(tps.getId());
+							tpcg.setTestPlan(tps.getId());
+							tpcg.getTestCases().add(tc);
+							mdService.update(tc.getMetaData());
+							testCases.add(tc);
+						}
 					}
 					
-					tps.getTestCases().addAll(importRes.getTestcases());
-					testCaseRepository.save(importRes.getTestcases());
+					testCaseRepository.save(testCases);
 					mdService.update(tps.getMetaData());
 					testPlanRepository.save(tps);
 					ImportResult ir = new ImportResult();
 					ir.setStatus(true);
 					ir.setErrors(errors);
-					ir.setTestCases(importRes.getTestcases());
+					ir.setTestPlan(tps);
 					ir.setMessages(null);
 					return ir;
 				}

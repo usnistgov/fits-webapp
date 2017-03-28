@@ -1,13 +1,25 @@
 <script type="text/ng-template" id="EditPatientInformation.html">
     <md-content>
         <md-tabs md-selected="tabs.selectedTabTC" md-dynamic-height md-border-bottom>
-            <md-tab label="Patient Information">
+            <md-tab label="Assessment Date and Patient Information">
                 <md-content class="md-padding">
                     <form name="patientForm" class="form-horizontal" novalidate>
                         <div layout="row" layout-align="start center">
                             <div flex="100" layout="column" layout-align="center">
                                 <div flex="100">
-                                    <div style="width: 100%;" ng-if="selectedTC.dateType === 'RELATIVE'" layout="column" layout-align="center start">
+                                    <div style="width: 100%; margin-bottom: 10px;">
+                                        <md-input-container style="width: 100%;">
+                                            <label>Gender</label>
+                                            <md-select ng-model="selectedTC.patient.gender" ng-model-options="{trackBy: '$value'}" required>
+                                                <md-option ng-repeat=" enum in gender " ng-value="enum.code">{{enum.details}}</md-option>
+                                            </md-select>
+                                        </md-input-container>
+                                    </div>
+                                    <div ng-show="selectedTC.dateType === 'FIXED'"  layout="row" style="margin-bottom: 10px;">
+                                        <date-choose style="margin-right: 5px;" flex="50" nullable="false" type="selectedTC.dateType" label="'Assessment Date'" dt="selectedTC.evalDate" events="selectedTC.events"></date-choose>
+                                        <date-choose style="margin-left: 5px; width: 100%;" flex="50" exclude="'DOB'" nullable="false" type="selectedTC.dateType" label="'Date Of Birth'" dt="selectedTC.patient.dob" events="selectedTC.events"></date-choose>
+                                    </div>
+                                    <div style="width: 100%;" ng-show="selectedTC.dateType === 'RELATIVE'" layout="column" layout-align="center start">
                                         <div style="width: 100%; text-align: center; margin-bottom: 10px;">
                                             <label>Patient Age</label>
                                         </div>
@@ -18,23 +30,14 @@
                                             </md-input-container>
                                             <md-input-container >
                                                 <label>Months</label>
-                                                <input min='0' ng-model="selectedTC.patient.dob.rules[0].month" type="number" required>
+                                                <input ng-model="selectedTC.patient.dob.rules[0].month" type="number" required>
                                             </md-input-container>
                                             <md-input-container >
                                                 <label>Days</label>
-                                                <input min='0' ng-model="selectedTC.patient.dob.rules[0].day" type="number" required>
+                                                <input ng-model="selectedTC.patient.dob.rules[0].day" type="number" required>
                                             </md-input-container>
                                         </div>
                                     </div>
-                                    <div style="width: 100%;">
-                                        <md-input-container style="width: 100%;">
-                                            <label>Gender</label>
-                                            <md-select ng-model="selectedTC.patient.gender" ng-model-options="{trackBy: '$value'}" required>
-                                                <md-option ng-repeat=" enum in gender " ng-value="enum.code">{{enum.details}}</md-option>
-                                            </md-select>
-                                        </md-input-container>
-                                    </div>
-                                    <date-choose  style="width: 100%;" exclude="'DOB'" ng-if="selectedTC.dateType === 'FIXED'" nullable="false" type="selectedTC.dateType" label="'Date Of Birth'" dt="selectedTC.patient.dob" events="selectedTC.events"></date-choose>
                                 </div>
                             </div>
                         </div>

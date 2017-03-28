@@ -28,7 +28,11 @@ body {
 								<div class="col-md-4">
 									<md-input-container style="width: 100%;">
 										<label>Group</label>
-										<input ng-model-options="{ updateOn: 'blur'}" ng-model="selectedTC.group" type="text"/>
+										<!--<input ng-model-options="{ updateOn: 'blur'}" ng-model="selectedTC.group" type="text"/>-->
+										<md-select ng-model="selectedTC.group" ng-change="switchGroup(selectedTP,selectedTC)" >
+											<md-option style="background-color: #d2bf94;" ng-value="''">No Group</md-option>
+											<md-option ng-repeat="grp in selectedTP.testCaseGroups" ng-value="grp.id">{{grp.name}}</md-option>
+										</md-select>
 									</md-input-container>
 								</div>
 								<div class="col-md-4">
@@ -49,7 +53,7 @@ body {
 								<div class="col-md-12">
 									<md-input-container style="width: 100%;">
 										<label>Description</label>
-										<textarea style="border: 1px solid rgb(221, 216, 216); padding : 10px;"  ng-model="selectedTC.description" rows="5">
+										<textarea style="background-color: rgb(241, 241, 241);" ng-model="selectedTC.description" rows="5">
 										</textarea>
 									</md-input-container>
 								</div>
@@ -61,30 +65,37 @@ body {
 					<form name="mdForm" class="form-horizontal" novalidate>
 						<div class="row">
 							<div class="col-md-12">
-								<div class="col-md-9">
-									<md-input-container style="width: 100%;">
-										<label>Version</label>
-										<input ng-model="selectedTC.metaData.version" ng-change="tcChanged()" type="text"/>
-									</md-input-container>
-								</div>
-								<div class="col-md-3">
-									<md-input-container style="width: 100%;">
-										<label>Date Created</label>
-										<md-datepicker ng-model="selectedTC.metaData._dateCreated" ng-change="dateChange(selectedTC.metaData,'dateCreated')" ng-disabled="true"></md-datepicker>
-									</md-input-container>
-								</div>
-							</div>
-							<div class="col-md-12">
-								<div class="col-md-9">
+								<div class="col-md-4">
 									<md-input-container style="width: 100%;">
 										<label>Type</label>
 										<input value="{{selectedTC.metaData.imported ? 'Imported' : 'Created'}}" ng-disabled="true" type="text"/>
 									</md-input-container>
 								</div>
-								<div class="col-md-3">
+								<div class="col-md-4">
+									<md-input-container style="width: 100%;">
+										<label>Date Created</label>
+										<md-datepicker ng-model="selectedTC.metaData._dateCreated" ng-change="dateChange(selectedTC.metaData,'dateCreated')" ng-disabled="true"></md-datepicker>
+									</md-input-container>
+								</div>
+								<div class="col-md-4">
 									<md-input-container style="width: 100%;">
 										<label>Date Last Updated</label>
 										<md-datepicker ng-model="selectedTC.metaData._dateLastUpdated" ng-change="dateChange(selectedTC.metaData,'dateLastUpdated')" ng-disabled="true"></md-datepicker>
+									</md-input-container>
+								</div>
+							</div>
+							<div class="col-md-12">
+								<div class="col-md-12">
+									<md-input-container style="width: 100%;">
+										<label>Version</label>
+										<input ng-model="selectedTC.metaData.version" type="text"/>
+									</md-input-container>
+								</div>
+								<div class="col-md-12">
+									<md-input-container style="width: 100%;">
+										<label>Change Log</label>
+										<textarea style="background-color: rgb(241, 241, 241);" ng-model="selectedTC.metaData.changeLog" rows="5">
+										</textarea>
 									</md-input-container>
 								</div>
 							</div>

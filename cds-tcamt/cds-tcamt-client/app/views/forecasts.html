@@ -23,9 +23,11 @@ body {
 		 			   style="cursor: pointer;"
 					   ng-class="{'sinfo' : isSelectedForecast(forecast), 'fle' : $index === 0, 'le' : true}"
 					   context-menu="forecastCM" model="$index" >
-			<strong>
-				{{forecast.target === null ? 'New Forecast' : forecast.target.name}}
-			</strong>
+			<span style="text-align: center;">
+				 <strong>
+					{{forecast.target === null ? 'New Forecast' : forecast.target.name}}
+				</strong>
+			</span>
 		</md-list-item>
 	</md-list>
 				

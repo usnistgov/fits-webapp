@@ -26,26 +26,27 @@ body {
 
 				<td colspan="3" style="text-align : justify; padding: 10px;">
 					<div style="width : 100%;" layout="row" layout-align="start center" ng-show="ev.vaccination.administred && ev.vaccination.administred.discriminator === 'generic'">
-						<div flex="30" layout="column" layout-align="center center">
-							<span style="background-color: red;" class="badge">G</span>
-							<span class="badge sbadge">ID # {{ev.vaccination.position}}</span>
-							<span style="background-color: green;" class="badge">CVX#{{ev.vaccination.administred.cvx}}</span>
+						<div flex="10" layout="column" layout-align="center center">
+							<span><strong>ID # {{ev.vaccination.position}}</strong></span>
 						</div>
-						<div flex="50" layout="column" layout-align="start center">
+						<div flex="25" layout="column" layout-align="center center">
+							<span style="background-color: green;" class="badge">CVX {{ev.vaccination.administred.cvx}}</span>
+						</div>
+						<div flex="65" layout="column" layout-align="start center">
 							<span><strong>{{ev.vaccination.administred.name}}</strong></span>
 							<span>{{eventLabel(ev)}}</span>
 						</div>
 					</div>
 					<div style="width : 100%;" layout="row" layout-align="start center" ng-show="ev.vaccination.administred && ev.vaccination.administred.discriminator === 'specific'">
-						<div flex="30" layout="column" layout-align="center center">
-							<span style="background-color: red;" class="badge">S</span>
-							<span class="badge sbadge">ID # {{ev.vaccination.position}}</span>
-							<span style="background-color: green;" class="badge">CVX#{{getV(ev.vaccination.administred).cvx}}</span>
-							<span style="background-color: blue;" class="badge">MVX#{{ev.vaccination.administred.mx.mvx}}</span>
+						<div flex="10" layout="column" layout-align="center center">
+							<span><strong>ID # {{ev.vaccination.position}}</strong></span>
 						</div>
-						<div flex="50" layout="column" layout-align="start center" style="text-align : left;">
-							<span><strong>{{getV(ev.vaccination.administred).name}}</strong></span>
-							<span><strong>By</strong> {{ev.vaccination.administred.mx.name}}</span>
+						<div flex="25" layout="column" layout-align="center center">
+							<span style="background-color: green;" class="badge">CVX {{getV(ev.vaccination.administred).cvx}}</span>
+							<span style="background-color: blue;" class="badge">MVX {{ev.vaccination.administred.mx.mvx}}</span>
+						</div>
+						<div flex="65" layout="column" layout-align="start center" style="text-align : left;">
+							<!--<span><strong>{{getV(ev.vaccination.administred).name}}</strong></span>-->
 							<span><strong>{{ev.vaccination.administred.name}}</strong></span>
 							<span>{{eventLabel(ev)}}</span>
 						</div>

@@ -333,12 +333,12 @@ app.filter("sanitize", ['$sce', function($sce) {
 
 
 
-app.run(function ($rootScope, $location, Restangular, $modal, $filter, base64, userInfoService, $http, AppInfo,StorageService,$templateCache,$window,notifications) {
+app.run(function ($rootScope, $anchorScroll, $location, Restangular, $modal, $filter, base64, userInfoService, $http, AppInfo,StorageService,$templateCache,$window,notifications) {
     $rootScope.appInfo = {};
     //Check if the login dialog is already displayed.
     $rootScope.loginDialogShown = false;
     $rootScope.subActivePath = null;
-
+    $anchorScroll.yOffset = 9999999;
     // load app info
     // load app info
     AppInfo.get().then(function (appInfo) {

@@ -13,16 +13,22 @@ body {
 </script>
 <script type="text/ng-template" id="EditTestPlanData.html">
 	<md-content>
-		<md-tabs md-selected="selectedTabTP" md-dynamic-height md-border-bottom>
+		<md-tabs md-selected="tabs.selectedTabTP" md-dynamic-height md-border-bottom>
 			<md-tab label="Test Plan Information">
 				<md-content class="md-padding">         
 					<form name="testplanMetaDataForm" class="form-horizontal" novalidate>
 						<div class="row">
 							<div class="col-md-12">
-								<div class="col-md-8">
+								<div class="col-md-12">
 									<md-input-container style="width: 100%;">
 										<label>Name</label>
-										<input ng-model="selectedTP.name" ng-change="tpChanged()" type="text"/>
+										<input ng-model="selectedTP.name" type="text"/>
+									</md-input-container>
+								</div>
+								<div class="col-md-4">
+									<md-input-container style="width: 100%;">
+										<label>Version</label>
+										<input ng-model="selectedTP.metaData.version" ng-change="tpChanged()" type="text"/>
 									</md-input-container>
 								</div>
 								<div class="col-md-4">
@@ -31,16 +37,24 @@ body {
 										<md-datepicker ng-model="selectedTP.metaData._dateCreated" ng-change="dateChange(selectedTP.metaData,'dateCreated')" ng-disabled="true"></md-datepicker>
 									</md-input-container>
 								</div>
-								<div class="col-md-6">
+								<div class="col-md-4">
 									<md-input-container style="width: 100%;">
-										<label>Description</label>
-										<input ng-model="selectedTP.description" ng-change="tpChanged()" type="text"/>
+										<label>Date Last Updated</label>
+										<md-datepicker ng-model="selectedTP.metaData._dateLastUpdated" ng-change="dateChange(selectedTP.metaData,'dateLastUpdated')" ng-disabled="true"></md-datepicker>
 									</md-input-container>
 								</div>
-								<div class="col-md-6">
+								<div class="col-md-12">
 									<md-input-container style="width: 100%;">
-										<label>Version</label>
-										<input ng-model="selectedTP.metaData.version" ng-change="tpChanged()" type="text"/>
+										<label>Description</label>
+										<textarea style="background-color: rgb(241, 241, 241);" ng-model="selectedTP.description" rows="5">
+										</textarea>
+									</md-input-container>
+								</div>
+								<div class="col-md-12">
+									<md-input-container style="width: 100%;">
+										<label>Change Log</label>
+										<textarea style="background-color: rgb(241, 241, 241);" ng-model="selectedTP.metaData.changeLog" rows="5">
+										</textarea>
 									</md-input-container>
 								</div>
 							</div>
