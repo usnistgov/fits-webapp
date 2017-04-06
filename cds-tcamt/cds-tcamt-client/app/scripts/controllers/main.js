@@ -73,7 +73,7 @@ angular.module('tcl').controller('MainCtrl', ['$scope', '$rootScope', 'i18n', '$
             $rootScope.initMaps();
             $rootScope.igdocument = null;
             AutoSaveService.stop();
-            $location.url('/tp');
+            $location.url('/home');
         };
 
         $scope.cancel = function () {
@@ -129,6 +129,22 @@ angular.module('tcl').controller('MainCtrl', ['$scope', '$rootScope', 'i18n', '$
             return '';
         };
 
+        $rootScope.downloadDocument = function (path) {
+            if (path != null) {
+                var form = document.createElement("form");
+                form.action = "api/documentation/downloadDocument";
+                form.method = "POST";
+                form.target = "_target";
+                var input = document.createElement("input");
+                input.name = "path";
+                input.value = path;
+                form.appendChild(input);
+                form.style.display = 'none';
+                document.body.appendChild(form);
+                form.submit();
+            }
+        };
+
         $rootScope.showLoginDialog = function (username, password) {
 
             if ($rootScope.loginDialog && $rootScope.loginDialog != null && $rootScope.loginDialog.opened) {
@@ -178,16 +194,12 @@ angular.module('tcl').controller('MainCtrl', ['$scope', '$rootScope', 'i18n', '$
         $rootScope.$on('IdleTimeout', function () {
             closeModals();
             if ($scope.isAuthenticated()) {
-                if ($rootScope.igdocument && $rootScope.igdocument != null && $rootScope.hasChanges()) {
-                    $rootScope.$emit('event:saveAndExecLogout');
-                }else {
-                    $rootScope.$emit('event:execLogout');
-                }
+                $rootScope.$emit('event:execLogout');
+                $rootScope.timedout = $modal.open({
+                    templateUrl: 'timedout-dialog.html',
+                    windowClass: 'modal-danger'
+                });
             }
-            $rootScope.timedout = $modal.open({
-                templateUrl: 'timedout-dialog.html',
-                windowClass: 'modal-danger'
-            });
         });
 
         $scope.$on('Keepalive', function() {
@@ -405,7 +417,7 @@ angular.module('tcl').controller('MainCtrl', ['$scope', '$rootScope', 'i18n', '$
         $rootScope.parentsMap = {};
         $rootScope.igChanged = false;
 
-
+        $rootScope.selectedConfig = null;
         $rootScope.messageTree = null;
 
         $scope.scrollbarWidth = 0;
@@ -450,35 +462,7 @@ angular.module('tcl').controller('MainCtrl', ['$scope', '$rootScope', 'i18n', '$
 
             return $scope.scrollbarWidth;
         };
-        $rootScope.initMaps = function () {
-            $rootScope.segment = null;
-            $rootScope.datatype = null;
-            $rootScope.message = null;
-            $rootScope.table = null;
-            $rootScope.codeSystems = [];
-            $rootScope.messagesMap = {};
-            $rootScope.segmentsMap = {};
-            $rootScope.datatypesMap = {};
-            $rootScope.tablesMap = {};
-            $rootScope.segments = [];
-            $rootScope.tables = [];
-            $rootScope.segmentPredicates = [];
-            $rootScope.segmentConformanceStatements = [];
-            $rootScope.datatypePredicates = [];
-            $rootScope.datatypeConformanceStatements = [];
-            $rootScope.datatypes = [];
-            $rootScope.messages = [];
-            $rootScope.messagesData = [];
-            $rootScope.newCodeFakeId = 0;
-            $rootScope.newTableFakeId = 0;
-            $rootScope.newPredicateFakeId = 0;
-            $rootScope.newConformanceStatementFakeId = 0;
-            $rootScope.clearChanges();
-            $rootScope.parentsMap = [];
-            $rootScope.conformanceStatementIdList = [];
 
-            $rootScope.messageTree = null;
-        };
 
         $rootScope.$watch(function () {
             return $location.path();

@@ -7,59 +7,81 @@ angular.module('tcl').filter('vaccine', function () {
         if (!items || !items.length) {
             return;
         }
+        if (!str || str === "") return items;
         return items.filter(function (item) {
-            if (!str || str === "") return true;
             var s = str.toLowerCase();
             return item.vx.name.toLowerCase().includes(s) || item.vx.cvx.includes(s);
         });
     };
 });
 
-angular.module('tcl').filter('groupEvents', function () {
-    return _.memoize(function (items) {
-            if (!items || !items.length) {
-                return;
-            }
-            return _.groupBy(items, function (item) {
-                return item.vaccination.administred ? item.vaccination.administred.name : "new";
-            });
-        },
-        function (items) {
-            if (!items || !items.length) {
-                return "x";
-            }
-            return angular.toJson(items);
-        }
-    )
-});
-
-angular.module('tcl').filter('groupBy', function ($parse) {
-    return _.memoize(function (items, field) {
+angular.module('tcl').filter('tcFilter', function ($filter) {
+    return function (items, flt) {
         if (!items || !items.length) {
             return;
         }
-        var getter = $parse(field);
-        return _.groupBy(items, function (item) {
-            var g = getter(item);
-            return g ? g !== '' ? g : 'Ungrouped' : 'Ungrouped';
-        });
-    }, function (items, field) {
-        if (!items || !items.length) {
-            return "x";
-        }
-        return items.reduce(function (acc, item) {
-            return acc + item.id + item.group + '-';
-        });
-    });
+
+        var filterActive = function (f) {
+            return   f.changed !== false || f.example.name !== '' || f.example.uid !== '' || f.example.metaData.version !== '' || f.dates.created.date !== null || f.dates.updated.date !== null;
+        };
+        if (!filterActive(flt)) return items;
+        return $filter('dateMD')($filter('dateMD')($filter('changed')($filter('filter')(items,flt.example),flt.changed),flt.dates.created,'dateCreated'),flt.dates.updated,'dateLastUpdated');
+    };
 });
+
+
+angular.module('tcl').filter('changed', function () {
+    return function (items, bool) {
+        if (!items || !items.length) {
+            return;
+        }
+        if (!bool) return items;
+        return items.filter(function (item) {
+            if(item._changed)
+                return true;
+            //return item.vx.name.toLowerCase().includes(s) || item.vx.cvx.includes(s);
+        });
+    };
+});
+
+angular.module('tcl').filter('dateMD', function () {
+    return function (items, dateF, criterion) {
+        Date.prototype.withoutTime = function () {
+            var d = new Date(this);
+            d.setHours(0, 0, 0, 0);
+            return d;
+        };
+
+        if (!items || !items.length ) {
+            return;
+        }
+        if(dateF.date === null || !(dateF.position === 'O' || dateF.position === 'A' || dateF.position === 'B')){
+            return items;
+        }
+        //console.log(dateF);
+        var dtTM = dateF.date.withoutTime().getTime();
+        return items.filter(function (item) {
+            // console.log((dateF.position === 'O' && item.metaData[criterion].getTime() === dateF.date.getTime())
+            //     || (dateF.position === 'A' && item.metaData[criterion].getTime() > dateF.date.getTime())
+            //     || (dateF.position === 'B' && item.metaData[criterion].getTime() < dateF.date.getTime()));
+            //console.log(item.metaData[criterion]);
+            var tcTM = item.metaData["_"+criterion].withoutTime().getTime();
+
+            return (dateF.position === 'O' && tcTM === dtTM)
+            || (dateF.position === 'A' && tcTM > dtTM)
+                || (dateF.position === 'B' && tcTM < dtTM);
+        });
+    };
+});
+
 
 angular.module('tcl').filter('vaccineEpt', function () {
     return function (items, str) {
         if (!items || !items.length) {
             return;
         }
+        if (!str || str === "") return [];
         return items.filter(function (item) {
-            if (!str || str === "") return false;
             var s = str.toLowerCase();
             return item.vx.name.toLowerCase().includes(s) || item.vx.cvx.includes(s);
         });
@@ -71,8 +93,8 @@ angular.module('tcl').filter('product', function () {
         if (!items || !items.length) {
             return;
         }
+        if (!str || str === "") return items;
         return items.filter(function (item) {
-            if (!str || str === "") return true;
             var s = str.toLowerCase();
             return item.name.toLowerCase().includes(s) || item.mx.mvx.toLowerCase().includes(s) || item.mx.name.toLowerCase().includes(s);
         });
@@ -84,8 +106,8 @@ angular.module('tcl').filter('productEpt', function () {
         if (!items || !items.length) {
             return;
         }
+        if (!str || str === "") return [];
         return items.filter(function (item) {
-            if (!str || str === "") return false;
             var s = str.toLowerCase();
             return item.name.toLowerCase().includes(s) || item.mx.mvx.toLowerCase().includes(s);
         });
@@ -97,8 +119,8 @@ angular.module('tcl').filter('unspecified', function () {
         if (!items || !items.length) {
             return;
         }
+        if (!usp) return items;
         return items.filter(function (item) {
-            if (!usp) return true;
             return item.group;
         });
     };
@@ -109,8 +131,8 @@ angular.module('tcl').filter('testcase', function () {
         if (!items || !items.length) {
             return;
         }
+        if (!str || str === "") return items;
         return items.filter(function (item) {
-            if (!str || str === "") return true;
             var s = str.toLowerCase();
             return item.name.toLowerCase().includes(s) || item.uid && item.uid.toLowerCase().includes(s) || item.group && item.group.toLowerCase().includes(s);
         });
@@ -123,6 +145,7 @@ angular.module('tcl').filter('vxgroup', function () {
         if (!items || !items.length) {
             return;
         }
+        if (!groups || groups.length === 0) return items;
         var filter = function (item) {
 
             var hasGroup = function (mp, gr) {
@@ -138,8 +161,6 @@ angular.module('tcl').filter('vxgroup', function () {
                 }
                 return false;
             };
-
-            if (!groups || groups.length === 0) return true;
             for (var x in groups) {
                 if (!hasGroup(item, groups[x])) {
                     return false;
@@ -180,6 +201,7 @@ angular
                 tpDetails: false
             };
             $scope.testCases = [];
+            $scope.filterView = false;
             $scope.patientSelected = false;
             $scope.message = "";
             $scope.loadSpin = false;
@@ -198,6 +220,11 @@ angular
                 to: 1000,
                 all: true
             };
+            $scope.autoSave = {
+                active : true,
+                lastSave : new Date(),
+                saving : true
+            };
             $scope.tpview = true;
             $scope.groups = false;
             $scope.remember = {
@@ -215,6 +242,7 @@ angular
             // CDSI TCAMT
             $scope.importing = false;
             $scope.impDiag = null;
+            $scope.errorDiag = null;
             $scope.selectedEvent = null;
             $scope.selectedForecast = null;
             $scope.selectedTP = null;
@@ -268,6 +296,36 @@ angular
                 }
                 return "";
             };
+
+            $scope.autoSaveFct = function () {
+                $timeout(function () {
+                    if($scope.selectedTP && $scope.autoSave.active){
+                        console.log("Saving");
+                        $scope.autoSave.saving = true;
+
+                        $scope.saveTP($scope.selectedTP,true,true).then(function () {
+                            if($scope.selectedTC && TestObjectUtil.hashChanged($scope.selectedTC)){
+                                $scope.saveTC($scope.selectedTC,true).then(function () {
+                                    $scope.autoSave.lastSave = new Date();
+                                    $scope.autoSave.saving = false;
+                                },function () {
+                                    $scope.autoSave.lastSave = new Date();
+                                    $scope.autoSave.saving = false;
+                                })
+                            }
+                            else {
+                                $scope.autoSave.lastSave = new Date();
+                                $scope.autoSave.saving = false;
+                            }
+                        },
+                        function () {
+                            $scope.autoSave.saving = false;
+                        });
+                    }
+                    $scope.autoSaveFct();
+                },10000);
+            };
+
 
             $scope.dateTypeChange = function (tc) {
                 $scope.exit = $modal.open({
@@ -370,7 +428,7 @@ angular
             $scope.newTestPlan = function () {
                 var tp = TestObjectFactory.createTP();
                 $scope.tps.push(tp);
-                $scope.selectTP(tp);
+                $scope.selectTP(tp,true);
             };
 
             $scope.initEnums = function () {
@@ -479,31 +537,29 @@ angular
                 }
             };
 
-            $scope.selectTP = function (tp) {
-                // waitingDialog.show('Opening Test Plan', {
-                // 	dialogSize : 'xs',
-                // 	progressType : 'info'
-                // });
-                $timeout(function () {
-                    console.log("SelectTP");
-                    // Selection
-                    $scope.selectedEvent = null;
-                    $scope.selectedForecast = null;
-                    $scope.selectedTC = null;
-                    $scope.tpTree = [];
-                    $scope.patientSelected = false;
-                    $scope.grouping = true;
-                    $scope.selectedTP = tp;
-                    $scope.tpTree.push($scope.selectedTP);
-                    $scope.testCases = [];
-                    TestObjectUtil.listTC(tp, $scope.testCases);
-                    $scope.selectedType = "tp";
+            $scope.selectTP = function (tp,skip) {
+                $scope.warning(skip).then(function () {
+                    $timeout(function () {
+                        console.log("SelectTP");
+                        // Selection
+                        $scope.selectedEvent = null;
+                        $scope.selectedForecast = null;
+                        $scope.selectedTC = null;
+                        $scope.tpTree = [];
+                        $scope.patientSelected = false;
+                        $scope.grouping = true;
+                        $scope.selectedTP = tp;
+                        $scope.tpTree.push($scope.selectedTP);
+                        $scope.testCases = [];
+                        TestObjectUtil.listTC(tp, $scope.testCases);
+                        $scope.selectedType = "tp";
 
-                    // View
-                    $scope.selectTPTab(1);
-                    $scope.subview = "EditTestPlanData.html";
-                    waitingDialog.hide();
-                }, 0);
+                        // View
+                        $scope.selectTPTab(1);
+                        $scope.subview = "EditTestPlanData.html";
+                        waitingDialog.hide();
+                    }, 0);
+                });
             };
 
             $scope.hasChanges = function (tc) {
@@ -525,6 +581,18 @@ angular
                 return false;
             };
 
+            $scope.errors = function (list) {
+                if (!list || list.length === 0)
+                    return false;
+
+                for (var tc = 0; tc < list.length; tc++) {
+                    if (list[tc]._hasErrors) {
+                        return true;
+                    }
+                }
+                return false;
+            };
+
             $scope.groupName = function (id) {
                 if(id && id !== ""){
                     var grp = TestObjectUtil.getGroupByID($scope.selectedTP,id);
@@ -535,110 +603,279 @@ angular
                 return "";
             };
 
-            $scope.$watch('selectedTC', function (newValue, oldValue) {
-                console.log("W");
+            $scope.warning = function (skip) {
+                var deferred = $q.defer();
+                if ($scope.selectedTC && !skip) {
+                    if(TestObjectUtil.hashChanged($scope.selectedTC)) {
 
-                if (!newValue && !TestObjectUtil.index($scope.testCases, "id", oldValue.id)) {
-                    console.log("Deleted");
-                }
-                else if (oldValue !== null && (!newValue || oldValue.id !== newValue.id)) {
-                    console.log("Selected TC Changed");
-                    console.log("Old Value : ");
-                    console.log(oldValue);
-                    console.log($scope.testCases);
-                    var i = TestObjectUtil.index($scope.testCases, "id", oldValue.id);
-                    console.log("Index Of Selected is : " + i);
-                    if (~i) {
-                        var tc = $scope.testCases[i];
-                        if (TestObjectUtil.hashChanged(tc)) {
-                            console.log("UNSAVED CHANGED");
-                            tc._changed = true;
-                            if ($scope.remember.bool) {
-                                if ($scope.remember.choice === "save") {
-                                    console.log("Should Save");
-                                    $scope.saveAllChangedTestPlans(tc, $scope.selectedTP)
-                                }
-                                else if ($scope.remember.choice === "discard") {
-                                    console.log("Discarding");
-                                    $scope.discardChanges(tc);
-                                }
+                        console.log("UNSAVED CHANGED");
+                        $scope.selectedTC._changed = true;
+
+                        //------- DEFAULT ACTION --------
+                        if ($scope.remember.bool) {
+                            if ($scope.remember.choice === "save") {
+                                $scope.saveAllChangedTestPlans($scope.selectedTC, $scope.selectedTP).then(function () {
+                                    deferred.resolve();
+                                }, function () {
+                                    deferred.resolve();
+                                });
+                            }
+                            else if ($scope.remember.choice === "discard") {
+                                $scope.discardChanges($scope.selectedTC);
+                                deferred.resolve();
                             }
                             else {
-                                $scope.exit = $modal.open({
-                                    templateUrl: 'ExitTC.html',
-                                    controller: 'ExitCtrl',
-                                    resolve: {
-                                        discard: function () {
-                                            return TestObjectUtil.isLocal(tc);
-                                        }
-                                    }
-                                });
-
-                                $scope.exit.result.then(function (response) {
-                                    if (response) {
-                                        $scope.remember.bool = response.remember;
-                                        $scope.remember.choice = response.action;
-                                        if (response.action === "save") {
-                                            console.log("Should Save");
-                                            $scope.saveAllChangedTestPlans(tc, $scope.selectedTP)
-                                        }
-                                        else if (response.action === "discard") {
-                                            console.log("Discarding");
-                                            $scope.discardChanges(tc);
-                                        }
-                                    }
-                                }, function () {
-                                    console.log("Save Later");
-                                });
+                                deferred.resolve();
                             }
-
                         }
+                        //-------------------------------
+                        //------------ DIALOG -----------
                         else {
-                            tc._changed = false;
+
+                            $scope.exit = $modal.open({
+                                templateUrl: 'ExitTC.html',
+                                controller: 'ExitCtrl',
+                                resolve: {
+                                    discard: function () {
+                                        return TestObjectUtil.isLocal($scope.selectedTC);
+                                    }
+                                }
+                            });
+
+                            $scope.exit.result.then(function (response) {
+                                if (response) {
+                                    $scope.remember.bool = response.remember;
+                                    $scope.remember.choice = response.action;
+                                    if (response.action === "save") {
+                                        $scope.saveAllChangedTestPlans($scope.selectedTC, $scope.selectedTP).then(function () {
+                                            deferred.resolve();
+                                        }, function () {
+                                            deferred.resolve();
+                                        });
+                                    }
+                                    else if (response.action === "discard") {
+                                        $scope.discardChanges($scope.selectedTC);
+                                        deferred.resolve();
+                                    }
+                                    else {
+                                        deferred.resolve();
+                                    }
+                                }
+                            }, function () {
+                                deferred.resolve();
+                            });
                         }
+
+                    }
+                    else {
+                        $scope.selectedTC._changed = false;
+                        deferred.resolve();
                     }
                 }
+                else {
+                    deferred.resolve();
+                }
+                return deferred.promise;
+            };
+
+            $scope.$watch('selectedTC', function (newValue, oldValue) {
+
+
+                // console.log("Watch Triggered");
+                // if (!newValue && !TestObjectUtil.index($scope.testCases, "id", oldValue.id)) {
+                //     console.log("Deleted");
+                // }
+                // else if (oldValue !== null && (!newValue || oldValue.id !== newValue.id)) {
+                //     console.log("Selected TC Changed");
+                //     console.log("Value : ");
+                //     console.log(oldValue);
+                //
+                //     var i = TestObjectUtil.index($scope.testCases, "id", oldValue.id);
+                //     console.log("Index Of Selected is : " + i);
+                //     if (~i) {
+                //         var tc = $scope.testCases[i];
+                //         if (TestObjectUtil.hashChanged(tc)) {
+                //             console.log("UNSAVED CHANGED");
+                //             console.log("Backup : ");
+                //             if($scope.tcBackups.hasOwnProperty(tc.id)) {
+                //                 console.log($scope.tcBackups[tc.id]);
+                //             }
+                //             tc._changed = true;
+                //             if ($scope.remember.bool) {
+                //                 if ($scope.remember.choice === "save") {
+                //                     console.log("Should Save");
+                //                     $scope.saveAllChangedTestPlans(tc, $scope.selectedTP)
+                //                 }
+                //                 else if ($scope.remember.choice === "discard") {
+                //                     console.log("Discarding");
+                //                     $scope.discardChanges(tc);
+                //                 }
+                //             }
+                //             else {
+                //                 $scope.exit = $modal.open({
+                //                     templateUrl: 'ExitTC.html',
+                //                     controller: 'ExitCtrl',
+                //                     resolve: {
+                //                         discard: function () {
+                //                             return TestObjectUtil.isLocal(tc);
+                //                         }
+                //                     }
+                //                 });
+                //
+                //                 $scope.exit.result.then(function (response) {
+                //                     if (response) {
+                //                         $scope.remember.bool = response.remember;
+                //                         $scope.remember.choice = response.action;
+                //                         if (response.action === "save") {
+                //                             console.log("Should Save");
+                //                             $scope.saveAllChangedTestPlans(tc, $scope.selectedTP)
+                //                         }
+                //                         else if (response.action === "discard") {
+                //                             console.log("Discarding");
+                //                             $scope.discardChanges(tc);
+                //                         }
+                //                     }
+                //                 }, function () {
+                //                     console.log("Save Later");
+                //                 });
+                //             }
+                //
+                //         }
+                //         else {
+                //             tc._changed = false;
+                //         }
+                //     }
+                //
+                // }
             });
 
             $scope.getScope = function (id) {
-                // var obj = { $$a : "b", $$b : 1, $$c : new Date(), d : "a"};
-                // var obj2 =  angular.copy(obj);
-                // console.log(obj2);
-                console.log("SCOPE");
-                console.log(id);
-                console.log(angular.element(document.getElementById(id)).scope());
                 return angular.element(document.getElementById(id)).scope();
             };
 
-            $scope.selectTC = function (tc) {
-                // waitingDialog.show('Opening Test Case', {
-                // 	dialogSize : 'xs',
-                // 	progressType : 'info'
-                // });
+            $scope.noDatesSS = ['G','F','A','I','S','C','X'];
 
+            $scope.needDates = function (ss) {
+                if(~$scope.noDatesSS.indexOf(ss)){
+                    return false;
+                }
+                return true;
+            };
 
-                $timeout(function () {
-                    if (!tc._changed) {
-                        $scope.tcBackups[tc.id] = angular.copy(tc);
+            $scope.serieStatusChange = function (ss,fct) {
+                if(!$scope.needDates(ss)){
+                    fct.earliest = null;
+                    fct.recommended = null;
+                    fct.complete = null;
+                    fct.pastDue = null;
+                }
+                else {
+                    if(!fct.earliest){
+                        fct.earliest = TestObjectFactory.createDate($scope.selectedTC.dateType);
                     }
+                    if(!fct.recommended){
+                        fct.recommended = TestObjectFactory.createDate($scope.selectedTC.dateType);
+                    }
+                }
+            };
+
+            $scope.tcFilter = {
+                example : {
+                    name : '',
+                    uid : '',
+                    metaData : {
+                        version: ''
+                    }
+                },
+                changed : false,
+                dates : {
+                    created : {
+                        position : 'O',
+                        date : null
+                    },
+                    updated : {
+                        position : 'O',
+                        date : null
+                    }
+                }
+            };
+            $scope.resetTcFilter = function (f) {
+                Object.assign(f,{
+                    example : {
+                        name : '',
+                        uid : '',
+                        metaData : {
+                            version: ''
+                        }
+                    },
+                    changed : false,
+                    dates : {
+                        created : {
+                            position : 'O',
+                            date : null
+                        },
+                        updated : {
+                            position : 'O',
+                            date : null
+                        }
+                    }
+                });
+            };
+            $scope.filterActive = function (f) {
+              return   f.changed !== false || f.example.name !== '' || f.example.uid !== '' || f.example.metaData.version !== '' || f.dates.created.date !== null || f.dates.updated.date !== null;
+            };
+
+            $scope.selectTG = function (tg) {
+                $timeout(function () {
 
                     // Selection
                     $scope.selectedEvent = null;
                     $scope.selectedForecast = null;
-                    $scope.selectedTC = tc;
-                    $scope.selectedType = "tc";
+                    $scope.selectedTG = tg;
+                    $scope.selectedType = "tg";
                     $scope.patientSelected = false;
+
                     // View
-                    $scope.subview = "EditTestPlanMetadata.html";
+                    $scope.subview = "EditTestGroupMetadata.html";
                     waitingDialog.hide();
                 }, 0);
             };
 
-            $scope.selectPatient = function () {
-                waitingDialog.show('Opening Patient Information', {
-                    dialogSize: 'xs',
-                    progressType: 'info'
+            $scope.selectTC = function (tc,skip,goToSummary) {
+                $scope.warning(skip).then(function () {
+                    $timeout(function () {
+                        if(!tc._hasErrors){
+                            tc._hasErrors = false;
+                            tc._errors = null;
+                        }
+                        if (!tc._changed) {
+                            if(!tc._hash && !$scope.isLocal(tc)){
+                                TestObjectUtil.updateHash(tc);
+                            }
+                            tc._changed = false;
+                            $scope.tcBackups[tc.id] = angular.copy(tc);
+                        }
+
+                        // Selection
+                        $scope.selectedEvent = null;
+                        $scope.selectedForecast = null;
+                        $scope.selectedTC = tc;
+                        $scope.selectedType = "tc";
+                        $scope.patientSelected = false;
+
+                        // View
+                        $scope.subview = "EditTestPlanMetadata.html";
+                        if(goToSummary)
+                            $scope.tabs.selectedTabTC = 1;
+                        else {
+                            $scope.tabs.selectedTabTC = 0;
+                        }
+                        waitingDialog.hide();
+                    }, 0);
                 });
+            };
+
+            $scope.selectPatient = function () {
                 $timeout(function () {
                     // View
                     $scope.selectedEvent = null;
@@ -655,18 +892,6 @@ angular
                         delete evaluation.reason;
                     }
                 }
-            };
-
-            $scope.cloneTP = function (tp) {
-                var x = TestObjectUtil.cloneEntity(tp);
-                x.name = "[CLONE] " + x.name;
-                for (var t in x.testCases) {
-                    TestObjectUtil.markWithCLID(x.testCases[t]);
-                    TestObjectUtil.sanitizeEvents(x);
-                }
-                TestObjectUtil.sanitizeDates(x);
-                $scope.tps.push(x);
-                $scope.selectTP(x);
             };
 
             $scope.isSelectedTC = function (t) {
@@ -734,6 +959,10 @@ angular
                 $scope.selectTPTab(0);
             };
 
+            $scope.$on('$routeChangeStart',function(angularEvent,next,current) {
+                console.log("Leaving TP EDIT");
+            });
+
             $scope.has = function (a, b) {
                 return a.hasOwnProperty(b) && a[b];
             };
@@ -752,7 +981,7 @@ angular
             };
 
             $scope.summary = function () {
-                $scope.selectTC($scope.selectedTC);
+                $scope.selectTC($scope.selectedTC,true,true);
                 $scope.tabs.selectedTabTC = 1;
             };
 
@@ -785,7 +1014,7 @@ angular
                         for (var e = 0; e < $scope.selectedTC.events.length; e++) {
                             TestObjectUtil.updateEventId($scope.selectedTC.events,$scope.selectedTC.events[e].vaccination.position,e);
                         }
-                        $scope.selectTC($scope.selectedTC);
+                        $scope.selectTC($scope.selectedTC,true);
                     }]];
 
             $scope.forecastCM = [
@@ -793,32 +1022,34 @@ angular
                     function ($itemScope) {
                         var id = $itemScope.$index;
                         $scope.selectedTC.forecast.splice(id, 1);
-                        $scope.selectTC($scope.selectedTC);
+                        $scope.selectTC($scope.selectedTC,true);
                     }]];
 
             $scope.tpCM = [
-                ['Add Test Case',
-                    function ($itemScope) {
-                        var tp = $itemScope.tp;
-                        var tc = TestObjectFactory.createTC(tp.id,"");
-                        tp.testCases.push(tc);
-                        $scope.testCases.push(tc);
-                        $scope.selectTC(tc);
-                    }],
-                ['Import Test Case',
-                    function ($itemScope) {
-                        var tp = $itemScope.tp;
-                        $scope.selectTP(tp);
-                        $scope.selectedTabTP = 1;
-                    },
-                    function () {
-                        return !$scope.isLocal($scope.selectedTP);
-                    }],
+
                 ['Add Test Case Group',
                     function ($itemScope) {
                         var tp = $itemScope.tp;
                         var tcg = TestObjectFactory.createGRP(tp.id);
                         tp.testCaseGroups.push(tcg);
+                        $scope.saveTG(tcg);
+                    }],
+                ['Add Test Case',
+                    function ($itemScope) {
+                        var tp = $itemScope.tp;
+                        var tc = TestObjectFactory.createTC(tp.id,"",tp.metaData.version);
+                        console.log("NEW TC");
+                        console.log(tc);
+
+                        tp.testCases.push(tc);
+                        $scope.testCases.push(tc);
+                        console.log(tp);
+                        $scope.selectTC(tc);
+                        $scope.scrollTo('tc-' + tc.id,"");
+                    }],
+                ['Import Test Case',
+                    function ($itemScope) {
+                        $scope.importButton();
                     }]
             ];
 
@@ -826,11 +1057,12 @@ angular
                 ['Add Test Case',
                     function ($itemScope) {
                         var grp = $itemScope.group;
-                        var tc = TestObjectFactory.createTC(grp.testPlan, grp.id);
+                        var tc = TestObjectFactory.createTC(grp.testPlan, grp.id, $scope.selectedTP.metaData.version);
                         tc.group = grp.id;
-                        grp.testCases.splice(0, 0, tc);
+                        grp.testCases.push(tc);
                         $scope.testCases.push(tc);
                         $scope.selectTC(tc);
+                        $scope.scrollTo('tc-' + tc.id,tc.group);
                     }],
                 ['Rename Test Case Group',
                     function ($itemScope) {
@@ -870,8 +1102,27 @@ angular
                     function ($itemScope) {
                         var grp = $itemScope.group;
                         var index = TestObjectUtil.index($scope.selectedTP.testCaseGroups, "id", grp.id);
-                        $scope.selectedTP.testCaseGroups.splice(index, 1);
-                        //TODO Delete TCG BackEnd
+                        if(TestObjectUtil.isLocalID(grp.id)){
+                            $scope.selectedTP.testCaseGroups.splice(index, 1);
+                            $scope.notify(true,"Test Case Group deleted");
+                            if($scope.selectedTC && grp.id === $scope.selectedTC.group){
+                                $scope.selectedTC = null;
+                            }
+                            $scope.selectTP($scope.selectedTP,true);
+                        }
+                        else {
+                            $http.post('api/testcasegroup/'+grp.id+'/delete').then(function (success) {
+                                $scope.selectedTP.testCaseGroups.splice(index, 1);
+                                $scope.notify(true,"Test Case Group deleted");
+                                if($scope.selectedTC && grp.id === $scope.selectedTC.group){
+                                    $scope.selectedTC = null;
+                                }
+                                $scope.selectTP($scope.selectedTP,true);
+                            },
+                            function () {
+                                $scope.notify(false,"Failed to delete Test Case Group");
+                            });
+                        }
                     }]];
 
             $scope.tcCM = [
@@ -885,11 +1136,11 @@ angular
                         TestObjectUtil.sanitizeEvents(clone);
                         var list = TestObjectUtil.getList($scope.selectedTP, obj.id);
                         if (list) {
-                            var index = list.indexOf(obj);
-                            list.splice(index + 1, 0, clone);
+                            list.push(clone);
                             $scope.testCases.push(clone);
                             $scope.selectTC(clone);
-                            console.log(clone);
+                            $scope.scrollTo('tc-' + clone.id,clone.group);
+                            //console.log(clone);
                         }
                     }],
                 ['Delete Test Case',
@@ -900,16 +1151,22 @@ angular
                             var index = list.indexOf(tc);
                             if (TestObjectUtil.isLocal(tc)) {
                                 list.splice(index, 1);
-                                $scope.selectTP($scope.selectedTP);
                                 var indexTCL = TestObjectUtil.index($scope.testCases,"id",tc.id);
                                 $scope.testCases.splice(indexTCL, 1);
+                                if($scope.selectedTC && tc.id === $scope.selectedTC.id){
+                                    $scope.selectedTC = null;
+                                }
+                                $scope.selectTP($scope.selectedTP,true);
                             }
                             else {
                                 $http.post('api/testcase/' + tc.id + '/delete').then(function (r) {
                                         list.splice(index, 1);
-                                        $scope.selectTP($scope.selectedTP);
                                         var indexTCL = TestObjectUtil.index($scope.testCases,"id",tc.id);
                                         $scope.testCases.splice(indexTCL, 1);
+                                        if($scope.selectedTC && tc.id === $scope.selectedTC.id){
+                                            $scope.selectedTC = null;
+                                        }
+                                        $scope.selectTP($scope.selectedTP,true);
 
                                         Notification
                                             .success({
@@ -957,6 +1214,7 @@ angular
                     }
                     else {
                         $scope.$apply(function () {
+                            $scope.sfileO = null;
                             $scope.sfile = "File should be Excel Spreadsheet";
                             $scope.fileErr = true;
                         });
@@ -971,8 +1229,52 @@ angular
                 tc._dateType = tc.dateType;
             };
 
+            $scope.saved = function (list) {
+                for(var tc = 0; tc < list.length; tc++){
+                    console.log(list[tc]);
+                    if($scope.isLocal(list[tc]) || list[tc]._changed ){
+                        return false;
+                    }
+                }
+                return true;
+            };
+
+            $scope.canImport = function (tp) {
+                if(!tp){
+                    return false;
+                }
+                if($scope.isLocal(tp)){
+                    return false;
+                }
+                if(!$scope.saved(tp.testCases)){
+                    return false;
+                }
+                if(!$scope.saved(tp.testCaseGroups)){
+                    return false;
+                }
+                for(var tc = 0; tc < tp.testCaseGroups.length; tc++){
+                    if(!$scope.saved(tp.testCaseGroups[tc].testCases)){
+                        return false;
+                    }
+                }
+                return true;
+            };
+
             $scope.uploadNIST = function () {
                 if ($scope.sfileO != null && !$scope.fileErr) {
+                    if(!$scope.canImport($scope.selectedTP)){
+                        console.log("CAN'T IMPORT");
+                        var saveModal = $modal.open({
+                            templateUrl: 'ImportSave.html',
+                            controller: 'ImportSaveCtrl'
+                        });
+                        saveModal.result.then(function (result) {
+                            if(result.action === 'save'){
+                                $scope.saveTP($scope.selectedTP,true);
+                            }
+                        });
+                        return;
+                    }
                     $scope.importing = true;
                     var fd = new FormData();
                     fd.append("file", $scope.sfileO);
@@ -992,16 +1294,35 @@ angular
                             function (data) {
                                 console.log(data);
                                 if (data.status) {
-                                    $scope.sanitizeTestCase(data.imported);
-                                    $scope.selectedTP.testCases.push(data.imported);
-                                    $scope.importing = false;
+                                    var tp = angular.fromJson(data.testPlan);
+                                    TestObjectUtil.sanitizeDates(tp);
+                                    for (var tc = 0; tc < tp.testCases.length; tc++) {
+                                        tp.testCases[tc]._dateType = tp.testCases[tc].dateType;
+                                        TestObjectUtil.sanitizeEvents(tp.testCases[tc]);
+                                    }
+                                    for (var tg = 0; tg < tp.testCaseGroups.length; tg++) {
+                                        for (var tci = 0; tci < tp.testCaseGroups[tg].testCases.length; tci++) {
+                                            tp.testCaseGroups[tg].testCases[tci]._dateType = tp.testCaseGroups[tg].testCases[tci].dateType;
+                                            TestObjectUtil.sanitizeEvents(tp.testCaseGroups[tg].testCases[tci]);
+                                        }
+                                    }
+                                    //TestObjectUtil.merge(tp,$scope.selectedTP);
+                                    Object.assign($scope.selectedTP,tp);
+                                    TestObjectUtil.listTC($scope.selectedTP,$scope.testCases);
+                                    var i = TestObjectUtil.index($scope.testCases,'id',data.imported.id);
+                                    if(~i){
+                                        $scope.selectTC($scope.testCases[i]);
+                                        $scope.scrollTo('tc-'+data.imported.id,data.imported.group);
+                                    }
+
                                     Notification
                                         .success({
                                             message: "TestCase Imported",
                                             delay: 3000
                                         });
+                                    $scope.sfile = "browse";
+                                    $scope.sfileO = null;
                                 } else {
-                                    $scope.importing = false;
                                     $scope.control.error.isSet = true;
                                     var erObj = {
                                         action: "IMPORT_NIST",
@@ -1015,6 +1336,11 @@ angular
                                             });
                                         }
                                     }
+                                    erObj.errors.push({
+                                        path: 'File',
+                                        message: data.message
+                                    });
+                                    $scope.fileErr = true;
                                     $scope.control.error.list.push(erObj);
                                     Notification
                                         .error({
@@ -1023,17 +1349,16 @@ angular
                                         });
                                 }
 
-                                $scope.sfile = "browse";
-                                $scope.sfileO = null;
+
+                                $scope.importing = false;
 
                             }).error(function (data) {
                         $scope.importing = false;
+                        $scope.fileErr = true;
                         Notification.error({
-                            message: "Error While Importing",
+                            message: "Server Error While Importing",
                             delay: 3000
                         });
-                        $scope.sfile = "browse";
-                        $scope.sfileO = null;
                     });
                 }
             };
@@ -1048,6 +1373,7 @@ angular
                     $scope.impDiag = $modal.open({
                         templateUrl: 'ImportLoading.html',
                         controller: 'ConfirmTestPlanDeleteCtrl',
+                        backdrop: false,
                         resolve: {
                             testplanToDelete: function () {
                                 return null;
@@ -1056,6 +1382,30 @@ angular
                                 return $scope.tps;
                             }
                         }
+                    });
+                }
+            });
+
+            $scope.$watch('control.error.isSet', function (newValue) {
+                if (newValue === false) {
+                    if ($scope.errorDiag)
+                        $scope.errorDiag.close({});
+                }
+                else if (newValue === true) {
+                    $scope.errorDiag = $modal.open({
+                        templateUrl: 'ErrorPanel.html',
+                        controller: 'ErrorPanelCtrl',
+                        resolve: {
+                            control : function () {
+                                return $scope.control;
+                            }
+                        }
+                    });
+                    $scope.errorDiag.result.then(function () {
+
+                    },function () {
+                        $scope.control.error.isSet = false;
+                        $scope.control.error.list = [];
                     });
                 }
             });
@@ -1075,8 +1425,22 @@ angular
                 }
             };
 
+
             $scope.uploadCDC = function () {
                 if ($scope.sfileO != null && !$scope.fileErr) {
+                    if(!$scope.canImport($scope.selectedTP)){
+                        console.log("CAN'T IMPORT");
+                        var saveModal = $modal.open({
+                            templateUrl: 'ImportSave.html',
+                            controller: 'ImportSaveCtrl'
+                        });
+                        saveModal.result.then(function (result) {
+                            if(result.action === 'save'){
+                                $scope.saveTP($scope.selectedTP,true);
+                            }
+                        });
+                        return;
+                    }
                     $scope.importing = true;
                     var fd = new FormData();
                     fd.append("file", $scope.sfileO);
@@ -1103,17 +1467,15 @@ angular
                                     for (var tc = 0; tc < tp.testCases.length; tc++) {
                                         tp.testCases[tc]._dateType = tp.testCases[tc].dateType;
                                         TestObjectUtil.sanitizeEvents(tp.testCases[tc]);
-                                        TestObjectUtil.hash(tp.testCases[tc]);
                                     }
                                     for (var tg = 0; tg < tp.testCaseGroups.length; tg++) {
                                         for (var tci = 0; tci < tp.testCaseGroups[tg].testCases.length; tci++) {
                                             tp.testCaseGroups[tg].testCases[tci]._dateType = tp.testCaseGroups[tg].testCases[tci].dateType;
                                             TestObjectUtil.sanitizeEvents(tp.testCaseGroups[tg].testCases[tci]);
                                         }
-                                        TestObjectUtil.hash(tp.testCaseGroups[tg].testCases);
                                     }
 
-                                    Object.assign($scope.selectedTP,tp);
+                                    TestObjectUtil.merge(tp,$scope.selectedTP);
                                     $scope.selectTP($scope.selectedTP);
 
                                     Notification
@@ -1121,24 +1483,30 @@ angular
                                             message: "TestCases Imported",
                                             delay: 3000
                                         });
+
                                 } else {
+                                    var erObj = {
+                                        action: "IMPORT_NIST",
+                                        errors: [{ path : 'File', message : data.message}]
+                                    };
+                                    $scope.control.error.list.push(erObj);
                                     Notification
                                         .error({
                                             message: "Error While Importing",
                                             delay: 3000
                                         });
+                                    $scope.fileErr = true;
+                                    $scope.control.error.isSet = true;
                                 }
-                                $scope.sfile = "browse";
-                                $scope.sfileO = null;
                                 $scope.importing = false;
                             }).error(function (data) {
                         $scope.importing = false;
+                        $scope.fileErr = true;
                         Notification.error({
-                            message: "Error While Importing",
+                            message: "Server Error While Importing",
                             delay: 3000
                         });
-                        $scope.sfile = "browse";
-                        $scope.sfileO = null;
+
                     });
                 }
             };
@@ -1157,7 +1525,7 @@ angular
                 }
                 else {
                     Notification.error({
-                        message: "Your TestCase has unsaved changes please save before exporting",
+                        message: "Your Test Case has unsaved changes please save before exporting",
                         delay: 3000
                     });
                 }
@@ -1167,6 +1535,7 @@ angular
 
             $scope.initTestCases = function () {
                 if (userInfoService.isAuthenticated()) {
+
                     $scope.loading = true;
                     $scope.loadTestCases().then(function (a) {
                         $scope.initEnums().then(function (b) {
@@ -1174,6 +1543,7 @@ angular
                                 console.log($scope.tps);
                                 $scope.loading = false;
                                 $scope.error = null;
+                                //$scope.autoSaveFct();
                             });
                         });
                     });
@@ -1246,37 +1616,45 @@ angular
 
             $scope.switchGroup = function (tp, tc) {
                 var list = TestObjectUtil.getList(tp, tc.id);
-                var index = TestObjectUtil.index(list, "id", tc.id);
-                if (tc.group !== "") {
-                    var group = TestObjectUtil.getGroupByID(tp, tc.group);
-                    if (group) {
+                if(list){
+                    var index = TestObjectUtil.index(list, "id", tc.id);
+                    if (tc.group !== "") {
+                        var group = TestObjectUtil.getGroupByID(tp, tc.group);
+                        if (group) {
+                            list.splice(index, 1);
+                            group.testCases.push(tc);
+                        }
+                    }
+                    else {
                         list.splice(index, 1);
-                        group.testCases.push(tc);
-                        var scope = $scope.getScope('gr-' + group.id);
-                        console.log(scope);
-                        scope.expand();
-                        $timeout(function () {
-                            $scope.scrollTo('tc-' + tc.id);
-                        }, 1000);
-
+                        tp.testCases.push(tc);
                     }
                 }
                 else {
-                    console.log("ELSE");
-                    list.splice(index, 1);
-                    tp.testCases.push(tc);
+                    var group = TestObjectUtil.getGroupByID(tp, tc.group);
+                    if (group) {
+                        group.testCases.push(tc);
+                    }
                 }
 
-                $timeout(function () {
-                    $scope.scrollTo('tc-' + tc.id);
-                }, 1000);
+
+                $scope.scrollTo('tc-' + tc.id,tc.group);
+
             };
 
-            $scope.scrollTo = function (id) {
-                var old = $location.hash();
-                $location.hash(id);
-                $anchorScroll();
-                $location.hash(old);
+            $scope.scrollTo = function (id,grp) {
+                $timeout(function () {
+                    if(grp && grp !== ''){
+                        var scope = $scope.getScope('gr-' + grp);
+                        scope.expand();
+                    }
+                    $timeout(function () {
+                        var old = $location.hash();
+                        $location.hash(id);
+                        $anchorScroll();
+                        $location.hash(old);
+                    }, 500);
+                }, 500);
             };
 
             $scope.selectTPTab = function (value) {
@@ -1303,14 +1681,14 @@ angular
                         //TestObjectUtil.sanitizeDates(result.tg);
                         Object.assign(tg, result.tg);
                         TestObjectSynchronize.updateTestGroupId(tg);
-                        Notification.success({
-                            message: result.message,
-                            delay: 3000
-                        });
+                        // Notification.success({
+                        //     message: result.message,
+                        //     delay: 3000
+                        // });
                         $scope.loading = false;
                         deferred.resolve({
                             status: true,
-                            message: "TestCase Saved",
+                            message: "TestCaseGroup Saved",
                             obj: tg
                         });
                     },
@@ -1341,12 +1719,13 @@ angular
                             };
                             erObj.errors = result.response.errors;
                             $scope.control.error.list.push(erObj);
-                            Notification.error({
-                                message: result.message,
-                                delay: 3000
-                            });
+                            // Notification.error({
+                            //     message: result.message,
+                            //     delay: 3000
+                            // });
                             deferred.reject({
-                                status: false
+                                status: false,
+                                message: result.message
                             });
                         }
                         $scope.loading = false;
@@ -1355,7 +1734,23 @@ angular
                 return deferred.promise;
             };
 
-            $scope.saveTP = function (tp,deep) {
+            $scope.saveSeqTC = function (i,list,auto) {
+                if(i < list.length) {
+                    $scope.saveTC(list[i],auto).then(function (result) {
+                        if(!auto){
+                            $scope.notify(result.status,result.message);
+                        }
+                        $scope.saveSeqTC(i+1,list,auto);
+                    }, function (result) {
+                        if(!auto){
+                            $scope.notify(result.status,result.message);
+                        }
+                        $scope.saveSeqTC(i+1,list,auto);
+                    });
+                }
+            };
+
+            $scope.saveTP = function (tp,deep,auto) {
                 var deferred = $q.defer();
                 TestObjectSynchronize.syncTP(tp).then(
                     function (result) {
@@ -1366,22 +1761,48 @@ angular
                         Object.assign(tp, result.tp);
                         TestObjectSynchronize.updateTestPlanId(tp);
                         if(deep){
+                            //var tcPromises = [];
                             var tcs = [];
                             TestObjectUtil.listTC(tp,tcs);
-                            for(var tc = 0; tc < tcs.length; tc++){
-                                if(tcs[tc]._changed){
-                                    $scope.saveTC(tcs[tc]);
-                                }
-                            }
+                            tcs = tcs.filter(function (item) {
+                                return item._changed ? true : false;
+                            });
+                            $scope.saveSeqTC(0,tcs,auto);
+                            // for(var tc = 0; tc < tcs.length; tc++){
+                            //     if(tcs[tc]._changed){
+                            //         $scope.saveTC(tcs[tc],auto).then(function (result) {
+                            //             if(!auto){
+                            //                 $scope.notify(result.status,result.message);
+                            //             }
+                            //         }, function (result) {
+                            //             if(!auto){
+                            //                 $scope.notify(result.status,result.message);
+                            //             }
+                            //         });
+                            //     }
+                            // }
+                            // for(var tcg = 0; tcg < tp.testCaseGroups.length; tcg++){
+                            //     if($scope.isLocal(tp.testCaseGroups[tcg])){
+                            //         $scope.saveTG(tp.testCaseGroups[tcg],auto).then(function (result) {
+                            //             if(!auto){
+                            //                 $scope.notify(result.status,result.message);
+                            //             }
+                            //         }, function (result) {
+                            //             if(!auto){
+                            //                 $scope.notify(result.status,result.message);
+                            //             }
+                            //         });
+                            //     }
+                            // }
                         }
-                        Notification.success({
-                            message: result.message,
-                            delay: 3000
-                        });
+                        // Notification.success({
+                        //     message: result.message,
+                        //     delay: 3000
+                        // });
                         $scope.loading = false;
                         deferred.resolve({
                             status: true,
-                            message: "TestCase Saved",
+                            message: "TestPlan Saved",
                             obj: tp
                         });
                     },
@@ -1397,20 +1818,21 @@ angular
                             $scope.control.error.list.push(erObj);
 
                         }
-                        Notification.error({
-                            message: result.message,
-                            delay: 3000
-                        });
+                        // Notification.error({
+                        //     message: result.message,
+                        //     delay: 3000
+                        // });
                         $scope.loading = false;
                         deferred.reject({
-                            status: false
+                            status: false,
+                            message : result.message
                         });
                     }
                 );
                 return deferred.promise;
             };
 
-            $scope.saveTC = function (tc) {
+            $scope.saveTC = function (tc,auto) {
                 var deferred = $q.defer();
                 var where;
                 var id;
@@ -1425,13 +1847,11 @@ angular
                 TestObjectSynchronize.syncTC(where, id, tc).then(
                     function (result) {
                         TestObjectUtil.updateHash(result.tc);
-                        tc._changed = false;
+                        result.tc._changed = false;
+                        result.tc._hasErrors = false;
+                        result.tc._errors = null;
                         var actual = TestObjectUtil.synchronize(tc.id, $scope.testCases, result.tc);
                         tc = actual;
-                        Notification.success({
-                            message: result.message,
-                            delay: 3000
-                        });
                         $scope.loading = false;
                         deferred.resolve({
                             status: true,
@@ -1442,17 +1862,14 @@ angular
                     function (result) {
 
                         if (result.hasOwnProperty("code") && result.code === 'LOCAL') {
-                            console.log("LOCAL - WHERE : " + where);
-                            console.log("LOCAL - ID : " + id);
+
                             var index = TestObjectUtil.index($scope.tps, "id", tc.testPlan);
                             var tp = $scope.tps[index];
-                            console.log(tp);
-                            console.log("TP ID " + tp.id);
-                            console.log("TCP ID " + tc.testPlan);
+
                             if (where === 'tp') {
                                 $scope.saveTP(tp,false).then(
                                     function () {
-                                        $scope.saveTC(tc).then(function (result) {
+                                        $scope.saveTC(tc,auto).then(function (result) {
                                                 deferred.resolve(result);
                                             },
                                             function (result) {
@@ -1469,7 +1886,7 @@ angular
                                 if (group) {
                                     $scope.saveTG(group).then(
                                         function () {
-                                            $scope.saveTC(tc).then(function (result) {
+                                            $scope.saveTC(tc,auto).then(function (result) {
                                                     deferred.resolve(result);
                                                 },
                                                 function (result) {
@@ -1484,26 +1901,33 @@ angular
                             }
                         }
                         else if (result.response.hasOwnProperty("errors")) {
-                            $scope.control.error.isSet = true;
                             var erObj = {
                                 action: 'SAVE_TC',
                                 obj: tc,
                                 errors: []
                             };
+
                             for (var i = 0; i < result.response.errors.length; i++) {
                                 erObj.errors.push({
                                     path: $scope.sanitizeErrorPath(result.response.errors[i].path),
                                     message: result.response.errors[i].message
                                 });
                             }
-                            //$scope.control.error.list = [];
-                            $scope.control.error.list.push(erObj);
-                            Notification.error({
-                                message: result.message,
-                                delay: 3000
-                            });
+                            tc._hasErrors = true;
+                            tc._changed = true;
+                            tc._errors = erObj.errors;
+                                //$scope.control.error.list = [];
+                            if(!auto){
+                                $scope.control.error.list.push(erObj);
+                                $scope.control.error.isSet = true;
+                            }
+                            // Notification.error({
+                            //     message: result.message,
+                            //     delay: 3000
+                            // });
                             deferred.reject({
-                                status: false
+                                status: false,
+                                message : result.message
                             });
                             $scope.loading = false;
                         }
@@ -1513,15 +1937,47 @@ angular
             };
 
             $scope.saveAllChangedTestPlans = function (stc, stp) {
+                var deferred = $q.defer();
                 $scope.loading = true;
                 $scope.control.error.isSet = false;
                 $scope.control.error.obj = [];
 
                 if (!stc && stp) {
-                    $scope.saveTP(stp,true);
+                    $scope.saveTP(stp,true).then(function (result) {
+                        $scope.notify(result.status,result.message);
+                        deferred.resolve(result);
+                    }, function (result) {
+                        $scope.notify(result.status,result.message);
+                        deferred.reject(result);
+                    });
                 }
                 else if (stc) {
-                    $scope.saveTC(stc);
+                    $scope.saveTC(stc).then(function (result) {
+                        $scope.notify(result.status,result.message);
+                        deferred.resolve(result);
+                    }, function (result) {
+                        $scope.notify(result.status,result.message);
+                        deferred.reject(result);
+                    });
+                }
+                else {
+                    deferred.resolve();
+                }
+                return deferred.promise;
+            };
+
+            $scope.notify = function (success,message) {
+                if(success){
+                    Notification.success({
+                        message: message,
+                        delay: 3000
+                    });
+                }
+                else {
+                    Notification.error({
+                        message: message,
+                        delay: 3000
+                    });
                 }
             };
 
@@ -1633,6 +2089,22 @@ angular.module('tcl').controller('ExitCtrl',
         };
     });
 
+angular.module('tcl').controller('ImportSaveCtrl',
+    function ($scope, $uibModalInstance) {
+
+        $scope.save = function () {
+            $uibModalInstance.close({action: 'save'});
+        };
+
+        $scope.saveLater = function () {
+            $uibModalInstance.close({action: 'later'});
+        };
+
+        $scope.dismiss = function () {
+            $uibModalInstance.dismiss('cancel');
+        };
+    });
+
 angular.module('tcl').controller('DateCtrl',
     function ($scope, $uibModalInstance) {
         $scope.continue = function () {
@@ -1659,6 +2131,14 @@ angular.module('tcl').controller('GrpNameCtrl',
             $uibModalInstance.dismiss('cancel');
         };
 
+    });
+
+angular.module('tcl').controller('ErrorPanelCtrl',
+    function ($scope, $uibModalInstance, control) {
+        $scope.control = control;
+        $scope.ok = function () {
+            $uibModalInstance.dismiss('cancel');
+        };
     });
 
 angular.module('tcl').controller('VaccineBrowseCtrl',

@@ -29,15 +29,39 @@ angular.module('tcl').factory('TestObjectUtil', function () {
                 }
             }
         },
+        tpHash : function (tp) {
+          var str = tp.name+tp.metaData.version+tp.description+tp.metaData.changeLog;
+          return md5(str);
+        },
+        tpHashChanged : function (tp) {
+           if(!tp._hash){
+               return true;
+           }
+           else {
+               return tp._hash !== testObjectService.tpHash(tp);
+           }
+        },
+        tpUpdateHash : function (tp) {
+            tp._hash = testObjectService.tpHash(tp);
+        },
+        toStringObj : function (obj) {
+            var cleanedObj =  JSON.parse(angular.toJson(obj));
+            var string = JSON.sortify(cleanedObj);
+            return string;
+        },
         hashChanged: function (tc) {
             var _tc = testObjectService.prepare(tc);
             delete _tc.metaData.dateLastUpdated;
-            return md5(JSON.stringify(JSON.parse(angular.toJson(_tc)), Object.keys(_tc).sort())) !== tc._hash;
+            var str = testObjectService.toStringObj(_tc);
+            return md5(str) !== tc._hash;
         },
         updateHash: function (tc) {
             var _tc = testObjectService.prepare(tc);
+            console.log(tc);
+            console.log(_tc);
             delete _tc.metaData.dateLastUpdated;
-            tc._hash = md5(JSON.stringify(JSON.parse(angular.toJson(_tc)), Object.keys(_tc).sort()));
+            var str = testObjectService.toStringObj(_tc);
+            tc._hash = md5(str);
         },
         cleanObject: function (obj, exp) {
             if (typeof obj === 'object') {
@@ -167,6 +191,15 @@ angular.module('tcl').factory('TestObjectUtil', function () {
             return null;
         },
 
+        getGroupByName: function (tp, name) {
+            for (var tcg = 0; tcg < tp.testCaseGroups.length; tcg++) {
+                if (tp.testCaseGroups[tcg].name === name) {
+                    return tp.testCaseGroups[tcg];
+                }
+            }
+            return null;
+        },
+
         clone: function (obj) {
             var c = JSON.parse(angular.toJson(obj));
             testObjectService.cleanObject(c, new RegExp("^id$"));
@@ -177,6 +210,25 @@ angular.module('tcl').factory('TestObjectUtil', function () {
             var e = testObjectService.clone(entity);
             testObjectService.markWithCLID(e);
             return e;
+        },
+
+        merge: function (newTP, oldTP) {
+            oldTP.testCases = oldTP.testCases.concat(newTP.testCases);
+            for(var i = 0; i < newTP.testCaseGroups.length; i++){
+                var group = testObjectService.getGroupByID(oldTP,newTP.testCaseGroups[i].id);
+                if(group){
+                    console.log("GROUP "+newTP.testCaseGroups[i].name+" FOUND");
+                    for(var tc = 0; tc < newTP.testCaseGroups[i].testCases.length; tc++){
+                        group.testCases.push(newTP.testCaseGroups[i].testCases[tc]);
+                    }
+                    console.log(group);
+                    console.log(oldTP);
+                }
+                else {
+                    console.log("GROUP "+newTP.testCaseGroups[i].name+" NOT FOUND");
+                    oldTP.testCaseGroups.push(newTP.testCaseGroups[i]);
+                }
+            }
         },
 
         synchronize: function (id, container, remoteObj) {
@@ -299,6 +351,14 @@ angular.module('tcl').factory('TestObjectFactory', function (TestObjectUtil) {
                 rules: []
             }
         },
+        createDate : function (type) {
+            if(type === 'RELATIVE'){
+                return testObjectService.createRD();
+            }
+            else {
+                return testObjectService.createFD();
+            }
+        },
         createGRP: function (id) {
             return {
                 id: "cl_" + TestObjectUtil.generateUID(),
@@ -341,10 +401,11 @@ angular.module('tcl').factory('TestObjectFactory', function (TestObjectUtil) {
                 ]
             }
         },
-        createTC: function (tp,grp) {
+        createTC: function (tp,grp,version) {
             var dt = new Date();
             var tc = {
                 name: "New TC",
+                uid : '',
                 _changed: true,
                 description: "",
                 dateType: 'FIXED',
@@ -353,13 +414,14 @@ angular.module('tcl').factory('TestObjectFactory', function (TestObjectUtil) {
                 group : grp,
                 patient: {
                     dob: testObjectService.createFD(),
-                    gender: null
+                    gender: 'F'
                 },
                 metaData: {
-                    version: 1,
+                    version: version,
                     imported: false,
                     dateCreated: dt.getTime(),
-                    dateLastUpdated: dt.getTime()
+                    dateLastUpdated: dt.getTime(),
+                    changeLog : ""
                 },
                 evalDate: testObjectService.createFD(),
                 events: [],
@@ -379,7 +441,8 @@ angular.module('tcl').factory('TestObjectFactory', function (TestObjectUtil) {
                     version: "1",
                     imported: false,
                     dateCreated: dt.getTime(),
-                    dateLastUpdated: dt.getTime()
+                    dateLastUpdated: dt.getTime(),
+                    changeLog : ""
                 },
                 testCases: [],
                 testCaseGroups: []
@@ -423,7 +486,7 @@ angular.module('tcl').factory('TestObjectFactory', function (TestObjectUtil) {
                 recomm = testObjectService.createRD();
             }
             var fc = {
-                doseNumber: 0,
+                doseNumber: '-',
                 forecastReason: "",
                 earliest: earliest,
                 recommended: recomm,
@@ -599,6 +662,7 @@ angular.module('tcl').factory('TestDataService', function ($http, $q, TestObject
                     tps = angular.fromJson(response.data);
                     TestObjectUtil.sanitizeDates(tps);
                     for (var tp = 0; tp < tps.length; tp++) {
+                        TestObjectUtil.tpUpdateHash(tps[tp]);
                         for (var tc = 0; tc < tps[tp].testCases.length; tc++) {
                             tps[tp].testCases[tc]._dateType = tps[tp].testCases[tc].dateType;
                             TestObjectUtil.sanitizeEvents(tps[tp].testCases[tc]);
@@ -608,9 +672,9 @@ angular.module('tcl').factory('TestDataService', function ($http, $q, TestObject
                                 tps[tp].testCaseGroups[tg].testCases[tci]._dateType = tps[tp].testCaseGroups[tg].testCases[tci].dateType;
                                 TestObjectUtil.sanitizeEvents(tps[tp].testCaseGroups[tg].testCases[tci]);
                             }
-                            TestObjectUtil.hash(tps[tp].testCaseGroups[tg].testCases);
+                            //TestObjectUtil.hash(tps[tp].testCaseGroups[tg].testCases);
                         }
-                        TestObjectUtil.hash(tps[tp].testCases);
+                        //TestObjectUtil.hash(tps[tp].testCases);
                     }
                     deferred.resolve(tps);
                 },
@@ -620,6 +684,35 @@ angular.module('tcl').factory('TestDataService', function ($http, $q, TestObject
             return deferred.promise;
         },
 
+        loadTestPlan: function (id) {
+            var deferred = $q.defer();
+            var tp = {};
+            $http.get('api/testplan/'+id).then(
+                function (response) {
+                    tp = angular.fromJson(response.data);
+                    TestObjectUtil.sanitizeDates(tp);
+                    
+                    for (var tc = 0; tc < tp.testCases.length; tc++) {
+                        tp.testCases[tc]._dateType = tp.testCases[tc].dateType;
+                        TestObjectUtil.sanitizeEvents(tp.testCases[tc]);
+                    }
+                    for (var tg = 0; tg < tp.testCaseGroups.length; tg++) {
+                        for (var tci = 0; tci < tp.testCaseGroups[tg].testCases.length; tci++) {
+                            tp.testCaseGroups[tg].testCases[tci]._dateType = tp.testCaseGroups[tg].testCases[tci].dateType;
+                            TestObjectUtil.sanitizeEvents(tp.testCaseGroups[tg].testCases[tci]);
+                        }
+                        TestObjectUtil.hash(tp.testCaseGroups[tg].testCases);
+                    }
+                    TestObjectUtil.hash(tp.testCases);
+
+                    deferred.resolve(tp);
+                },
+                function (error) {
+                    deferred.reject("Failed to load TestPlans");
+                });
+            return deferred.promise;
+        },
+        
         loadEnums: function () {
             var deferred = $q.defer();
             var enums = {};

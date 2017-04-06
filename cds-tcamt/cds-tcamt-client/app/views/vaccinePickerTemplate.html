@@ -12,12 +12,12 @@
 						<span>{{ctrl.model.details}}</span>
 					</td>
 					<td>
-						<button class="btn btn-xs pull-right" ng-click="ctrl.searchVx(selectedEvent)">
-							<i style="font-size: 2em;" class="fa fa-search" aria-hidden="true"></i>
-						</button>
-						<button class="btn btn-xs pull-right" ng-click="ctrl.clearVx(selectedEvent)">
-							<i style="font-size: 2em;" class="fa fa-times" aria-hidden="true"></i>
-						</button>
+						<md-button class="btn btn-xs pull-right" ng-click="ctrl.searchVx(selectedEvent)">
+							<i style="font-size: 2em;" class="fa fa-search" ></i>
+						</md-button>
+						<md-button class="btn btn-xs pull-right" ng-click="ctrl.clearVx(selectedEvent)">
+							<i style="font-size: 2em;" class="fa fa-times" ></i>
+						</md-button>
 					</td>
 				</tr>
 			</table>
@@ -35,12 +35,12 @@
 						<span>{{ctrl.getVx(ctrl.model).details}}</span>
 					</td>
 					<td>
-						<button class="btn btn-xs pull-right" ng-click="ctrl.searchVx(selectedEvent)">
-							<i style="font-size: 2em;" class="fa fa-search" aria-hidden="true"></i>
-						</button>
-						<button class="btn btn-xs pull-right" ng-click="ctrl.clearVx(selectedEvent)">
-							<i style="font-size: 2em;" class="fa fa-times" aria-hidden="true"></i>
-						</button>
+						<md-button class="btn btn-xs pull-right" ng-click="ctrl.searchVx(selectedEvent)">
+							<i style="font-size: 2em;" class="fa fa-search" ></i>
+						</md-button>
+						<md-button class="btn btn-xs pull-right" ng-click="ctrl.clearVx(selectedEvent)">
+							<i style="font-size: 2em;" class="fa fa-times" ></i>
+						</md-button>
 					</td>
 				</tr>
 			</table>
@@ -60,9 +60,9 @@
 											<td style="width: 80px;">#<strong>{{ctrl.qMp.vx.cvx}}</strong></td>
 											<td><strong>{{ctrl.qMp.vx.name}}</strong> </td>
 											<td>
-												<button class="btn btn-xs btn-primary pull-right" ng-click="ctrl.clearqMp()">
+												<md-button class="btn btn-xs btn-primary pull-right" ng-click="ctrl.clearqMp()">
 													<i class="fa fa-times" aria-hidden="true"></i>
-												</button>
+												</md-button>
 											</td>
 										</tr>
 									</table>
@@ -107,7 +107,7 @@
 									</div>
 								</div>
 								<div class="col-md-12" layout="row" layout-align="center">
-									<button flex="25" class="btn btn-xs btn-success" ng-click="ctrl.select()"> Select </button>
+									<button flex="25" class="btn btn-xs btn-success" ng-click="ctrl.select()"> Confirm </button>
 								</div>
 							</div>
 							<div ng-show="!ctrl.qMp" class="col-md-12" style="padding: 0px;">

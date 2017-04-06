@@ -113,8 +113,9 @@ body {
 			<md-card ng-class="{'alternate0' : isW($index), 'alternate1' : !isW($index) }" style="margin : 0; height : 125px;" class="col-md-6" ng-repeat="mp in filterData = ( vxm | vaccine:searchtxt | vxgroup:vxGroups | unspecified:unspec ) | limitTo:pageSize:pageSize*(pcG-1) track by $index">
 				<md-card-title style="padding : 18px 10px 10px;" layout="row" layout-align="end center">
 					<md-card-title-media style="margin-right : 10px;">
-						<div class="md-media-sm card-media" ng-class="{'alternate0' : !isW($index), 'alternate1' : isW($index) }" layout="column" layout-align="center">
-							<span style="text-align: center; font-size: 20px;"><strong>#{{mp.vx.cvx}}</strong></span>
+						<div class="md-media-sm card-media" ng-class="{'alternate0' : !isW($index), 'alternate1' : isW($index) }" layout="column" layout-align="center center">
+							<span style="background-color: green;" class="badge">CVX</span>
+							<span style="text-align: center; font-size: 20px;"><strong>{{mp.vx.cvx}}</strong></span>
 						</div>
 					</md-card-title-media>
 					<md-card-title-text>

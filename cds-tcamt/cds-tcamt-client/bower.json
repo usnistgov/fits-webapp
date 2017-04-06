@@ -41,7 +41,8 @@
     "allmighty-autocomplete": "*",
     "vkBeautify": "vkbeautify#*",
     "js-md5": "md5#^0.4.2",
-    "angular-ui-scroll": "^1.6.1"
+    "angular-ui-scroll": "^1.6.1",
+    "json.sortify": "^2.1.0"
   },
   "devDependencies": {
     "angular-scenario": "1.5.5",

@@ -45,7 +45,7 @@ body {
 									<md-input-container style="width: 100%;">
 										<label>Date Type</label>
 										<md-select ng-model="selectedTC._dateType" ng-change="dateTypeChange(selectedTC)" ng-model-options="{trackBy: '$value'}" required>
-											<md-option ng-value="'FIXED'">Fix Dates</md-option>
+											<md-option ng-value="'FIXED'">Fixed Dates</md-option>
 											<md-option ng-value="'RELATIVE'">Relative Dates</md-option>
 										</md-select>
 									</md-input-container>
@@ -87,7 +87,7 @@ body {
 							<div class="col-md-12">
 								<div class="col-md-12">
 									<md-input-container style="width: 100%;">
-										<label>Version</label>
+										<label>Last Changed in Test Plan Version</label>
 										<input ng-model="selectedTC.metaData.version" type="text"/>
 									</md-input-container>
 								</div>

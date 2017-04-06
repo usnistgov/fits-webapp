@@ -62,12 +62,12 @@ body {
 					</form>
 				</md-content>
 			</md-tab>
-			<md-tab label="Import" ng-if="!isLocal(selectedTP)">
+			<md-tab label="Import">
 				<md-content class="md-padding">
 					<form name="testplanMetaDataForm" class="form-horizontal" novalidate>
 						<div class="row">
 							<div class="col-md-12">
-								<div class="col-md-6">
+								<div class="col-md-4">
 									<md-input-container style="width: 100%;" ng-init="exportType = 'NIST'">
 										<label>Format Type</label>
 										<md-select ng-model="export.type" ng-change="typeChange();">
@@ -76,13 +76,13 @@ body {
  										</md-select>
 									</md-input-container>
 								</div>
-								<div class="col-md-6">
+								<div class="col-md-8">
 									<div class="btn" ng-class="{'btn-info' : sfileO === null && !fileErr, 'btn-success' : !fileErr && sfileO !== null, 'btn-danger' : fileErr}" style="width : 100%">
 										<i class="fa fa-file pull-left" aria-hidden="true"></i>
 										<!--<span ng-show="sfileO === null && !fileErr">{{sfile}}</span>-->
 										<!--<span ng-show="fileErr" style="color : rgb(252, 148, 148);">{{sfile}}</span>-->
 										<span>{{sfile}}</span>
-										<input type="file" class="upload" onchange="angular.element(this).scope().fileChange(this.files)"/>
+										<input style="width: 100%; height: 100%" type="file" class="upload" onchange="angular.element(this).scope().fileChange(this.files)"/>
 									</div>
 								</div>
 								<div class="col-md-12" ng-show="export.type === 'CDC'">

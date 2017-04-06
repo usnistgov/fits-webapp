@@ -99,7 +99,7 @@ app.config(function ($routeProvider, RestangularProvider, $httpProvider, Keepali
             templateUrl: 'views/account/userAccount.html',
             controller: 'AccountMgtCtrl'
         })
-        .when('/exec', {
+        .when('/validation', {
             templateUrl: 'views/execution.html'
         })
 //        .when('/account', {
@@ -335,6 +335,25 @@ app.filter("sanitize", ['$sce', function($sce) {
 
 app.run(function ($rootScope, $anchorScroll, $location, Restangular, $modal, $filter, base64, userInfoService, $http, AppInfo,StorageService,$templateCache,$window,notifications) {
     $rootScope.appInfo = {};
+    $rootScope.releaseNotes = [
+        {
+            version : '1.0-Beta',
+            date : new Date(),
+            updates : [
+                'Update1', 'Update2'
+            ]
+
+        }
+    ];
+
+    $rootScope.documents = [
+        {
+            name : 'AIRA',
+            date : new Date(),
+            location : '/docs/document.pptx',
+            fileName : "file.pptx"
+        }
+    ];
     //Check if the login dialog is already displayed.
     $rootScope.loginDialogShown = false;
     $rootScope.subActivePath = null;

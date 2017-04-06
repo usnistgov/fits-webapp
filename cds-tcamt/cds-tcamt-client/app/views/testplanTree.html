@@ -22,18 +22,21 @@ body {
 				<div style="margin-left: 5px;">
 					 <i ng-click="toggle(this)" class="fa" ng-class="{'fa-caret-right': collapsed, 'fa-caret-down': !collapsed}"></i>
 					<span>
-						<span class="label label-sub-component label-icon">P</span>
-						<span>{{tp.name}} <span style="font-style: italic; color: #663ae0;">({{testCases.length}} TC)</span></span>
+						<span class="label label-plan label-icon">TP</span>
+						<i title="Unsaved Changes" class="fa fa-refresh unsaved" aria-hidden="true" ng-show="isLocal(tp)"></i>
+						<span>{{tp.name}} <span style="font-style: italic; color: #0000ff;">({{testCases.length}})</span></span>
 					</span>
 				</div>
 			</div>
 			<ol ui-tree-nodes ng-model="tp.testCases">
-				<li data-drag-enabled="false" ng-repeat="tc in tp.testCases | testcase:tcSearch" ui-tree-node ng-hide="$parentNodeScope.collapsed">
-					<div id="{{'tc-'+tc.id}}"  ng-click="selectTC(tc)"  context-menu="tcCM">
+				<!--<li data-drag-enabled="false" ng-repeat="tc in  $scope.filterActive(tcFilter) ? (tp.testCases | filter:tcFilter.example | dateMD:tcFilter.dates.created:'dateCreated' | dateMD:tcFilter.dates.updated:'dateLastUpdated' | changed:tcFilter.changed) : tp.testCases" ui-tree-node ng-hide="$parentNodeScope.collapsed">-->
+				<li data-drag-enabled="false" ng-repeat="tc in  tp.testCases | tcFilter:tcFilter" ui-tree-node ng-hide="$parentNodeScope.collapsed">
+					<div id="{{'tc-'+tc.id}}"  ng-click="selectTC(tc)"  ng-class="{selected1 : isSelectedTC(tc)}" context-menu="tcCM">
 						<div style="margin-left: 5px;">
 							<span ng-class="{selected1 : isSelectedTC(tc)}">
-								<span class="label label-component label-icon">T</span>
-								<span style="font-weight: initial;" ng-class="{ 'unsaved' : tc._changed }">
+								<i ng-show="tc._hasErrors" style="margin-left: -10px; color: red;" class="fa fa-exclamation" aria-hidden="true"></i>
+								<span class="label label-case label-icon">TC</span>
+								<span style="font-weight: initial;">
 									<i title="Unsaved Changes" class="fa fa-refresh unsaved" aria-hidden="true" ng-show="tc._changed"></i>
 									{{ tc.uid ? '#'+tc.uid+"- " : ""}}{{tc.name}}
 								</span>
@@ -43,24 +46,26 @@ body {
 				</li>
 			</ol>
 			<ol ui-tree-nodes data-nodrop-enabled="true" ng-model="tp.testCaseGroups">
-				<li data-drag-enabled="false" data-collapsed="{{!isLocal(group)}}" ng-repeat="group in tp.testCaseGroups track by $index" ui-tree-node ng-hide="$parentNodeScope.collapsed || group._gtc.length === 0">
+				<li data-drag-enabled="false" data-collapsed="{{!isLocal(group)}}" ng-repeat="group in tp.testCaseGroups track by $index" ui-tree-node ng-hide="$parentNodeScope.collapsed || (filterActive(tcFilter) && (group._gtc.length === 0 || !group._gtc))">
 					<div context-menu="tgCM" id="{{'gr-'+group.id}}" ng-class="{selected1 : isSelectedTC(tc)}" >
 						<div style="margin-left: 5px;">
 							<i ng-click="toggle(this)" class="fa" ng-class="{'fa-caret-right': collapsed, 'fa-caret-down': !collapsed}"></i>
 							<span>
-								<span class="label label-group label-icon">G</span>
+								<span class="label label-group label-icon">GP</span>
+								<i title="Unsaved Changes" class="fa fa-refresh unsaved" aria-hidden="true" ng-show="isLocal(group)"></i>
 								<strong>{{ group.name }}</strong>
-								<span style="font-style: italic; color: #663AE0;">({{group._gtc ? group._gtc.length : "0"}} TC)</span>
+								<span style="font-style: italic; color: #0000ff;">({{group._gtc ? group._gtc.length : "0"}})</span>
 							</span>
 						</div>
 					</div>
 					<ol ui-tree-nodes ng-model="group.testCases">
-						<li data-drag-enabled="false" ng-repeat="tc in ($parentNodeScope.collapsed ? [] : group._gtc = (group.testCases | testcase:tcSearch)) track by $index" ui-tree-node ng-hide="$parentNodeScope.collapsed">
+						<li data-drag-enabled="false" ng-repeat="tc in ($parentNodeScope.collapsed ? [] : group._gtc = (group.testCases | tcFilter:tcFilter)) track by $index" ui-tree-node ng-hide="$parentNodeScope.collapsed">
 							<div id="{{'tc-'+tc.id}}" ng-click="selectTC(tc)"  ng-class="{selected1 : isSelectedTC(tc)}" context-menu="tcCM">
 								<div style="margin-left: 5px;">
 									<span ng-class="{selected1 : isSelectedTC(tc)}">
-										<span class="label label-component label-icon">T</span>
-										<span style="font-weight: initial;" ng-class="{ 'unsaved' : tc._changed }">
+										<i ng-show="tc._hasErrors" style="margin-left: -10px; color: red;" class="fa fa-exclamation" aria-hidden="true"></i>
+										<span class="label label-case label-icon">TC</span>
+										<span style="font-weight: initial;">
 											<i title="Unsaved Changes" class="fa fa-refresh unsaved" aria-hidden="true" ng-show="tc._changed"></i>
 											{{ tc.uid ? '#'+tc.uid+"- " : ""}}{{tc.name}}
 										</span>

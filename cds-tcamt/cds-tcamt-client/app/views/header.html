@@ -1,4 +1,6 @@
-<style id="antiClickjack">body{display:none !important;}</style>
+<style id="antiClickjack">body {
+    display: none !important;
+}</style>
 <script type="text/javascript">
     if (self === top) {
         var antiClickjack = document.getElementById("antiClickjack");
@@ -7,11 +9,13 @@
         top.location = self.location;
     }
 </script>
-    <div class="navbar navbar-default" role="navigation">
+<div class="navbar navbar-default" role="navigation">
+     <!--style="position: fixed; z-index : 1000; height: 85px; width: 98%;">-->
     <div class="brand" id="appheader">
         <a style="display: inline-block; text-shadow:none" href="#">
             <div id="apptitle">
-                <span style="color: #F3C60D;">NIST</span> <span> - Forecasting for Immunization Test Suite</span> (FITS) <span style='color:red; font-size:12px'> {{appInfo.version}}</span>
+                <span style="color: #F3C60D;">NIST</span> <span> - Forecasting for Immunization Test Suite</span> (FITS)
+                <span style='color:red; font-size:12px'> {{appInfo.version}}</span>
             </div>
         </a>
     </div>
@@ -20,32 +24,49 @@
             <li ng-class="activeWhen(path()=='/home')">
                 <a class="point" href="#/home"><i class="fa fa-home"></i>&nbsp;<span msg key="navbar.home"></span></a>
             </li>
-            <li ng-class="activeWhen(path()=='/tp')"><a class="point" href="#/tp"><i class="fa fa-book"></i>&nbsp;<span msg class="msg" key="navbar.tps"></span></a></li>
-            <li ng-class="activeWhen(path()=='/exec')"><a class="point" href="#/exec"><i class="fa fa-cog"></i>&nbsp;<span class="msg">Execution</span></a></li>
-            <li ng-class="activeWhen(path()=='/doc')"><a class="point" href="#/doc"><i class="fa fa-file-text"></i>&nbsp;<span msg class="msg" key="navbar.documentation"></span></a></li>
-            <li ng-class="activeWhen(path()=='/about')"><a class="point" href="#/about"><i class="fa fa-info"></i>&nbsp;About</a></li>
-            <li ng-class="activeWhen(path()=='/glossary')"><a class="point" href="#/glossary"><i class="fa fa-file-text"></i>&nbsp;<span msg class="msg" key="navbar.glossary"></span></a></li>
-            <li ng-class="activeWhen(path()=='/issue')"><a class="point" href="#/issue"><i class="fa fa-question"></i>&nbsp;Issues</a></li>
-            <li ng-show='showSpinner()' ><i class="fa fa-spinner fa-pulse fa-align-center"></i></li>
+            <li ng-class="activeWhen(path()=='/tp')"><a class="point" href="#/tp"><i class="fa fa-book"></i>&nbsp;<span
+                    msg class="msg" key="navbar.tps"></span></a></li>
+            <li ng-class="activeWhen(path()=='/validation')"><a class="point" href="#/validation"><i class="fa fa-check"></i>
+                &nbsp;<span class="msg">Validation</span></a></li>
+            <li ng-class="activeWhen(path()=='/doc')"><a class="point" href="#/doc"><i class="fa fa-file-text"></i>&nbsp;<span
+                    msg class="msg" key="navbar.documentation"></span></a></li>
+            <li ng-class="activeWhen(path()=='/about')"><a class="point" href="#/about"><i class="fa fa-info"></i>&nbsp;About</a>
+            </li>
+            <!--<li ng-class="activeWhen(path()=='/glossary')"><a class="point" href="#/glossary"><i-->
+                    <!--class="fa fa-file-text"></i>&nbsp;<span msg class="msg" key="navbar.glossary"></span></a></li>-->
+            <li ng-class="activeWhen(path()=='/issue')"><a class="point" href="#/issue"><i class="fa fa-question"></i>&nbsp;Issues</a>
+            </li>
+            <li ng-show='showSpinner()'><i class="fa fa-spinner fa-pulse fa-align-center"></i></li>
         </ul>
 
         <ul class="nav navbar-nav navbar-right" style="margin-right: 2px">
 
-            <li ng-class="activeWhen(path()=='/registration')" ng-show="!isAuthenticated()"  >
-                <a href="#/registration"><div msg key="navbar.registration"></div></a>
+            <li ng-class="activeWhen(path()=='/registration')" ng-show="!isAuthenticated()">
+                <a href="#/registration">
+                    <div msg key="navbar.registration"></div>
+                </a>
             </li>
 
             <li ng-class="activeWhen(path()=='/forgotten')" ng-show="!isAuthenticated()">
-                <a href="#/forgotten"><div msg key="navbar.forgotten"></div></a>
+                <a href="#/forgotten">
+                    <div msg key="navbar.forgotten"></div>
+                </a>
             </li>
 
-            <li    ng-show="isAuthenticated()" ng-class="activeWhen(path()=='/useraccount')"><a class="point" href="#/useraccount"><i class="fa fa-user"></i>&nbsp;My Account</a></li>
+            <li ng-show="isAuthenticated()" ng-class="activeWhen(path()=='/useraccount')"><a class="point"
+                                                                                             href="#/useraccount"><i
+                    class="fa fa-user"></i>&nbsp;My Account</a></li>
+            <!--<li ng-class="activeWhen(path()=='/usermanagement')" ng-show="isAuthenticated() && isAdmin()">-->
+                <!--<a class="point" href="#/usermanagement"><i class="fa fa-user"></i>&nbsp;<span> User Management</span></a>-->
+            <!--</li>-->
 
             <li class="" ng-show="isAuthenticated()">
-                <a class="point" ng-click="logout()"><i class="fa fa-sign-out"></i>&nbsp;<span msg class="msg" key="navbar.logout"></span></a>
+                <a class="point" ng-click="logout()"><i class="fa fa-sign-out"></i>&nbsp;<span msg class="msg"
+                                                                                               key="navbar.logout"></span></a>
             </li>
-            <li class=""  ng-show="!isAuthenticated()">
-                <a class="point" ng-click="loginReq()"><i class="fa fa-sign-in"></i>&nbsp;<span msg class="msg" key="navbar.login"></span></a>
+            <li class="" ng-show="!isAuthenticated()">
+                <a class="point" ng-click="loginReq()"><i class="fa fa-sign-in"></i>&nbsp;<span msg class="msg"
+                                                                                                key="navbar.login"></span></a>
             </li>
         </ul>
     </div>

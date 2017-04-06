@@ -1,6 +1,11 @@
 package gov.nist.healthcare.cds.tcamt.config;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -8,6 +13,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Properties;
 import java.util.Set;
 
 import javax.annotation.PostConstruct;
@@ -27,6 +33,7 @@ import gov.nist.healthcare.cds.domain.RelativeDateRule;
 import gov.nist.healthcare.cds.domain.SoftwareConfig;
 import gov.nist.healthcare.cds.domain.StaticDateReference;
 import gov.nist.healthcare.cds.domain.TestCase;
+import gov.nist.healthcare.cds.domain.TestCaseGroup;
 import gov.nist.healthcare.cds.domain.TestPlan;
 import gov.nist.healthcare.cds.domain.VaccinationEvent;
 import gov.nist.healthcare.cds.domain.Vaccine;
@@ -35,9 +42,15 @@ import gov.nist.healthcare.cds.domain.VaccineMapping;
 import gov.nist.healthcare.cds.domain.exception.VaccineNotFoundException;
 import gov.nist.healthcare.cds.domain.wrapper.ActualEvaluation;
 import gov.nist.healthcare.cds.domain.wrapper.ActualForecast;
+import gov.nist.healthcare.cds.domain.wrapper.AppInfo;
+import gov.nist.healthcare.cds.domain.wrapper.Document;
+import gov.nist.healthcare.cds.domain.wrapper.Documents;
 import gov.nist.healthcare.cds.domain.wrapper.EngineResponse;
 import gov.nist.healthcare.cds.domain.wrapper.MetaData;
+import gov.nist.healthcare.cds.domain.wrapper.Resources;
 import gov.nist.healthcare.cds.domain.wrapper.ResponseVaccinationEvent;
+import gov.nist.healthcare.cds.domain.wrapper.SimulatedResult;
+import gov.nist.healthcare.cds.domain.wrapper.SimulationMap;
 import gov.nist.healthcare.cds.domain.wrapper.VaccineRef;
 import gov.nist.healthcare.cds.enumeration.DatePosition;
 import gov.nist.healthcare.cds.enumeration.DateType;
@@ -48,25 +61,48 @@ import gov.nist.healthcare.cds.enumeration.Gender;
 import gov.nist.healthcare.cds.enumeration.RelativeTo;
 import gov.nist.healthcare.cds.enumeration.SerieStatus;
 import gov.nist.healthcare.cds.repositories.ManufacturerRepository;
+import gov.nist.healthcare.cds.repositories.ProductRepository;
 import gov.nist.healthcare.cds.repositories.SoftwareConfigRepository;
 import gov.nist.healthcare.cds.repositories.TestCaseRepository;
 import gov.nist.healthcare.cds.repositories.TestPlanRepository;
+import gov.nist.healthcare.cds.repositories.VaccineGroupRepository;
 import gov.nist.healthcare.cds.repositories.VaccineMappingRepository;
+import gov.nist.healthcare.cds.repositories.VaccineRepository;
+import gov.nist.healthcare.cds.service.MetaDataService;
+import gov.nist.healthcare.cds.service.NISTFormatService;
+import gov.nist.healthcare.cds.service.TestCaseExecutionService;
 import gov.nist.healthcare.cds.service.TestRunnerService;
 import gov.nist.healthcare.cds.service.VaccineImportService;
+import gov.nist.healthcare.cds.service.impl.ExecutionService;
 import gov.nist.healthcare.cds.service.impl.MockTestRunner;
+import gov.nist.healthcare.cds.service.impl.TestExecutionSimulation;
 
+import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.PropertySource;
+import org.springframework.core.env.Environment;
+import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.oxm.Marshaller;
 import org.springframework.oxm.castor.CastorMarshaller;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 @Service
+@PropertySource("classpath:app-info.properties" )
 public class Bootstrap {
 
+	@Autowired
+	private Environment env;
+	
+	@Autowired
+	private MetaDataService mdService;
+	
 	@Autowired
 	private AccountService accountService;
 	
@@ -77,9 +113,6 @@ public class Bootstrap {
 	private PrivilegeRepository privilegeRepository;
 	
 	@Autowired
-	private VaccineMappingRepository vaccineRepository;
-	
-	@Autowired
 	private TestPlanRepository testPlanRepository;
 	
 	@Autowired
@@ -87,6 +120,46 @@ public class Bootstrap {
 	
 	@Autowired
 	private SoftwareConfigRepository softwareConfRepository;
+	
+	@Autowired
+	private VaccineMappingRepository vaccineRepository;
+	
+	@Autowired
+	private NISTFormatService nistService;
+	
+
+	@Bean 
+	public AppInfo appInfo() throws ParseException{
+		AppInfo app = new AppInfo();
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+		app.setAdminEmail(env.getProperty("webadmin.email"));
+		app.setDate(sdf.parse(env.getProperty("build.date")));
+		app.setVersion(env.getProperty("version"));
+		return app;
+	}
+	
+	@Bean
+	public JavaMailSenderImpl mailSender() {
+		JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
+		mailSender.setHost("smtp.nist.gov");
+		mailSender.setPort(25);
+		mailSender.setProtocol("smtp");
+		Properties javaMailProperties = new Properties();
+		javaMailProperties.setProperty("mail.smtp.auth","false");
+		javaMailProperties.setProperty("mail.debug","true");
+
+		mailSender.setJavaMailProperties(javaMailProperties);
+		return mailSender;
+	}
+
+
+	@Bean
+	public org.springframework.mail.SimpleMailMessage templateMessage() {
+		org.springframework.mail.SimpleMailMessage templateMessage = new org.springframework.mail.SimpleMailMessage();
+		templateMessage.setFrom("fits@nist.gov");
+		templateMessage.setSubject("NIST FITS Notification");
+		return templateMessage;
+	}
 	
 	@Bean
 	public Marshaller castorM(){
@@ -96,19 +169,55 @@ public class Bootstrap {
 	@Bean
 	public TestRunnerService testRunner(){
 //		return new MockTestRunner();
-		return new TestRunnerServiceFhirImpl("https://p860556.campus.nist.gov:8443/forecast/ImmunizationRecommendations");
-//		return new TestRunnerServiceFhirImpl("https://localhost:15001/forecast/ImmunizationRecommendations");
-
+//		return new TestRunnerServiceFhirImpl("https://p860556.campus.nist.gov:8443/forecast/ImmunizationRecommendations");
+		return new TestRunnerServiceFhirImpl("https://hit-dev.nist.gov:15001/forecast/ImmunizationRecommendations");
+	}
+	
+	@Bean
+	public SimulationMap simulationMap() throws JsonParseException, JsonMappingException, IOException{
+		ObjectMapper mapper = new ObjectMapper();
+		SimulationMap sm = new SimulationMap();
+		List<SimulatedResult> myObjects = mapper.readValue(Bootstrap.class.getResourceAsStream("/simulation.json"), mapper.getTypeFactory().constructCollectionType(List.class, SimulatedResult.class));
+		for(SimulatedResult sr : myObjects){
+			sm.put(sr.getId(),sr.getXml());
+		}
+		return sm;
+	}
+	
+	@Bean
+	public Documents documents() throws JsonParseException, JsonMappingException, IOException{
+		Documents docs = new Documents();
+		ObjectMapper mapper = new ObjectMapper();
+		List<Document> myObjects = mapper.readValue(Bootstrap.class.getResourceAsStream("/docs/documents.json"), mapper.getTypeFactory().constructCollectionType(List.class, Document.class));
+		docs.setDocs(myObjects);
+		return docs;
+	}
+	
+	@Bean
+	public Resources resources() throws JsonParseException, JsonMappingException, IOException{
+		Resources docs = new Resources();
+		ObjectMapper mapper = new ObjectMapper();
+		List<Document> myObjects = mapper.readValue(Bootstrap.class.getResourceAsStream("/doc_resources/documents.json"), mapper.getTypeFactory().constructCollectionType(List.class, Document.class));
+		docs.setResources(myObjects);
+		return docs;
+	}
+	
+	@Bean
+	public TestCaseExecutionService testExecution(){
+//		return new ExecutionService();
+		return new TestExecutionSimulation();
 	}
 	
 	public void createVaccine() throws IOException{
-		Set<VaccineMapping> set = vaccineService._import(Bootstrap.class.getResourceAsStream("/web_cvx.xlsx"),Bootstrap.class.getResourceAsStream("/web_vax2vg.xlsx"),Bootstrap.class.getResourceAsStream("/web_mvx.xlsx"),Bootstrap.class.getResourceAsStream("/web_tradename.xlsx"));
 		long all = vaccineRepository.count();
 		int i = 0;
-		for(VaccineMapping mp : set){
-			if(!vaccineRepository.exists(mp.getId())){
-				i++;
-				vaccineRepository.save(mp);
+		if(all ==  0){
+			Set<VaccineMapping> set = vaccineService._import(Bootstrap.class.getResourceAsStream("/web_cvx.xlsx"),Bootstrap.class.getResourceAsStream("/web_vax2vg.xlsx"),Bootstrap.class.getResourceAsStream("/web_mvx.xlsx"),Bootstrap.class.getResourceAsStream("/web_tradename.xlsx"));
+			for(VaccineMapping mp : set){
+				if(!vaccineRepository.exists(mp.getId())){
+					i++;
+					vaccineRepository.save(mp);
+				}
 			}
 		}
 		System.out.println("[VACCINE SERVICE IMPORT] IMPORTED "+i+" EXISTING "+all);
@@ -148,6 +257,27 @@ public class Bootstrap {
 		System.out.println("[PRIME SOFTWARE CONFIG] existing");
 	}
 	
+	private List<TestCase> loadTestCases(String folder, String tp) throws IOException, VaccineNotFoundException{
+		List<TestCase> tcs = new ArrayList<TestCase>();
+		final URL url = Bootstrap.class.getResource("/" + folder);
+		if (url != null) {
+	        try {
+	            final File apps = new File(url.toURI());
+	            for (File app : apps.listFiles()) {
+	            	FileInputStream fisTargetFile = new FileInputStream(app);
+	            	String targetFileStr = IOUtils.toString(fisTargetFile, "UTF-8");
+	            	TestCase tc = nistService._import(targetFileStr);
+	            	tc.setTestPlan(tp);
+	            	tcs.add(tc);
+					
+	            }
+	        } catch (URISyntaxException ex) {
+	            // never happens
+	        }
+	    }
+		return tcs;
+	}
+	
 	@PostConstruct
 	public void init() throws ParseException, IOException, VaccineNotFoundException {
 		
@@ -160,148 +290,52 @@ public class Bootstrap {
 		//Software
 		this.createSoftware();
 		
-		accountService.deleteAll();
 		
-		Account a = new Account();
-		a.setUsername("admin");
-		a.setPassword("qwerty");
-		accountService.createAdmin(a);
+		if(accountService.getAccountByUsername("michael") == null){
+			Account m = new Account();
+			m.setUsername("michael");
+			m.setEmail("michael.indovina@nist.gov");
+			m.setPassword("qwerty");
+			accountService.createAdmin(m);
+		}
 		
-		Account m = new Account();
-		m.setUsername("michael");
-		m.setPassword("qwerty");
-		accountService.createAdmin(m);
+		if(accountService.getAccountByUsername("robert") == null){
+			Account r = new Account();
+			r.setUsername("robert");
+			r.setEmail("robert.snelick@nist.gov");
+			r.setPassword("qwerty");
+			accountService.createAdmin(r);
+		}
 		
-		Account r = new Account();
-		r.setUsername("robert");
-		r.setPassword("qwerty");
-		accountService.createAdmin(r);
+		if(accountService.getAccountByUsername("hossam") == null){
+			Account h = new Account();
+			h.setUsername("hossam");
+			h.setEmail("hossam.tamri@nist.gov");
+			h.setPassword("qwerty");
+			accountService.createAdmin(h);
+		}
 		
-		Account h = new Account();
-		h.setUsername("hossam");
-		h.setPassword("qwerty");
-		accountService.createAdmin(h);
-		
-		Account ai = new Account();
-		ai.setUsername("aira");
-		ai.setPassword("qwerty");
-		accountService.createAdmin(ai);
-		
-		Account c = new Account();
-		c.setUsername("cdc1");
-		c.setPassword("qwerty");
-		accountService.createAdmin(c);
-	
-		
-//		TestCase tc = new TestCase();
-//		tc.setName("DTap Age Below Absolute Minimum");
-//		tc.setDescription("DTaP #2 at age 10 weeks-5 days");
-//		tc.setDateType(DateType.RELATIVE);
-//		
-//		//Eval
-//		RelativeDate evalDate = new RelativeDate();
-//		evalDate.add(new RelativeDateRule(DatePosition.AFTER, 0, 0, 0, new StaticDateReference(RelativeTo.EVALDATE)));
-//		tc.setEvalDate(evalDate);
-//		
-//		//Patient
-//		Patient pt = new Patient();
-//		RelativeDate birth = new RelativeDate();
-//		birth.add(new RelativeDateRule(DatePosition.BEFORE, 18, 0, 0, new StaticDateReference(RelativeTo.EVALDATE)));
-//		pt.setDob(birth);
-//		pt.setGender(Gender.F);		
-//		tc.setPatient(pt);
-//		
-//		Vaccine vx = vaccineRepository.findMapping("107").getVx();
-//		Vaccine vx1 = vaccineRepository.findMapping("100").getVx();
-//		
-////		//Events
-//		VaccinationEvent vcEvent1 = new VaccinationEvent();
-//		vcEvent1.setPosition(0);
-//		RelativeDate vced1 = new RelativeDate();
-//		vced1.add(new RelativeDateRule(DatePosition.AFTER, 0, 10, 0, new StaticDateReference(RelativeTo.DOB)));
-//		vcEvent1.setDate(vced1);
-//		vcEvent1.setAdministred(vx);
-//		vcEvent1.setDoseNumber(1);
-//		vcEvent1.setType(EventType.VACCINATION);
-//		
-//		ExpectedEvaluation ee1 = new ExpectedEvaluation();
-//		ee1.setRelatedTo(vx);
-//		ee1.setStatus(EvaluationStatus.VALID);
-//		
-//		ExpectedEvaluation ee11 = new ExpectedEvaluation();
-//		ee11.setRelatedTo(vx1);
-//		ee11.setStatus(EvaluationStatus.VALID);
-//		vcEvent1.setEvaluations(new HashSet<>(Arrays.asList(ee1,ee11)));
-//		
-//		VaccinationEvent vcEvent2 = new VaccinationEvent();
-//		vcEvent2.setPosition(1);
-//		RelativeDate vced2 = new RelativeDate();
-//		vced2.add(new RelativeDateRule(DatePosition.AFTER, 0, 10, 0, new VaccineDateReference(0)));
-//		vcEvent2.setDate(vced2);
-//		vcEvent2.setAdministred(vx);
-//		vcEvent2.setDoseNumber(2);
-//		vcEvent2.setType(EventType.VACCINATION);
-//		
-//		ExpectedEvaluation ee2 = new ExpectedEvaluation();
-//		ee2.setRelatedTo(vx);
-//		ee2.setStatus(EvaluationStatus.INVALID);
-//		ee2.setEvaluationReason("Age too young");
-//		vcEvent2.setEvaluations(new HashSet<>(Arrays.asList(ee2)));
-//		
-//		
-//		tc.addEvent(vcEvent1);
-//		tc.addEvent(vcEvent2);
-//		
-//		//Expected Forecast
-//		ExpectedForecast ef = new ExpectedForecast();
-//		ef.setDoseNumber("2");
-//		ef.setTarget(vx);
-//		ef.setSerieStatus(SerieStatus.O);
-//		ef.setForecastReason("Second dose was administed too early");
-//		Date earliest = dateformat.parse("30/05/2011");
-//		Date recommended = dateformat.parse("26/06/2011");
-//		Date pastDue = dateformat.parse("22/08/2011");
-//		ef.setEarliest(new FixedDate(earliest));
-//		ef.setRecommended(new FixedDate(recommended));
-//		ef.setPastDue(new FixedDate(pastDue));
-//
-//		
-//		ExpectedForecast eff = new ExpectedForecast();
-//		eff.setDoseNumber("2");
-//		eff.setTarget(vx1);
-//		eff.setSerieStatus(SerieStatus.O);
-//		eff.setForecastReason("Second dose was administed too early");
-//		Date earliest1 = dateformat.parse("30/05/2011");
-//		Date recommended1 = dateformat.parse("26/06/2011");
-//		Date pastDue1 = dateformat.parse("22/08/2011");
-//		eff.setEarliest(new FixedDate(earliest1));
-//		eff.setRecommended(new FixedDate(recommended1));
-//		eff.setPastDue(new FixedDate(pastDue1));
-//		tc.setForecast(new HashSet<>(Arrays.asList(ef,eff)));
-		
-//		MetaData md = new MetaData();
-//		md.setDateCreated(new Date());
-//		md.setDateLastUpdated(new Date());
-//		md.setImported(false);
-//		md.setVersion("1");
-//		tc.setMetaData(md);
-//		
 //		TestPlan tp = new TestPlan();
-//		tp.setId("xxxxx");
-//		MetaData mdp = new MetaData();
-//		mdp.setDateCreated(new Date());
-//		mdp.setDateLastUpdated(new Date());
-//		mdp.setImported(false);
-//		mdp.setVersion("1");
-//		tp.setMetaData(mdp);
-//		tp.setDescription("CDS TestCases for CDSi Specification v2");
-//		tp.setName("CDC");
 //		tp.setUser("hossam");
-//		tp.addTestCase(tc);
-//		tc.setTestPlan("xxxxx");
-//		tc.setId("1");
-//		testCaseRepository.save(tc);
+//		tp.setName("IMPORTED");
+//		tp.setMetaData(mdService.create(true));
 //		testPlanRepository.save(tp);
-		
+//		
+//		List<TestCase> tcs = this.loadTestCases("demo_tp", tp.getId());
+//		for(TestCase tc : tcs){
+//			if(tc.getGroupTag() != null && !tc.getGroupTag().isEmpty()){
+//				TestCaseGroup tpcg = tp.getByNameOrCreateGroup(tc.getGroupTag());
+//				tc.setGroupTag(tpcg.getId());
+//				tpcg.setTestPlan(tp.getId());
+//				tpcg.getTestCases().add(tc);
+//			}
+//			else {
+//				tp.addTestCase(tc);
+//			}
+//			mdService.update(tc.getMetaData());
+//			testCaseRepository.save(tc);
+//			mdService.update(tp.getMetaData());
+//			testPlanRepository.save(tp);
+//		}
 	}
 }

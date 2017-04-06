@@ -27,8 +27,8 @@ body {
 							<div class="col-md-12">
 								<div class="col-md-4">
 									<md-input-container style="width: 100%;">
-										<label>Serie Status</label>
-										<md-select ng-model="selectedForecast.serieStatus" ng-model-options="{trackBy: '$value'}" ng-change="tcChanged()">
+										<label>Series Status</label>
+										<md-select ng-model="selectedForecast.serieStatus" ng-model-options="{trackBy: '$value'}" ng-change="serieStatusChange(selectedForecast.serieStatus,selectedForecast)">
 											<md-option ng-repeat=" enum in serieStatus " ng-value="enum.code">{{enum.details}}</md-option>
 										</md-select>
 									</md-input-container>
@@ -36,26 +36,26 @@ body {
 								<div class="col-md-4">
 									<md-input-container style="width: 100%;">
 										<label>Dose Number</label>
-										<input ng-model="selectedForecast.doseNumber" ng-change="tcChanged()" type="text"/>
+										<input ng-model="selectedForecast.doseNumber" type="text"/>
 									</md-input-container>
 								</div>
 								<div class="col-md-4">
 									<md-input-container style="width: 100%;">
 										<label>Forecast Reason</label>
-										<input ng-model="selectedForecast.forecastReason" ng-change="tcChanged()" type="text"/>
+										<input ng-model="selectedForecast.forecastReason" type="text"/>
 									</md-input-container>
 								</div>
 							</div>
-							<div ng-show="selectedForecast.serieStatus !== 'C'">
+							<div ng-show="needDates(selectedForecast.serieStatus)">
 								<date-choose class="col-md-12" exclude="''" style="margin-bottom: 10px;" nullable="false" type="selectedTC.dateType" label="'Earliest'" dt="selectedForecast.earliest" events="selectedTC.events"></date-choose>
 							</div>
-							<div ng-show="selectedForecast.serieStatus !== 'C'">
+							<div ng-show="needDates(selectedForecast.serieStatus)">
 								<date-choose class="col-md-12" exclude="''" style="margin-bottom: 10px;" nullable="false" type="selectedTC.dateType" label="'Recommended'" dt="selectedForecast.recommended" events="selectedTC.events"></date-choose>
 							</div>
-							<div ng-show="selectedForecast.serieStatus !== 'C'">
+							<div ng-show="needDates(selectedForecast.serieStatus)">
 								<date-choose class="col-md-12" exclude="''" style="margin-bottom: 10px;" nullable="true" type="selectedTC.dateType" label="'Past Due'" dt="selectedForecast.pastDue" events="selectedTC.events"></date-choose>
 							</div>
-							<div ng-show="selectedForecast.serieStatus !== 'C'">
+							<div ng-show="needDates(selectedForecast.serieStatus)">
 								<date-choose class="col-md-12" exclude="''" style="margin-bottom: 10px;" nullable="true" type="selectedTC.dateType" label="'Latest'" dt="selectedForecast.complete" events="selectedTC.events"></date-choose>
 							</div>
 						</div>

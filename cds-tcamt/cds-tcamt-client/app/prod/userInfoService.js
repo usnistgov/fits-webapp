@@ -129,6 +129,8 @@ angular.module('tcl').factory('userInfoService', ['StorageService', 'userLoaderS
 
         var setCurrentUser = function(newUser) {
             currentUser = newUser;
+            console.log("USER");
+            console.log(newUser);
             if ( currentUser !== null && currentUser !== undefined ) {
                 username = currentUser.username;
                 id = currentUser.accountId;
@@ -139,7 +141,7 @@ angular.module('tcl').factory('userInfoService', ['StorageService', 'userLoaderS
                         {
                         case 'user':
                              break;
-                        case 'admin':
+                        case 'ADMIN':
                             admin = true;
                              break;
                         case 'author':

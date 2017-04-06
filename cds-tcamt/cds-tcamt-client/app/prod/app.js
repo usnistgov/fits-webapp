@@ -105,7 +105,7 @@ app.config(function ($routeProvider, RestangularProvider, $httpProvider, Keepali
         }) .when('/glossary', {
             templateUrl: 'views/glossary.html'
         })
-        .when('/exec', {
+        .when('/validation', {
             templateUrl: 'views/execution.html'
         })
 //        .when('/account', {
@@ -138,6 +138,10 @@ app.config(function ($routeProvider, RestangularProvider, $httpProvider, Keepali
         .when('/registrationSubmitted', {
             templateUrl: 'views/account/registrationSubmitted.html'
         })
+
+    .when('/usermanagement', {
+        templateUrl: 'views/account/usermanagement.html'
+    })
         .otherwise({
             redirectTo: '/'
         });
@@ -304,7 +308,23 @@ app.config(function ($routeProvider, RestangularProvider, $httpProvider, Keepali
 
 
 app.run(function ($rootScope, $location, $anchorScroll, Restangular, $modal, $filter, base64, userInfoService, $http, AppInfo, StorageService, $templateCache, $window, notifications) {
-    $rootScope.appInfo = {};
+
+    $http.get("api/appInfo").then(function (result) {
+        $rootScope.appInfo = result.data;
+    });
+
+    $http.get("api/documentation/docs").then(function (result) {
+        $rootScope.documents = result.data;
+    });
+
+    $http.get("api/documentation/res").then(function (result) {
+        $rootScope.documentationResources = result.data;
+    });
+
+    $http.get("api/documentation/releaseNotes").then(function (result) {
+        $rootScope.releaseNotes = result.data;
+    });
+
     //Check if the login dialog is already displayed.
     $rootScope.loginDialogShown = false;
     $rootScope.subActivePath = null;

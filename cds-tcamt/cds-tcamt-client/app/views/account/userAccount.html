@@ -12,8 +12,8 @@
         <tabset>
             <tab>
                 <tab-heading>
-                    <i class="fa fa-user"></i>&nbsp;<span msg
-                                                          key="navbar.account"></span></a>
+                    <i style="color: black;" class="fa fa-user"></i>&nbsp;<strong><span style="color: black;" msg
+                                                                  key="navbar.account"></span></strong></a>
                 </tab-heading>
                 <div id="account" class="accountMgt">
                     <div ng-include="'views/account/userProfile.html'"></div>
@@ -22,7 +22,7 @@
 
             <tab ng-show="isAdmin()">
                 <tab-heading>
-                    <i class="fa fa-cog"></i>&nbsp;<span msg key="navbar.manage"></span>
+                    <i style="color: black;" class="fa fa-cog"></i>&nbsp;<strong><span style="color: black;" msg key="navbar.manage"></span></strong>
                 </tab-heading>
                 <div id="accounts" class="accountMgt">
                     <div ng-include="'views/account/accountsList.html'"></div>

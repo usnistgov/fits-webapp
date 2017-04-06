@@ -27,7 +27,7 @@ body {
 				<td colspan="3" style="text-align : justify; padding: 10px;">
 					<div style="width : 100%;" layout="row" layout-align="start center" ng-show="ev.vaccination.administred && ev.vaccination.administred.discriminator === 'generic'">
 						<div flex="10" layout="column" layout-align="center center">
-							<span><strong>ID # {{ev.vaccination.position}}</strong></span>
+							<span><strong>ID # {{ev.vaccination.position+1}}</strong></span>
 						</div>
 						<div flex="25" layout="column" layout-align="center center">
 							<span style="background-color: green;" class="badge">CVX {{ev.vaccination.administred.cvx}}</span>
@@ -53,7 +53,7 @@ body {
 					</div>
 					<div style="width : 100%;" layout="row" layout-align="start center" ng-show="!ev.vaccination.administred">
 						<div flex="30" layout="column" layout-align="center center">
-							<span class="badge sbadge">ID # {{ev.vaccination.position}}</span>
+							<span class="badge sbadge">ID # {{ev.vaccination.position+1}}</span>
 						</div>
 						<div flex="50" layout="column" layout-align="start center" style="text-align : left;">
 							<span><strong>New Event</strong></span>

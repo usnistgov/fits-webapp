@@ -72,7 +72,7 @@
 									<md-select ng-model="rule.relativeTo" ng-model-options="{trackBy: '$value.id'}" ng-change="ctrl.refType(rule)" required>
 										<md-option ng-value="{ reference : 'static', id : 'DOB' }" ng-disabled="ctrl.exclude === 'DOB'">Birth</md-option>
 										<md-option ng-value="{ reference : 'static', id : 'EVALDATE'}" ng-disabled="ctrl.exclude === 'EVALDATE'">Assessment Date</md-option>
-										<md-option ng-repeat="event in ctrl.events" ng-if="event.vaccination.administred && ctrl.notCircular(event)" ng-disabled="ctrl.exclude === event.vaccination.position" ng-value="{ reference : 'dynamic', id : event.vaccination.position }">{{event.vaccination.administred.name}} - ID # {{event.vaccination.position}}</md-option>
+										<md-option ng-repeat="event in ctrl.events" ng-if="event.vaccination.administred && ctrl.notCircular(event)" ng-disabled="ctrl.exclude === event.vaccination.position" ng-value="{ reference : 'dynamic', id : event.vaccination.position }">{{event.vaccination.administred.name}} - ID # {{event.vaccination.position + 1}}</md-option>
 									</md-select>
 								</md-input-container>
 							</td>

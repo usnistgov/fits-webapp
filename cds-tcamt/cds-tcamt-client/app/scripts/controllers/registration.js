@@ -17,12 +17,10 @@ angular.module('tcl')
             if($scope.agreed) {
                 //console.log("Creating account");
                 var acctToRegister = new NewAccount();
-                acctToRegister.accountType = 'author';
+                acctToRegister.accountType = 'TESTER';
                 acctToRegister.employer =  $scope.account.employer;
                 acctToRegister.fullName =  $scope.account.fullName;
-                acctToRegister.phone =  $scope.account.phone;
-                acctToRegister.title =  $scope.account.title;
-                acctToRegister.juridiction =  $scope.account.juridiction;
+                acctToRegister.organization =  $scope.account.organization;
                 acctToRegister.username =  $scope.account.username;
                 acctToRegister.password =  $scope.account.password;
                 acctToRegister.email =  $scope.account.email;

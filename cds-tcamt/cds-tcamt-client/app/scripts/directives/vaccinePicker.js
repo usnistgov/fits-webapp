@@ -95,7 +95,22 @@ angular.module('tcl').directive('report', function() {
       report: "=",
       vxm: "="
     },
-    controller: function($scope,$filter) {
+    controller: function($scope,$filter,$http) {
+        $scope.exportReportL = function (report) {
+
+            $http.post('api/report/export/xml',report).then(function (response) {
+                var anchor = angular.element('<a/>');
+                anchor.css({display: 'none'}); // Make sure it's not visible
+                angular.element(document.body).append(anchor); // Attach to document
+                anchor.attr({
+                    href: 'data:attachment/xml;charset=utf-8,' + encodeURI(response.data),
+                    target: '_blank',
+                    download: report.tcInfo.name.replace(/ /g,"_")+'.xml'
+                })[0].click();
+                anchor.remove();
+            });
+        };
+
         $scope.correctness = function (f, p, u, w) {
             var total = f + p;
             var correct = p;

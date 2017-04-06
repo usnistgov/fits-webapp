@@ -11,6 +11,15 @@ multiselect .caret {
 	display : none;
 }
 
+.dragme {
+  position:  absolute;
+  left: 0;
+  top: 0; /* set these so Chrome doesn't return 'auto' from getComputedStyle */
+  width: 200px;
+  background: rgba(255,255,255,0.66);
+  border: 2px  solid rgba(0,0,0,0.5);
+  border-radius: 4px; padding: 8px;
+}
 md-checkbox .md-icon {
   background-color: white;
 }
@@ -21,6 +30,10 @@ multiselect button:after {
 
 .myselect:hover {
   color: rgba(15, 15, 15, 0.33);
+}
+
+.tab-content-fits {
+  margin-top: 85px;
 }
 
 .invalid-date {
@@ -213,10 +226,13 @@ html {
 body {
   background: #021a4c url(../images/bg_body4.jpg) no-repeat 50% -10px;
   color: black;
+  font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+  font-size: 14px;
+  line-height: 1.428571429;
 }
 
 .info {
-	background-color : #D9EDF7;
+	background-color : #D9EDF7 !important;
 }
 
 .fail {
@@ -1241,7 +1257,15 @@ h4.addPOAFormDateSectionTitle {
   margin-top: 5px;
   margin-left: 4px;
 }
-
+.label-plan {
+  background-color: black !important;
+}
+.label-case {
+  background-color : #f2c60d !important;
+}
+.label-group {
+  background-color : #5cb85c !important;
+}
 .toLabel {
   margin: 0px 8px 0px 8px;
 }
@@ -1519,6 +1543,18 @@ input.account-input {
   background-color: #1296ea;
 }
 
+#graphAgg .md-mode-determinate .md-bar2 {
+  height: 20px !important;
+  background-color: #18ea0d !important;
+}
+
+#graphAgg .md-container {
+  height: 20px !important;
+  background-color: #ea341d !important;
+  border: 1px solid;
+}
+
+
 .detection-cell {
   border-top : 1px solid;
   border-bottom : 1px solid;
@@ -1701,6 +1737,15 @@ input.account-input {
 .panel {
   border-radius: 0px;
   margin-bottom: 5px;
+}
+
+
+.panel-about {
+  border-radius: 0;
+  margin-bottom: 5px;
+  background-color: #fff;
+  border: 1px solid transparent;
+  box-shadow: 0 1px 1px rgba(0,0,0,.05);
 }
 
 .panel-heading {
@@ -2070,7 +2115,7 @@ ul.dropdown-menu, ul.dropdown-menu > li {
 }
 
 .nav-tabs > li.active > a, .nav-tabs > li > a:hover, .nav-tabs > li.active > a:hover {
-  background-color: #ffcc00;
+  background-color: #ffc427;
   border-color: #ffcc00;
   //border: 0px;
   color: white;
@@ -2221,12 +2266,12 @@ input.form-control-short80 {
 
 
 .home-page-panel {
-  height:300px;
+  height:400px;
 }
 
 
 .home-page-panel-content {
-  max-height: 100px !important;
+  max-height: 400px !important;
   overflow: auto;
   text-align: left;
 }
@@ -2235,11 +2280,11 @@ input.form-control-short80 {
   border-bottom: 1px solid #eeeeee; margin-bottom: 20px;
 }
 
-tr.tbl-header {
-  background-color: #00bcd4;
-  color: rgba(255, 255, 255, 0.84);
+tr.tbl-header1 {
+  background-color: #d9edf7;
+  color: rgb(58, 135, 173);
   font-weight: normal;
-  border-color:#00bcd4;
+  border-color: #00bcd4;
 }
 
 table > theader{
@@ -2548,10 +2593,17 @@ a, a:hover, a:focus {
 
 }
 .panel-info > .panel-heading {
-    background-color: #49a7d2;
+  color: #3a87ad !important;
+  background-color: #d9edf7 !important;
+  border-color: #bce8f1 !important;
 }
+
+.panel-info {
+  border-color: #bce8f1;
+}
+
 .nav-tabs {
-    background: #000102 !important;
+    background: #f3c60d !important;
 }
 .nav-tabs {
     background-color: #7fb7b0;

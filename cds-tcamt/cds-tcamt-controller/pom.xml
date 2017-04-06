@@ -15,8 +15,28 @@
 		<logback.version>1.0.13</logback.version>
 		<jcl-over-slf4j.version>1.7.5</jcl-over-slf4j.version>
 		<cds-base.version>0.0.1-SNAPSHOT</cds-base.version>
+		<project.version>0.0.1-SNAPSHOT</project.version>
+   		<timestamp>${maven.build.timestamp}</timestamp>
+   		<maven.build.timestamp.format>yyyy-MM-dd HH:mm</maven.build.timestamp.format>
 	</properties>
 	<dependencies>
+	<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-context-support</artifactId>
+			<version>${spring.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>javax.mail</groupId>
+			<artifactId>mail</artifactId>
+			<version>1.4</version>
+		</dependency>
+
+		<dependency>
+			<groupId>javax.activation</groupId>
+			<artifactId>activation</artifactId>
+			<version>1.1.1</version>
+		</dependency>
 		<dependency>
 			<groupId>gov.nist.healthcare.cds</groupId>
 			<artifactId>cds-base-repo</artifactId>
@@ -110,6 +130,22 @@
 	</dependencies>
 	<build>
 		<finalName>fits</finalName>
+		<resources>
+		   <resource>
+		      <directory>src/main/resources</directory>
+		      <filtering>true</filtering>
+		      <excludes>
+                <exclude>**/*.xlsx</exclude>
+            </excludes>
+		   </resource>
+		   <resource>
+            <directory>src/main/resources</directory>
+            <filtering>false</filtering>
+            <includes>
+                <include>**/*.xlsx</include>
+            </includes>
+        </resource>
+		</resources>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>

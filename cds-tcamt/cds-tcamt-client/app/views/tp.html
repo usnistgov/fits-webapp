@@ -10,112 +10,159 @@
     }
 </script>
 <div class="container" ng-controller="TestPlanCtrl" ng-init="initTestCases()">
+    <div ng-show="isAuthenticated()">
+        <div ng-show="!isPending()">
+            <div class="row">
+                <ol ng-show="!accordi.tpList" class="breadcrumb" style="margin-bottom: 0px;">
+                    <li style="cursor: pointer;" ng-click="selectTP(selectedTP)" ng-if="aTPisSelected()"
+                        ng-class="{'activeBC' : aTPisSelected() && !aTCisSelected()}">
+                        <span class="label label-sub-component label-icon"
+                              style="vertical-align:middle;">Test Plan</span> {{selectedTP.name}}
+                    </li>
+                    <li style="cursor: pointer;" ng-click="selectTC(selectedTC)" ng-if="aTCisSelected()"
+                        ng-class="{'activeBC' : aTCisSelected() && !anEvisSelected() && !aFisSelected() && !aPisSelected()}">
+                        <span class="label label-component label-icon" style="vertical-align:middle;">Test Case</span>
+                        {{selectedTC.name}}
+                    </li>
+                    <li style="cursor: pointer;" ng-click="selectEvent(selectedEvent)" ng-if="anEvisSelected()"
+                        class="activeBC">
+                        <span class="label label-field label-icon " style="vertical-align:middle;">Event</span>
+                        {{selectedEvent.vaccination.administred.name}} -
+                        {{eventLabel(selectedEvent)}}
+                    </li>
+                    <li style="cursor: pointer;" ng-click="selectForecast(selectedForecast)" ng-if="aFisSelected()"
+                        class="activeBC">
+                        <span class="label label-segment label-icon" style="vertical-align:middle;">Forecast</span>
+                        {{selectedForecast.target.name}}
+                    </li>
+                    <li style="cursor: pointer;" ng-click="selectPatient()" ng-if="aPisSelected()" class="activeBC">
+                        Patient
+                    </li>
+                </ol>
+                <!--<div ng-show="control.error.isSet">-->
+                    <!--<div uib-alert class="alert-danger" close="dismissError()">-->
+                        <!--<div style="width: 100%;" layout="row" layout-align="center center">-->
+                            <!--<table flex="50" class="table table-condensed">-->
+                                <!--<tbody ng-repeat="errorObj in control.error.list track by $index">-->
+                                <!--<tr>-->
+                                    <!--<td colspan="2" style="text-align: center;">-->
+                                        <!--<strong>{{errorObj.action === 'IMPORT_NIST' ? 'Import Errors' : errorObj.action-->
+                                            <!--=== 'SAVE_TC' ? 'Saving TestCase '+ errorObj.obj.name : 'Errors'}}</strong>-->
+                                    <!--</td>-->
+                                <!--</tr>-->
+                                <!--<tr ng-repeat="e in errorObj.errors track by $index">-->
+                                    <!--<td><strong>{{e.path}}</strong></td>-->
+                                    <!--<td>{{e.message}}</td>-->
+                                <!--</tr>-->
+                                <!--</tbody>-->
+                            <!--</table>-->
+                        <!--</div>-->
+                    <!--</div>-->
+                <!--</div>-->
+                <!--<div class="pull-left">-->
+                    <!---->
 
-<div ng-show="isAuthenticated()">
-    <div ng-show="!isPending()">
-        <div class="row">
-			<ol ng-show="!accordi.tpList" class="breadcrumb" style="width : 100%; margin : 0px;">
-           		<li style="cursor: pointer;" ng-click="selectTP(selectedTP)" ng-if="aTPisSelected()" ng-class="{'activeBC' : aTPisSelected() && !aTCisSelected()}">
-           			<span class="label label-sub-component label-icon" style="vertical-align:middle;">Test Plan</span> {{selectedTP.name}}
-           		</li>
-  				<li style="cursor: pointer;" ng-click="selectTC(selectedTC)" ng-if="aTCisSelected()" ng-class="{'activeBC' : aTCisSelected() && !anEvisSelected() && !aFisSelected() && !aPisSelected()}">
-  					<span class="label label-component label-icon" style="vertical-align:middle;">Test Case</span> {{selectedTC.name}}
-  				</li>
-  				<li style="cursor: pointer;" ng-click="selectEvent(selectedEvent)" ng-if="anEvisSelected()" class="activeBC">
-  					<span class="label label-field label-icon " style="vertical-align:middle;">Event</span> {{selectedEvent.vaccination.administred.name}} -
-					{{eventLabel(selectedEvent)}}
-				</li>
-  				<li style="cursor: pointer;" ng-click="selectForecast(selectedForecast)" ng-if="aFisSelected()" class="activeBC">
-  					<span class="label label-segment label-icon" style="vertical-align:middle;">Forecast</span> {{selectedForecast.target.name}}
-  				</li>
-                <li style="cursor: pointer;" ng-click="selectPatient()" ng-if="aPisSelected()" class="activeBC">
-                    Patient
-                </li>
-			</ol>
-			<div ng-show="control.error.isSet">
-                <div uib-alert class="alert-danger" close="dismissError()" >
-                    <div style="width: 100%;" layout="row" layout-align="center center">
-                        <table flex="50" class="table table-condensed">
-                            <tbody ng-repeat="errorObj in control.error.list track by $index">
-                                <tr>
-                                    <td colspan="2" style="text-align: center;">
-                                         <strong>{{errorObj.action === 'IMPORT_NIST' ? 'Import Errors' : errorObj.action === 'SAVE_TC' ? 'Saving TestCase '+ errorObj.obj.name : 'Errors'}}</strong>
-                                    </td>
-                                </tr>
-                                <tr ng-repeat="e in errorObj.errors track by $index" >
-                                    <td><strong>{{e.path}}</strong></td>
-                                    <td>{{e.message}}</td>
-                                </tr>
-                            </tbody>
-                        </table>
+                <!--</div>-->
+
+                <div layout="row" layout-align="center center" style="padding-right: 15px; padding-left: 15px;">
+                    <div layout="row" flex="50" layout-align="start center">
+                        <span ng-show="accordi.tpList" class="header4" >Test Plans List</span>
+                        <!--<div layout="row" ng-show="accordi.tpDetails">-->
+                            <!--<md-checkbox md-no-ink ng-show="accordi.tpDetails && aTPisSelected()" ng-model="autoSave.active" class="md-primary">-->
+                                <!--Auto Save (refresh rate 10s)-->
+                            <!--</md-checkbox>-->
+                            <!--<span ng-show="autoSave.active" style="color : blue; margin-left: 5px;"><strong> Last Saved : {{autoSave.lastSave.getTime() | date:'HH:mm:ss'}}</strong></span>-->
+                            <!--<div ng-show="autoSave.saving && autoSave.active" style="margin-left: 5px;">-->
+                                <!--<i  class="fa fa-spinner fa-pulse"></i>-->
+                            <!--</div>-->
+                        <!--</div>-->
+                    </div>
+                    <div layout="row" flex="50" layout-align="end center" >
+                        <button ng-show="accordi.tpList" type="button" class="btn btn-info btn-sm" ng-click="newTestPlan()">
+                            <i class="fa fa-plus"></i>
+                            New
+                        </button>
+                        <button ng-show="accordi.tpDetails" title="View TestPlan List" type="button"
+                                class="btn btn-sm btn-info" ng-click="closeTestPlanEdit()">
+                            <span><i class="fa fa-list fa-fw"></i>List</span>
+                        </button>
+                        <button ng-show="aTPisSelected()" title="Import" type="button"
+                                class="btn btn-sm btn-info" ng-click="importButton()">
+                            <span><i class="fa fa-download fa-fw"></i>Import</span>
+                        </button>
+                        <div ng-show="accordi.tpDetails && aTCisSelected() && !selectedTC.changed" class="btn-group">
+                            <button type="button" class="btn btn-info btn-sm" ng-click="exportNIST()">
+                                <span><i class="fa fa-upload fa-fw"></i> Export</span>
+                            </button>
+                            <button type="button" class="btn btn-info btn-sm dropdown-toggle" data-toggle="dropdown"
+                                    aria-expanded="false">
+                                <span class="caret"></span>
+                                <span class="sr-only">Toggle Dropdown</span>
+                            </button>
+                            <ul class="dropdown-menu igl-menu" role="menu">
+                                <li><a class="point" ng-click="exportNIST()">NIST Format</a></li>
+                            </ul>
+                        </div>
+                        <button title="Save Changes" type="button" class="btn btn-sm btn-success" ng-show="aTPisSelected()"
+                                ng-click="saveAllChangedTestPlans(selectedTC,selectedTP)">
+                            <span><i class="fa fa-floppy-o fa-fw"></i> Save</span>
+                        </button>
                     </div>
                 </div>
-			</div>
-            <div class="pull-left">
-                <span ng-show="accordi.tpList" class="header4" style="margin-top:50px !important;">Test Plans List</span>
             </div>
 
-            <div class="pull-right">
-                <button ng-show="accordi.tpList" type="button" class="btn btn-info btn-sm" ng-click="newTestPlan()"><i class="fa fa-plus"></i>
-                    New
+            <div class="row">
+                <div ng-show="accordi.tpList" ng-include="'views/edit/listTP.html'"></div>
+                <div ng-show="accordi.tpDetails" ng-include="'views/edit/editTP.html'"></div>
+                <button ng-show="aTPisSelected()" ng-click="saveAllChangedTestPlans(selectedTC,selectedTP)"
+                        class="md-fab md-button btn-success md-ink-ripple"
+                        style="position: fixed !important; top : auto; bottom: 20px; right: 20px;">
+                    <span><i class="fa fa-floppy-o fa-fw" style="font-size: 1.5em;"></i></span>
+                    <md-tooltip md-direction="top">Save</md-tooltip>
                 </button>
-                <button ng-show="accordi.tpDetails" title="View TestPlan List" type="button" class="btn btn-sm btn-info" ng-click="closeTestPlanEdit()">
-                    <span><i class="fa fa-list fa-fw"></i>List</span>
+                <button ng-show="aTCisSelected()" ng-click="summary()"
+                        class="md-fab md-button btn-primary md-ink-ripple"
+                        style="position: fixed !important; top : auto; bottom: 20px; right: 80px;">
+                    <span><i class="fa fa-file-text-o" style="font-size: 1.5em;" aria-hidden="true"></i></span>
+                    <md-tooltip md-direction="top">Summary</md-tooltip>
                 </button>
-				<button ng-show="aTPisSelected() && !isLocal(selectedTP)" title="Import" type="button" class="btn btn-sm btn-info" ng-click="importButton()">
-                    <span><i class="fa fa-download fa-fw"></i>Import</span>
-                </button>
-                <div ng-show="accordi.tpDetails && aTCisSelected() && !selectedTC.changed" class="btn-group">
-                    <button type="button" class="btn btn-info btn-sm" ng-click="exportNIST()">
-                        <span><i class="fa fa-upload fa-fw"></i> Export</span>
-                    </button>
-                    <button type="button" class="btn btn-info btn-sm dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
-                        <span class="caret"></span>
-                        <span class="sr-only">Toggle Dropdown</span>
-                    </button>
-                    <ul class="dropdown-menu igl-menu" role="menu">
-                        <li><a class="point" ng-click="exportNIST()">NIST Format</a></li>
-                    </ul>
-                </div>
-                <button title="Save Changes" type="button" class="btn btn-sm btn-success" ng-show="aTPisSelected()" ng-click="saveAllChangedTestPlans(selectedTC,selectedTP)" >
-                    <span><i class="fa fa-floppy-o fa-fw"></i> Save</span>
+                <button ng-show="aTCisSelected()" ng-click="selectTC(selectedTC)"
+                        class="md-fab md-button btn-info md-ink-ripple"
+                        style="position: fixed !important; top : auto; bottom: 20px; right: 140px;">
+                    <span><i class="fa fa-info" style="font-size: 1.5em;" aria-hidden="true"></i></span>
+                    <md-tooltip md-direction="top">Test Case Information</md-tooltip>
                 </button>
             </div>
+
         </div>
 
-        <div class="row">
-            <div ng-show="accordi.tpList" ng-include="'views/edit/listTP.html'"></div>
-            <div ng-show="accordi.tpDetails" ng-include="'views/edit/editTP.html'"></div>
-        </div>
-    </div>
-
-    <!--<div style="font-size: 18px;text-align: center" ng-show="isPending()">-->
+        <!--<div style="font-size: 18px;text-align: center" ng-show="isPending()">-->
         <!--<div msg key='account.pendingSection'></div>-->
-    <!--</div>-->
+        <!--</div>-->
 
-</div>
+    </div>
 
-<script type="text/ng-template" id="ConfirmTestPlanDeleteCtrl.html">
-    <div class="modal-header">
-        <h3 class="modal-title">Delete Confirmation</h3>
-    </div>
-    <div class="modal-body">
-        <p>Are you sure you want to delete the TestPlan? This operation is irreversible</p>
-    </div>
-    </div>
-    <div class="modal-footer">
-        <button class="btn btn-default btn-sm" ng-disabled="loading" ng-click="cancel()">
-            <span><i class="fa fa-times fa-fw">&nbsp; </i>Cancel</span>
-        </button>
-        <button class="btn btn-danger btn-sm" ng-disabled="loading" ng-click="deleteTestPlan()">
-            <span><i class="fa fa-trash-o fa-fw">&nbsp; </i>Delete</span>
-        </button>
-        <div ng-show="loading" style="text-align:center;padding-top:20px; padding-bottom:20px">
-            <img class="ajax-loading" ng-src="images/ajax-loader.gif" alt="loading..."/>
+    <script type="text/ng-template" id="ConfirmTestPlanDeleteCtrl.html">
+        <div class="modal-header">
+            <h3 class="modal-title">Delete Confirmation</h3>
         </div>
-    </div>
-    </div>
-</script>
+        <div class="modal-body">
+            <p>Are you sure you want to delete the TestPlan? This operation is irreversible</p>
+        </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-default btn-sm" ng-disabled="loading" ng-click="cancel()">
+                <span><i class="fa fa-times fa-fw">&nbsp; </i>Cancel</span>
+            </button>
+            <button class="btn btn-danger btn-sm" ng-disabled="loading" ng-click="deleteTestPlan()">
+                <span><i class="fa fa-trash-o fa-fw">&nbsp; </i>Delete</span>
+            </button>
+            <div ng-show="loading" style="text-align:center;padding-top:20px; padding-bottom:20px">
+                <img class="ajax-loading" ng-src="images/ajax-loader.gif" alt="loading..."/>
+            </div>
+        </div>
+        </div>
+    </script>
 
     <script type="text/ng-template" id="ExitTC.html">
         <div class="modal-body" style="text-align: center;">
@@ -129,7 +176,8 @@
                 <button class="btn btn-success btn-sm" ng-disabled="loading" ng-click="saveChanges()">
                     <span><i class="fa fa-floppy-o fa-fw"></i> Save Now</span>
                 </button>
-                <button class="btn btn-danger btn-sm" ng-show="!canDiscard" ng-disabled="loading" ng-click="discardChanges()">
+                <button class="btn btn-danger btn-sm" ng-show="!canDiscard" ng-disabled="loading"
+                        ng-click="discardChanges()">
                     <span><i class="fa fa-trash-o fa-fw">&nbsp; </i>Discard Changes</span>
                 </button>
                 <button class="btn btn-info btn-sm" ng-disabled="loading" ng-click="saveLater()">
@@ -138,12 +186,65 @@
             </div>
         </div>
     </script>
+
+    <script type="text/ng-template" id="ImportSave.html">
+        <div class="modal-body" style="text-align: center;">
+            <strong><p>You have unsaved changes, please save your work before Importing Test Cases.</p></strong>
+        </div>
+        <div class="modal-footer" layout="column" layout-align="center start">
+            <div layout="row" layout-align="center center">
+                <button class="btn btn-success btn-sm" ng-disabled="loading" ng-click="save()">
+                    <span><i class="fa fa-floppy-o fa-fw"></i> Save All Changes</span>
+                </button>
+                <button class="btn btn-info btn-sm" ng-disabled="loading" ng-click="saveLater()">
+                    <span>Save Later</span>
+                </button>
+            </div>
+        </div>
+    </script>
+
+    <script type="text/ng-template" id="ErrorPanel.html">
+        <div class="modal-header">
+            <h3 class="modal-title"><i class="fa fa-exclamation-circle" style="color: red;" aria-hidden="true"></i> Errors</h3>
+        </div>
+        <div class="modal-body" style="text-align: center;">
+            <div style="width: 100%;" layout="row" layout-align="center center">
+                <table class="table table-condensed">
+                    <tbody ng-repeat="errorObj in control.error.list track by $index">
+                        <tr>
+                            <td colspan="2" style="text-align: center;">
+                                <strong>{{errorObj.action === 'IMPORT_NIST' ? 'Import Errors' : errorObj.action
+                                    === 'SAVE_TC' ? 'Saving TestCase '+ errorObj.obj.name : 'Errors'}}</strong>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="text-align: center;"><strong>Location</strong></td>
+                            <td style="text-align: center;"><strong>Error Message</strong></td>
+                        </tr>
+                        <tr ng-repeat="e in errorObj.errors track by $index">
+                            <td>{{e.path}}</td>
+                            <td>{{e.message}}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="modal-footer" layout="column" layout-align="center start">
+            <div layout="row" layout-align="center center">
+                <button class="btn btn-danger btn-sm" ng-disabled="loading" ng-click="ok()">
+                    <span>Ok</span>
+                </button>
+            </div>
+        </div>
+    </script>
+
+
     <script type="text/ng-template" id="GrpName.html">
         <div class="modal-body">
             <div class="col-md-12">
                 <md-input-container style="width: 100%;">
                     <label>Test Case Group Name</label>
-                    <input ng-model="name" type="text" />
+                    <input ng-model="name" type="text"/>
                 </md-input-container>
             </div>
         </div>
@@ -172,69 +273,68 @@
         </div>
     </script>
 
-<div ng-show="!isAuthenticated()" style="font-size: 18px;text-align: center">
-    <p>Please <a href="" ng-click="loginReq()"><i class="fa fa-sign-in"></i>&nbsp;login</a> to access this page. You
-        can also <a href="#/registration"><i class="fa fa-chevron-circle-right"></i>&nbsp;register</a></p>
-</div>
-
-
-
-<script type="text/ng-template" id="RichTextCtrl.html">
-    <div class="modal-header modal-wide">
-        <h3 class="modal-title">{{editorTarget.obj.position}} . {{editorTarget.obj.name}} :
-            {{editorTarget.title}}</h3>
+    <div ng-show="!isAuthenticated()" style="font-size: 18px;text-align: center">
+        <p>Please <a href="" ng-click="loginReq()"><i class="fa fa-sign-in"></i>&nbsp;login</a> to access this page. You
+            can also <a href="#/registration"><i class="fa fa-chevron-circle-right"></i>&nbsp;register</a></p>
     </div>
-    <div class="modal-body">
-        <div class="row">
-            <div class="col-md-12">
-                <div ng-if="!editorTarget.disabled">
+
+
+    <script type="text/ng-template" id="RichTextCtrl.html">
+        <div class="modal-header modal-wide">
+            <h3 class="modal-title">{{editorTarget.obj.position}} . {{editorTarget.obj.name}} :
+                {{editorTarget.title}}</h3>
+        </div>
+        <div class="modal-body">
+            <div class="row">
+                <div class="col-md-12">
+                    <div ng-if="!editorTarget.disabled">
                     <textarea froala="froalaEditorOptions" ng-model="editorTarget.obj[editorTarget.key]"
                               id="globalEditor"
                               name="content"
                               ng-change="recordChanged()"></textarea>
-                </div>
-                <div ng-if="editorTarget.disabled">
-                    <div froala-view="editorTarget.obj[editorTarget.key]"></div>
+                    </div>
+                    <div ng-if="editorTarget.disabled">
+                        <div froala-view="editorTarget.obj[editorTarget.key]"></div>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-    <div class="modal-footer">
-        <button class="btn btn-primary" ng-click="close()"><span><i class="fa fa-times fa-fw">
+        <div class="modal-footer">
+            <button class="btn btn-primary" ng-click="close()"><span><i class="fa fa-times fa-fw">
             &nbsp; </i>Close</span>
-        </button>
-    </div>
-</script>
+            </button>
+        </div>
+    </script>
 
-<script type="text/ng-template" id="InputTextCtrl.html">
-    <div class="modal-header">
-        <h3 ng-show="editorTarget.obj.type === 'segmentRef'">
-            {{editorTarget.obj.position}}.{{segmentsMap[editorTarget.obj.ref].name}}:{{segmentsMap[editorTarget.obj.ref].description}}</h3>
+    <script type="text/ng-template" id="InputTextCtrl.html">
+        <div class="modal-header">
+            <h3 ng-show="editorTarget.obj.type === 'segmentRef'">
+                {{editorTarget.obj.position}}.{{segmentsMap[editorTarget.obj.ref].name}}:{{segmentsMap[editorTarget.obj.ref].description}}</h3>
 
-        <h3 ng-show="editorTarget.obj.type === 'group'">{{editorTarget.obj.position}}.{{editorTarget.obj.name}}</h3>
+            <h3 ng-show="editorTarget.obj.type === 'group'">{{editorTarget.obj.position}}.{{editorTarget.obj.name}}</h3>
 
-        <h3 ng-show="editorTarget.obj.type !=  'segmentRef' && editorTarget.obj.type !=  'group'"
-            class="modal-title">{{editorTarget.obj.position}} . {{editorTarget.obj.name}} :
-            {{editorTarget.title}}</h3>
-    </div>
-    <div class="modal-body">
+            <h3 ng-show="editorTarget.obj.type !=  'segmentRef' && editorTarget.obj.type !=  'group'"
+                class="modal-title">{{editorTarget.obj.position}} . {{editorTarget.obj.name}} :
+                {{editorTarget.title}}</h3>
+        </div>
+        <div class="modal-body">
 
-        <form class="form-horizontal" novalidate>
-            <div class="row">
-                <div class="col-md-12">
-            <textarea rows="5"  type="text" ng-disabled="editorTarget.disabled" style="width:100%;" autofocus
+            <form class="form-horizontal" novalidate>
+                <div class="row">
+                    <div class="col-md-12">
+            <textarea rows="5" type="text" ng-disabled="editorTarget.disabled" style="width:100%;" autofocus
                       name="inputEditor" class="form-control" ng-model="editorTarget.obj[editorTarget.key]"
-                    ></textarea>
+            ></textarea>
                     </div>
                 </div>
             </form>
         </div>
-    </div>
-    <div class="modal-footer">
-        <button class="btn btn-primary btn-sm" ng-click="close()"><span><i class="fa fa-check fa-fw">
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-primary btn-sm" ng-click="close()"><span><i class="fa fa-check fa-fw">
             &nbsp; </i>Save</span>
-        </button>
-    </div>
-</script>
+            </button>
+        </div>
+    </script>
 
 </div>

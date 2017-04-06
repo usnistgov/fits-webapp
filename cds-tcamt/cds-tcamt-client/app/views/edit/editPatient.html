@@ -8,8 +8,10 @@
                             <div flex="100" layout="column" layout-align="center">
                                 <div flex="100">
                                     <div style="width: 100%; margin-bottom: 10px;">
-                                        <md-input-container style="width: 100%;">
+                                        <div style="width: 100%; ">
                                             <label>Gender</label>
+                                        </div>
+                                        <md-input-container style="width: 100%;">
                                             <md-select ng-model="selectedTC.patient.gender" ng-model-options="{trackBy: '$value'}" required>
                                                 <md-option ng-repeat=" enum in gender " ng-value="enum.code">{{enum.details}}</md-option>
                                             </md-select>
@@ -20,10 +22,10 @@
                                         <date-choose style="margin-left: 5px; width: 100%;" flex="50" exclude="'DOB'" nullable="false" type="selectedTC.dateType" label="'Date Of Birth'" dt="selectedTC.patient.dob" events="selectedTC.events"></date-choose>
                                     </div>
                                     <div style="width: 100%;" ng-show="selectedTC.dateType === 'RELATIVE'" layout="column" layout-align="center start">
-                                        <div style="width: 100%; text-align: center; margin-bottom: 10px;">
+                                        <div style="width: 100%; margin-bottom: 10px;">
                                             <label>Patient Age</label>
                                         </div>
-                                        <div style="width: 100%;" layout="row" layout-align="center center">
+                                        <div style="width: 100%;" layout="row">
                                             <md-input-container >
                                                 <label>Years</label>
                                                 <input min='0' ng-model="selectedTC.patient.dob.rules[0].year" type="number" required>

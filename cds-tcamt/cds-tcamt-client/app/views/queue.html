@@ -16,10 +16,10 @@
     }
 </script>
 <md-content layout="column">
-    <md-list md-whiteframe="2" layout="row" ng-show="$parent.tcQueue.length > 0" style="background-color: white; min-height: 45px; padding: 0px; border-top : 1px solid #dddddd;">
+    <md-list md-whiteframe="4" layout="row" ng-show="$parent.tcQueue.length > 0" style="background-color: white; min-height: 45px; padding: 0px; border-top : 1px solid #dddddd;">
         <md-list-item flex="{{exec ? 30 : 90 }}" style="border-right: 1px solid #dddddd;">
             <div layout="row" layout-align="center center" flex="100" style="width: 100%;" >
-                <strong>Name</strong>
+                <strong>Test Case Name</strong>
             </div>
         </md-list-item>
         <md-list-item flex="30" ng-show="$parent.exec" style="text-align : center; border-right: 1px solid #dddddd;">
@@ -27,16 +27,20 @@
                 <strong>Evaluations</strong>
                 <div layout="row">
                     <div flex="25" layout="row" layout-align="center center" class="detection-cell detection-cell-head">
-                        <span>Detections</span>
+                        <span>Results</span>
+                        <md-tooltip md-direction="bottom">validation results</md-tooltip>
                     </div>
                     <div flex="25" layout="row" layout-align="center center" class="detection-cell detection-cell-head">
                         <span>Requirements</span>
+                        <md-tooltip md-direction="bottom">total evaluation requirements</md-tooltip>
                     </div>
                     <div flex="25" layout="row" layout-align="center center" class="detection-cell detection-cell-head">
                         <span>Correctness</span>
+                        <md-tooltip md-direction="bottom">% of passed checks out of verifiable requirements</md-tooltip>
                     </div>
                     <div flex="25" layout="row" layout-align="center center" class="detection-cell detection-cell-end detection-cell-head">
                         <span>Completion</span>
+                        <md-tooltip md-direction="bottom">% of requirements that could be verified</md-tooltip>
                     </div>
                 </div>
             </div>
@@ -46,16 +50,20 @@
                 <strong>Forecasts</strong>
                 <div layout="row">
                     <div flex="25" layout="row" layout-align="center center" class="detection-cell detection-cell-head">
-                        <span>Detections</span>
+                        <span>Results</span>
+                        <md-tooltip md-direction="bottom">validation results</md-tooltip>
                     </div>
                     <div flex="25" layout="row" layout-align="center center" class="detection-cell detection-cell-head">
                         <span>Requirements</span>
+                        <md-tooltip md-direction="bottom">total forecast requirements</md-tooltip>
                     </div>
                     <div flex="25" layout="row" layout-align="center center" class="detection-cell detection-cell-head">
                         <span>Correctness</span>
+                        <md-tooltip md-direction="bottom">% of passed checks out of verifiable requirements</md-tooltip>
                     </div>
                     <div flex="25" layout="row" layout-align="center center" class="detection-cell detection-cell-end detection-cell-head">
                         <span>Completion</span>
+                        <md-tooltip md-direction="bottom">% of requirements that could be verified</md-tooltip>
                     </div>
                 </div>
             </div>
@@ -67,11 +75,14 @@
         </md-list-item>
     </md-list>
     <md-divider></md-divider>
-    <md-virtual-repeat-container ng-class="{'drop-zone' :  ($parent.dstartf || $parent.multipleSel) && $parent.tcQueue.length === 0 }" style="height : 280px;" id="qbody" dnd-list="tcQueue"  dnd-drop="drop(list, item, index)" md-top-index="$parent.controls.top">
-        <md-list-item md-virtual-repeat="tc in $parent.viewTc = (tcQueue | testcase:$parent.filter.queueSearch)" class="repeated-item" flex
+    <div ng-show="$parent.tcQueue.length === 0" style="width: 100%; text-align: center; font-size: 17px;">
+        <strong>Drop Here</strong>
+    </div>
+    <md-virtual-repeat-container ng-class="{'drop-zone' :  $parent.tcQueue.length === 0 }" style="height : 280px;" id="qbody" dnd-list="tcQueue"  dnd-drop="drop(list, item, index)" md-top-index="$parent.controls.top">
+        <md-list-item md-virtual-repeat="tc in $parent.viewTc = (tcQueue | testcase:$parent.filter.queueSearch | fcFilter:$parent.filter:$parent.showResults | evFilter:$parent.filter:$parent.showResults | execSuccess:$parent.filter.exec:$parent.showResults )" class="repeated-item" flex
                       layout="row"
-                      ng-class="{'cursor-move' : !$parent.exec, 'run' :  tc._running, 'fail' : exec && tc._running === false && tc._s === false, 'info' : $index === x.rp && showResults }"
-                      style="height: 15px; border-bottom: 1px solid #dddddd; padding: 0;"
+                      ng-class="{'cursor-move' : !$parent.exec, 'fail' : tc._s === false, 'info' : $index === x.rp && $parent.showResults }"
+                      style="height: 15px; border-bottom: 1px solid #dddddd; padding: 0; background-color: rgba(158, 158, 158, 0.17);"
                       dnd-draggable="tc"
                       dnd-disable-if="exec"
                       dnd-moved="dragMoved($index)"

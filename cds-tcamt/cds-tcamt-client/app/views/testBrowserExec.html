@@ -28,13 +28,13 @@
                 <div style="margin-left: 5px;">
                     <i ng-click="toggle(this)" class="fa" ng-class="{'fa-caret-right': collapsed, 'fa-caret-down': !collapsed}"></i>
                     <span>
-						<span class="label label-sub-component label-icon">P</span>
+						<span class="label label-plan label-icon">TP</span>
 						<span>{{tp.name}}</span>
 					</span>
                 </div>
             </div>
             <ol ui-tree-nodes dnd-list="tp.testCases" dnd-drop="false" ng-model="tp.testCases">
-                <li data-drag-enabled="false" ng-repeat="tc in $parentNodeScope.collapsed ? [] : (tp.testCases | testcase:tcSearch)" ui-tree-node ng-hide="$parentNodeScope.collapsed"
+                <li data-drag-enabled="false" ng-repeat="tc in $parentNodeScope.collapsed ? [] : (tp.testCases | tcFilter:tcFilter)" ui-tree-node ng-hide="$parentNodeScope.collapsed"
                     dnd-draggable="multipleSel ? selected : tc"
                     dnd-moved="onMoved(list)"
                     dnd-selected="select(tc)"
@@ -45,7 +45,7 @@
                     <div id="{{'tc-'+tc.id}}"  ng-click="selectTC(tc)"  ng-class="{selected1 : isSelectedTC(tc) && !multipleSel, cdraggable : find(selected,tc) && multipleSel, inqueue : inQueue(tc)}">
                         <div style="margin-left: 5px;">
 							<span ng-class="{selected1 : isSelectedTC(tc) && !multipleSel, cdraggable : find(selected,tc) && multipleSel, inqueue : inQueue(tc)}">
-								<span class="label label-component label-icon">T</span>
+								<span class="label label-case label-icon">TC</span>
 								<span style="font-weight: initial;" ng-class="{ 'unsaved' : tc._changed }">
 									<i title="Unsaved Changes" class="fa fa-refresh unsaved" aria-hidden="true" ng-show="tc._changed"></i>
 									{{ tc.uid ? '#'+tc.uid+"- " : ""}}{{tc.name}}
@@ -56,7 +56,7 @@
                 </li>
             </ol>
             <ol ui-tree-nodes data-nodrop-enabled="true" dnd-list="tp.testCaseGroups" dnd-drop="false"ng-model="tp.testCaseGroups">
-                <li data-drag-enabled="false" data-collapsed="{{!isLocal(group)}}" ng-repeat="group in $parentNodeScope.collapsed ? [] : tp.testCaseGroups track by $index" ui-tree-node ng-hide="$parentNodeScope.collapsed"
+                <li data-drag-enabled="false" data-collapsed="{{!isLocal(group)}}" ng-repeat="group in $parentNodeScope.collapsed ? [] : tp.testCaseGroups track by $index" ui-tree-node ng-hide="$parentNodeScope.collapsed || (filterActive(tcFilter) && (group._gtc.length === 0 || !group._gtc))"
                     dnd-draggable="group"
                     dnd-moved="onMoved(list)"
                     dnd-dragstart="dstart(true)"
@@ -67,13 +67,14 @@
                         <div style="margin-left: 5px;">
                             <i ng-click="toggle(this)" class="fa" ng-class="{'fa-caret-right': collapsed, 'fa-caret-down': !collapsed}"></i>
                             <span>
-								<span class="label label-group label-icon">G</span>
+								<span class="label label-group label-icon">GP</span>
 								<strong>{{ group.name }}</strong>
+                                <span style="font-style: italic; color: #0000ff;">({{group._gtc ? group._gtc.length : "0"}})</span>
 							</span>
                         </div>
                     </div>
                     <ol dnd-list="group.testCases" dnd-drop="false" ui-tree-nodes ng-model="group.testCases">
-                        <li data-drag-enabled="false" ng-repeat="tc in ($parentNodeScope.collapsed ? [] : (group.testCases | testcase:tcSearch)) track by $index" ui-tree-node ng-hide="$parentNodeScope.collapsed"
+                        <li data-drag-enabled="false" ng-repeat="tc in ($parentNodeScope.collapsed ? [] : group._gtc = (group.testCases | tcFilter:tcFilter)) track by $index" ui-tree-node ng-hide="$parentNodeScope.collapsed"
                             dnd-draggable="multipleSel ? selected : tc"
                             dnd-moved="onMoved(list)"
                             dnd-selected="select(tc)"
@@ -84,7 +85,7 @@
                             <div id="{{'tc-'+tc.id}}" ng-click="selectTC(tc)"  ng-class="{selected1 : isSelectedTC(tc) && !multipleSel, cdraggable : find(selected,tc) && multipleSel, inqueue : inQueue(tc)}">
                                 <div style="margin-left: 5px;">
 									<span ng-class="{selected1 : isSelectedTC(tc) && !multipleSel, cdraggable : find(selected,tc) && multipleSel, inqueue : inQueue(tc)}">
-										<span class="label label-component label-icon">T</span>
+										<span class="label label-case label-icon">TC</span>
 										<span style="font-weight: initial;" ng-class="{ 'unsaved' : tc._changed }">
 											<i title="Unsaved Changes" class="fa fa-refresh unsaved" aria-hidden="true" ng-show="tc._changed"></i>
 											{{ tc.uid ? '#'+tc.uid+"- " : ""}}{{tc.name}}

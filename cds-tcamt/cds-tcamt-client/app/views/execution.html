@@ -32,7 +32,8 @@
                     <div flex="grow" layout="row" layout-align="end center">
                         <span ng-show="exec" style="margin-right: 5px;"><strong>{{controls.progress}}%</strong></span>
                         <div ng-show="exec" style="height : 20px; margin-right: 10px;" flex="50">
-                            <md-progress-linear md-mode="determinate" value="{{controls.progress}}"></md-progress-linear>
+                            <md-progress-linear md-mode="determinate"
+                                                value="{{controls.progress}}"></md-progress-linear>
                         </div>
                         <button ng-click="controls.paused ? resume() : pause()" ng-show="exec && !showResults"
                                 class="btn btn-xs" ng-class="{ 'pause-btn' : !controls.paused, 'btn-success' : controls.paused }" style="margin: 0px; margin-right: 10px;">
@@ -48,7 +49,12 @@
                             </span>
                         </button>
                         <button ng-click="saveReports()"
-                                ng-show="exec && showResults && report && report.reports && report.reports.length > 0"
+                                ng-show="exec && showResults && report && container.asList && container.asList.length > 0 && !saved"
+                                class="btn btn-xs btn-success" style="margin: 0px; margin-right: 10px;">
+                            <span><i class="fa fa-floppy-o fa-fw"></i>Save Reports</span>
+                        </button>
+                        <button ng-show="false" ng-click="getSimulationList()"
+                                ng-show="exec && showResults && report && container.asList && container.asList.length > 0 "
                                 class="btn btn-xs btn-success" style="margin: 0px; margin-right: 10px;">
                             <span><i class="fa fa-floppy-o fa-fw"></i>Save Reports</span>
                         </button>
@@ -93,62 +99,103 @@
                             </td>
                             <td style="width: 70%;">
                                 <md-content layout="column" ng-show="showResults">
-                                    <div layout="row" style="background-color: white; min-height: 45px; padding: 0px;">
-                                        <div flex="30" layout="column" layout-align="center center" style="border-right : 1px solid #dddddd;">
-                                            <div class="input-group" style="width : 90%; margin-left: 10px;">
-                                                <span class="input-group-addon"  style="background-color: rgb(240, 240, 240);" id="basic-addon1"><i class="fa fa-search" aria-hidden="true"></i></span>
-                                                <input type="text" class="form-control" ng-model="filter.queueSearch" ng-model-options="{ debounce: 500 }" style="background-color: white; width : 100%;" placeholder="  Name, ID, Group"/>
-                                            </div>
-                                        </div>
-                                        <div flex="30" style="border-right : 1px solid #dddddd">
-                                            <md-list layout="row" layout-align="center center" style="text-align: center; width: 100%; height: 100%;">
-                                                <div flex="40" layout="column" layout-align="center start">
-                                                    <md-checkbox class="md-secondary" ng-model="filter.eCm" aria-label="Checkbox 1">
-                                                        Complete Match
-                                                    </md-checkbox>
-                                                    <md-checkbox class="md-secondary" ng-model="filter.eCs" aria-label="Checkbox 1">
-                                                        Complete Success
-                                                    </md-checkbox>
-                                                </div>
-                                                <div flex="40" layout="column" layout-align="center start">
-                                                    <md-checkbox class="md-secondary" ng-model="filter.eCe" aria-label="Checkbox 1">
-                                                        Contains Errors
-                                                    </md-checkbox>
-                                                    <md-checkbox class="md-secondary" ng-model="filter.eCw" aria-label="Checkbox 1">
-                                                        Contains Warnings
-                                                    </md-checkbox>
-                                                </div>
-                                            </md-list>
-                                        </div>
-                                        <div flex="30" style="border-right : 1px solid #dddddd">
-                                            <md-list layout="row" layout-align="center center" style="text-align: center; width: 100%; height: 100%;">
-                                                <div flex="40" layout="column" layout-align="center start">
-                                                    <md-checkbox class="md-secondary" ng-model="filter.fCm" aria-label="Checkbox 1">
-                                                        Complete Match
-                                                    </md-checkbox>
-                                                    <md-checkbox class="md-secondary" ng-model="filter.fCs" aria-label="Checkbox 1">
-                                                        Complete Success
-                                                    </md-checkbox>
-                                                </div>
-                                                <div flex="40" layout="column" layout-align="center start">
-                                                    <md-checkbox class="md-secondary" ng-model="filter.fCe" aria-label="Checkbox 1">
-                                                        Contains Errors
-                                                    </md-checkbox>
-                                                    <md-checkbox class="md-secondary" ng-model="filter.fCw" aria-label="Checkbox 1">
-                                                        Contains Warnings
-                                                    </md-checkbox>
-                                                </div>
-                                            </md-list>
-                                        </div>
-                                        <div flex="10" layout="column" layout-align="center center">
-                                            <div flex="50" layout="column" layout-align="center center" >
-                                                <button class="btn btn-xs btn-danger" ng-style="!qview ? { 'background-color' : '#44bf6b' } : {}" ng-click="resetFilter()" >
-                                                    RESET
+                                    <div md-whiteframe="2" layout="column" style="width: 100%;">
+                                        <div layout="row" layout-align="start center" style="padding : 10px; background-color: #1f79c1; text-align: center; height: 100%; width: 100%; border : 1px solid #dddddd;">
+                                            <span flex="90" style="font-size: 14px; color: white; ">
+                                                <strong>Filters</strong>
+                                            </span>
+                                            <div flex="10" layout="row" layout-align="end">
+                                                <button class="btn btn-xs btn-info" ng-class="{ 'btn-info' : !filterView, 'btn-primary' : filterView }" ng-click="filterView = !filterView" style="margin: 0; margin-right: 10px;">
+                                                    <span ng-style="filterEngaged(filter) ? { 'background-color' : '#47ef47' } : { 'background-color' : '#ff4040' } " style="padding: 0 !important; margin-right: 5px; font-size: 10px;" class="badge">&nbsp;</span>
+                                                    <i class="fa fa-filter" aria-hidden="true" style="font-size : 1.8em;"></i>
+                                                    <md-tooltip md-direction="top">Filter</md-tooltip>
                                                 </button>
                                             </div>
-                                            <div flex="50" style="border-top : 1px solid #dddddd; width: 100%;" layout="column" layout-align="center center">
-                                                <div>
-                                                    <span style="background-color: black;" class="badge">TOTAL  {{viewTc.length ? viewTc.length : 0}}</span>
+                                        </div>
+                                        <div layout="row" style="background-color: white; padding: 0px;" ng-show="filterView">
+                                            <div flex="30" layout="column" layout-align="center center" style="border-right : 1px solid #dddddd;">
+                                                <div class="input-group" style="width : 90%; margin-left: 10px;">
+                                                    <span class="input-group-addon"  style="background-color: rgb(240, 240, 240);" id="basic-addon1"><i class="fa fa-search" aria-hidden="true"></i></span>
+                                                    <input type="text" class="form-control" ng-model="filter.queueSearch" ng-model-options="{ debounce: 500 }" style="background-color: white; width : 100%;" placeholder="  Name, ID, Group"/>
+                                                </div>
+                                            </div>
+                                            <div flex="60" layout="column" style="border-right : 1px solid #dddddd;">
+                                                <div style="width: 100%; border-bottom : 1px solid #dddddd" layout="row" layout-align="center center">
+                                                    <md-checkbox style="margin-top : 10px;" class="md-secondary" ng-model="filter.exec" aria-label="Checkbox 1">
+                                                        Execution Success Only
+                                                    </md-checkbox>
+                                                </div>
+                                                <div layout="row">
+                                                    <div flex="50" style="border-right : 1px solid #dddddd;">
+                                                        <md-list layout="row" layout-align="center center" style="text-align: center; width: 100%; height: 100%;">
+                                                            <div flex="40" layout="column" layout-align="center start">
+                                                                <md-checkbox class="md-secondary" ng-model="filter.eCm" ng-change="compC('e',true,filter.eCm)" aria-label="Checkbox 1">
+                                                                    100% Complete
+                                                                </md-checkbox>
+                                                                <md-checkbox class="md-secondary" ng-model="filter.enCm" ng-change="compC('e',false,filter.enCm)" aria-label="Checkbox 1">
+                                                                    &lt; 100% Complete
+                                                                </md-checkbox>
+                                                                <md-checkbox class="md-secondary" ng-model="filter.eCs" ng-change="csuccess('e',filter.eCs)" aria-label="Checkbox 1">
+                                                                    100% Correct
+                                                                </md-checkbox>
+                                                            </div>
+                                                            <div flex="40" layout="column" layout-align="center start">
+                                                                <md-checkbox class="md-secondary" ng-model="filter.eCe" ng-change="cdetection('e',filter.eCe)" aria-label="Checkbox 1">
+                                                                    Contains Errors
+                                                                </md-checkbox>
+                                                                <md-checkbox class="md-secondary" ng-model="filter.eCw" aria-label="Checkbox 1">
+                                                                    Contains Warnings
+                                                                </md-checkbox>
+                                                            </div>
+                                                        </md-list>
+                                                    </div>
+                                                    <div flex="50">
+                                                        <md-list layout="row" layout-align="center center" style="text-align: center; width: 100%; height: 100%;">
+                                                            <div flex="45" layout="column" layout-align="center start">
+                                                                <md-checkbox class="md-secondary" ng-model="filter.fCm"  ng-change="compC('f',true,filter.fCm)" aria-label="Checkbox 1">
+                                                                    100% Complete
+                                                                </md-checkbox>
+                                                                <md-checkbox class="md-secondary" ng-model="filter.fnCm" ng-change="compC('f',false,filter.fnCm)" aria-label="Checkbox 1">
+                                                                    &lt; 100% Complete
+                                                                </md-checkbox>
+                                                                <md-checkbox class="md-secondary" ng-model="filter.fCs" ng-change="csuccess('f',filter.fCs)" aria-label="Checkbox 1">
+                                                                    100% Correct
+                                                                </md-checkbox>
+                                                                <md-checkbox class="md-secondary" ng-model="filter.fCr.e" ng-change="cdetection('f',filter.fCr.e)" aria-label="Checkbox 1">
+                                                                    Incorrect Earliest Date
+                                                                </md-checkbox>
+                                                                <md-checkbox class="md-secondary" ng-model="filter.fCr.r" ng-change="cdetection('f',filter.fCr.r)" aria-label="Checkbox 1">
+                                                                    Incorrect Recommended
+                                                                </md-checkbox>
+                                                            </div>
+                                                            <div flex="45" layout="column" layout-align="center start">
+                                                                <md-checkbox class="md-secondary" ng-model="filter.fCe" ng-change="cdetection('f',filter.fCe)" aria-label="Checkbox 1">
+                                                                    Contains Errors
+                                                                </md-checkbox>
+                                                                <md-checkbox class="md-secondary" ng-model="filter.fCw" aria-label="Checkbox 1">
+                                                                    Contains Warnings
+                                                                </md-checkbox>
+                                                                <md-checkbox class="md-secondary" ng-model="filter.fCr.d"  ng-change="cdetection('f',filter.fCr.d)" aria-label="Checkbox 1">
+                                                                    Incorrect Past Due Date
+                                                                </md-checkbox>
+                                                                <md-checkbox class="md-secondary" ng-model="filter.fCr.l" ng-change="cdetection('f',filter.fCr.l)" aria-label="Checkbox 1">
+                                                                    Incorrect Latest Date
+                                                                </md-checkbox>
+                                                            </div>
+                                                        </md-list>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div flex="10" layout="column" layout-align="center center">
+                                                <div flex="50" layout="column" layout-align="center center" >
+                                                    <button class="btn btn-xs btn-danger" ng-style="!qview ? { 'background-color' : '#44bf6b' } : {}" ng-click="resetFilter()" >
+                                                        RESET
+                                                    </button>
+                                                </div>
+                                                <div flex="50" style="border-top : 1px solid #dddddd; width: 100%;" layout="column" layout-align="center center">
+                                                    <div>
+                                                        <span style="background-color: black;" class="badge">TOTAL  {{viewTc.length ? viewTc.length : 0}}</span>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
@@ -161,6 +208,12 @@
                     </table>
                 </div>
             </div>
+        </div>
+        <div ng-show="exec" layout="row" layout-align="center center">
+            <span style="background-color: green;" class="badge">CORRECT</span>
+            <span style="background-color: red;" class="badge">ERRORS</span>
+            <span style="background-color: orange;" class="badge">WARNINGS</span>
+            <span style="background-color: grey;" class="badge">INCOMPLETE</span>
         </div>
         <div class="col-md-12" ng-show="exec">
             <div class="panel panel-primary" style="padding: 0px; margin-top : 15px;">
@@ -179,20 +232,21 @@
                                 <md-content class="md-padding">
                                     <div flex="100" layout="row" layout-align="space-around center">
                                         <div flex="10" layout="row" layout-align="center center">
-                                            <button class="btn" ng-show="x.rp-1 >= 0 && viewTc.length > 0" ng-click="goToReport(x.rp-1)">
+                                            <button class="btn" ng-show="x.rp-1 >= 0 && viewTc.length > 0 && viewReport()" ng-click="goToReport(x.rp-1)">
                                                 <i class="fa fa-chevron-left" style="font-size : 5em;"
                                                    aria-hidden="true"></i>
                                             </button>
                                         </div>
                                         <div flex="80">
-                                            <report ng-show="report.reports.length > 0" vxm="vxm"
-                                                    report="report.reports[reportId]"></report>
-                                            <p ng-show="report.reports.length === 0"
-                                               style="text-align: center; margin-top: 10px;"><strong>No report in the
-                                                queue.</strong></p>
+                                            <report ng-if="selectedReport" vxm="vxm"
+                                                    report="selectedReport"></report>
+                                            <p ng-show="!viewReport()"
+                                               style="text-align: center; margin-top: 10px;"><strong>No report in the queue.</strong></p>
+                                            <p ng-show="!selectedReport"
+                                               style="text-align: center; margin-top: 10px;"><strong>Sorry, no report was found for this Test Case.</strong></p>
                                         </div>
                                         <div flex="10" layout="row" layout-align="center center">
-                                            <button class="btn" ng-show="viewTc.length > x.rp+1 && viewTc.length > 0"
+                                            <button class="btn" ng-show="viewTc.length > x.rp+1 && viewTc.length > 0 && viewReport()"
                                                     ng-click="goToReport(x.rp+1)">
                                                 <i class="fa fa-chevron-right" style="font-size : 5em;"
                                                    aria-hidden="true"></i>
@@ -218,23 +272,75 @@
                                 <i class="fa fa-files-o" style="font-size: 2em;" aria-hidden="true"></i>
                             </button>
                         </div>
-                        <div flex="45" style="padding: 0; text-align: center;">
+                        <div flex="80" style="padding: 0; text-align: center;">
                             <strong> Test Cases </strong>
                         </div>
-                        <div flex="50" style="padding: 0;">
-                            <div class="input-group" style="width : 100%;">
-                                <span class="input-group-addon" style="background-color: rgb(240, 240, 240);"
-                                      id="basic-addon1"><i class="fa fa-search" aria-hidden="true"></i></span>
-                                <input type="text" class="form-control" ng-model="tcSearch"
-                                       ng-model-options="{ debounce: 500 }"
-                                       style="padding-left: 10px; background-color: white; width : 100%;"
-                                       placeholder="Name, ID, Group"/>
-                            </div>
+                        <button flex="15" class="btn btn-xs btn-info" ng-class="{ 'btn-info' : tcFilterView, 'btn-primary' : !tcFilterView }" ng-click="tcFilterView = !tcFilterView" style="margin: 0; margin-right: 10px;">
+                            <span ng-style="filterActive(tcFilter) ? { 'background-color' : '#47ef47' } : { 'background-color' : '#ff4040' } " style="padding: 0 !important; margin-right: 5px; font-size: 10px;" class="badge">&nbsp;</span>
+                            <i class="fa fa-filter" aria-hidden="true" style="font-size : 1.8em;"></i>
+                            <md-tooltip md-direction="top">Filter</md-tooltip>
+                        </button>
+                    </div>
+                    <div layout="column" style="width : 100%; background-color : rgb(241,241,241); border: 1px solid #dddddd; padding: 10px;" ng-show="tcFilterView">
+                        <div layout="row" layout-align="center center">
+                            <md-input-container style="width: 100%;">
+                                <label>Name</label>
+                                <input ng-model="tcFilter.example.name" type="text"/>
+                            </md-input-container>
                         </div>
+                        <div layout="row" layout-align="center center">
+                            <md-input-container style="width: 100%;">
+                                <label>ID</label>
+                                <input ng-model="tcFilter.example.uid" type="text"/>
+                            </md-input-container>
+                            <md-input-container style="width: 100%;">
+                                <label>Last Changed Version</label>
+                                <input ng-model="tcFilter.example.metaData.version" type="text"/>
+                            </md-input-container>
+                        </div>
+                        <div layout="row" layout-align="center center">
+                            <md-input-container style="width: 100%;">
+                                <label>Created</label>
+                                <md-select ng-model="tcFilter.dates.created.position">
+                                    <md-option value="B">BEFORE</md-option>
+                                    <md-option value="A">AFTER</md-option>
+                                    <md-option value="O">ON</md-option>
+                                </md-select>
+                            </md-input-container>
+                            <md-input-container style="width: 100%;">
+                                <label>Date</label>
+                                <md-datepicker
+                                        flex="50"
+                                        ng-model="tcFilter.dates.created.date"
+                                        md-placeholder="Creation Date">
+                                </md-datepicker>
+                            </md-input-container>
+                        </div>
+                        <div layout="row" layout-align="center center">
+                            <md-input-container style="width: 100%;">
+                                <label>Last Updated</label>
+                                <md-select ng-model="tcFilter.dates.updated.position">
+                                    <md-option value="B">BEFORE</md-option>
+                                    <md-option value="A">AFTER</md-option>
+                                    <md-option value="O">ON</md-option>
+                                </md-select>
+                            </md-input-container>
+                            <md-input-container style="width: 100%;">
+                                <label>Date</label>
+                                <md-datepicker
+                                        flex="50"
+                                        ng-model="tcFilter.dates.updated.date"
+                                        md-placeholder="Update Date">
+                                </md-datepicker>
+                            </md-input-container>
+                        </div>
+                        <button class="btn btn-danger" style="width : 100%;" ng-click="resetTcFilter(tcFilter)">
+                            Reset Filter
+                        </button>
                     </div>
                     <div class="panel-body panel-resizable" style="height: 400px;">
                         <div ng-show="tps.length === 0" layout="row" layout-align="center center">
-                            <img src="images/import.gif"/>
+                            <strong>No TestPlan Available</strong>
                         </div>
                         <div style="white-space:nowrap;" ng-show="tps.length > 0">
                             <ng-include src="'views/testBrowserExec.html'"/>
@@ -277,15 +383,23 @@
     </div>
 </div>
 <script type="text/ng-template" id="ReportView.html">
+    <div  class="modal-header" layout="row" layout-align="end">
+        <button class="btn btn-xs btn-danger" ng-click="dismiss()">
+            <i class="fa fa-times" aria-hidden="true"></i>
+        </button>
+    </div>
     <div class="modal-body" layout="row" layout-align="center center">
         <report flex="70" vxm="vxm" report="report"></report>
     </div>
 </script>
 <script type="text/ng-template" id="report.html">
-    <table class="table table-condensed table-striped table-bordered" style="width: 100%; height: 100%;">
+    <button ng-click="exportReportL(report)" class="btn btn-xs btn-primary pull-right"  style="margin-bottom : 10px;">
+        <i class="fa fa-file-o" style="font-size : 1.5em;" aria-hidden="true"></i> Download XML
+    </button>
+    <table class="table table-condensed table-striped table-bordered" style="width: 100%; height: 100%; font-size: 15px;">
         <thead>
         <tr>
-            <th>Validation Report <span class="pull-right">{{ report.executionDate | date:"MM/dd/yyyy"}}</span></th>
+            <th>Validation Report<span class="pull-right">{{ report.executionDate | date:"MM/dd/yyyy"}}</span></th>
         </tr>
         </thead>
         <tbody>
@@ -296,40 +410,94 @@
                     <tr>
                         <th style="text-align: center;" colspan="2">
                             <h3>
-										<span style="border: 0; color: rgb(93, 93, 189); text-align: center; font-weight: bold;">
-											{{report.tcName}}
-										</span>
+                                <span style="border: 0; color: rgb(93, 93, 189); text-align: center; font-weight: bold;">
+                                    {{report.tcInfo.name}}
+                                </span>
                             </h3>
                         </th>
                     </tr>
                     </thead>
                     <tbody>
-                    <tr>
-                        <td colspan="2" style="background-color : white;">Evaluation Date <span class="pull-right">{{ report.evaluationDate | date:"MM/dd/yyyy"}}</span>
-                        </td>
-                    </tr>
-                    <tr style="text-align: center;">
-                        <td colspan="2"><span style="color : blue;">Software</span></td>
-                    </tr>
-                    <tr>
-                        <td>End Point</td>
-                        <td>{{report.softwareConfig.endPoint}}</td>
-                    </tr>
-                    <tr>
-                        <td>Connection Type</td>
-                        <td>{{report.softwareConfig.connector}}</td>
-                    </tr>
-                    <tr style="text-align: center;">
-                        <td colspan="2"><span style="color : blue;">Patient</span></td>
-                    </tr>
-                    <tr>
-                        <td>Date Of Birth</td>
-                        <td>{{report.dob | date:"MM/dd/yyyy"}}</td>
-                    </tr>
-                    <tr>
-                        <td>Gender</td>
-                        <td>{{report.gender}}</td>
-                    </tr>
+                        <tr>
+                            <td md-whiteframe="2" colspan="2" style="background-color: rgba(187, 224, 255, 0.34);">
+                                <span style="color : blue; font-size: 15px;"><strong>MetaData</strong></span>
+                                <button style="margin : 0px;" class="btn btn-xs pull-right"
+                                        ng-click="report.showMD = !report.showMD">
+                                    <i ng-show="!report.showMD" class="fa fa-eye" aria-hidden="true"
+                                       style="font-size : 1.5em; color: #2d5634;"></i>
+                                    <i ng-show="report.showMD" class="fa fa-eye-slash" aria-hidden="true"
+                                       style="font-size : 1.5em; color: rgb(203, 167, 167);"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                    <tbody ng-if="report.showMD">
+                        <tr>
+                            <td colspan="2"><strong>TestCase</strong></td>
+                        </tr>
+                        <tr>
+                            <td>Description</td>
+                            <td>{{report.tcInfo.description}}</td>
+                        </tr>
+                        <tr>
+                            <td>UID</td>
+                            <td>{{report.tcInfo.UID}}</td>
+                        </tr>
+                        <tr>
+                            <td>Last Changed In TestPlan Version</td>
+                            <td>{{report.tcInfo.metaData.version}}</td>
+                        </tr>
+                        <tr>
+                            <td>Date Created</td>
+                            <td>{{report.tcInfo.metaData.dateCreated | date:"MM/dd/yyyy"}}</td>
+                        </tr>
+                        <tr>
+                            <td>Date Last Updated</td>
+                            <td>{{report.tcInfo.metaData.dateLastUpdated | date:"MM/dd/yyyy"}}</td>
+                        </tr>
+                        <tr>
+                            <td colspan="2"><strong>Software</strong></td>
+                        </tr>
+                        <tr>
+                            <td>Name</td>
+                            <td>{{report.softwareConfig.name}}</td>
+                        </tr>
+                        <tr>
+                            <td>End Point</td>
+                            <td>{{report.softwareConfig.endPoint}}</td>
+                        </tr>
+                        <tr>
+                            <td>Connection Type</td>
+                            <td>{{report.softwareConfig.connector}}</td>
+                        </tr>
+                    </tbody>
+                    <tbody>
+                        <tr>
+                            <td md-whiteframe="2" colspan="2" style="background-color: rgba(187, 224, 255, 0.34);">
+                                <span style="color : blue; font-size: 15px;"><strong>TestCase Data</strong></span>
+                                <button style="margin : 0px;" class="btn btn-xs pull-right"
+                                        ng-click="report.showTD = !report.showTD">
+                                    <i ng-show="!report.showTD" class="fa fa-eye" aria-hidden="true"
+                                       style="font-size : 1.5em; color: #2d5634;"></i>
+                                    <i ng-show="report.showTD" class="fa fa-eye-slash" aria-hidden="true"
+                                       style="font-size : 1.5em; color: rgb(203, 167, 167);"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                    <tbody ng-if="report.showTD">
+                        <tr>
+                            <td>Assessment Date</td>
+                            <td>{{ report.evaluationDate | date:"MM/dd/yyyy"}}</td>
+                        </tr>
+                        <tr>
+                            <td>Patient Date Of Birth</td>
+                            <td>{{report.dob | date:"MM/dd/yyyy"}}</td>
+                        </tr>
+                        <tr>
+                            <td>Patient Gender</td>
+                            <td>{{report.gender}}</td>
+                        </tr>
                     </tbody>
                 </table>
             </td>
@@ -348,37 +516,37 @@
                         <td>Evaluations</td>
                         <td>Forecasts</td>
                     </tr>
-                    <tr class="success">
-                        <td>PASSED</td>
+                    <tr class="success" style="color : black;">
+                        <td>CORRECT</td>
                         <td>{{report.events.p}}</td>
                         <td>{{report.forecasts.p}}</td>
                     </tr>
-                    <tr class="danger">
-                        <td>FAILED</td>
+                    <tr class="danger" style="color : black;">
+                        <td>ERRORS</td>
                         <td>{{report.events.f}}</td>
                         <td>{{report.forecasts.f}}</td>
                     </tr>
-                    <tr class="warning">
-                        <td>WARNING</td>
+                    <tr class="warning" style="color : black;">
+                        <td>WARNINGS</td>
                         <td>{{report.events.w}}</td>
                         <td>{{report.forecasts.w}}</td>
                     </tr>
-                    <tr class="unmatched">
-                        <td>NOT FOUND</td>
+                    <tr class="unmatched" style="color : black;">
+                        <td>INCOMPLETE</td>
                         <td>{{report.events.u}}</td>
                         <td>{{report.forecasts.u}}</td>
                     </tr>
-                    <tr>
-                        <td>COMPLETION</td>
-                        <td>{{completion(report.events.f, report.events.p, report.events.u, report.events.w)}} %</td>
-                        <td>{{completion(report.forecasts.f, report.forecasts.p, report.forecasts.u,
-                            report.forecasts.w)}} %
-                        </td>
-                    </tr>
-                    <tr>
+                    <tr style="color : black;">
                         <td>CORRECTNESS</td>
                         <td>{{correctness(report.events.f, report.events.p, report.events.u, report.events.w)}} %</td>
                         <td>{{correctness(report.forecasts.f, report.forecasts.p, report.forecasts.u,
+                            report.forecasts.w)}} %
+                        </td>
+                    </tr>
+                    <tr style="color : black;">
+                        <td>COMPLETION</td>
+                        <td>{{completion(report.events.f, report.events.p, report.events.u, report.events.w)}} %</td>
+                        <td>{{completion(report.forecasts.f, report.forecasts.p, report.forecasts.u,
                             report.forecasts.w)}} %
                         </td>
                     </tr>
@@ -388,41 +556,43 @@
         </tr>
         <tr>
             <td>
-                <table class="table table-condensed table-striped table-bordered" style="width: 100%; height: 100%;">
-                    <thead>
-                    <tr>
-                        <th style="text-align: center;">Events</th>
-                        <th style="text-align: center;">Forecasts</th>
-                    </tr>
-                    </thead>
-                    <tbody ng-init="report.showXML = false">
-                    <tr>
-                        <td>
-                            <event-report vxm="vxm" data="report.veValidation"></event-report>
-                        </td>
-                        <td>
-                            <forecast-report data="report.fcValidation"></forecast-report>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td md-whiteframe="2" colspan="2" style="text-align : center;">
-                            XML Response
-                            <button style="margin : 0px;" class="btn btn-xs pull-right"
-                                    ng-click="report.showXML = !report.showXML">
-                                <i ng-show="report.showXML" class="fa fa-eye" aria-hidden="true"
-                                   style="font-size : 1.5em; color: #2d5634;"></i>
-                                <i ng-show="!report.showXML" class="fa fa-eye-slash" aria-hidden="true"
-                                   style="font-size : 1.5em; color: rgb(203, 167, 167);"></i>
-                            </button>
-                        <td>
-                    </tr>
-                    <tr ng-show="report.showXML">
-                        <td colspan="2" class="panel-resizable">
-                            <pre style="height : 300px; overflow-y : scroll;" class="prettyprint">{{beauty}}</pre>
-                        <td>
-                    </tr>
-                    </tbody>
-                </table>
+                <div style="width: 100%;" layout="row" layout-align="center center">
+                    <table flex="100" class="table table-condensed table-striped table-bordered" style="width: 100%; height: 100%;">
+                        <thead>
+                        <tr>
+                            <th style="text-align: center;">Events</th>
+                            <th style="text-align: center;">Forecasts</th>
+                        </tr>
+                        </thead>
+                        <tbody ng-init="report.showXML = false">
+                        <tr>
+                            <td>
+                                <event-report vxm="vxm" data="report.veValidation"></event-report>
+                            </td>
+                            <td>
+                                <forecast-report data="report.fcValidation"></forecast-report>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td md-whiteframe="2" colspan="2" style="text-align : center;">
+                                XML Response
+                                <button style="margin : 0px;" class="btn btn-xs pull-right"
+                                        ng-click="report.showXML = !report.showXML">
+                                    <i ng-show="!report.showXML" class="fa fa-eye" aria-hidden="true"
+                                       style="font-size : 1.5em; color: #2d5634;"></i>
+                                    <i ng-show="report.showXML" class="fa fa-eye-slash" aria-hidden="true"
+                                       style="font-size : 1.5em; color: rgb(203, 167, 167);"></i>
+                                </button>
+                            <td>
+                        </tr>
+                        <tr ng-show="report.showXML">
+                            <td colspan="2" class="panel-resizable">
+                                <pre style="height : 300px; overflow-y : scroll;" class="prettyprint">{{beauty}}</pre>
+                            <td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
             </td>
         </tr>
         </tbody>
@@ -477,7 +647,7 @@
             </td>
             <td>{{eval.expEval.status}}</td>
             <td>{{eval.validation.status === 'P' ? eval.expEval.status : eval.validation.status === 'U' ? '' : eval.validation.value}}</td>
-            <td ng-class="{ 'success' : eval.validation.status === 'P', 'danger' : eval.validation.status === 'F', 'unmatched' : eval.validation.status === 'U' }">
+            <td style="color : black;" ng-class="{ 'success' : eval.validation.status === 'P', 'danger' : eval.validation.status === 'F', 'unmatched' : eval.validation.status === 'U' }">
                 {{eval.validation.status === 'P' ? 'PASSED' : eval.validation.status === 'F' ? 'FAILED' : eval.validation.status === 'U' ? 'NO MATCH' : ''}}
             </td>
         </tr>
@@ -509,7 +679,7 @@
             <td style="background-color: #FFFFFF;">Dose</td>
             <td>{{fc.forecastRequirement.expForecast.doseNumber}}</td>
             <td>{{fc.dose.value}}</td>
-            <td ng-class="{ 'warning' : fc.dose.status === 'W', 'success' : fc.dose.status === 'P', 'danger' : fc.dose.status === 'F', 'unmatched' : fc.dose.status === 'U' }">
+            <td style="color : black;" ng-class="{ 'warning' : fc.dose.status === 'W', 'success' : fc.dose.status === 'P', 'danger' : fc.dose.status === 'F', 'unmatched' : fc.dose.status === 'U' }">
                 {{assessment(fc.dose)}}
             </td>
         </tr>
@@ -517,7 +687,7 @@
             <td style="background-color: #FFFFFF;">Earliest</td>
             <td>{{fc.forecastRequirement.earliest | date:"MM/dd/yyyy"}}</td>
             <td>{{fc.earliest.status === 'U' ? '' : printDiff(fc.forecastRequirement.earliest,fc.earliest)}}</td>
-            <td ng-class="{ 'warning' : fc.earliest.status === 'W', 'success' : fc.earliest.status === 'P', 'danger' : fc.earliest.status === 'F', 'unmatched' : fc.earliest.status === 'U' }">
+            <td style="color : black;" ng-class="{ 'warning' : fc.earliest.status === 'W', 'success' : fc.earliest.status === 'P', 'danger' : fc.earliest.status === 'F', 'unmatched' : fc.earliest.status === 'U' }">
                 {{assessment(fc.earliest)}}
             </td>
         </tr>
@@ -525,7 +695,7 @@
             <td style="background-color: #FFFFFF;">Recommended</td>
             <td>{{fc.forecastRequirement.recommended | date:"MM/dd/yyyy"}}</td>
             <td>{{fc.recommended.status === 'U' ? '' : printDiff(fc.forecastRequirement.recommended,fc.recommended)}}</td>
-            <td ng-class="{ 'warning' : fc.recommended.status === 'W', 'success' : fc.recommended.status === 'P', 'danger' : fc.recommended.status === 'F', 'unmatched' : fc.recommended.status === 'U' }">
+            <td style="color : black;" ng-class="{ 'warning' : fc.recommended.status === 'W', 'success' : fc.recommended.status === 'P', 'danger' : fc.recommended.status === 'F', 'unmatched' : fc.recommended.status === 'U' }">
                 {{assessment(fc.recommended)}}
             </td>
         </tr>
@@ -533,7 +703,7 @@
             <td style="background-color: #FFFFFF;">Past Due</td>
             <td>{{fc.forecastRequirement.pastDue | date:"MM/dd/yyyy"}}</td>
             <td>{{fc.pastDue.status === 'U' ? '' : printDiff(fc.forecastRequirement.pastDue,fc.pastDue)}}</td>
-            <td ng-class="{ 'warning' : fc.pastDue.status === 'W', 'success' : fc.pastDue.status === 'P', 'danger' : fc.pastDue.status === 'F', 'unmatched' : fc.pastDue.status === 'U' }">
+            <td style="color : black;" ng-class="{ 'warning' : fc.pastDue.status === 'W', 'success' : fc.pastDue.status === 'P', 'danger' : fc.pastDue.status === 'F', 'unmatched' : fc.pastDue.status === 'U' }">
                 {{assessment(fc.pastDue)}}
             </td>
         </tr>
@@ -541,7 +711,7 @@
             <td style="background-color: #FFFFFF;">Complete</td>
             <td>{{fc.forecastRequirement.complete | date:"MM/dd/yyyy"}}</td>
             <td>{{fc.complete.status === 'U' ? '' : printDiff(fc.forecastRequirement.complete,fc.complete)}}</td>
-            <td ng-class="{ 'warning' : fc.complete.status === 'W', 'success' : fc.complete.status === 'P', 'danger' : fc.complete.status === 'F', 'unmatched' : fc.complete.status === 'U' }">
+            <td style="color : black;" ng-class="{ 'warning' : fc.complete.status === 'W', 'success' : fc.complete.status === 'P', 'danger' : fc.complete.status === 'F', 'unmatched' : fc.complete.status === 'U' }">
                 {{assessment(fc.complete)}}
             </td>
         </tr>

@@ -1,0 +1,14 @@
+[
+	{
+		"name" : "Test Case XML Schema (NIST Format)",
+		"date" : 1491493210,
+		"fileName" : "testCaseXSD.xsd",
+		"location" : "/doc_resources/testCaseXSD.xsd"
+	},
+	{
+		"name" : "Validation Report XML Schema (NIST Format)",
+		"date" : 1491493210,
+		"fileName" : "reportXSD.xsd",
+		"location" : "/doc_resources/reportXSD.xsd"
+	}
+]

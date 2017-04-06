@@ -16,21 +16,21 @@
     }
 </script>
 <md-content>
-    <md-tabs md-selected="view.tab" md-dynamic-height md-border-bottom>
+    <md-tabs md-selected="$parent.view.tab" md-dynamic-height md-border-bottom>
         <md-tab label="Test Case Information">
             <ng-include src="'views/testView.html'" />
         </md-tab>
         <md-tab label="Reports">
             <md-content class="md-padding">
                 <table ng-show="reportsFor(selectedTC.id).length > 0" class="table table-condensed table-striped table-hover">
-                    <tr ng-repeat="item in reportsFor(selectedTC.id) track by $index">
+                    <tr ng-repeat="item in reportsFor(selectedTC.id) | orderBy:'executionDate' track by $index">
                         <td>
                             <div style="width: 100%;" layout="row" layout-align="start center">
                                 <div flex="50" layout="row" layout-align="center">
                                     <table style="width: 100%;">
                                         <tr>
                                             <td>Date</td>
-                                            <td>{{::item.executionDate | date:'MM/dd/yyyy'}}</td>
+                                            <td>{{::item.executionDate | date:'medium'}}</td>
                                         </tr>
                                         <tr>
                                             <td>Server</td>
@@ -52,9 +52,13 @@
                                         <button ng-click="deleteSavedReport(item,selectedTC.id,$index)" class="btn btn-xs btn-danger"  style="margin: 0px; margin-bottom: 5px;">
                                             <i class="fa fa-trash-o" style="font-size : 1.5em;" aria-hidden="true"></i> Delete
                                         </button>
-                                        <button ng-click="showReport(item)" class="btn btn-xs btn-success"  style="margin: 0px;">
+                                        <button ng-click="showReport(item)" class="btn btn-xs btn-success"  style="margin: 0px; margin-bottom: 5px;">
                                             <i class="fa fa-eye" style="font-size : 1.5em;" aria-hidden="true"></i> View
                                         </button>
+                                        <button ng-click="exportReport(item.id)" class="btn btn-xs btn-primary"  style="margin: 0px;">
+                                            <i class="fa fa-file-o" style="font-size : 1.5em;" aria-hidden="true"></i> Download XML
+                                        </button>
+
                                     </div>
                                 </div>
                             </div>

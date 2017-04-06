@@ -9,19 +9,25 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 import javassist.NotFoundException;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.validation.ConstraintViolation;
 import javax.validation.Valid;
+import javax.validation.Validation;
+import javax.validation.Validator;
 
 import gov.nist.healthcare.cds.domain.TestCase;
 import gov.nist.healthcare.cds.domain.TestCaseGroup;
 import gov.nist.healthcare.cds.domain.TestPlan;
 import gov.nist.healthcare.cds.domain.exception.UnresolvableDate;
 import gov.nist.healthcare.cds.domain.exception.VaccineNotFoundException;
+import gov.nist.healthcare.cds.domain.wrapper.AppInfo;
 import gov.nist.healthcare.cds.domain.wrapper.CDCImport;
 import gov.nist.healthcare.cds.domain.wrapper.CDCImportConfig;
 import gov.nist.healthcare.cds.domain.wrapper.ModelError;
@@ -37,10 +43,12 @@ import gov.nist.healthcare.cds.service.MetaDataService;
 import gov.nist.healthcare.cds.service.NISTFormatService;
 import gov.nist.healthcare.cds.service.PropertyService;
 import gov.nist.healthcare.cds.service.TestCaseExecutionService;
+import gov.nist.healthcare.cds.service.ValidateTestCase;
 import gov.nist.healthcare.cds.tcamt.domain.ImportResult;
 
 import org.apache.http.HttpResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.propertyeditors.StringTrimmerEditor;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -49,7 +57,9 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -89,11 +99,28 @@ public class TestCaseController {
 	
 	@Autowired
 	private DeleteTestObjectService trash;
-
+	
+	@Autowired
+	private ValidateTestCase validator;
+	
+	@Autowired
+	private AppInfo appInfo;
+	
 	@RequestMapping(value = "/testplans", method = RequestMethod.GET)
 	@ResponseBody
 	public List<TestPlan> test(Principal p){
 		return testPlanRepository.findByUser(p.getName());
+	}
+	
+	@InitBinder
+	public void initBinder(WebDataBinder binder) {
+	    binder.registerCustomEditor(String.class, new StringTrimmerEditor(true));
+	}
+	
+	@RequestMapping(value = "/appInfo", method = RequestMethod.GET)
+	@ResponseBody
+	public AppInfo appInfo(){
+		return appInfo;
 	}
 	
 	
@@ -101,6 +128,8 @@ public class TestCaseController {
 	@ResponseBody
 	public TestCase save(@RequestBody @Valid TestCase tc,@PathVariable String id, Principal p) throws NotFoundException {
 		TestPlan tp = ledger.tpBelongsTo(id, p.getName());
+		//validator.validate(tc);
+
 		if(tp != null){
 			boolean newt = tc.getId() == null || tc.getId().isEmpty();
 			tc.setTestPlan(tp.getId());
@@ -127,10 +156,13 @@ public class TestCaseController {
 		}
 	}
 	
+	
 	@RequestMapping(value = "/testcase/tg/{id}/save", method = RequestMethod.POST)
 	@ResponseBody
 	public TestCase saveTG(@RequestBody @Valid TestCase tc,@PathVariable String id, Principal p) throws NotFoundException {
 		TestPlan tp = ledger.tgBelongsTo(id, p.getName());
+		//validator.validate(tc);
+
 		boolean newt = tc.getId() == null || tc.getId().isEmpty();
 		if(tp != null){
 			TestCaseGroup tcg = tp.getGroup(id);
@@ -149,7 +181,7 @@ public class TestCaseController {
 					tp.getTestCases().remove(_tc);
 					tcgN.getTestCases().add(tc);
 				}
-				else {
+				else if(!_tc.getGroupTag().equals(id)){
 					// Group To Group
 					TestCaseGroup tcgO = tp.getGroup(_tc.getGroupTag());
 					TestCaseGroup tcgN = tp.getGroup(tc.getGroupTag());
@@ -263,6 +295,19 @@ public class TestCaseController {
 		return "";
 	}
 	
+	@RequestMapping(value = "/testcasegroup/{id}/delete", method = RequestMethod.POST)
+	@ResponseBody
+	public String deleteTCG(@PathVariable String id, Principal p) throws NotFoundException{
+		TestPlan tp = ledger.tgBelongsTo(id, p.getName());
+		if(tp != null){
+			trash.deleteTestCaseGroup(tp,id);
+		}
+		else {
+			throw new NotFoundException("TP not found");
+		}
+		return "";
+	}
+	
 	@RequestMapping(value = "/testcase/{id}/export/{format}", method = RequestMethod.POST)
 	@ResponseBody
 	public void export(@PathVariable String id,@PathVariable String format,HttpServletRequest request, HttpServletResponse response, Principal p) throws IOException{
@@ -270,6 +315,16 @@ public class TestCaseController {
 		if(format.equals("nist") && tc != null){
 			response.setContentType("text/xml");
 			response.setHeader("Content-disposition", "attachment;filename="+tc.getName().replace(" ", "_")+".xml" );
+			if(tc.getGroupTag() != null && !tc.getGroupTag().isEmpty()){
+				TestPlan tp = ledger.tpBelongsTo(tc.getTestPlan(), p.getName());
+				if(tp != null){
+					TestCaseGroup grp = tp.getGroup(tc.getGroupTag());
+					if(grp != null){
+						tc.setGroupTag(grp.getName());
+					}
+				}
+			}
+			
 			String str = nistFormatService._export(tc);
 			InputStream stream = new ByteArrayInputStream(str.getBytes(StandardCharsets.UTF_8));
 			FileCopyUtils.copy(stream, response.getOutputStream());
@@ -291,7 +346,7 @@ public class TestCaseController {
 						ImportResult ir = new ImportResult();
 						ir.setStatus(false);
 						ir.setErrors(null);
-						ir.setMessages(Arrays.asList("Test plan not found"));
+						ir.setMessage("Test plan not found");
 						return ir;
 					}
 					
@@ -300,47 +355,57 @@ public class TestCaseController {
 						ImportResult ir = new ImportResult();
 						ir.setStatus(false);
 						ir.setErrors(null);
-						ir.setMessages(Arrays.asList("Error while parsing the file"));
+						ir.setMessage("Error while parsing the file");
 						return ir;
 					}
 
 					tc.setTestPlan(tps.getId());
+					if(tc.getGroupTag() != null && !tc.getGroupTag().isEmpty()){
+						TestCaseGroup tpcg = tps.getByNameOrCreateGroup(tc.getGroupTag());
+						tc.setGroupTag(tpcg.getId());
+						tpcg.setTestPlan(tps.getId());
+						tpcg.getTestCases().add(tc);
+					}
+					else {
+						tps.addTestCase(tc);
+					}
+					mdService.update(tc.getMetaData());
 					testCaseRepository.save(tc);
-					tps.addTestCase(tc);
 					mdService.update(tps.getMetaData());
 					testPlanRepository.save(tps);
 					ImportResult ir = new ImportResult();
 					ir.setStatus(true);
 					ir.setErrors(null);
-					ir.setMessages(null);
+					ir.setMessage("");
 					ir.setImported(tc);
+					ir.setTestPlan(tps);
 					return ir;
 				}
 				else {
 					ImportResult ir = new ImportResult();
 					ir.setStatus(false);
 					ir.setErrors(errors);
-					ir.setMessages(null);
+					ir.setMessage("Unable to import file due to XML errors, please review XML format XSD in documentation Tab");
 					return ir;
 				}
 			} catch (IOException e) {
 				ImportResult ir = new ImportResult();
 				ir.setStatus(false);
 				ir.setErrors(null);
-				ir.setMessages(Arrays.asList("Error while reading file"));
+				ir.setMessage("Error while reading file");
 				return ir;
 			} catch (VaccineNotFoundException e) {
 				ImportResult ir = new ImportResult();
 				ir.setStatus(false);
 				ir.setErrors(null);
-				ir.setMessages(Arrays.asList("Vaccine with CVX = "+e.getCvx()+" not found"));
+				ir.setMessage("Vaccine with CVX = "+e.getCvx()+" not found");
 				return ir;
 			}
 		} else {
 			ImportResult ir = new ImportResult();
 			ir.setStatus(false);
 			ir.setErrors(null);
-			ir.setMessages(Arrays.asList("Imported file should not be empty"));
+			ir.setMessage("Imported file should not be empty");
 			return ir;
 		}
 	}
@@ -352,6 +417,12 @@ public class TestCaseController {
 			try {
 				byte[] bytes = file.getBytes();
 				ByteArrayInputStream bis = new ByteArrayInputStream(bytes);
+				if(config.getTo() < config.getFrom()){
+					ImportResult ir = new ImportResult();
+					ir.setStatus(false);
+					ir.setMessage("Invalid import config start line must lower than or equal to end line");
+					return ir;
+				}
 				CDCImport importRes = cdcFormatService._import(bis,config);
 				List<ErrorModel> errors = importRes.getExceptions();
 				if(importRes.getTestcases().size() > 0){
@@ -361,18 +432,23 @@ public class TestCaseController {
 						ImportResult ir = new ImportResult();
 						ir.setStatus(false);
 						ir.setErrors(errors);
-						ir.setMessages(Arrays.asList("Test plan not found"));
+						ir.setMessage("Test plan not found");
 						return ir;
 					}
-					
+					TestPlan container = new TestPlan();
 					List<TestCase> testCases = new ArrayList<>();
 					for(TestCaseGroup tcg : importRes.getTestcases()){
 						for(TestCase tc : tcg.getTestCases()){
 							TestCaseGroup tpcg = tps.getByNameOrCreateGroup(tcg.getName());
+							
+							TestCaseGroup tpcgContainer = container.getByNameOrCreateGroup(tcg.getName());
+							tpcgContainer.setId(tpcg.getId());
+							
 							tc.setGroupTag(tpcg.getId());
 							tc.setTestPlan(tps.getId());
 							tpcg.setTestPlan(tps.getId());
 							tpcg.getTestCases().add(tc);
+							tpcgContainer.getTestCases().add(tc);
 							mdService.update(tc.getMetaData());
 							testCases.add(tc);
 						}
@@ -384,29 +460,29 @@ public class TestCaseController {
 					ImportResult ir = new ImportResult();
 					ir.setStatus(true);
 					ir.setErrors(errors);
-					ir.setTestPlan(tps);
-					ir.setMessages(null);
+					ir.setTestPlan(container);
+					ir.setMessage("Import Success");
 					return ir;
 				}
 				else {
 					ImportResult ir = new ImportResult();
 					ir.setStatus(false);
 					ir.setErrors(errors);
-					ir.setMessages(Arrays.asList("No TestCase Imported"));
+					ir.setMessage("No TestCase Imported due to Invalid Format");
 					return ir;
 				}
 			} catch (IOException e) {
 				ImportResult ir = new ImportResult();
 				ir.setStatus(false);
 				ir.setErrors(null);
-				ir.setMessages(Arrays.asList("Error while reading file"));
+				ir.setMessage("Error while reading file (Invalid Format)");
 				return ir;
 			} 
 		} else {
 			ImportResult ir = new ImportResult();
 			ir.setStatus(false);
 			ir.setErrors(null);
-			ir.setMessages(Arrays.asList("Imported file should not be empty"));
+			ir.setMessage("Imported file should not be empty");
 			return ir;
 		}
 	}

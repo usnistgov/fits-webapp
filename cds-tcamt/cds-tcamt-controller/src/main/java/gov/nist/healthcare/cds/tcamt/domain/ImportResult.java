@@ -10,7 +10,7 @@ import java.util.List;
 public class ImportResult {
 	private List<ErrorModel> errors;
 	private boolean status;
-	private List<String> messages;
+	private String message;
 	private TestCase imported;
 	private List<TestCase> testCases;
 	private List<TestCaseGroup> testCaseGroups;
@@ -37,12 +37,6 @@ public class ImportResult {
 	public void setStatus(boolean status) {
 		this.status = status;
 	}
-	public List<String> getMessages() {
-		return messages;
-	}
-	public void setMessages(List<String> messages) {
-		this.messages = messages;
-	}
 	public TestCase getImported() {
 		return imported;
 	}
@@ -60,6 +54,14 @@ public class ImportResult {
 	}
 	public void setTestCaseGroups(List<TestCaseGroup> testCaseGroups) {
 		this.testCaseGroups = testCaseGroups;
+	}
+
+	public String getMessage() {
+		return message;
+	}
+
+	public void setMessage(String message) {
+		this.message = message;
 	}
 	
 	

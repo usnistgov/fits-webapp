@@ -20,7 +20,7 @@
         <div ng-hide="addConfig" flex="20" layout="row" layout-align="center center">
             <md-input-container  flex="60" style="margin-right: 10px;" >
                 <label>Software</label>
-                <md-select ng-model="$parent.selectedConfig" ng-change="run()">
+                <md-select ng-model="$parent.main.selectedConfig" ng-model-options="{trackBy: '$value.id'}">
                     <md-option class="config" ng-repeat="conf in configs" ng-value="conf">
                         <div layout="row" style="width: 100%;">
                             <div flex="25">

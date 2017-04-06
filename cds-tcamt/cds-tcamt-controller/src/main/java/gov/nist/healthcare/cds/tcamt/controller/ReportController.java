@@ -1,8 +1,10 @@
 package gov.nist.healthcare.cds.tcamt.controller;
 
 import java.security.Principal;
+import java.util.ArrayList;
 import java.util.List;
 import gov.nist.healthcare.cds.domain.wrapper.Report;
+import gov.nist.healthcare.cds.domain.wrapper.SimulatedResult;
 import gov.nist.healthcare.cds.repositories.ReportRepository;
 import gov.nist.healthcare.cds.repositories.TestPlanRepository;
 import gov.nist.healthcare.cds.service.PropertyService;
@@ -31,6 +33,18 @@ public class ReportController {
 	@RequestMapping(value = "/report/save", method = RequestMethod.POST)
 	public void save(@RequestBody List<Report> reports) {
 		reportRepository.save(reports);
+	}
+	
+	@RequestMapping(value = "/report/json", method = RequestMethod.POST)
+	public List<SimulatedResult> json(@RequestBody List<Report> reports) {
+		List<SimulatedResult> result = new ArrayList<SimulatedResult>();
+		for(Report r : reports){
+			SimulatedResult sr = new SimulatedResult();
+			sr.setId(r.getTcInfo().getUID());
+			sr.setXml(r.getResponse());
+			result.add(sr);
+		}
+		return result;
 	}
 	
 	@RequestMapping(value = "/report/tc/{id}", method = RequestMethod.GET)

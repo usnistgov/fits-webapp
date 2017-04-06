@@ -152,6 +152,7 @@ angular.module('tcl')
                     $scope.msg = null;
                     new MultiAuthorsLoader().then(function (response) {
                         $scope.accountList = response;
+                        console.log(response);
                         $scope.tmpAccountList = [].concat($scope.accountList);
                     });
                 }
