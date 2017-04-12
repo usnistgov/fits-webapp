@@ -298,52 +298,5 @@ public class Bootstrap {
 		this.createSoftware();
 		
 		
-//		if(accountService.getAccountByUsername(env.getProperty("mike.username")) == null){
-//			Account m = new Account();
-//			m.setUsername(env.getProperty("mike.username"));
-//			m.setEmail(env.getProperty("mike.email"));
-//			m.setPassword(env.getProperty("mike.password"));
-//			accountService.createAdmin(m);
-//		}
-//		
-//		if(accountService.getAccountByUsername(env.getProperty("rob.username")) == null){
-//			Account r = new Account();
-//			r.setUsername(env.getProperty("rob.username"));
-//			r.setEmail(env.getProperty("rob.email"));
-//			r.setPassword(env.getProperty("rob.password"));
-//		
-//			accountService.createAdmin(r);
-//		}
-//		
-//		if(accountService.getAccountByUsername(env.getProperty("hossam.username")) == null){
-//			Account h = new Account();
-//			h.setUsername(env.getProperty("hossam.username"));
-//			h.setEmail(env.getProperty("hossam.email"));
-//			h.setPassword(env.getProperty("hossam.password"));
-//			accountService.createAdmin(h);
-//		}
-		
-//		TestPlan tp = new TestPlan();
-//		tp.setUser("hossam");
-//		tp.setName("IMPORTED");
-//		tp.setMetaData(mdService.create(true));
-//		testPlanRepository.save(tp);
-//		
-//		List<TestCase> tcs = this.loadTestCases("demo_tp", tp.getId());
-//		for(TestCase tc : tcs){
-//			if(tc.getGroupTag() != null && !tc.getGroupTag().isEmpty()){
-//				TestCaseGroup tpcg = tp.getByNameOrCreateGroup(tc.getGroupTag());
-//				tc.setGroupTag(tpcg.getId());
-//				tpcg.setTestPlan(tp.getId());
-//				tpcg.getTestCases().add(tc);
-//			}
-//			else {
-//				tp.addTestCase(tc);
-//			}
-//			mdService.update(tc.getMetaData());
-//			testCaseRepository.save(tc);
-//			mdService.update(tp.getMetaData());
-//			testPlanRepository.save(tp);
-//		}
 	}
 }
