@@ -16,22 +16,55 @@ body {
 	}
 </script>
 <div>
-	<md-list ng-cloak>
-		 <md-list-item class="secondary-button-padding"
-		 			   ng-repeat="forecast in selectedTC.forecast track by $index"
-		 			   ng-click="selectForecast(forecast)"
-		 			   style="cursor: pointer;"
-					   ng-class="{'sinfo' : isSelectedForecast(forecast), 'fle' : $index === 0, 'le' : true}"
-					   context-menu="forecastCM" model="$index" >
-			<span style="text-align: center;">
-				 <strong>
-					{{forecast.target === null ? 'New Forecast' : forecast.target.name}}
-				</strong>
-			</span>
-		</md-list-item>
-	</md-list>
-				
-<!-- 	<table class="table table-hover"> -->
+	<!--<md-list ng-cloak>-->
+		 <!--<md-list-item class="secondary-button-padding"-->
+		 			   <!--ng-repeat="forecast in selectedTC.forecast track by $index"-->
+		 			   <!--ng-click="selectForecast(forecast)"-->
+		 			   <!--style="cursor: pointer;"-->
+					   <!--ng-class="{'sinfo' : isSelectedForecast(forecast), 'fle' : $index === 0, 'le' : true}"-->
+					   <!--context-menu="forecastCM" model="$index" >-->
+			<!--<span style="text-align: center;">-->
+				 <!--<strong>-->
+					<!--{{forecast.target === null ? 'New Forecast' : forecast.target.name}}-->
+				<!--</strong>-->
+			<!--</span>-->
+		<!--</md-list-item>-->
+	<!--</md-list>-->
+	<table style="width: 100%;" class="table-hover">
+		<tbody>
+		<tr ng-repeat="forecast in selectedTC.forecast track by $index" ng-click="selectForecast(forecast)"
+			style="cursor: pointer; height : 50px;"
+			ng-class="{'sinfo' : isSelectedForecast(forecast), 'fle' : $index === 0, 'le' : true}"
+			context-menu="forecastCM" model="$index" >
+
+			<td colspan="3" style="text-align : justify; padding: 10px;">
+				<div style="width : 100%;" layout="row" layout-align="start center" ng-show="forecast.target && forecast.target.discriminator === 'generic'">
+					<div flex="10" layout="column" layout-align="center center">
+						<span><strong>ID # {{$index+1}}</strong></span>
+					</div>
+					<div flex="25" layout="column" layout-align="center center">
+						<span style="background-color: green;" class="badge">CVX {{forecast.target.cvx}}</span>
+					</div>
+					<div flex="65" layout="column" layout-align="start center">
+						<span><strong>{{forecast.target.name}}</strong></span>
+					</div>
+				</div>
+				<div style="width : 100%;" layout="row" layout-align="start center" ng-show="!forecast.target">
+					<div flex="30" layout="column" layout-align="center center">
+						<span class="badge sbadge">ID # {{$index+1}}</span>
+					</div>
+					<div flex="50" layout="column" layout-align="start center" style="text-align : left;">
+						<span><strong>New Forecast</strong></span>
+					</div>
+				</div>
+			</td>
+
+		</tr>
+		</tbody>
+	</table>
+
+
+	<!-- 	<table class="table table-hover"> -->
 <!-- 		<tr  > -->
 <!-- 			<td style="cursor:pointer;"  style="cursor: pointer;" -->
 <!-- 				ng-class="{'info' : isSelectedForecast(forecast)}" -->

@@ -6,7 +6,7 @@
 					<td style="width: 100px;"><img src="images/injection.png" /></td>
 					<td style="margin-left: 10px;">
 						<span style="background-color: red;" class="badge">Generic</span>
-						<span style="background-color: green;" class="badge">CVX#{{ctrl.model.cvx}}</span> 
+						<span style="background-color: green;" class="badge">CVX {{ctrl.model.cvx}}</span>
 						</br>
 						<span><strong>{{ctrl.model.name}}</strong></span></br>
 						<span>{{ctrl.model.details}}</span>
@@ -26,8 +26,8 @@
 					<td style="width: 100px;"><img src="images/injection.png" /></td>
 					<td style="margin-left: 10px;">
 						<span style="background-color: red;" class="badge">Specific</span>
-						<span style="background-color: green;" class="badge">CVX#{{ctrl.getVx(ctrl.model).cvx}}</span> 
-						<span style="background-color: blue;" class="badge">MVX#{{ctrl.model.mx.mvx}}</span> 
+						<span style="background-color: green;" class="badge">CVX {{ctrl.getVx(ctrl.model).cvx}}</span>
+						<span style="background-color: blue;" class="badge">MVX {{ctrl.model.mx.mvx}}</span>
 						</br>
 						<span><strong>{{ctrl.model.name}}</strong></span></br>
 						<span><strong>{{ctrl.getVx(ctrl.model).name}}</strong></span></br>
@@ -48,42 +48,40 @@
 				<tr>
 					<td style="width: 100px;"><img src="images/injection.png" /></td>
 					<td style="margin-left: 10px; background-color : rgb(255, 230, 230); text-transform : uppercase;">
-						<div class="col-md-12" style="padding: 5px;">
-							<span class="col-md-12" style="text-align : center; ">Select Vaccine</span>
-							<div ng-show="ctrl.qMp" class="col-md-12" style="padding: 0;">
-								<div class="col-md-12"
-									 style="padding : 0; height : 35px; background-color: white; border : 1px solid #0f0f0f0f;"
-									 layout="column"
-									 layout-align="center">
-									<table class="col-md-12 table-condensed">
-										<tr>
-											<td style="width: 80px;">#<strong>{{ctrl.qMp.vx.cvx}}</strong></td>
-											<td><strong>{{ctrl.qMp.vx.name}}</strong> </td>
-											<td>
-												<md-button class="btn btn-xs btn-primary pull-right" ng-click="ctrl.clearqMp()">
-													<i class="fa fa-times" aria-hidden="true"></i>
-												</md-button>
-											</td>
-										</tr>
-									</table>
+						<div style="width: 100%;" layout="column" layout-align="center center">
+							<span style="text-align : center; ">Select Vaccine</span>
+							<div ng-show="ctrl.qMp" style="width: 100%;" layout="column" layout-align="center center">
+								<div style="margin-bottom : 5px; width: 100%; padding-left : 5px; padding-right : 5px;background-color: white; border : 1px solid black;"
+									 layout="row"
+									 layout-align="start center">
+									<div flex="20" layout="row" layout-align="start center">
+										<span style="background-color: green;" class="badge">CVX {{ctrl.qMp.vx.cvx}}</span>
+									</div>
+									<div flex="60" layout="row" layout-align="center center" style="text-align: center;">
+										<strong>{{ctrl.qMp.vx.name}}</strong>
+									</div>
+									<div flex="20" layout="row" layout-align="end center">
+										<button class="btn btn-xs btn-info" ng-click="ctrl.clearqMp()">
+											<i class="fa fa-times" aria-hidden="true"></i>
+										</button>
+									</div>
 								</div>
-								<div class="col-md-12"  style="padding: 0px;" ng-show="ctrl.allowMvx && ctrl.qMp.products.length > 0">
-									<div ng-show="ctrl.qMx" class="col-md-12"  style="padding: 0; margin-top: 10px;">
-										<div class="col-md-12"
-											 style="padding : 0; height : 35px; background-color: white; border : 1px solid #0f0f0f0f;"
-											 layout="column"
-											 layout-align="center">
-											<table class="col-md-12 table-condensed">
-												<tr>
-													<td style="width: 80px;"><strong>{{ctrl.qMx.mx.mvx}}</strong></td>
-													<td><strong>{{ctrl.qMx.name}}</strong> </td>
-													<td>
-														<button class="btn btn-xs btn-primary pull-right" ng-click="ctrl.clearqMx()">
-															<i class="fa fa-times" aria-hidden="true"></i>
-														</button>
-													</td>
-												</tr>
-											</table>
+								<div style="padding: 0px; width: 100%;" ng-show="ctrl.allowMvx && ctrl.qMp.products.length > 0">
+									<div ng-show="ctrl.qMx" style="width: 100%;" layout="column" layout-align="center center">
+										<div style="padding-left : 5px; padding-right : 5px; width : 100%; background-color: white; border : 1px solid black;"
+											 layout="row"
+											 layout-align="start center">
+											<div flex="20" layout="row" layout-align="start center" >
+												<span style="background-color: blue;" class="badge">MVX {{ctrl.qMx.mx.mvx}}</span>
+											</div>
+											<div flex="60" layout="row" layout-align="center center" style="text-align: center;">
+												<strong>{{ctrl.qMx.name}}</strong>
+											</div>
+											<div flex="20" layout="row" layout-align="end center">
+												<button class="btn btn-xs btn-info" ng-click="ctrl.clearqMx()">
+													<i class="fa fa-times" aria-hidden="true"></i>
+												</button>
+											</div>
 										</div>
 									</div>
 									<div ng-show="!ctrl.qMx" class="col-md-12"  style="padding: 0; margin-top: 10px;">

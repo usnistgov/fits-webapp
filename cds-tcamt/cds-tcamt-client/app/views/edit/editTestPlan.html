@@ -12,7 +12,7 @@ body {
 	}
 </script>
 <script type="text/ng-template" id="EditTestPlanMetadata.html">
-	<md-content>
+	<md-content ng-model-options="{updateOn : 'change blur'}">
 		<md-tabs md-selected="tabs.selectedTabTC" md-dynamic-height md-border-bottom>
 			<md-tab label="Test Case Information">
 				<md-content class="md-padding">
@@ -22,7 +22,7 @@ body {
 								<div class="col-md-12">
 									<md-input-container style="width: 100%;">
 										<label>Name</label>
-										<input ng-model="selectedTC.name" type="text" required/>
+										<input ng-model="selectedTC.name" type="text"  ng-trim="false" required/>
 									</md-input-container>
 								</div>
 								<div class="col-md-4">

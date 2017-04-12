@@ -1,0 +1,372 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" xmlns:tns="https://fits.nist.gov/xml/" targetNamespace="https://fits.nist.gov/xml/">
+
+<!-- GENERAL TEST CASE MODEL -->
+	<element name="TestCase">
+	    <complexType>
+	    	<sequence>
+	    		<element name="Name" type="string" minOccurs="1"
+	    			maxOccurs="1">
+	    		</element>
+	    		<element name="Description" type="string" minOccurs="0"
+	    			maxOccurs="1">
+	    		</element>
+                <element name="Group" type="string" minOccurs="0" maxOccurs="1"></element>
+                <element name="DateType" minOccurs="1" maxOccurs="1">
+	    			<simpleType>
+	    				<restriction base="string">
+	    					<enumeration value="RELATIVE"></enumeration>
+	    					<enumeration value="FIXED"></enumeration>
+	    				</restriction>
+	    			</simpleType>
+	    		</element>
+                <element name="MetaData" type="tns:MetaDataType" minOccurs="1" maxOccurs="1">
+	    		</element>
+                <element name="AssessmentDate" type="tns:DateType"
+	    			minOccurs="1" maxOccurs="1">
+	    		</element>
+	    		<element name="Patient" type="tns:PatientType"
+	    			minOccurs="1" maxOccurs="1">
+	    		</element>
+                <element name="Events" type="tns:EventsType"
+	    			minOccurs="0" maxOccurs="1">
+	    		</element>
+	    		<element name="Forecasts" type="tns:ForecastsType"
+	    			minOccurs="0" maxOccurs="1">
+	    		</element>
+	    	</sequence>
+	    	<attribute name="UID" type="string" use="optional"></attribute>
+	    </complexType>
+	</element>
+
+    <complexType name="MetaDataType">
+    	<sequence>
+    		<element name="version" type="string" minOccurs="1" maxOccurs="1"></element>
+    		<element name="dateCreated" type="date" minOccurs="1" maxOccurs="1"></element>
+    		<element name="dateLastUpdated" type="date" minOccurs="1" maxOccurs="1"></element>
+    	</sequence>
+    </complexType>
+
+    <complexType name="PatientType">
+    	<sequence>
+    		<element name="Gender" type="tns:GenderType" minOccurs="1" maxOccurs="1"></element>
+    		<element name="DateOfBirth" type="tns:DateType" minOccurs="1" maxOccurs="1"></element>
+    	</sequence>
+    </complexType>
+    
+    <complexType name="PatientTypeReport">
+    	<sequence>
+    		<element name="Gender" type="tns:GenderType" minOccurs="1" maxOccurs="1"></element>
+    		<element name="DateOfBirth" type="date" minOccurs="1" maxOccurs="1"></element>
+    	</sequence>
+    </complexType>
+
+    <simpleType name="GenderType">
+    	<restriction base="string">
+    		<enumeration value="Female"></enumeration>
+    		<enumeration value="Male"></enumeration>
+    	</restriction>
+    </simpleType>
+
+    <complexType name="EventsType">
+    	<sequence>
+    		<element name="Event" type="tns:EventType" minOccurs="0" maxOccurs="unbounded"></element>
+    	</sequence>
+    </complexType>
+
+    <complexType name="EventType">
+    	<sequence>
+    		<element name="EventDate" type="tns:DateType" minOccurs="1"
+    			maxOccurs="1">
+    		</element>
+    		<element name="Administred" type="tns:VaccineType"
+    			minOccurs="1" maxOccurs="1">
+    		</element>
+    		<element name="Evaluations" type="tns:EvaluationsType"
+    			minOccurs="0" maxOccurs="1">
+    		</element>
+    	</sequence>
+    	<attribute name="type" use="required">
+    		<simpleType>
+    			<restriction base="string">
+    				<enumeration value="VACCINATION"></enumeration>
+    			</restriction>
+    		</simpleType>
+    	</attribute>
+    	<attribute name="ID" type="int"></attribute>
+    </complexType>
+
+    <complexType name="VaccineType">
+    	<attribute name="name" type="string" use="required"></attribute>
+    	<attribute name="cvx" type="string" use="required"></attribute>
+    	<attribute name="mvx" type="string" use="optional"></attribute>
+    </complexType>
+
+    <complexType name="EvaluationsType">
+    	<sequence>
+    		<element name="Evaluation" type="tns:EvaluationType" minOccurs="0" maxOccurs="unbounded"></element>
+    	</sequence>
+    </complexType>
+
+    <complexType name="EvaluationType">
+    	<sequence>
+    		<element name="Vaccine" type="tns:VaccineType" minOccurs="1"
+    			maxOccurs="1">
+    		</element>
+    		<element name="EvaluationReason" type="tns:EvaluationReasonType" minOccurs="0" maxOccurs="1"></element>
+    	</sequence>
+    	<attribute name="status" type="tns:statusType" use="required"></attribute>
+    </complexType>
+
+    <simpleType name="statusType">
+    	<restriction base="string">
+    		<enumeration value="Valid"></enumeration>
+    		<enumeration value="Invalid"></enumeration>
+    		<enumeration value="Substandard"></enumeration>
+    		<enumeration value="Extraneous"></enumeration>
+    	</restriction>
+    </simpleType>
+
+    <complexType name="ForecastType">
+    	<sequence>
+    		<element name="target" type="tns:VaccineType" minOccurs="1"
+    			maxOccurs="1">
+    		</element>
+    		<element name="SerieStatus" type="tns:SerieStatusType"
+    			minOccurs="0" maxOccurs="1">
+    		</element>
+    		<element name="ForecastReason" type="string" minOccurs="0"
+    			maxOccurs="1">
+    		</element>
+    		<element name="Earliest" type="tns:DateType" minOccurs="0"
+    			maxOccurs="1">
+    		</element>
+    		<element name="Recommended" type="tns:DateType"
+    			minOccurs="0" maxOccurs="1">
+    		</element>
+    		<element name="PastDue" type="tns:DateType" minOccurs="0"
+    			maxOccurs="1">
+    		</element>
+    		<element name="Latest" type="tns:DateType" maxOccurs="1" minOccurs="0">
+    		</element>
+    	</sequence>
+    </complexType>
+
+    <complexType name="DateType">
+    	<choice>
+    		<element name="Fixed" type="tns:FixedDateType" minOccurs="0" maxOccurs="1"></element>
+    		<element name="Relative" type="tns:RelativeDateType" minOccurs="0" maxOccurs="1"></element>
+    	</choice>
+    </complexType>
+
+    <complexType name="FixedDateType">
+    	<attribute name="date" type="date"></attribute>
+    </complexType>
+
+    <complexType name="RelativeDateType">
+    	<sequence>
+    		<element name="Rule" type="tns:RuleType" minOccurs="1" maxOccurs="unbounded"></element>
+    	</sequence>
+    </complexType>
+
+    <complexType name="ForecastsType">
+    	<sequence>
+    		<element name="Forecast" type="tns:ForecastType" minOccurs="0" maxOccurs="unbounded"></element>
+    	</sequence>
+    </complexType>
+
+    <complexType name="SerieStatusType">
+    	<attribute name="code" use="required">
+    		<simpleType>
+    			<restriction base="string">
+    				<enumeration value="A"></enumeration>
+    				<enumeration value="C"></enumeration>
+    				<enumeration value="D"></enumeration>
+    				<enumeration value="F"></enumeration>
+    				<enumeration value="G"></enumeration>
+    				<enumeration value="I"></enumeration>
+    				<enumeration value="L"></enumeration>
+    				<enumeration value="N"></enumeration>
+    				<enumeration value="O"></enumeration>
+    				<enumeration value="S"></enumeration>
+    				<enumeration value="V"></enumeration>
+    				<enumeration value="W"></enumeration>
+    			    <enumeration value="X"></enumeration>
+    			    <enumeration value="Z"></enumeration>
+    			</restriction>
+    		</simpleType>
+    	</attribute>
+    	<attribute name="details" type="string" use="optional"></attribute>
+    </complexType>
+
+    <complexType name="EvaluationReasonType">
+    	<attribute name="code" type="string" use="required"></attribute>
+    	<attribute name="value" type="string" use="required"></attribute>
+    </complexType>
+
+    <complexType name="RuleType">
+    	<sequence>
+    		<element name="RelativeTo" type="tns:RelativeToType"></element>
+    	</sequence>
+    	<attribute name="years" type="int"></attribute>
+    	<attribute name="months" type="int"></attribute>
+    	<attribute name="days" type="int"></attribute>
+    </complexType>
+
+    <complexType name="RelativeToType">
+    	<attribute name="position" use="required">
+    		<simpleType>
+    			<restriction base="string">
+    				<enumeration value="BEFORE"></enumeration>
+    				<enumeration value="AFTER"></enumeration>
+    			</restriction>
+    		</simpleType>
+    	</attribute>
+    	<attribute name="reference" use="required">
+    		<simpleType>
+    			<restriction base="string">
+    				<enumeration value="DOB"></enumeration>
+    				<enumeration value="EVALDATE"></enumeration>
+    				<enumeration value="VACCINATION"></enumeration>
+    			</restriction>
+    		</simpleType>
+    	</attribute>
+    	<attribute name="id" type="int" use="optional"></attribute>
+    </complexType>
+    
+    
+<!--     Validation Report Model  -->
+ <element name="ValidationReport" type="tns:ValidationReport"></element>
+    
+     <simpleType name="validationStatus">
+    	<restriction base="string">
+    		<enumeration value="ERROR"></enumeration>
+    		<enumeration value="SUCCESS"></enumeration>
+    		<enumeration value="WARNING"></enumeration>
+    		<enumeration value="NO_MATCH"></enumeration>
+    	</restriction>
+    </simpleType>
+    
+    <complexType name="ValidationReport">
+    	<sequence>
+    		<element name="ReportMetaData" type="tns:ReportMetaDataType" minOccurs="1" maxOccurs="1"></element>
+    		<element name="TestCaseMetaData" type="tns:TestCaseMetaDataType" minOccurs="1" maxOccurs="1"></element>
+    		<element name="TestCaseInformation" type="tns:TestCaseInformationType" minOccurs="1" maxOccurs="1"></element>
+    		<element name="ValidationResult" type="tns:ValidationResultType" minOccurs="1" maxOccurs="1"></element>
+    	</sequence>
+    </complexType>
+    <complexType name="ValidationResultType">
+    	<sequence>
+    		<element name="ReportSummary" type="tns:ReportSummaryType" minOccurs="1" maxOccurs="1"></element>
+    		<element name="EvaluationsReport" type="tns:EvaluationsReportType" minOccurs="0" maxOccurs="1"></element>
+    		<element name="ForecastsReport" type="tns:ForecastsReportType" minOccurs="1" maxOccurs="1"></element>
+    	</sequence>
+    </complexType>
+    <complexType name="ForecastsReportType">
+    	<sequence>
+    		<element name="ForecastValidation" type="tns:ForecastValidationType" minOccurs="1" maxOccurs="unbounded"></element>
+    	</sequence>
+    </complexType>
+    <complexType name="ForecastValidationType">
+    	<sequence>
+    		<element name="Target" type="tns:VaccineType"></element>
+    		<element name="DoseNumber" type="tns:DoseValidationType"></element>
+    		<element name="EarliestDate" type="tns:DateValidationType"></element>
+    		<element name="RecommendedDate" type="tns:DateValidationType"></element>
+    		<element name="PastDueDate" type="tns:DateValidationType"></element>
+    		<element name="LatestDate" type="tns:DateValidationType"></element>
+    	</sequence>
+    </complexType>
+    <complexType name="DateValidationType">
+    	<sequence>
+    		<element name="Expected" type="date"></element>
+    		<element name="Actual" type="date"></element>
+    		<element name="Assessment" type="tns:validationStatus"></element>
+    		<element name="DaysOffset" type="integer"></element>
+    	</sequence>
+    </complexType>
+    <complexType name="DoseValidationType">
+    	<sequence>
+    		<element name="Expected" type="string"></element>
+    		<element name="Actual" type="string"></element>
+    		<element name="Assessment" type="tns:validationStatus"></element>
+    		<element name="DaysOffset" type="integer"></element>
+    	</sequence>
+    </complexType>
+    <complexType name="EvaluationsReportType">
+    	<sequence>
+    		<element name="VaccinationEventValidation" type="tns:EventValidationType" minOccurs="0" maxOccurs="unbounded"></element>
+    	</sequence>
+    </complexType>
+    <complexType name="EventValidationType">
+    	<sequence>
+    		<element name="VaccinationEvent" type="tns:VaccinationEventReportType" minOccurs="1" maxOccurs="1"></element>
+    		<element name="Evaluations" type="tns:EvaluationsValidationType" minOccurs="1" maxOccurs="1"></element>
+    	</sequence>
+    </complexType>
+    <complexType name="VaccinationEventReportType">
+    	<sequence>
+    		<element name="Administred" type="tns:VaccineType" minOccurs="1" maxOccurs="1"></element>
+    		<element name="Date" type="date" minOccurs="1" maxOccurs="1"></element>
+    	</sequence>
+    </complexType>
+    <complexType name="EvaluationsValidationType">
+    	<sequence>
+    		<element name="Evaluation" type="tns:EvaluationValidationType" minOccurs="0" maxOccurs="unbounded"></element>
+    	</sequence>
+    </complexType>
+    <complexType name="EvaluationValidationType">
+    	<sequence>
+    		<element name="Evaluation" type="tns:EvaluationType"></element>
+    		<element name="Actual" type="tns:statusType"></element>
+    		<element name="Assessment" type="tns:validationStatus"></element>
+    	</sequence>
+    </complexType>
+    
+    <complexType name="ReportSummaryType">
+    	<sequence>
+    		<element name="Evaluations" type="tns:SummaryType" minOccurs="1" maxOccurs="1"></element>
+    		<element name="Forecasts" type="tns:SummaryType" minOccurs="1" maxOccurs="1"></element>
+    	</sequence>
+    </complexType>
+    
+
+    <complexType name="ReportMetaDataType">
+    	<sequence>
+            <element name="DateExecuted" type="dateTime" minOccurs="1" maxOccurs="1"></element>
+            <element name="Software" type="tns:SoftwareConfigType" minOccurs="1" maxOccurs="1"></element>
+        </sequence>
+    </complexType>
+    <complexType name="SummaryType">
+    	<sequence>
+    		<element name="Correct" type="decimal"></element>
+            <element name="Errors" type="decimal"></element>
+            <element name="Warnings" type="decimal"></element>
+            <element name="Incomplete" type="decimal"></element>
+            <element name="CompletionPercentage" type="decimal"></element>
+            <element name="CorrectnessPercentage" type="decimal"></element>
+        </sequence>
+    </complexType>
+
+    <complexType name="SoftwareConfigType">
+    	<sequence>
+    		<element name="EndPoint" type="string"></element>
+    		<element name="ConnectionType" type="string"></element>
+    	</sequence>
+    </complexType>
+
+    <complexType name="TestCaseMetaDataType">
+    	<sequence>
+    		<element name="Name" type="string" minOccurs="1" maxOccurs="1"></element>
+    		<element name="UID" type="string" minOccurs="0" maxOccurs="1"></element>
+    		<element name="Group" type="string" minOccurs="0" maxOccurs="1"></element>
+    		<element name="MetaData" type="tns:MetaDataType" minOccurs="1" maxOccurs="1"></element>
+    	</sequence>
+    </complexType>
+    <complexType name="TestCaseInformationType">
+    	<sequence>
+    		<element name="Patient" type="tns:PatientTypeReport" minOccurs="1" maxOccurs="1"></element>
+    		<element name="AssessmentDate" type="date" minOccurs="1" maxOccurs="1"></element>
+    	</sequence>
+    </complexType>
+</schema>

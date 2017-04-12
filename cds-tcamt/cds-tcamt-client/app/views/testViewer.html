@@ -23,7 +23,7 @@
         <md-tab label="Reports">
             <md-content class="md-padding">
                 <table ng-show="reportsFor(selectedTC.id).length > 0" class="table table-condensed table-striped table-hover">
-                    <tr ng-repeat="item in reportsFor(selectedTC.id) | orderBy:'executionDate' track by $index">
+                    <tr ng-repeat="item in reportsFor(selectedTC.id) | orderBy:'-executionDate' track by $index">
                         <td>
                             <div style="width: 100%;" layout="row" layout-align="start center">
                                 <div flex="50" layout="row" layout-align="center">

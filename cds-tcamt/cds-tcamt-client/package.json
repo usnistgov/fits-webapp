@@ -4,9 +4,11 @@
   "dependencies": {
     "angular-ui-scroll": "^1.6.1",
     "imagemin": "^4.0.0",
-    "json-stable-stringify": "^1.0.1"
+    "json-stable-stringify": "^1.0.1",
+    "object-hash": "^1.1.7"
   },
   "devDependencies": {
+    "object-hash": "^1.1.7",
     "grunt": "^0.4.5",
     "grunt-autoprefixer": "^0.7.3",
     "grunt-cli": "^1.2.0",

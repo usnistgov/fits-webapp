@@ -73,9 +73,9 @@ import gov.nist.healthcare.cds.service.NISTFormatService;
 import gov.nist.healthcare.cds.service.TestCaseExecutionService;
 import gov.nist.healthcare.cds.service.TestRunnerService;
 import gov.nist.healthcare.cds.service.VaccineImportService;
-import gov.nist.healthcare.cds.service.impl.ExecutionService;
-import gov.nist.healthcare.cds.service.impl.MockTestRunner;
-import gov.nist.healthcare.cds.service.impl.TestExecutionSimulation;
+import gov.nist.healthcare.cds.service.impl.validation.ExecutionService;
+import gov.nist.healthcare.cds.service.impl.validation.simulation.MockTestRunner;
+import gov.nist.healthcare.cds.service.impl.validation.simulation.TestExecutionSimulation;
 
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -85,6 +85,8 @@ import org.springframework.core.env.Environment;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.oxm.Marshaller;
 import org.springframework.oxm.castor.CastorMarshaller;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
@@ -95,6 +97,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Service
 @PropertySource("classpath:app-info.properties" )
+@PropertySource("classpath:admin.properties" )
 public class Bootstrap {
 
 	@Autowired
@@ -127,7 +130,11 @@ public class Bootstrap {
 	@Autowired
 	private NISTFormatService nistService;
 	
-
+	@Bean
+	public PasswordEncoder passEncode(){
+		return new BCryptPasswordEncoder();
+	}
+	
 	@Bean 
 	public AppInfo appInfo() throws ParseException{
 		AppInfo app = new AppInfo();
@@ -204,8 +211,8 @@ public class Bootstrap {
 	
 	@Bean
 	public TestCaseExecutionService testExecution(){
-//		return new ExecutionService();
-		return new TestExecutionSimulation();
+		return new ExecutionService();
+//		return new TestExecutionSimulation();
 	}
 	
 	public void createVaccine() throws IOException{
@@ -291,29 +298,30 @@ public class Bootstrap {
 		this.createSoftware();
 		
 		
-		if(accountService.getAccountByUsername("michael") == null){
-			Account m = new Account();
-			m.setUsername("michael");
-			m.setEmail("michael.indovina@nist.gov");
-			m.setPassword("qwerty");
-			accountService.createAdmin(m);
-		}
-		
-		if(accountService.getAccountByUsername("robert") == null){
-			Account r = new Account();
-			r.setUsername("robert");
-			r.setEmail("robert.snelick@nist.gov");
-			r.setPassword("qwerty");
-			accountService.createAdmin(r);
-		}
-		
-		if(accountService.getAccountByUsername("hossam") == null){
-			Account h = new Account();
-			h.setUsername("hossam");
-			h.setEmail("hossam.tamri@nist.gov");
-			h.setPassword("qwerty");
-			accountService.createAdmin(h);
-		}
+//		if(accountService.getAccountByUsername(env.getProperty("mike.username")) == null){
+//			Account m = new Account();
+//			m.setUsername(env.getProperty("mike.username"));
+//			m.setEmail(env.getProperty("mike.email"));
+//			m.setPassword(env.getProperty("mike.password"));
+//			accountService.createAdmin(m);
+//		}
+//		
+//		if(accountService.getAccountByUsername(env.getProperty("rob.username")) == null){
+//			Account r = new Account();
+//			r.setUsername(env.getProperty("rob.username"));
+//			r.setEmail(env.getProperty("rob.email"));
+//			r.setPassword(env.getProperty("rob.password"));
+//		
+//			accountService.createAdmin(r);
+//		}
+//		
+//		if(accountService.getAccountByUsername(env.getProperty("hossam.username")) == null){
+//			Account h = new Account();
+//			h.setUsername(env.getProperty("hossam.username"));
+//			h.setEmail(env.getProperty("hossam.email"));
+//			h.setPassword(env.getProperty("hossam.password"));
+//			accountService.createAdmin(h);
+//		}
 		
 //		TestPlan tp = new TestPlan();
 //		tp.setUser("hossam");

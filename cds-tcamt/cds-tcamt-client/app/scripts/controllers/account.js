@@ -3,8 +3,8 @@
 /* "newcap": false */
 
 angular.module('tcl')
-.controller('UserProfileCtrl', ['$scope', '$resource', 'AccountLoader', 'Account', 'userInfoService', '$location',
-    function ($scope, $resource, AccountLoader, Account, userInfoService, $location) {
+.controller('UserProfileCtrl', ['$scope', 'Notification', '$resource', 'AccountLoader', 'Account', 'userInfoService', '$location',
+    function ($scope, Notification, $resource, AccountLoader, Account, userInfoService, $location) {
         var PasswordChange = $resource('api/accounts/:id/passwordchange', {id:'@id'});
 
         $scope.accountpwd = {};
@@ -39,9 +39,27 @@ angular.module('tcl')
             user.newPassword = $scope.accountpwd.newPassword;
             user.id = $scope.account.id;
             //TODO: Check return value???
-            user.$save().then(function(result){
-                $scope.msg = angular.fromJson(result);
+            //TODO: Check return value???
+            user.$save(function(){
+                // $scope.msg = angular.fromJson(result);
+                console.log("RESULT_ACC");
+                console.log(user);
+                if(user.type === 'success'){
+                    Notification.success({
+                        message: "Password Changed Successfully",
+                        delay: 3000
+                    });
+                }
+                else {
+                    Notification.error({
+                        message: user.text,
+                        delay: 3000
+                    });
+                }
             });
+            // user.$save().then(function(result){
+            //     $scope.msg = angular.fromJson(result);
+            // });
         };
 
         $scope.deleteAccount = function () {
@@ -100,8 +118,8 @@ angular.module('tcl')
 'use strict';
 
 angular.module('tcl')
-    .controller('AccountsListCtrl', ['$scope', 'MultiAuthorsLoader', 'MultiSupervisorsLoader','Account', '$modal', '$resource','AccountLoader','userInfoService','$location',
-        function ($scope, MultiAuthorsLoader, MultiSupervisorsLoader, Account, $modal, $resource, AccountLoader, userInfoService, $location) {
+    .controller('AccountsListCtrl', ['$scope', 'Notification', 'MultiAuthorsLoader', 'MultiSupervisorsLoader','Account', '$modal', '$resource','AccountLoader','userInfoService','$location',
+        function ($scope, Notification, MultiAuthorsLoader, MultiSupervisorsLoader, Account, $modal, $resource, AccountLoader, userInfoService, $location) {
 
             //$scope.accountTypes = [{ 'name':'Author', 'type':'author'}, {name:'Supervisor', type:'supervisor'}];
             //$scope.accountType = $scope.accountTypes[0];
@@ -123,6 +141,21 @@ angular.module('tcl')
                 //not sure it is very clean...
                 //TODO: Add call back?
                 new Account($scope.account).$save();
+                //     .then(function (result) {
+                //     $scope.msg = angular.fromJson(result);
+                //     if($scope.msg.type === 'success'){
+                //         Notification.success({
+                //             message: "Profile updated successfully",
+                //             delay: 3000
+                //         });
+                //     }
+                //     else {
+                //         Notification.error({
+                //             message: "Failed to update profile",
+                //             delay: 3000
+                //         });
+                //     }
+                // });
                 $scope.accountOrig = angular.copy($scope.account);
             };
 
@@ -142,8 +175,22 @@ angular.module('tcl')
                 user.newPassword = $scope.accountpwd.newPassword;
                 user.id = $scope.account.id;
                 //TODO: Check return value???
-                user.$save().then(function(result){
-                    $scope.msg = angular.fromJson(result);
+                user.$save(function(){
+                    // $scope.msg = angular.fromJson(result);
+                    console.log("RESULT_ACC");
+                    console.log(user);
+                    if(user.type === 'success'){
+                        Notification.success({
+                            message: "Password Changed Successfully",
+                            delay: 3000
+                        });
+                    }
+                    else {
+                        Notification.error({
+                            message: user.text,
+                            delay: 3000
+                        });
+                    }
                 });
             };
 

@@ -89,13 +89,23 @@ multiselect button:after {
 .drop-here {
   text-align: center;
   color: black;
-  background-color: rgb(222, 251, 220);
+  background-color: rgba(33, 150, 243, 0.06);
   border: 2px dashed black;
 }
 
+.fits-m-h {
+  padding-bottom: 10px !important;
+  text-align: center;
+}
+
+.fits-m-b {
+  background-color: #e4e4e4;
+}
+
 .drop-zone {
-  background-color: rgb(222, 251, 220);
+  background-color: rgba(33, 150, 243, 0.06);
   border: 2px dashed black;
+  border-top: 0px;
 }
 
 .md-tab {
@@ -201,7 +211,7 @@ html {
 
 .panel-resizable {
 	resize: vertical;
-    overflow: auto
+    overflow: auto;
 }
 
 #header-wrap {
@@ -2532,6 +2542,12 @@ span {
 
 .cf-tbody {
 //  border: 1px white solid;
+}
+
+.alert-warning {
+  background-color: #fcf8e3 !important;
+  border: 1px solid #faebcc !important;
+  color: black !important;
 }
 
 .alert-info-2 {

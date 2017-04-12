@@ -13,7 +13,7 @@ angular.module('tcl')
                 console.log(resetReq);
                 console.log(resetReq.text);
                 if ( resetReq.text === 'resetRequestProcessed' ) {
-                    Notification.success({message:"An e-mail with instructions on how to resest  has been sent ", delay:1500});
+                    Notification.success({message:"An e-mail with instructions on how to reset  has been sent ", delay:1500});
                     $scope.username = '';
                 }
                 else {

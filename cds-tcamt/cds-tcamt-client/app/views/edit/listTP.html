@@ -29,22 +29,26 @@
                 <table st-table="tmpTps" st-safe-src="tps" class="smart-table table table-striped table-bordered">
                     <thead>
                         <tr class="tbl-header">
-                            <th st-ratio="5">#</th>
-                            <th st-ratio="20" st-sort="name">Name</th>
-                            <th st-ratio="30" st-sort="description">Description</th>
-                            <th st-ratio="15" st-sort="version">Version</th>
-                            <th st-ratio="15" st-sort="lastUpdateDate">Date</th>
-                            <th st-ratio="15">Actions</th>
+                            <!--<th st-ratio="5">#</th>-->
+                            <th st-ratio="22" st-sort="name">Name</th>
+                            <th st-ratio="20" st-sort="description">Description</th>
+                            <th st-ratio="10" st-sort="version">Version</th>
+                            <th st-ratio="11" st-sort="lastUpdateDate">Creation Date</th>
+                            <th st-ratio="12" st-sort="lastUpdateDate">Last Update Date</th>
+                            <th st-ratio="10" >Total Test Cases</th>
+                            <th st-ratio="10">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr ng-repeat="row in tmpTps track by $index">
-                            <td st-ratio="5">{{$index + 1}}</td>
-                            <td st-ratio="20" ng-bind="row.name"></td>
-                            <td st-ratio="30" ng-bind="row.description"></td>
-                            <td st-ratio="15" ng-bind="row.metaData.version"></td>
-   							<td st-ratio="15" ng-bind="row.metaData.dateCreated | date:'MM/dd/yyyy'"></td>
-                            <td st-ratio="15">
+                            <!--<td st-ratio="5">{{$index + 1}}</td>-->
+                            <td st-ratio="22" ng-bind="row.name"></td>
+                            <td st-ratio="20" ng-bind="row.description"></td>
+                            <td st-ratio="10" ng-bind="row.metaData.version"></td>
+   							<td st-ratio="11" ng-bind="row.metaData.dateCreated | date:'MM/dd/yyyy'"></td>
+                            <td st-ratio="12" ng-bind="row.metaData.dateLastUpdated | date:'MM/dd/yyyy'"></td>
+                            <td st-ratio="10" ng-bind="calculateTC(row)"></td>
+                            <td st-ratio="10">
                         	    <button title="Select"
                                     type="button" class="btn btn-xs btn-info no-margin"
                                     ng-click="selectTP(row)">

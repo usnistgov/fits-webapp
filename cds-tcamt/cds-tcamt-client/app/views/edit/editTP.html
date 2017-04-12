@@ -18,6 +18,7 @@ body {
 <ng-include src="'views/edit/editEvent.html'"></ng-include>
 <ng-include src="'views/edit/editForecast.html'"></ng-include>
 <ng-include src="'views/edit/editPatient.html'"></ng-include>
+<ng-include src="'views/edit/editGroup.html'"></ng-include>
 <div class="row" ng-show="!selectedTestPlan1">
 	<div class="col-md-12">
 		<p>No Test Case Selected.</p>
@@ -35,34 +36,28 @@ body {
 							<i ng-show="tpview" class="fa fa-eye-slash" aria-hidden="true" style="font-size : 1.8em; color: rgb(203, 167, 167);"></i>
 						</button>
 					</div>
-					<div flex="10" ng-show="changes(testCases) || errors(testCases)" layout="row">
-						<div ng-show="changes(testCases)" layout="row">
+					<div flex="10" ng-show="workSpaceChanges() || hasIncomplete" layout="row">
+						<div ng-show="workSpaceChanges()" layout="row">
 							<i class="fa fa-refresh unsaved" aria-hidden="true"></i>
 							<md-tooltip md-direction="top">One or more test cases have unsaved changes</md-tooltip>
 						</div>
-						<div style="margin-left : 5px;" ng-show="errors(testCases)" layout="row">
+						<div style="margin-left : 5px;" ng-show="hasIncomplete" layout="row">
 							<i class="fa fa-exclamation" aria-hidden="true" style="margin-right: 5px; color: red;"></i>
-							<md-tooltip md-direction="top">One or more test cases have errors</md-tooltip>
+							<md-tooltip md-direction="top">One or more test cases are incomplete</md-tooltip>
 						</div>
 					</div>
-					<div flex="{{changes(testCases) || errors(testCases) ? 60 : 70 }}" style="text-align: center;">
+					<div flex="{{workSpaceChanges() || hasIncomplete ? 60 : 70 }}" style="text-align: center;">
 						<strong> Test Browser </strong>
 					</div>
 					<div flex="15" layout="row" layout-align="end" style="padding: 0;">
-						<button class="btn btn-xs btn-info" ng-class="{ 'btn-info' : filterView, 'btn-primary' : !filterView }" ng-click="filterView = !filterView" style="margin: 0; margin-right: 10px;">
+						<button class="btn btn-xs" ng-class="{ 'btn-info' : filterView, 'btn-primary' : !filterView }" ng-click="filterView = !filterView" style="margin: 0; margin-right: 10px;">
 							<span ng-style="filterActive(tcFilter) ? { 'background-color' : '#47ef47' } : { 'background-color' : '#ff4040' } " style="padding: 0 !important; margin-right: 5px; font-size: 10px;" class="badge">&nbsp;</span>
 							<i class="fa fa-filter" aria-hidden="true" style="font-size : 1.8em;"></i>
 							<md-tooltip md-direction="top">Filter</md-tooltip>
 						</button>
 					</div>
-					<!--<div flex="{{changes(testCases) ? 40 : 45 }}" style="padding: 0;">-->
-						<!--<div class="input-group" style="width : 100%;">-->
-							<!--<span class="input-group-addon"  style="background-color: rgb(240, 240, 240);" id="basic-addon1"><i class="fa fa-search" aria-hidden="true"></i></span>-->
-							<!--<input type="text" class="form-control" ng-model="tcSearch" ng-model-options="{ debounce: 500 }" style="padding-left: 10px; background-color: white; width : 100%;" placeholder="Name, ID, Group"/>-->
-						<!--</div>-->
-					<!--</div>-->
 				</div>
-				<div layout="column" style="width : 100%; background-color : rgb(241,241,241); border: 1px solid #dddddd; padding: 10px;" ng-show="filterView">
+				<div layout="column" style="width : 100%; background-color : rgb(241,241,241); border: 1px solid #dddddd; padding: 10px;" ng-show="filterView" ng-model-options="{updateOn : 'change blur'}">
 					<div layout="row" layout-align="center center">
 						<md-input-container style="width: 100%;">
 							<label>Name</label>
@@ -115,9 +110,12 @@ body {
 							</md-datepicker>
 						</md-input-container>
 					</div>
-					<div layout="row" layout-align="start center">
+					<div layout="row" layout-align="center center">
 						<md-checkbox ng-model="tcFilter.changed">
-							Show test cases with unsaved changes only
+							Unsaved Changes
+						</md-checkbox>
+						<md-checkbox ng-model="tcFilter.incomplete">
+							Incomplete
 						</md-checkbox>
 					</div>
 					<button class="btn btn-danger" style="width : 100%;" ng-click="resetTcFilter(tcFilter)">
@@ -264,12 +262,9 @@ body {
 					<button  ng-show="aTCisSelected()" ng-click="summary()" class="btn btn-xs btn-info pull-right" style="margin: 0px;">
 						Summary
 					</button>
-					<button style="margin: 0px; margin-right: 10px;" ng-show="aTCisSelected() && selectedTC._changed && !isLocal(selectedTC)" class="btn btn-xs btn-danger pull-right" ng-click="discardChanges(selectedTC)">
+					<button style="margin: 0px; margin-right: 10px;" ng-show="aTCisSelected() && !entityUtils.inSynch(selectedTC) && hasBackUp(selectedTC)" class="btn btn-xs btn-danger pull-right" ng-click="discardChanges(selectedTC)">
 						<span><i class="fa fa-trash-o fa-fw">&nbsp; </i>Discard Changes</span>
 					</button>
-					<!--<button style="margin: 0px; margin-right: 10px;" ng-show="aTCisSelected()" class="btn btn-xs btn-info pull-right" ng-click="scrollTo('tc-'+selectedTC.id)">-->
-						<!--<span> Locate Test Case </span>-->
-					<!--</button>-->
 				</div>
 				<div class="panel-body panel-resizable"
 					style="padding-bottom: 10px; height : 100%; bottom : 0; min-height: 400px;">
@@ -278,7 +273,7 @@ body {
 						<p>No Element Selected</p>
 					</div>
 
-					<div id="edit" ng-show="subview !== undefined" style="width: 100%;">
+					<div id="edit"  ng-show="subview !== undefined" style="width: 100%; resize : none;">
 						<ng-include src="subview"></ng-include>
 					</div>
 				</div>

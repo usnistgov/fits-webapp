@@ -19,41 +19,41 @@ body {
 <div>
 	<table style="width: 100%;" class="table-hover">
 		<tbody>
-			<tr ng-repeat="ev in selectedTC.events | orderBy:'ev.vaccination.position' " ng-click="selectEvent(ev)"
+			<tr ng-repeat="ev in selectedTC.events | orderBy:'ev.position' " ng-click="selectEvent(ev)"
 				style="cursor: pointer; height : 50px;"
 				ng-class="{'sinfo' : isSelectedEvent(ev), 'fle' : $index === 0, 'le' : true}"
 				context-menu="eventCM" model="$index" >
 
 				<td colspan="3" style="text-align : justify; padding: 10px;">
-					<div style="width : 100%;" layout="row" layout-align="start center" ng-show="ev.vaccination.administred && ev.vaccination.administred.discriminator === 'generic'">
+					<div style="width : 100%;" layout="row" layout-align="start center" ng-show="ev.administred && ev.administred.discriminator === 'generic'">
 						<div flex="10" layout="column" layout-align="center center">
-							<span><strong>ID # {{ev.vaccination.position+1}}</strong></span>
+							<span><strong>ID # {{ev.position+1}}</strong></span>
 						</div>
 						<div flex="25" layout="column" layout-align="center center">
-							<span style="background-color: green;" class="badge">CVX {{ev.vaccination.administred.cvx}}</span>
+							<span style="background-color: green;" class="badge">CVX {{ev.administred.cvx}}</span>
 						</div>
 						<div flex="65" layout="column" layout-align="start center">
-							<span><strong>{{ev.vaccination.administred.name}}</strong></span>
+							<span><strong>{{ev.administred.name}}</strong></span>
 							<span>{{eventLabel(ev)}}</span>
 						</div>
 					</div>
-					<div style="width : 100%;" layout="row" layout-align="start center" ng-show="ev.vaccination.administred && ev.vaccination.administred.discriminator === 'specific'">
+					<div style="width : 100%;" layout="row" layout-align="start center" ng-show="ev.administred && ev.administred.discriminator === 'specific'">
 						<div flex="10" layout="column" layout-align="center center">
-							<span><strong>ID # {{ev.vaccination.position}}</strong></span>
+							<span><strong>ID # {{ev.position+1}}</strong></span>
 						</div>
 						<div flex="25" layout="column" layout-align="center center">
-							<span style="background-color: green;" class="badge">CVX {{getV(ev.vaccination.administred).cvx}}</span>
-							<span style="background-color: blue;" class="badge">MVX {{ev.vaccination.administred.mx.mvx}}</span>
+							<span style="background-color: green;" class="badge">CVX {{getV(ev.administred).cvx}}</span>
+							<span style="background-color: blue;" class="badge">MVX {{ev.administred.mx.mvx}}</span>
 						</div>
 						<div flex="65" layout="column" layout-align="start center" style="text-align : left;">
-							<!--<span><strong>{{getV(ev.vaccination.administred).name}}</strong></span>-->
-							<span><strong>{{ev.vaccination.administred.name}}</strong></span>
+							<!--<span><strong>{{getV(ev.administred).name}}</strong></span>-->
+							<span><strong>{{ev.administred.name}}</strong></span>
 							<span>{{eventLabel(ev)}}</span>
 						</div>
 					</div>
-					<div style="width : 100%;" layout="row" layout-align="start center" ng-show="!ev.vaccination.administred">
+					<div style="width : 100%;" layout="row" layout-align="start center" ng-show="!ev.administred">
 						<div flex="30" layout="column" layout-align="center center">
-							<span class="badge sbadge">ID # {{ev.vaccination.position+1}}</span>
+							<span class="badge sbadge">ID # {{ev.position+1}}</span>
 						</div>
 						<div flex="50" layout="column" layout-align="start center" style="text-align : left;">
 							<span><strong>New Event</strong></span>

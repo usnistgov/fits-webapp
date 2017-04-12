@@ -12,23 +12,23 @@ body {
 	}
 </script>
 <script type="text/ng-template" id="EditTestPlanData.html">
-	<md-content>
+	<md-content block-ui="editPanel">
 		<md-tabs md-selected="tabs.selectedTabTP" md-dynamic-height md-border-bottom>
 			<md-tab label="Test Plan Information">
-				<md-content class="md-padding">         
+				<md-content class="md-padding" ng-model-options="{updateOn : 'change blur'}">
 					<form name="testplanMetaDataForm" class="form-horizontal" novalidate>
 						<div class="row">
 							<div class="col-md-12">
 								<div class="col-md-12">
 									<md-input-container style="width: 100%;">
 										<label>Name</label>
-										<input ng-model="selectedTP.name" type="text"/>
+										<input ng-model="selectedTP.name" ng-change="changedTP(selectedTP)" type="text"/>
 									</md-input-container>
 								</div>
 								<div class="col-md-4">
 									<md-input-container style="width: 100%;">
 										<label>Version</label>
-										<input ng-model="selectedTP.metaData.version" ng-change="tpChanged()" type="text"/>
+										<input ng-model="selectedTP.metaData.version" ng-change="changedTP(selectedTP)" type="text"/>
 									</md-input-container>
 								</div>
 								<div class="col-md-4">
@@ -46,14 +46,14 @@ body {
 								<div class="col-md-12">
 									<md-input-container style="width: 100%;">
 										<label>Description</label>
-										<textarea style="background-color: rgb(241, 241, 241);" ng-model="selectedTP.description" rows="5">
+										<textarea style="background-color: rgb(241, 241, 241);" ng-change="changedTP(selectedTP)" ng-model="selectedTP.description" rows="5">
 										</textarea>
 									</md-input-container>
 								</div>
 								<div class="col-md-12">
 									<md-input-container style="width: 100%;">
 										<label>Change Log</label>
-										<textarea style="background-color: rgb(241, 241, 241);" ng-model="selectedTP.metaData.changeLog" rows="5">
+										<textarea style="background-color: rgb(241, 241, 241);" ng-change="changedTP(selectedTP)" ng-model="selectedTP.metaData.changeLog" rows="5">
 										</textarea>
 									</md-input-container>
 								</div>
@@ -93,14 +93,14 @@ body {
     								<div ng-show="!exportCDC.all" class="col-md-6" layout="column" layout-align="end">
 	    								<div>
 											<md-input-container style="width: 100%;">
-												<label>From</label>
-												<input ng-model="exportCDC.from" type="number">
+												<label>From Line</label>
+												<input ng-model="exportCDC.from" min="0" type="number">
 											</md-input-container>
 										</div>
 										<div>
 											<md-input-container style="width: 100%;">
-												<label>To</label>
-												<input ng-model="exportCDC.to" type="number">
+												<label>To Line</label>
+												<input ng-model="exportCDC.to" min="0" type="number">
 											</md-input-container>
 										</div>
     								</div>
@@ -115,7 +115,7 @@ body {
 							</div>
 							<div class="col-md-12">
 								<div class="col-md-3">
-									<button ng-show="!fileErr && sfileO !== null" ng-click="upload()" class="btn btn-info" style="width : 100%">Import</button>
+									<button ng-show="!fileErr && sfileO !== null && (exportCDC.all || (exportCDC.from >= 0 && exportCDC.to >=0))" ng-click="upload()" class="btn btn-info" style="width : 100%">Import</button>
 								</div>
 							</div>
 						</div>

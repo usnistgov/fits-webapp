@@ -4,41 +4,41 @@
     <div>
         <h3 style="color: #3235ff;"><strong>Test Case Metadata</strong></h3>
         <div style="background-color: rgb(236,243,248);" class="md-padding">
-            <table class="table table-condensed table-striped table-bordered" style="font-size : 15px;">
+            <table class="table table-condensed table-striped table-bordered" style="font-size : 13px;">
                 <tr>
-                    <td style="width : 200px;"><strong> Name </strong></td>
+                    <td style="width : 250px;"><strong> Name </strong></td>
                     <td>{{selectedTC.name}}</td>
                 </tr>
                 <tr>
-                    <td style="width : 200px;"><strong> ID </strong></td>
+                    <td style="width : 250px;"><strong> ID </strong></td>
                     <td>{{selectedTC.uid}}</td>
                 </tr>
                 <tr>
-                    <td style="width : 200px;"><strong> Group </strong></td>
+                    <td style="width : 250px;"><strong> Group </strong></td>
                     <td>{{groupName(selectedTC.group)}}</td>
                 </tr>
                 <tr>
-                    <td style="width : 200px;"><strong>Description</strong></td>
+                    <td style="width : 250px;"><strong>Description</strong></td>
                     <td>{{selectedTC.description}}</td>
                 </tr>
                 <tr>
-                    <td style="width : 200px;"><strong> Last Changed in Test Plan Version </strong></td>
+                    <td style="width : 250px;"><strong> Last Changed in Test Plan Version </strong></td>
                     <td>{{selectedTC.metaData.version}}</td>
                 </tr>
                 <tr>
-                    <td style="width : 200px;"><strong> Change Log </strong></td>
+                    <td style="width : 250px;"><strong> Change Log </strong></td>
                     <td>{{selectedTC.metaData.changeLog}}</td>
                 </tr>
                 <tr>
-                    <td style="width : 200px;"><strong> Date Created </strong></td>
+                    <td style="width : 250px;"><strong> Date Created </strong></td>
                     <td>{{selectedTC.metaData.dateCreated | date:'MM/dd/yyyy'}}</td>
                 </tr>
                 <tr>
-                    <td style="width : 200px;"><strong> Date Last Updated </strong></td>
+                    <td style="width : 250px;"><strong> Date Last Updated </strong></td>
                     <td>{{selectedTC.metaData.dateLastUpdated | date:'MM/dd/yyyy'}}</td>
                 </tr>
                 <tr>
-                    <td style="width : 200px;"><strong> Type </strong></td>
+                    <td style="width : 250px;"><strong> Type </strong></td>
                     <td>
                         {{selectedTC.metaData.imported ? 'Imported' : 'Created in FITS'}}
                     </td>
@@ -48,7 +48,7 @@
         <h3 style="color: #3235ff;"><strong>Test Case Data</strong></h3>
         <div style="background-color: rgb(236,243,248);" class="md-padding">
             <h3>Assessment Date and Patient Information</h3>
-            <table class="table table-condensed table-striped table-bordered" style="font-size : 15px;">
+            <table class="table table-condensed table-striped table-bordered" style="font-size : 13px;">
                 <tr>
                     <td style="width : 200px;"><strong> Assessment Date </strong></td>
                     <td ng-show="selectedTC.evalDate.type === 'fixed'">
@@ -84,27 +84,27 @@
             </table>
             <h3 ng-show="selectedTC.events.length > 0">Vaccination History and Expected Evaluations</h3>
             <table class="table table-condensed table-striped table-bordered"
-                   ng-repeat="event in selectedTC.events track by $index" style="font-size : 15px;">
+                   ng-repeat="event in selectedTC.events track by $index" style="font-size : 13px;">
                 <tr>
-                    <td ng-show="event.vaccination.administred.discriminator === 'generic'" colspan=2
-                        style="color : blue;"><strong># {{event.vaccination.position + 1}} -
-                        {{event.vaccination.administred.name}} - CVX : {{event.vaccination.administred.cvx}}</strong>
+                    <td ng-show="event.administred.discriminator === 'generic'" colspan=2
+                        style="color : blue;"><strong># {{event.position + 1}} -
+                        {{event.administred.name}} - CVX : {{event.administred.cvx}}</strong>
                     </td>
-                    <td ng-show="event.vaccination.administred.discriminator === 'specific'" colspan=2
-                        style="color : blue;"><strong># {{event.vaccination.position + 1}} -
-                        {{event.vaccination.administred.name}} - </strong>{{getMapping(event.vaccination.administred).vx.name}}
-                        <strong> - CVX : {{getMapping(event.vaccination.administred).vx.cvx}} - MVX :
-                            {{event.vaccination.administred.mx.mvx}}</strong></td>
+                    <td ng-show="event.administred.discriminator === 'specific'" colspan=2
+                        style="color : blue;"><strong># {{event.position + 1}} -
+                        {{event.administred.name}} - </strong>{{getMapping(event.administred).vx.name}}
+                        <strong> - CVX : {{getMapping(event.administred).vx.cvx}} - MVX :
+                            {{event.administred.mx.mvx}}</strong></td>
                 </tr>
                 <tr>
                     <td style="width : 200px;"><strong> Date Administred </strong></td>
-                    <td ng-if="event.vaccination.date.type === 'fixed'">
-                        {{event.vaccination.date.date | date:'MM/dd/yyyy'}} - {{event.vaccination.date.date | date :
+                    <td ng-if="event.date.type === 'fixed'">
+                        {{event.date.date | date:'MM/dd/yyyy'}} - {{event.date.date | date :
                         'fullDate'}}
                     </td>
-                    <td ng-if="event.vaccination.date.type === 'relative'">
-                        <table ng-if="event.vaccination.date.rules" style="font-size : 15px;">
-                            <tr ng-repeat="rule in event.vaccination.date.rules track by $index">
+                    <td ng-if="event.date.type === 'relative'">
+                        <table ng-if="event.date.rules" style="font-size : 13px;">
+                            <tr ng-repeat="rule in event.date.rules track by $index">
                                 <td><span ng-if="$index !== 0"><strong>BUT NOT BEFORE</strong></span></td>
                                 <td>{{rule.year}} <strong>Years</strong></td>
                                 <td>{{rule.month}} <strong>Months</strong></td>
@@ -126,14 +126,14 @@
                 <tr>
                     <td style="width : 200px;"><strong> Evaluations </strong></td>
                     <td>
-                        <table class="table table-condensedtable-bordered" style="font-size : 15px;">
+                        <table class="table table-condensedtable-bordered" style="font-size : 13px;">
                             <tr layout="row">
                                 <td flex="10"><strong> CVX </strong></td>
                                 <td flex="40"><strong> Name </strong></td>
                                 <td flex="20"><strong> Status </strong></td>
                                 <td flex="30"><strong> Reason </strong></td>
                             </tr>
-                            <tr ng-repeat="eval in event.vaccination.evaluations" layout="row">
+                            <tr ng-repeat="eval in event.evaluations" layout="row">
                                 <td flex="10">{{eval.relatedTo.cvx}}</td>
                                 <td flex="40">{{eval.relatedTo.name}}</td>
                                 <td flex="20">{{valueForEnum(eval.status,evalStatus)}}</td>
@@ -145,7 +145,7 @@
             </table>
             <h3 ng-show="selectedTC.forecast.length > 0">Expected Forecasts</h3>
             <table class="table table-condensed table-striped table-bordered"
-                   ng-repeat="fc in selectedTC.forecast track by $index" style="font-size : 15px;">
+                   ng-repeat="fc in selectedTC.forecast track by $index" style="font-size : 13px;">
                 <tr>
                     <td colspan=2 style="color : blue;"><strong>{{fc.target.name}} # {{fc.target.cvx}}</strong></td>
                 </tr>
@@ -173,7 +173,7 @@
                         {{fc.earliest.date | date:'MM/dd/yyyy'}} - {{fc.earliest.date | date : 'fullDate'}}
                     </td>
                     <td ng-if="fc.earliest.type === 'relative'">
-                        <table ng-if="fc.earliest.rules" style="font-size : 15px;">
+                        <table ng-if="fc.earliest.rules" style="font-size : 13px;">
                             <tr ng-repeat="rule in fc.earliest.rules track by $index">
                                 <td><span ng-if="$index !== 0"><strong>BUT NOT BEFORE</strong></span></td>
                                 <td>{{rule.year}} <strong>Years</strong></td>
@@ -199,7 +199,7 @@
                         {{fc.recommended.date | date:'MM/dd/yyyy'}} - {{fc.recommended.date | date : 'fullDate'}}
                     </td>
                     <td ng-if="fc.recommended.type === 'relative'">
-                        <table ng-if="fc.recommended.rules" style="font-size : 15px;">
+                        <table ng-if="fc.recommended.rules" style="font-size : 13px;">
                             <tr ng-repeat="rule in fc.recommended.rules track by $index">
                                 <td><span ng-if="$index !== 0"><strong>BUT NOT BEFORE</strong></span></td>
                                 <td>{{rule.year}} <strong>Years</strong></td>
@@ -225,7 +225,7 @@
                         {{fc.pastDue.date | date:'MM/dd/yyyy'}} - {{fc.pastDue.date | date : 'fullDate'}}
                     </td>
                     <td ng-if="fc.pastDue.type === 'relative'">
-                        <table ng-if="fc.pastDue.rules" style="font-size : 15px;">
+                        <table ng-if="fc.pastDue.rules" style="font-size : 13px;">
                             <tr ng-repeat="rule in fc.pastDue.rules track by $index">
                                 <td><span ng-if="$index !== 0"><strong>BUT NOT BEFORE</strong></span></td>
                                 <td>{{rule.year}} <strong>Years</strong></td>
@@ -251,7 +251,7 @@
                         {{fc.complete.date | date:'MM/dd/yyyy'}} - {{fc.complete.date | date : 'fullDate'}}
                     </td>
                     <td ng-if="fc.complete.type === 'relative'">
-                        <table ng-if="fc.complete.rules" style="font-size : 15px;">
+                        <table ng-if="fc.complete.rules" style="font-size : 13px;">
                             <tr ng-repeat="rule in fc.complete.rules track by $index">
                                 <td><span ng-if="$index !== 0"><strong>BUT NOT BEFORE</strong></span></td>
                                 <td>{{rule.year}} <strong>Years</strong></td>

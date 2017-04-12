@@ -155,6 +155,10 @@ public class TestExecutionController {
 			response.sendError(403,"TestCase or Configuration does not belong to user");
 			return null;
 		}
+		else if(!tc.isRunnable()){
+			response.sendError(500,"TestCase is not complete and therefore can't be executed");
+			return null;
+		}
 		else {
 			try {
 				return execService.execute(config, tc, sc.getDate());

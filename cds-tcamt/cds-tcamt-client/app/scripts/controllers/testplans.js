@@ -22,13 +22,25 @@ angular.module('tcl').filter('tcFilter', function ($filter) {
         }
 
         var filterActive = function (f) {
-            return   f.changed !== false || f.example.name !== '' || f.example.uid !== '' || f.example.metaData.version !== '' || f.dates.created.date !== null || f.dates.updated.date !== null;
+            return   f.incomplete !== false || f.changed !== false || f.example.name !== '' || f.example.uid !== '' || f.example.metaData.version !== '' || f.dates.created.date !== null || f.dates.updated.date !== null;
         };
         if (!filterActive(flt)) return items;
-        return $filter('dateMD')($filter('dateMD')($filter('changed')($filter('filter')(items,flt.example),flt.changed),flt.dates.created,'dateCreated'),flt.dates.updated,'dateLastUpdated');
+        return $filter('dateMD')($filter('dateMD')($filter('incomplete')($filter('changed')($filter('filter')(items,flt.example),flt.changed),flt.incomplete),flt.dates.created,'dateCreated'),flt.dates.updated,'dateLastUpdated');
     };
 });
 
+angular.module('tcl').filter('incomplete', function () {
+    return function (items, bool) {
+        if (!items || !items.length) {
+            return;
+        }
+        if (!bool) return items;
+        return items.filter(function (item) {
+            if(!item.runnable)
+                return true;
+        });
+    };
+});
 
 angular.module('tcl').filter('changed', function () {
     return function (items, bool) {
@@ -39,7 +51,6 @@ angular.module('tcl').filter('changed', function () {
         return items.filter(function (item) {
             if(item._changed)
                 return true;
-            //return item.vx.name.toLowerCase().includes(s) || item.vx.cvx.includes(s);
         });
     };
 });
@@ -178,12 +189,13 @@ angular
         'TestPlanCtrl',
         function ($parse, $document, $scope, $rootScope, $templateCache,
                   Restangular, $http, $filter, $modal, $cookies, $anchorScroll, $location,
-                  $timeout, userInfoService, ngTreetableParams,
+                  $timeout, userInfoService, ngTreetableParams,DataSynchService,PopUp,
                   $interval, ViewSettings, StorageService, $q,
                   notifications, IgDocumentService, ElementUtils,
-                  AutoSaveService, $sce, Notification, TestObjectUtil, TestObjectFactory, VaccineService, TestObjectSynchronize, TestDataService) {
+                  AutoSaveService, $sce, Notification, TestObjectUtil, TestObjectFactory, VaccineService, TestObjectSynchronize, TestDataService, FITSBackEnd, EntityService, EntityUtilsService) {
             $scope.vxm = [];
             $scope.loading = false;
+            $scope.entityUtils = EntityUtilsService;
             $scope.selectedTabTP = 0;
             $scope.sfile = "BROWSE";
             $scope.sfileO = null;
@@ -200,6 +212,7 @@ angular
                 tpList: true,
                 tpDetails: false
             };
+            $scope.FITS_SERVER = FITSBackEnd;
             $scope.testCases = [];
             $scope.filterView = false;
             $scope.patientSelected = false;
@@ -235,12 +248,16 @@ angular
                 obj[key] = obj["_" + key].getTime();
             };
 
+
             $scope.dateChangeX = function (dateObj) {
                 dateObj.date = dateObj._dateObj.getTime();
             };
+
             // ------------------------------------------------------------------------------------------
             // CDSI TCAMT
+            DataSynchService.clear();
             $scope.importing = false;
+            $scope.excludeTP = new RegExp("(testCases|testCaseGroups)");
             $scope.impDiag = null;
             $scope.errorDiag = null;
             $scope.selectedEvent = null;
@@ -250,6 +267,7 @@ angular
             $scope.selectedTCB = null;
             $scope.selectedTG = null;
             $scope.tps = [];
+            $scope.hasIncomplete = false;
             $scope.tpTree = [];
             $scope.evalStatus = [];
             $scope.evalReason = [];
@@ -267,7 +285,7 @@ angular
                 error: {
                     isSet: false,
                     tc: null,
-                    list: [],
+                    list: []
                 }
             };
             $scope.tcBackups = {};
@@ -296,108 +314,117 @@ angular
                 }
                 return "";
             };
+            //
+            // $scope.autoSaveFct = function () {
+            //     $timeout(function () {
+            //         if($scope.selectedTP && $scope.autoSave.active){
+            //             console.log("Saving");
+            //             $scope.autoSave.saving = true;
+            //
+            //             $scope.saveTP($scope.selectedTP,true,true).then(function () {
+            //                 if($scope.selectedTC && TestObjectUtil.hashChanged($scope.selectedTC)){
+            //                     $scope.saveTC($scope.selectedTC,true).then(function () {
+            //                         $scope.autoSave.lastSave = new Date();
+            //                         $scope.autoSave.saving = false;
+            //                     },function () {
+            //                         $scope.autoSave.lastSave = new Date();
+            //                         $scope.autoSave.saving = false;
+            //                     })
+            //                 }
+            //                 else {
+            //                     $scope.autoSave.lastSave = new Date();
+            //                     $scope.autoSave.saving = false;
+            //                 }
+            //             },
+            //             function () {
+            //                 $scope.autoSave.saving = false;
+            //             });
+            //         }
+            //         $scope.autoSaveFct();
+            //     },10000);
+            // };
 
-            $scope.autoSaveFct = function () {
-                $timeout(function () {
-                    if($scope.selectedTP && $scope.autoSave.active){
-                        console.log("Saving");
-                        $scope.autoSave.saving = true;
+            //---------------------------------------------------------------------------------------------------------------------------------------------------
+            //-[DT]--------------------------------------------------------------- WHEN DATES TYPES CHANGE ------------------------------------------------------
+            //---------------------------------------------------------------------------------------------------------------------------------------------------
 
-                        $scope.saveTP($scope.selectedTP,true,true).then(function () {
-                            if($scope.selectedTC && TestObjectUtil.hashChanged($scope.selectedTC)){
-                                $scope.saveTC($scope.selectedTC,true).then(function () {
-                                    $scope.autoSave.lastSave = new Date();
-                                    $scope.autoSave.saving = false;
-                                },function () {
-                                    $scope.autoSave.lastSave = new Date();
-                                    $scope.autoSave.saving = false;
-                                })
-                            }
-                            else {
-                                $scope.autoSave.lastSave = new Date();
-                                $scope.autoSave.saving = false;
-                            }
-                        },
-                        function () {
-                            $scope.autoSave.saving = false;
-                        });
+            $scope.changeToFixed = function (tc) {
+                tc.evalDate = TestObjectFactory.createFD();
+                tc.patient.dob = TestObjectFactory.createFD();
+                for (var i = 0; i < tc.events.length; i++) {
+                    var ev = tc.events[i];
+                    ev.date = TestObjectFactory.createFD();
+                }
+                for (var j = 0; j < tc.forecast.length; j++) {
+                    var fc = tc.forecast[i];
+                    if (fc.earliest) {
+                        fc.earliest = TestObjectFactory.createFD();
                     }
-                    $scope.autoSaveFct();
-                },10000);
+                    if (fc.recommended) {
+                        fc.recommended = TestObjectFactory.createFD();
+                    }
+                    if (fc.pastDue) {
+                        fc.pastDue = TestObjectFactory.createFD();
+                    }
+                    if (fc.complete) {
+                        fc.complete = TestObjectFactory.createFD();
+                    }
+                }
             };
 
+            $scope.changeToRelative = function (tc) {
+                tc.evalDate = TestObjectFactory.createREVD();
+                tc.patient.dob = TestObjectFactory.createRDOB();
+                for (var i = 0; i < tc.events.length; i++) {
+                    var ev = tc.events[i];
+                    ev.date = TestObjectFactory.createRD();
+                }
+                for (var j = 0; j < tc.forecast.length; j++) {
+                    var fc = tc.forecast[i];
+                    if (fc.earliest) {
+                        fc.earliest = TestObjectFactory.createRD();
+                    }
+                    if (fc.recommended) {
+                        fc.recommended = TestObjectFactory.createRD();
+                    }
+                    if (fc.pastDue) {
+                        fc.pastDue = TestObjectFactory.createRD();
+                    }
+                    if (fc.complete) {
+                        fc.complete = TestObjectFactory.createRD();
+                    }
+                }
+            };
 
             $scope.dateTypeChange = function (tc) {
-                $scope.exit = $modal.open({
+                $scope.dchange = $modal.open({
                     templateUrl: 'DTChange.html',
                     controller: 'DateCtrl'
                 });
 
-                $scope.exit.result.then(function () {
+                $scope.dchange.result.then(function () {
                     tc.dateType = tc._dateType;
                     if (tc.dateType === 'FIXED') {
-                        tc.evalDate = TestObjectFactory.createFD();
-                        tc.patient.dob = TestObjectFactory.createFD();
-                        for (var i = 0; i < $scope.selectedTC.events.length; i++) {
-                            var ev = $scope.selectedTC.events[i];
-                            if (ev[ev._type].date) {
-                                ev[ev._type].date = TestObjectFactory.createFD();
-                            }
-                        }
-                        for (var j = 0; j < $scope.selectedTC.forecast.length; j++) {
-                            var fc = $scope.selectedTC.forecast[i];
-                            if (fc.earliest) {
-                                fc.earliest = TestObjectFactory.createFD();
-                            }
-                            if (fc.recommended) {
-                                fc.recommended = TestObjectFactory.createFD();
-                            }
-                            if (fc.pastDue) {
-                                fc.pastDue = TestObjectFactory.createFD();
-                            }
-                            if (fc.complete) {
-                                fc.complete = TestObjectFactory.createFD();
-                            }
-                        }
+                        $scope.changeToFixed(tc);
                     }
                     else if (tc.dateType === 'RELATIVE') {
-                        tc.evalDate = TestObjectFactory.createREVD();
-                        tc.patient.dob = TestObjectFactory.createRDOB();
-                        for (var i = 0; i < $scope.selectedTC.events.length; i++) {
-                            var ev = $scope.selectedTC.events[i];
-                            if (ev[ev._type].date) {
-                                ev[ev._type].date = TestObjectFactory.createRD();
-                            }
-                        }
-                        for (var j = 0; j < $scope.selectedTC.forecast.length; j++) {
-                            var fc = $scope.selectedTC.forecast[i];
-                            if (fc.earliest) {
-                                fc.earliest = TestObjectFactory.createRD();
-                            }
-                            if (fc.recommended) {
-                                fc.recommended = TestObjectFactory.createRD();
-                            }
-                            if (fc.pastDue) {
-                                fc.pastDue = TestObjectFactory.createRD();
-                            }
-                            if (fc.complete) {
-                                fc.complete = TestObjectFactory.createRD();
-                            }
-                        }
+                        $scope.changeToRelative(tc);
                     }
 
                 }, function () {
-
                     tc._dateType = tc.dateType;
-
                 });
             };
 
+            //---------------------------------------------------------------------------------------------------------------------------------------------------
+            //---------------------------------------------------------------------------------------------------------------------------------------------------
+            //---------------------------------------------------------------------------------------------------------------------------------------------------
+
             $scope.eventLabel = function (event) {
-                if (event.vaccination.date) {
-                    if (event.vaccination.date.type && event.vaccination.date.type === "fixed") {
-                        if (event.vaccination.date.date) {
-                            return $filter('date')(event.vaccination.date.date, "MM/dd/yyyy");
+                if (event.date) {
+                    if (event.date.type && event.date.type === "fixed") {
+                        if (event.date.date) {
+                            return $filter('date')(event.date.date, "MM/dd/yyyy");
                         }
                         else {
                             return 'Fixed Date';
@@ -405,8 +432,8 @@ angular
 
                     }
                     else {
-                        if (event.vaccination.date.type && event.vaccination.date.rules && event.vaccination.date.rules.length > 0) {
-                            var rule = event.vaccination.date.rules[0];
+                        if (event.date.type && event.date.rules && event.date.rules.length > 0) {
+                            var rule = event.date.rules[0];
                             if (rule.relativeTo) {
                                 if (rule.relativeTo.reference && rule.relativeTo.reference === "static" && rule.relativeTo.hasOwnProperty('id')) {
                                     return "Relative to " + (rule.relativeTo.id === 'DOB' ? 'Birth' : 'Assessment Date');
@@ -428,8 +455,14 @@ angular
             $scope.newTestPlan = function () {
                 var tp = TestObjectFactory.createTP();
                 $scope.tps.push(tp);
+                $scope.entityChangeLog[tp.id] = true;
                 $scope.selectTP(tp,true);
             };
+
+            //---------------------------------------------------------------------------------------------------------------------------------------------------
+            //-[LD]--------------------------------------------------------------- LOAD TESTING DATA ------------------------------------------------------------
+            //---------------------------------------------------------------------------------------------------------------------------------------------------
+
 
             $scope.initEnums = function () {
                 var d = $q.defer();
@@ -463,26 +496,58 @@ angular
                 return d.promise;
             };
 
+            $scope.initHasIncomplete = function (tps) {
+                $scope.hasIncomplete = false;
+                _.forEach(tps,function (tp) {
+                    _.forEach(tp.testCases,function (tc) {
+                        if(tc && tc.hasOwnProperty("runnable") && !tc.runnable){
+                            console.log(tc);
+                            $scope.hasIncomplete = true;
+                        }
+                    });
+                    _.forEach(tp.testCaseGroups,function (tg) {
+                        _.forEach(tg.testCases,function (tc) {
+                            if(tc && tc.hasOwnProperty("runnable") && !tc.runnable) {
+                                console.log(tc);
+                                $scope.hasIncomplete = true;
+                            }
+                        });
+                    });
+                });
+                console.log("INCOMPLETE ? "+$scope.hasIncomplete);
+            };
+
             $scope.loadTestCases = function () {
                 var d = $q.defer();
-                TestDataService.loadTestPlans().then(function (data) {
-                    $scope.tps = data;
-                    d.resolve(true);
-                }, function (err) {
-                    console.log(err);
-                    d.resolve(false);
+                $scope.FITS_SERVER.loadTestPlans().then(function (data) {
+                    if(data.status){
+                        $scope.tps = data.obj;
+                        $scope.initHasIncomplete($scope.tps);
+                        d.resolve(true);
+                    }
+                    else {
+                        d.resolve(false);
+                    }
                 });
                 return d.promise;
             };
 
-            $scope.selectEvent = function (e) {
-                // waitingDialog.show('Opening Event', {
-                // 	dialogSize : 'xs',
-                // 	progressType : 'info'
-                // });
+            //---------------------------------------------------------------------------------------------------------------------------------------------------
+            //---------------------------------------------------------------------------------------------------------------------------------------------------
+            //---------------------------------------------------------------------------------------------------------------------------------------------------
+
+            //---------------------------------------------------------------------------------------------------------------------------------------------------
+            //-[SL]--------------------------------------------------------------- VIEW SELECTION ---------------------------------------------------------------
+            //---------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+            $scope.selectEvent = function (ev) {
                 $timeout(function () {
                     // Selection
-                    $scope.selectedEvent = e;
+                    // $scope.selectedEvent = $scope.selectedTC.events.find(function (evt) {
+                    //     evt.position = id;
+                    // });
+                    $scope.selectedEvent = ev;
                     $scope.selectedForecast = null;
                     $scope.patientSelected = false;
                     $scope.selectedType = "evt";
@@ -495,10 +560,6 @@ angular
             };
 
             $scope.selectForecast = function (f) {
-                // waitingDialog.show('Opening Forecast', {
-                // 	dialogSize : 'xs',
-                // 	progressType : 'info'
-                // });
                 $timeout(function () {
                     // Selection
                     $scope.selectedForecast = f;
@@ -511,36 +572,11 @@ angular
                 }, 0);
             };
 
-            $scope.discardChanges = function (tc) {
-                if($scope.tcBackups.hasOwnProperty(tc.id)){
-                    $scope.tcBackups[tc.id]._changed = false;
-
-                    if(tc.group !== $scope.tcBackups[tc.id].group){
-                        tc.group = $scope.tcBackups[tc.id].group;
-                        $scope.switchGroup($scope.selectedTP, tc);
-                    }
-                    TestObjectUtil.synchronize(tc.id,$scope.testCases,$scope.tcBackups[tc.id]);
-                }
-            };
-
-            $scope.treeOptions = {
-                accept: function (sourceNodeScope, destNodesScope) {
-                    return destNodesScope.$parent && destNodesScope.$parent.$modelValue && destNodesScope.$parent.$modelValue.hasOwnProperty("testCases");
-                },
-                beforeDrop: function (e) {
-                    var index = TestObjectUtil.index($scope.testCases, "id", e.source.nodeScope.$modelValue.id);
-                    $scope.testCases[index].group = e.dest.nodesScope.$parent.$modelValue.id;
-
-                    $scope.switchGroup($scope.selectedTP, $scope.testCases[index]);
-                    $scope.selectTC($scope.testCases[index]);
-                    return false;
-                }
-            };
-
             $scope.selectTP = function (tp,skip) {
                 $scope.warning(skip).then(function () {
                     $timeout(function () {
                         console.log("SelectTP");
+                        DataSynchService.register(tp,null,$scope.entityUtils.transformTP);
                         // Selection
                         $scope.selectedEvent = null;
                         $scope.selectedForecast = null;
@@ -549,6 +585,7 @@ angular
                         $scope.patientSelected = false;
                         $scope.grouping = true;
                         $scope.selectedTP = tp;
+                        $scope.selectedTG = null;
                         $scope.tpTree.push($scope.selectedTP);
                         $scope.testCases = [];
                         TestObjectUtil.listTC(tp, $scope.testCases);
@@ -561,6 +598,92 @@ angular
                     }, 0);
                 });
             };
+
+            $scope.hasBackUp = function (tc) {
+                return tc && $scope.tcBackups.hasOwnProperty(tc.id);
+            };
+
+            $scope.selectTC = function (tc,skip,goToSummary) {
+                $scope.warning(skip || tc === $scope.selectedTC).then(function () {
+                    $timeout(function () {
+
+                        DataSynchService.register(tc);
+                        if ($scope.entityUtils.inSynch(tc)) {
+
+                            tc._changed = false;
+                            $scope.tcBackups[tc.id] = angular.copy(tc);
+                        }
+
+                        // Selection
+                        $scope.selectedEvent = null;
+                        $scope.selectedForecast = null;
+                        $scope.selectedTC = tc;
+                        $scope.selectedType = "tc";
+                        $scope.patientSelected = false;
+
+                        // View
+                        $scope.subview = "EditTestPlanMetadata.html";
+                        if(goToSummary)
+                            $scope.tabs.selectedTabTC = 1;
+                        else {
+                            $scope.tabs.selectedTabTC = 0;
+                        }
+                        waitingDialog.hide();
+                    }, 0);
+                });
+            };
+
+            $scope.selectPatient = function () {
+                $timeout(function () {
+                    // View
+                    $scope.selectedEvent = null;
+                    $scope.selectedForecast = null;
+                    $scope.patientSelected = true;
+                    $scope.subview = "EditPatientInformation.html";
+                    waitingDialog.hide();
+                }, 0);
+            };
+
+
+            $scope.selectTG = function (tg,skip) {
+                $scope.warning(skip).then(function () {
+                    $timeout(function () {
+                        DataSynchService.register(tg,null,$scope.entityUtils.transformTG);
+                        // Selection
+                        $scope.selectedEvent = null;
+                        $scope.selectedForecast = null;
+                        $scope.selectedTG = tg;
+                        $scope.selectedTC = null;
+                        $scope.selectedType = "tg";
+                        $scope.patientSelected = false;
+
+                        // View
+                        $scope.subview = "EditTestGroupMetadata.html";
+                        waitingDialog.hide();
+                    }, 0);
+                });
+            };
+
+
+            //---------------------------------------------------------------------------------------------------------------------------------------------------
+            //---------------------------------------------------------------------------------------------------------------------------------------------------
+            //---------------------------------------------------------------------------------------------------------------------------------------------------
+
+            $scope.discardChanges = function (tc) {
+                if($scope.tcBackups.hasOwnProperty(tc.id)){
+                    $scope.tcBackups[tc.id]._changed = false;
+
+                    if(tc.group !== $scope.tcBackups[tc.id].group){
+                        tc.group = $scope.tcBackups[tc.id].group;
+                        $scope.switchGroup($scope.selectedTP, tc);
+                    }
+                    angular.copy($scope.tcBackups[tc.id],tc);
+                    $scope.selectTC(tc);
+                }
+            };
+
+
+
 
             $scope.hasChanges = function (tc) {
                 if (tc)
@@ -606,17 +729,13 @@ angular
             $scope.warning = function (skip) {
                 var deferred = $q.defer();
                 if ($scope.selectedTC && !skip) {
-                    if(TestObjectUtil.hashChanged($scope.selectedTC)) {
-
-                        console.log("UNSAVED CHANGED");
-                        $scope.selectedTC._changed = true;
+                    if(!$scope.entityUtils.inSynch($scope.selectedTC)) {
 
                         //------- DEFAULT ACTION --------
                         if ($scope.remember.bool) {
                             if ($scope.remember.choice === "save") {
-                                $scope.saveAllChangedTestPlans($scope.selectedTC, $scope.selectedTP).then(function () {
-                                    deferred.resolve();
-                                }, function () {
+                                $scope.saveTC($scope.selectedTC).then(function (result) {
+                                    $scope.notify(result);
                                     deferred.resolve();
                                 });
                             }
@@ -637,7 +756,7 @@ angular
                                 controller: 'ExitCtrl',
                                 resolve: {
                                     discard: function () {
-                                        return TestObjectUtil.isLocal($scope.selectedTC);
+                                        return $scope.entityUtils.isLocal($scope.selectedTC);
                                     }
                                 }
                             });
@@ -647,9 +766,8 @@ angular
                                     $scope.remember.bool = response.remember;
                                     $scope.remember.choice = response.action;
                                     if (response.action === "save") {
-                                        $scope.saveAllChangedTestPlans($scope.selectedTC, $scope.selectedTP).then(function () {
-                                            deferred.resolve();
-                                        }, function () {
+                                        $scope.saveTC($scope.selectedTC).then(function (result) {
+                                            $scope.notify(result);
                                             deferred.resolve();
                                         });
                                     }
@@ -668,7 +786,6 @@ angular
 
                     }
                     else {
-                        $scope.selectedTC._changed = false;
                         deferred.resolve();
                     }
                 }
@@ -678,77 +795,6 @@ angular
                 return deferred.promise;
             };
 
-            $scope.$watch('selectedTC', function (newValue, oldValue) {
-
-
-                // console.log("Watch Triggered");
-                // if (!newValue && !TestObjectUtil.index($scope.testCases, "id", oldValue.id)) {
-                //     console.log("Deleted");
-                // }
-                // else if (oldValue !== null && (!newValue || oldValue.id !== newValue.id)) {
-                //     console.log("Selected TC Changed");
-                //     console.log("Value : ");
-                //     console.log(oldValue);
-                //
-                //     var i = TestObjectUtil.index($scope.testCases, "id", oldValue.id);
-                //     console.log("Index Of Selected is : " + i);
-                //     if (~i) {
-                //         var tc = $scope.testCases[i];
-                //         if (TestObjectUtil.hashChanged(tc)) {
-                //             console.log("UNSAVED CHANGED");
-                //             console.log("Backup : ");
-                //             if($scope.tcBackups.hasOwnProperty(tc.id)) {
-                //                 console.log($scope.tcBackups[tc.id]);
-                //             }
-                //             tc._changed = true;
-                //             if ($scope.remember.bool) {
-                //                 if ($scope.remember.choice === "save") {
-                //                     console.log("Should Save");
-                //                     $scope.saveAllChangedTestPlans(tc, $scope.selectedTP)
-                //                 }
-                //                 else if ($scope.remember.choice === "discard") {
-                //                     console.log("Discarding");
-                //                     $scope.discardChanges(tc);
-                //                 }
-                //             }
-                //             else {
-                //                 $scope.exit = $modal.open({
-                //                     templateUrl: 'ExitTC.html',
-                //                     controller: 'ExitCtrl',
-                //                     resolve: {
-                //                         discard: function () {
-                //                             return TestObjectUtil.isLocal(tc);
-                //                         }
-                //                     }
-                //                 });
-                //
-                //                 $scope.exit.result.then(function (response) {
-                //                     if (response) {
-                //                         $scope.remember.bool = response.remember;
-                //                         $scope.remember.choice = response.action;
-                //                         if (response.action === "save") {
-                //                             console.log("Should Save");
-                //                             $scope.saveAllChangedTestPlans(tc, $scope.selectedTP)
-                //                         }
-                //                         else if (response.action === "discard") {
-                //                             console.log("Discarding");
-                //                             $scope.discardChanges(tc);
-                //                         }
-                //                     }
-                //                 }, function () {
-                //                     console.log("Save Later");
-                //                 });
-                //             }
-                //
-                //         }
-                //         else {
-                //             tc._changed = false;
-                //         }
-                //     }
-                //
-                // }
-            });
-
             $scope.getScope = function (id) {
                 return angular.element(document.getElementById(id)).scope();
             };
@@ -756,10 +802,7 @@ angular
             $scope.noDatesSS = ['G','F','A','I','S','C','X'];
 
             $scope.needDates = function (ss) {
-                if(~$scope.noDatesSS.indexOf(ss)){
-                    return false;
-                }
-                return true;
+                return !~$scope.noDatesSS.indexOf(ss);
             };
 
             $scope.serieStatusChange = function (ss,fct) {
@@ -787,6 +830,7 @@ angular
                         version: ''
                     }
                 },
+                incomplete : false,
                 changed : false,
                 dates : {
                     created : {
@@ -808,6 +852,7 @@ angular
                             version: ''
                         }
                     },
+                    incomplete : false,
                     changed : false,
                     dates : {
                         created : {
@@ -822,69 +867,59 @@ angular
                 });
             };
             $scope.filterActive = function (f) {
-              return   f.changed !== false || f.example.name !== '' || f.example.uid !== '' || f.example.metaData.version !== '' || f.dates.created.date !== null || f.dates.updated.date !== null;
+              return   f.incomplete !== false || f.changed !== false || f.example.name !== '' || f.example.uid !== '' || f.example.metaData.version !== '' || f.dates.created.date !== null || f.dates.updated.date !== null;
             };
 
-            $scope.selectTG = function (tg) {
-                $timeout(function () {
 
-                    // Selection
-                    $scope.selectedEvent = null;
-                    $scope.selectedForecast = null;
-                    $scope.selectedTG = tg;
-                    $scope.selectedType = "tg";
-                    $scope.patientSelected = false;
-
-                    // View
-                    $scope.subview = "EditTestGroupMetadata.html";
-                    waitingDialog.hide();
-                }, 0);
+            $scope.transformTP = function (tp) {
+                return {
+                    id : tp.id,
+                    name : tp.name,
+                    version : tp.metaData.version,
+                    changeLog : tp.metaData.changeLog,
+                    description : tp.description
+                };
             };
 
-            $scope.selectTC = function (tc,skip,goToSummary) {
-                $scope.warning(skip).then(function () {
-                    $timeout(function () {
-                        if(!tc._hasErrors){
-                            tc._hasErrors = false;
-                            tc._errors = null;
-                        }
-                        if (!tc._changed) {
-                            if(!tc._hash && !$scope.isLocal(tc)){
-                                TestObjectUtil.updateHash(tc);
-                            }
-                            tc._changed = false;
-                            $scope.tcBackups[tc.id] = angular.copy(tc);
-                        }
-
-                        // Selection
-                        $scope.selectedEvent = null;
-                        $scope.selectedForecast = null;
-                        $scope.selectedTC = tc;
-                        $scope.selectedType = "tc";
-                        $scope.patientSelected = false;
-
-                        // View
-                        $scope.subview = "EditTestPlanMetadata.html";
-                        if(goToSummary)
-                            $scope.tabs.selectedTabTC = 1;
-                        else {
-                            $scope.tabs.selectedTabTC = 0;
-                        }
-                        waitingDialog.hide();
-                    }, 0);
-                });
+            $scope.transformTG = function (gp) {
+                return {
+                    id : gp.id,
+                    name : gp.name
+                };
             };
 
-            $scope.selectPatient = function () {
-                $timeout(function () {
-                    // View
-                    $scope.selectedEvent = null;
-                    $scope.selectedForecast = null;
-                    $scope.patientSelected = true;
-                    $scope.subview = "EditPatientInformation.html";
-                    waitingDialog.hide();
-                }, 0);
+            //----CHANGE-WATCH------
+            $scope.entityChangeLog = {};
+
+            $scope.$watch("selectedTC",function () {
+                $scope.selectedTC._changed = DataSynchService.changed($scope.selectedTC);
+                if($scope.selectedTC){
+                    $scope.entityChangeLog[$scope.selectedTC.id] = $scope.selectedTC._changed;
+                }
+            },true);
+
+            $scope.changedTP = function (tp) {
+                tp._changed = DataSynchService.changed(tp,null,$scope.entityUtils.transformTP);
+                $scope.entityChangeLog[tp.id] = tp._changed;
             };
+
+            $scope.changedTG = function (gp) {
+                console.log(gp._changed);
+                gp._changed = DataSynchService.changed(gp,null,$scope.entityUtils.transformTG);
+                $scope.entityChangeLog[gp.id] = gp._changed;
+            };
+
+            $scope.workSpaceChanges = function () {
+                for(var id in $scope.entityChangeLog){
+                    if($scope.entityChangeLog.hasOwnProperty(id) && $scope.entityChangeLog[id]){
+                        return true;
+                    }
+                }
+                return false;
+            };
+            //----------------------
+
+
 
             $scope.evalStatusChange = function (evaluation) {
                 if (evaluation.status !== 'INVALID') {
@@ -897,6 +932,9 @@ angular
             $scope.isSelectedTC = function (t) {
                 return $scope.selectedTC && t && t.id === $scope.selectedTC.id;
             };
+            $scope.isSelectedTG = function (t) {
+                return $scope.selectedTG && t && t.id === $scope.selectedTG.id;
+            };
 
             $scope.isSelectedEvent = function (e) {
                 return e === $scope.selectedEvent;
@@ -908,6 +946,10 @@ angular
 
             $scope.isSelectedTPv = function () {
                 return $scope.subview === "EditTestPlanData.html";
+            };
+
+            $scope.isSelectedTGv = function () {
+                return $scope.subview === "EditTestGroupMetadata.html";
             };
 
             $scope.isSelectedTCv = function () {
@@ -959,10 +1001,6 @@ angular
                 $scope.selectTPTab(0);
             };
 
-            $scope.$on('$routeChangeStart',function(angularEvent,next,current) {
-                console.log("Leaving TP EDIT");
-            });
-
             $scope.has = function (a, b) {
                 return a.hasOwnProperty(b) && a[b];
             };
@@ -989,30 +1027,30 @@ angular
                 ['Delete Event',
                     function ($itemScope) {
                         var ev = $itemScope.ev;
-                        var index = ev[ev._type].position;
+                        var index = ev.position;
                         var i = $itemScope.$index;
 
                         $scope.selectedTC.events.splice(i, 1);
                         if ($scope.selectedTC.dateType === 'RELATIVE') {
                             for (var evt = 0; evt < $scope.selectedTC.events.length; evt++) {
                                 var v = $scope.selectedTC.events[evt];
-                                if (v && v.vaccination && v.vaccination.date) {
-                                    for (var r = 0; r < v.vaccination.date.rules.length; r++) {
+                                if (v && v.date) {
+                                    for (var r = 0; r < v.date.rules.length; r++) {
                                         console.log("r");
-                                        var rule = v.vaccination.date.rules[r];
+                                        var rule = v.date.rules[r];
                                         console.log(rule);
                                         console.log(index);
                                         console.log(rule.relativeTo.id === index);
                                         if (rule && rule.relativeTo && rule.relativeTo.reference && rule.relativeTo.reference === 'dynamic' && rule.relativeTo.id + '' === index + '') {
                                             console.log("ENTER");
-                                            v.vaccination.date.rules.splice(r, 1);
+                                            v.date.rules.splice(r, 1);
                                         }
                                     }
                                 }
                             }
                         }
                         for (var e = 0; e < $scope.selectedTC.events.length; e++) {
-                            TestObjectUtil.updateEventId($scope.selectedTC.events,$scope.selectedTC.events[e].vaccination.position,e);
+                            TestObjectUtil.updateEventId($scope.selectedTC.events,$scope.selectedTC.events[e].position,e);
                         }
                         $scope.selectTC($scope.selectedTC,true);
                     }]];
@@ -1031,8 +1069,9 @@ angular
                     function ($itemScope) {
                         var tp = $itemScope.tp;
                         var tcg = TestObjectFactory.createGRP(tp.id);
+                        $scope.entityChangeLog[tcg.id] = true;
                         tp.testCaseGroups.push(tcg);
-                        $scope.saveTG(tcg);
+                        //$scope.saveTG(tcg);
                     }],
                 ['Add Test Case',
                     function ($itemScope) {
@@ -1040,7 +1079,7 @@ angular
                         var tc = TestObjectFactory.createTC(tp.id,"",tp.metaData.version);
                         console.log("NEW TC");
                         console.log(tc);
-
+                        $scope.entityChangeLog[tc.id] = true;
                         tp.testCases.push(tc);
                         $scope.testCases.push(tc);
                         console.log(tp);
@@ -1053,6 +1092,44 @@ angular
                     }]
             ];
 
+            // $scope.tgCM = [
+            //     ['Add Test Case',
+            //         function ($itemScope) {
+            //             var grp = $itemScope.group;
+            //             var tc = TestObjectFactory.createTC(grp.testPlan, grp.id, $scope.selectedTP.metaData.version);
+            //             tc.group = grp.id;
+            //             grp.testCases.push(tc);
+            //             $scope.testCases.push(tc);
+            //             $scope.selectTC(tc);
+            //             $scope.scrollTo('tc-' + tc.id,tc.group);
+            //         }],
+            //     ['Delete Test Case Group',
+            //         function ($itemScope) {
+            //             var grp = $itemScope.group;
+            //             var index = TestObjectUtil.index($scope.selectedTP.testCaseGroups, "id", grp.id);
+            //             if(TestObjectUtil.isLocal(grp)){
+            //                 $scope.selectedTP.testCaseGroups.splice(index, 1);
+            //                 $scope.notify(true,"Test Case Group deleted");
+            //                 if($scope.selectedTC && grp.id === $scope.selectedTC.group){
+            //                     $scope.selectedTC = null;
+            //                 }
+            //                 $scope.selectTP($scope.selectedTP,true);
+            //             }
+            //             else {
+            //                 $http.post('api/testcasegroup/'+grp.id+'/delete').then(function (success) {
+            //                         $scope.selectedTP.testCaseGroups.splice(index, 1);
+            //                         $scope.notify(true,"Test Case Group deleted");
+            //                         if($scope.selectedTC && grp.id === $scope.selectedTC.group){
+            //                             $scope.selectedTC = null;
+            //                         }
+            //                         $scope.selectTP($scope.selectedTP,true);
+            //                     },
+            //                     function () {
+            //                         $scope.notify(false,"Failed to delete Test Case Group");
+            //                     });
+            //             }
+            //         }]];
+
             $scope.tgCM = [
                 ['Add Test Case',
                     function ($itemScope) {
@@ -1061,68 +1138,31 @@ angular
                         tc.group = grp.id;
                         grp.testCases.push(tc);
                         $scope.testCases.push(tc);
+                        $scope.entityChangeLog[tc.id] = true;
                         $scope.selectTC(tc);
                         $scope.scrollTo('tc-' + tc.id,tc.group);
-                    }],
-                ['Rename Test Case Group',
-                    function ($itemScope) {
-                        var grp = $itemScope.group;
-                        $scope.rename = $modal.open({
-                            templateUrl: 'GrpName.html',
-                            controller: 'GrpNameCtrl',
-                            resolve: {
-                                name: function () {
-                                    return grp.name;
-                                }
-                            }
-                        });
-
-                        $scope.rename.result.then(function (response) {
-                            if (response && response.name && response.name !== "") {
-                                grp.name = response.name;
-                                $scope.saveTG(grp).then(function () {
-                                    Notification
-                                        .success({
-                                            message: "Test Case Group Renamed",
-                                            delay: 3000
-                                        });
-                                },
-                                function () {
-                                    Notification
-                                        .error({
-                                            message: "Unable to save renamed group",
-                                            delay: 3000
-                                        });
-                                });
-                            }
-                        });
-
                     }],
                 ['Delete Test Case Group',
                     function ($itemScope) {
                         var grp = $itemScope.group;
-                        var index = TestObjectUtil.index($scope.selectedTP.testCaseGroups, "id", grp.id);
-                        if(TestObjectUtil.isLocalID(grp.id)){
-                            $scope.selectedTP.testCaseGroups.splice(index, 1);
-                            $scope.notify(true,"Test Case Group deleted");
-                            if($scope.selectedTC && grp.id === $scope.selectedTC.group){
-                                $scope.selectedTC = null;
-                            }
-                            $scope.selectTP($scope.selectedTP,true);
-                        }
-                        else {
-                            $http.post('api/testcasegroup/'+grp.id+'/delete').then(function (success) {
-                                $scope.selectedTP.testCaseGroups.splice(index, 1);
-                                $scope.notify(true,"Test Case Group deleted");
-                                if($scope.selectedTC && grp.id === $scope.selectedTC.group){
-                                    $scope.selectedTC = null;
+                        PopUp.start("Deleting Test Case Group ...");
+                        try {
+                            $scope.FITS_SERVER.delete([$scope.selectedTP.testCaseGroups], grp, EntityService.type.TEST_CASE_GROUP).then(function (data) {
+                                PopUp.stop();
+                                if(data.status){
+                                    $scope.notify(data);
+                                    delete $scope.entityChangeLog[grp.id];
+                                    $scope.selectTP($scope.selectedTP,true);
                                 }
-                                $scope.selectTP($scope.selectedTP,true);
-                            },
-                            function () {
-                                $scope.notify(false,"Failed to delete Test Case Group");
+                                else {
+                                    $scope.notify(data);
+                                }
                             });
                         }
+                        catch(ex){
+                            PopUp.stop();
+                        }
+
                     }]];
 
             $scope.tcCM = [
@@ -1132,58 +1172,101 @@ angular
                         var obj = $itemScope.tc;
                         var clone = TestObjectUtil.cloneEntity(obj);
                         clone.name = "[CLONE] " + clone.name;
-                        TestObjectUtil.sanitizeDates(clone);
-                        TestObjectUtil.sanitizeEvents(clone);
+                        $scope.entityUtils.sanitizeTC(clone);
+
                         var list = TestObjectUtil.getList($scope.selectedTP, obj.id);
                         if (list) {
                             list.push(clone);
+                            $scope.entityChangeLog[clone.id] = true;
                             $scope.testCases.push(clone);
                             $scope.selectTC(clone);
                             $scope.scrollTo('tc-' + clone.id,clone.group);
-                            //console.log(clone);
                         }
                     }],
                 ['Delete Test Case',
-                    function ($itemScope, $event, modelValue, text, $li) {
+                    function ($itemScope) {
                         var tc = $itemScope.tc;
                         var list = TestObjectUtil.getList($scope.selectedTP, tc.id);
                         if (list) {
-                            var index = list.indexOf(tc);
-                            if (TestObjectUtil.isLocal(tc)) {
-                                list.splice(index, 1);
-                                var indexTCL = TestObjectUtil.index($scope.testCases,"id",tc.id);
-                                $scope.testCases.splice(indexTCL, 1);
-                                if($scope.selectedTC && tc.id === $scope.selectedTC.id){
-                                    $scope.selectedTC = null;
-                                }
-                                $scope.selectTP($scope.selectedTP,true);
-                            }
-                            else {
-                                $http.post('api/testcase/' + tc.id + '/delete').then(function (r) {
-                                        list.splice(index, 1);
-                                        var indexTCL = TestObjectUtil.index($scope.testCases,"id",tc.id);
-                                        $scope.testCases.splice(indexTCL, 1);
-                                        if($scope.selectedTC && tc.id === $scope.selectedTC.id){
-                                            $scope.selectedTC = null;
-                                        }
+                            PopUp.start("Deleting Test Case ...");
+                            try{
+                                $scope.FITS_SERVER.delete([list],tc,EntityService.type.TEST_CASE).then(function (data) {
+                                    PopUp.stop();
+                                    if(data.status){
+                                        $scope.notify(data);
+                                        delete $scope.entityChangeLog[tc.id];
                                         $scope.selectTP($scope.selectedTP,true);
-
-                                        Notification
-                                            .success({
-                                                message: "Test Case Deleted",
-                                                delay: 3000
-                                            });
-                                    },
-                                    function (r) {
-                                        Notification
-                                            .error({
-                                                message: "Error Deleting",
-                                                delay: 3000
-                                            });
-                                    });
+                                    }
+                                    else {
+                                        $scope.notify(data);
+                                    }
+                                });
+                            }
+                            catch (ex){
+                                PopUp.stop();
                             }
                         }
                     }]];
+
+            // $scope.tcCM = [
+            //     ['Clone Test Case',
+            //         function ($itemScope) {
+            //
+            //             var obj = $itemScope.tc;
+            //             var clone = TestObjectUtil.cloneEntity(obj);
+            //             clone.name = "[CLONE] " + clone.name;
+            //             TestObjectUtil.sanitizeDates(clone);
+            //             //TestObjectUtil.sanitizeEvents(clone);
+            //             var list = TestObjectUtil.getList($scope.selectedTP, obj.id);
+            //             if (list) {
+            //                 list.push(clone);
+            //                 $scope.testCases.push(clone);
+            //                 $scope.selectTC(clone);
+            //                 $scope.scrollTo('tc-' + clone.id,clone.group);
+            //                 //console.log(clone);
+            //             }
+            //         }],
+            //     ['Delete Test Case',
+            //         function ($itemScope, $event, modelValue, text, $li) {
+            //             var tc = $itemScope.tc;
+            //             var list = TestObjectUtil.getList($scope.selectedTP, tc.id);
+            //             if (list) {
+            //                 var index = list.indexOf(tc);
+            //                 if (TestObjectUtil.isLocal(tc)) {
+            //                     list.splice(index, 1);
+            //                     var indexTCL = TestObjectUtil.index($scope.testCases,"id",tc.id);
+            //                     $scope.testCases.splice(indexTCL, 1);
+            //                     if($scope.selectedTC && tc.id === $scope.selectedTC.id){
+            //                         $scope.selectedTC = null;
+            //                     }
+            //                     $scope.selectTP($scope.selectedTP,true);
+            //                 }
+            //                 else {
+            //                     $http.post('api/testcase/' + tc.id + '/delete').then(function (r) {
+            //                             list.splice(index, 1);
+            //                             var indexTCL = TestObjectUtil.index($scope.testCases,"id",tc.id);
+            //                             $scope.testCases.splice(indexTCL, 1);
+            //                             if($scope.selectedTC && tc.id === $scope.selectedTC.id){
+            //                                 $scope.selectedTC = null;
+            //                             }
+            //                             $scope.selectTP($scope.selectedTP,true);
+            //
+            //                             Notification
+            //                                 .success({
+            //                                     message: "Test Case Deleted",
+            //                                     delay: 3000
+            //                                 });
+            //                         },
+            //                         function (r) {
+            //                             Notification
+            //                                 .error({
+            //                                     message: "Error Deleting",
+            //                                     delay: 3000
+            //                                 });
+            //                         });
+            //                 }
+            //             }
+            //         }]];
 
             $scope.fileChange = function (files) {
 
@@ -1225,14 +1308,12 @@ angular
 
             $scope.sanitizeTestCase = function (tc) {
                 TestObjectUtil.sanitizeDates(tc);
-                TestObjectUtil.sanitizeEvents(tc);
                 tc._dateType = tc.dateType;
             };
 
             $scope.saved = function (list) {
                 for(var tc = 0; tc < list.length; tc++){
-                    console.log(list[tc]);
-                    if($scope.isLocal(list[tc]) || list[tc]._changed ){
+                    if(!$scope.entityUtils.inSynch(list[tc])){
                         return false;
                     }
                 }
@@ -1241,19 +1322,24 @@ angular
 
             $scope.canImport = function (tp) {
                 if(!tp){
+                    console.log("TP NULL");
                     return false;
                 }
-                if($scope.isLocal(tp)){
+                if($scope.entityUtils.isLocal(tp)){
+                    console.log("TP LOCAL");
                     return false;
                 }
                 if(!$scope.saved(tp.testCases)){
+                    console.log("TCS NOT SAVED");
                     return false;
                 }
                 if(!$scope.saved(tp.testCaseGroups)){
+                    console.log("TCGS NOT SAVED");
                     return false;
                 }
                 for(var tc = 0; tc < tp.testCaseGroups.length; tc++){
                     if(!$scope.saved(tp.testCaseGroups[tc].testCases)){
+                        console.log("TCGS TCS NOT SAVED");
                         return false;
                     }
                 }
@@ -1270,7 +1356,9 @@ angular
                         });
                         saveModal.result.then(function (result) {
                             if(result.action === 'save'){
-                                $scope.saveTP($scope.selectedTP,true);
+                                $scope.saveTP($scope.selectedTP,true).then(function (result) {
+                                    $scope.notify(result);
+                                })
                             }
                         });
                         return;
@@ -1295,24 +1383,16 @@ angular
                                 console.log(data);
                                 if (data.status) {
                                     var tp = angular.fromJson(data.testPlan);
-                                    TestObjectUtil.sanitizeDates(tp);
-                                    for (var tc = 0; tc < tp.testCases.length; tc++) {
-                                        tp.testCases[tc]._dateType = tp.testCases[tc].dateType;
-                                        TestObjectUtil.sanitizeEvents(tp.testCases[tc]);
-                                    }
-                                    for (var tg = 0; tg < tp.testCaseGroups.length; tg++) {
-                                        for (var tci = 0; tci < tp.testCaseGroups[tg].testCases.length; tci++) {
-                                            tp.testCaseGroups[tg].testCases[tci]._dateType = tp.testCaseGroups[tg].testCases[tci].dateType;
-                                            TestObjectUtil.sanitizeEvents(tp.testCaseGroups[tg].testCases[tci]);
-                                        }
-                                    }
-                                    //TestObjectUtil.merge(tp,$scope.selectedTP);
-                                    Object.assign($scope.selectedTP,tp);
+                                    $scope.entityUtils.sanitizeTP(tp);
+                                    TestObjectUtil.merge(tp,$scope.selectedTP);
                                     TestObjectUtil.listTC($scope.selectedTP,$scope.testCases);
-                                    var i = TestObjectUtil.index($scope.testCases,'id',data.imported.id);
-                                    if(~i){
-                                        $scope.selectTC($scope.testCases[i]);
-                                        $scope.scrollTo('tc-'+data.imported.id,data.imported.group);
+                                    var obj = $scope.entityUtils.findTcInTp(tp,data.imported);
+                                    if(obj){
+                                        $scope.selectTC(obj);
+                                        $scope.scrollTo('tc-'+obj.id,obj.group);
+                                    }
+                                    else {
+                                        $scope.selectTP($scope.selectedTP);
                                     }
 
                                     Notification
@@ -1363,26 +1443,38 @@ angular
                 }
             };
 
+            $scope.activeElement = function () {
+                if($scope.selectedTC)
+                    return 'tc';
+                if($scope.selectedTP && !$scope.selectedTG && !$scope.selectedTC)
+                    return 'tp';
+                if($scope.selectedTP && $scope.selectedTG && !$scope.selectedTC)
+                    return 'tg';
+                return 'x';
+            };
 
             $scope.$watch('importing', function (newValue) {
                 if (newValue === false) {
-                    if ($scope.impDiag)
-                        $scope.impDiag.close({});
+                    PopUp.stop();
+                    // if ($scope.impDiag)
+                    //     $scope.impDiag.close({});
                 }
                 else if (newValue === true) {
-                    $scope.impDiag = $modal.open({
-                        templateUrl: 'ImportLoading.html',
-                        controller: 'ConfirmTestPlanDeleteCtrl',
-                        backdrop: false,
-                        resolve: {
-                            testplanToDelete: function () {
-                                return null;
-                            },
-                            tps: function () {
-                                return $scope.tps;
-                            }
-                        }
-                    });
+                    PopUp.start("Importing Test Cases...");
+                    // $scope.impDiag = $modal.open({
+                    //     templateUrl: 'ImportLoading.html',
+                    //     controller: 'ConfirmTestPlanDeleteCtrl',
+                    //     backdrop : 'static',
+                    //     keyboard : false,
+                    //     resolve: {
+                    //         testplanToDelete: function () {
+                    //             return null;
+                    //         },
+                    //         tps: function () {
+                    //             return $scope.tps;
+                    //         }
+                    //     }
+                    // });
                 }
             });
 
@@ -1436,7 +1528,9 @@ angular
                         });
                         saveModal.result.then(function (result) {
                             if(result.action === 'save'){
-                                $scope.saveTP($scope.selectedTP,true);
+                                $scope.saveTP($scope.selectedTP,true).then(function () {
+                                    $scope.notify(result);
+                                })
                             }
                         });
                         return;
@@ -1463,18 +1557,7 @@ angular
                                 if (data.status) {
 
                                     var tp = angular.fromJson(data.testPlan);
-                                    TestObjectUtil.sanitizeDates(tp);
-                                    for (var tc = 0; tc < tp.testCases.length; tc++) {
-                                        tp.testCases[tc]._dateType = tp.testCases[tc].dateType;
-                                        TestObjectUtil.sanitizeEvents(tp.testCases[tc]);
-                                    }
-                                    for (var tg = 0; tg < tp.testCaseGroups.length; tg++) {
-                                        for (var tci = 0; tci < tp.testCaseGroups[tg].testCases.length; tci++) {
-                                            tp.testCaseGroups[tg].testCases[tci]._dateType = tp.testCaseGroups[tg].testCases[tci].dateType;
-                                            TestObjectUtil.sanitizeEvents(tp.testCaseGroups[tg].testCases[tci]);
-                                        }
-                                    }
-
+                                    $scope.entityUtils.sanitizeTP(tp);
                                     TestObjectUtil.merge(tp,$scope.selectedTP);
                                     $scope.selectTP($scope.selectedTP);
 
@@ -1513,7 +1596,7 @@ angular
 
 
             $scope.exportNIST = function () {
-                if (!TestObjectUtil.isLocal($scope.selectedTC) && !TestObjectUtil.hashChanged($scope.selectedTC)) {
+                if ($scope.entityUtils.inSynch($scope.selectedTC)) {
                     var form = document.createElement("form");
                     form.action = $rootScope.api('api/testcase/'
                         + $scope.selectedTC.id + '/export/nist');
@@ -1535,7 +1618,6 @@ angular
 
             $scope.initTestCases = function () {
                 if (userInfoService.isAuthenticated()) {
-
                     $scope.loading = true;
                     $scope.loadTestCases().then(function (a) {
                         $scope.initEnums().then(function (b) {
@@ -1574,7 +1656,7 @@ angular
             };
 
             $scope.isLocal = function (tp) {
-                return TestObjectUtil.isLocal(tp);
+                return $scope.entityUtils.isLocal(tp);
             };
 
             $scope.prefill = function (list, x) {
@@ -1673,309 +1755,138 @@ angular
             };
 
 
-            $scope.saveTG = function (tg) {
+            $scope.saveTG = function (tg,deep) {
                 var deferred = $q.defer();
-                TestObjectSynchronize.syncTG(tg).then(
-                    function (result) {
-                        delete result.tg.testCases;
-                        //TestObjectUtil.sanitizeDates(result.tg);
-                        Object.assign(tg, result.tg);
-                        TestObjectSynchronize.updateTestGroupId(tg);
-                        // Notification.success({
-                        //     message: result.message,
-                        //     delay: 3000
-                        // });
-                        $scope.loading = false;
-                        deferred.resolve({
-                            status: true,
-                            message: "TestCaseGroup Saved",
-                            obj: tg
-                        });
-                    },
-                    function (result) {
-                        if (result.hasOwnProperty("code") && result.code === 'LOCAL') {
-                            var index = TestObjectUtil.index($scope.tps, "id", tg.testPlan);
-                            var tp = $scope.tps[index];
-                            $scope.saveTP(tp,false).then(
-                                function () {
-                                    $scope.saveTG(tg).then(function (result) {
-                                            deferred.resolve(result);
-                                        },
-                                        function (result) {
-                                            deferred.reject(result);
-                                        });
-                                },
-                                function (result) {
-                                    deferred.reject(result);
-                                }
-                            );
+                console.log("SAVING TG");
+                console.log(tg);
+                $scope.FITS_SERVER.save($rootScope,EntityService.type.TEST_CASE_GROUP,tg,$scope.selectedTP).then(function (result) {
+                    if(result.status){
+                        if(deep){
+                            $scope.saveTCList(tg.testCases);
                         }
-                        else if (result.response && result.response.hasOwnProperty("errors")) {
-                            $scope.control.error.isSet = true;
-                            var erObj = {
-                                action: 'SAVE_TG',
-                                obj: tg,
-                                errors: []
-                            };
-                            erObj.errors = result.response.errors;
-                            $scope.control.error.list.push(erObj);
-                            // Notification.error({
-                            //     message: result.message,
-                            //     delay: 3000
-                            // });
-                            deferred.reject({
-                                status: false,
-                                message: result.message
-                            });
-                        }
-                        $scope.loading = false;
                     }
-                );
+                    $scope.loading = false;
+                    deferred.resolve(result);
+                });
                 return deferred.promise;
             };
 
-            $scope.saveSeqTC = function (i,list,auto) {
+            $scope.saveSeqTC = function (i,list) {
                 if(i < list.length) {
-                    $scope.saveTC(list[i],auto).then(function (result) {
-                        if(!auto){
-                            $scope.notify(result.status,result.message);
-                        }
-                        $scope.saveSeqTC(i+1,list,auto);
-                    }, function (result) {
-                        if(!auto){
-                            $scope.notify(result.status,result.message);
-                        }
-                        $scope.saveSeqTC(i+1,list,auto);
+                    $scope.saveTC(list[i]).then(function (result) {
+                       $scope.notify(result);
+                       $scope.saveSeqTC(i+1,list);
                     });
                 }
             };
 
-            $scope.saveTP = function (tp,deep,auto) {
-                var deferred = $q.defer();
-                TestObjectSynchronize.syncTP(tp).then(
-                    function (result) {
-                        delete result.tp.testCases;
-                        delete result.tp.testCaseGroups;
+            $scope.saveTCList = function (list) {
+                var tcs = list.filter(function (item) {
+                    return item._local || item._changed;
+                });
+                $scope.saveSeqTC(0,tcs);
+            };
 
-                        TestObjectUtil.sanitizeDates(result.tp);
-                        Object.assign(tp, result.tp);
-                        TestObjectSynchronize.updateTestPlanId(tp);
+            $scope.saveTP = function (tp,deep) {
+                var deferred = $q.defer();
+                $scope.FITS_SERVER.save($rootScope,EntityService.type.TEST_PLAN,tp,null).then(function (result) {
+                    if(result.status){
                         if(deep){
-                            //var tcPromises = [];
                             var tcs = [];
                             TestObjectUtil.listTC(tp,tcs);
-                            tcs = tcs.filter(function (item) {
-                                return item._changed ? true : false;
-                            });
-                            $scope.saveSeqTC(0,tcs,auto);
-                            // for(var tc = 0; tc < tcs.length; tc++){
-                            //     if(tcs[tc]._changed){
-                            //         $scope.saveTC(tcs[tc],auto).then(function (result) {
-                            //             if(!auto){
-                            //                 $scope.notify(result.status,result.message);
-                            //             }
-                            //         }, function (result) {
-                            //             if(!auto){
-                            //                 $scope.notify(result.status,result.message);
-                            //             }
-                            //         });
-                            //     }
-                            // }
-                            // for(var tcg = 0; tcg < tp.testCaseGroups.length; tcg++){
-                            //     if($scope.isLocal(tp.testCaseGroups[tcg])){
-                            //         $scope.saveTG(tp.testCaseGroups[tcg],auto).then(function (result) {
-                            //             if(!auto){
-                            //                 $scope.notify(result.status,result.message);
-                            //             }
-                            //         }, function (result) {
-                            //             if(!auto){
-                            //                 $scope.notify(result.status,result.message);
-                            //             }
-                            //         });
-                            //     }
-                            // }
+                            $scope.saveTCList(tcs);
                         }
-                        // Notification.success({
-                        //     message: result.message,
-                        //     delay: 3000
-                        // });
-                        $scope.loading = false;
-                        deferred.resolve({
-                            status: true,
-                            message: "TestPlan Saved",
-                            obj: tp
-                        });
-                    },
-                    function (result) {
-                        if (result.response && result.response.hasOwnProperty("errors")) {
-                            $scope.control.error.isSet = true;
-                            var erObj = {
-                                action: 'SAVE_TP',
-                                obj: tp,
-                                errors: []
-                            };
-                            erObj.errors = result.response.errors;
-                            $scope.control.error.list.push(erObj);
-
-                        }
-                        // Notification.error({
-                        //     message: result.message,
-                        //     delay: 3000
-                        // });
-                        $scope.loading = false;
-                        deferred.reject({
-                            status: false,
-                            message : result.message
-                        });
                     }
-                );
+                    deferred.resolve(result);
+                    $scope.loading = false;
+                });
                 return deferred.promise;
             };
 
-            $scope.saveTC = function (tc,auto) {
+            $scope.saveTC = function (tc) {
                 var deferred = $q.defer();
-                var where;
-                var id;
-                if (tc.group && tc.group !== "") {
-                    where = 'tg';
-                    id = tc.group;
-                }
-                else {
-                    where = 'tp';
-                    id = tc.testPlan;
-                }
-                TestObjectSynchronize.syncTC(where, id, tc).then(
-                    function (result) {
-                        TestObjectUtil.updateHash(result.tc);
-                        result.tc._changed = false;
-                        result.tc._hasErrors = false;
-                        result.tc._errors = null;
-                        var actual = TestObjectUtil.synchronize(tc.id, $scope.testCases, result.tc);
-                        tc = actual;
-                        $scope.loading = false;
-                        deferred.resolve({
-                            status: true,
-                            message: "TestCase Saved",
-                            obj: actual
-                        });
-                    },
-                    function (result) {
 
-                        if (result.hasOwnProperty("code") && result.code === 'LOCAL') {
+                $scope.FITS_SERVER.save($rootScope,EntityService.type.TEST_CASE,tc,$scope.selectedTP).then(function (result) {
+                    deferred.resolve(result);
+                    $scope.loading = false;
+                });
 
-                            var index = TestObjectUtil.index($scope.tps, "id", tc.testPlan);
-                            var tp = $scope.tps[index];
-
-                            if (where === 'tp') {
-                                $scope.saveTP(tp,false).then(
-                                    function () {
-                                        $scope.saveTC(tc,auto).then(function (result) {
-                                                deferred.resolve(result);
-                                            },
-                                            function (result) {
-                                                deferred.reject(result);
-                                            });
-                                    },
-                                    function (result) {
-                                        deferred.reject(result);
-                                    }
-                                );
-                            }
-                            else if (where === 'tg') {
-                                var group = TestObjectUtil.getTCGroup(tp, tc.id);
-                                if (group) {
-                                    $scope.saveTG(group).then(
-                                        function () {
-                                            $scope.saveTC(tc,auto).then(function (result) {
-                                                    deferred.resolve(result);
-                                                },
-                                                function (result) {
-                                                    deferred.reject(result);
-                                                });
-                                        },
-                                        function (result) {
-                                            deferred.reject(result);
-                                        }
-                                    );
-                                }
-                            }
-                        }
-                        else if (result.response.hasOwnProperty("errors")) {
-                            var erObj = {
-                                action: 'SAVE_TC',
-                                obj: tc,
-                                errors: []
-                            };
-
-                            for (var i = 0; i < result.response.errors.length; i++) {
-                                erObj.errors.push({
-                                    path: $scope.sanitizeErrorPath(result.response.errors[i].path),
-                                    message: result.response.errors[i].message
-                                });
-                            }
-                            tc._hasErrors = true;
-                            tc._changed = true;
-                            tc._errors = erObj.errors;
-                                //$scope.control.error.list = [];
-                            if(!auto){
-                                $scope.control.error.list.push(erObj);
-                                $scope.control.error.isSet = true;
-                            }
-                            // Notification.error({
-                            //     message: result.message,
-                            //     delay: 3000
-                            // });
-                            deferred.reject({
-                                status: false,
-                                message : result.message
-                            });
-                            $scope.loading = false;
-                        }
-                    }
-                );
                 return deferred.promise;
             };
 
-            $scope.saveAllChangedTestPlans = function (stc, stp) {
+
+            $scope.saveAllChangedTestPlans = function () {
                 var deferred = $q.defer();
                 $scope.loading = true;
                 $scope.control.error.isSet = false;
                 $scope.control.error.obj = [];
-
-                if (!stc && stp) {
-                    $scope.saveTP(stp,true).then(function (result) {
-                        $scope.notify(result.status,result.message);
-                        deferred.resolve(result);
-                    }, function (result) {
-                        $scope.notify(result.status,result.message);
-                        deferred.reject(result);
-                    });
+                var elm = $scope.activeElement();
+                console.log("ACTIVE ELEMENT "+elm);
+                try {
+                    if(elm !== 'x'){
+                        if (elm === 'tp') {
+                            PopUp.start("Saving Test Plan ...");
+                            $scope.saveTP($scope.selectedTP,true).then(function (result) {
+                                PopUp.stop();
+                                $scope.notify(result);
+                                deferred.resolve(result);
+                            });
+                        }
+                        else if (elm === 'tc') {
+                            PopUp.start("Saving Test Case ...");
+                            $scope.saveTC($scope.selectedTC).then(function (result) {
+                                PopUp.stop();
+                                $scope.notify(result);
+                                deferred.resolve(result);
+                            });
+                        }
+                        else if (elm === 'tg') {
+                            PopUp.start("Saving Test Case Group ...");
+                            $scope.saveTG($scope.selectedTG,true).then(function (result) {
+                                PopUp.stop();
+                                $scope.notify(result);
+                                deferred.resolve(result);
+                            });
+                        }
+                        else {
+                            deferred.resolve();
+                        }
+                    }
+                    else {
+                        deferred.resolve();
+                    }
                 }
-                else if (stc) {
-                    $scope.saveTC(stc).then(function (result) {
-                        $scope.notify(result.status,result.message);
-                        deferred.resolve(result);
-                    }, function (result) {
-                        $scope.notify(result.status,result.message);
-                        deferred.reject(result);
-                    });
-                }
-                else {
-                    deferred.resolve();
+                catch(ex){
+                    PopUp.stop();
                 }
                 return deferred.promise;
             };
 
-            $scope.notify = function (success,message) {
-                if(success){
-                    Notification.success({
-                        message: message,
+            $scope.calculateTC = function (tp) {
+                var nb = 0;
+                nb += tp.testCases.length;
+                _.forEach(tp.testCaseGroups, function (gr) {
+                    nb += gr.testCases.length;
+                });
+                return nb;
+            };
+
+            $scope.notify = function (response) {
+                if(response.severity === EntityService.severity.ERROR){
+                    Notification.error({
+                        message: response.message,
                         delay: 3000
                     });
                 }
-                else {
-                    Notification.error({
-                        message: message,
+                else if(response.severity === EntityService.severity.WARNING) {
+                    Notification.warning({
+                        message: response.message,
+                        delay: 3000
+                    });
+                }
+                else if(response.severity === EntityService.severity.SUCCESS){
+                    Notification.success({
+                        message: response.message,
                         delay: 3000
                     });
                 }
@@ -2007,58 +1918,64 @@ angular
             $scope.capitalize = function (string) {
                 return string.charAt(0).toUpperCase() + string.slice(1);
             };
+
+            $rootScope.$on('$locationChangeStart', function (event, next, current) {
+                if($scope.workSpaceChanges()){
+                    event.preventDefault();
+                    var modal = $modal.open({
+                        templateUrl: 'ExitTab.html',
+                        controller: 'ExitTabCtrl',
+                        backdrop : 'static',
+                        keyboard : false
+                    });
+
+                    modal.result.then(function (){
+
+                    }, function () {
+                        $scope.entityChangeLog = {};
+                        var go = next.substring(next.indexOf("#")+1,next.length);
+                        $location.path(go);
+                    });
+                }
+            });
+
+            $rootScope.$on('entity_saved', function (event, entity, transform) {
+                DataSynchService.save(transform);
+                if(entity){
+                    entity._changed = false;
+                    delete entity._local;
+                    $scope.hasIncomplete = entity.hasOwnProperty("runnable") ? !entity.runnable : false;
+                    $scope.entityChangeLog[entity.id] = false;
+                    $scope.tcBackups[entity.id] = angular.copy(entity);
+                }
+            });
         }
     );
 
 angular.module('tcl').controller('ConfirmTestPlanDeleteCtrl',
-    function ($scope, $uibModalInstance, testplanToDelete, tps, $http) {
+    function ($scope, $uibModalInstance, testplanToDelete, tps, $http, $rootScope, FITSBackEnd, EntityService) {
         $scope.testplanToDelete = testplanToDelete;
         $scope.loading = false;
         $scope.deleteTestPlan = function () {
             $scope.loading = true;
-            if ((typeof testplanToDelete.id) === "string" && testplanToDelete.id.startsWith("cl_")) {
-                var id = $scope.getIndex(tps, testplanToDelete.id);
-                if (~id) {
-                    tps.splice(id, 1);
+            var lists = [];
+            lists.push(tps);
+            FITSBackEnd.delete([tps], $scope.testplanToDelete, EntityService.type.TEST_PLAN).then(function (result) {
+                if (result.status) {
+                    $scope.loading = false;
+                    $rootScope.msg().text = "testplanDeleteSuccess";
+                    $rootScope.msg().type = "success";
+                    $rootScope.msg().show = true;
                 }
-                $scope.loading = false;
+                else {
+                    $scope.loading = false;
+                    $uibModalInstance.dismiss('cancel');
+                    $rootScope.msg().text = "testplanDeleteFailed";
+                    $rootScope.msg().type = "danger";
+                    $rootScope.msg().show = true;
+                }
                 $uibModalInstance.dismiss('cancel');
-                $rootScope.msg().text = "testplanDeleteSuccess";
-                $rootScope.msg().type = "success";
-                $rootScope.msg().show = true;
-            }
-            else {
-                $http.post('api/testplan/' + $scope.testplanToDelete.id + '/delete')
-                    .then(function (response) {
-                            var id = $scope.getIndex(tps, testplanToDelete.id);
-                            if (~id) {
-                                tps.splice(id, 1);
-                            }
-
-                            $scope.loading = false;
-                            $uibModalInstance.dismiss('cancel');
-                            $rootScope.msg().text = "testplanDeleteSuccess";
-                            $rootScope.msg().type = "success";
-                            $rootScope.msg().show = true;
-                        },
-                        function (error) {
-                            $scope.error = error;
-                            $scope.loading = false;
-                            $uibModalInstance.dismiss('cancel');
-                            $rootScope.msg().text = "testplanDeleteFailed";
-                            $rootScope.msg().type = "danger";
-                            $rootScope.msg().show = true;
-                        });
-            }
-        };
-
-        $scope.getIndex = function (l, id) {
-            for (var i = 0; i < l.length; i++) {
-                if (l[i].id === id) {
-                    return i;
-                }
-            }
-            return -1;
+            });
         };
 
         $scope.cancel = function () {
@@ -2088,6 +2005,19 @@ angular.module('tcl').controller('ExitCtrl',
             $uibModalInstance.dismiss('cancel');
         };
     });
+
+angular.module('tcl').controller('ExitTabCtrl',
+    function ($scope, $uibModalInstance) {
+
+        $scope.stay = function () {
+            $uibModalInstance.close(true);
+        };
+
+        $scope.cancel = function () {
+            $uibModalInstance.dismiss(false);
+        };
+
+});
 
 angular.module('tcl').controller('ImportSaveCtrl',
     function ($scope, $uibModalInstance) {

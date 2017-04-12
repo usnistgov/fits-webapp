@@ -4,6 +4,7 @@ import gov.nist.healthcare.cds.auth.domain.Account;
 import gov.nist.healthcare.cds.auth.domain.AccountPasswordReset;
 import gov.nist.healthcare.cds.auth.domain.CurrentUser;
 import gov.nist.healthcare.cds.auth.domain.PasswordChange;
+import gov.nist.healthcare.cds.auth.domain.PasswordChangeException;
 import gov.nist.healthcare.cds.auth.domain.Privilege;
 import gov.nist.healthcare.cds.auth.domain.ResponseMessage;
 import gov.nist.healthcare.cds.auth.repo.AccountPasswordResetRepository;
@@ -56,7 +57,7 @@ public class UserController {
 	@Autowired
 	private MailSender mailSender;
 
-	private final String ADMIN_EMAIL = "robert.snelick@nist.gov";
+	private final String ADMIN_EMAIL = "hossam.tamri@nist.gov";
 	//private final String ADMIN_EMAIL = "hossam.tamri@nist.gov";
 	
 	@RequestMapping(value = "/accounts/login", method = RequestMethod.GET)
@@ -179,27 +180,32 @@ public class UserController {
 		// check there is a username in the request
 		if (acc.getUsername() == null || acc.getUsername().isEmpty()) {
 			return new ResponseMessage(ResponseMessage.Type.danger,
-					"usernameMissing", null);
+					"Missing Username", null);
 		}
 
 		if (acc.getNewPassword() == null || acc.getNewPassword().length() < 4) {
 			return new ResponseMessage(ResponseMessage.Type.danger,
-					"invalidPassword", null);
+					"Invalid Password", null);
 		}
 
 		Account onRecordAccount = accountRepository.findOne(accountId);
 		if (!onRecordAccount.getUsername().equals(acc.getUsername())) {
 			return new ResponseMessage(ResponseMessage.Type.danger,
-					"invalidUsername", null);
+					"Invalid Username", null);
 		}
 
-		userService.changePassword(onRecordAccount,acc);
+		try {
+			userService.changePassword(onRecordAccount,acc);
+		} catch (PasswordChangeException e) {
+			return new ResponseMessage(ResponseMessage.Type.danger,
+					e.getMessage(), null);
+		}
 
 		// send email notification
 		this.sendChangeAccountPasswordNotification(onRecordAccount);
 
 		return new ResponseMessage(ResponseMessage.Type.success,
-				"accountPasswordReset", onRecordAccount.getId().toString(),
+				"Password Changed Successfully", onRecordAccount.getId().toString(),
 				true);
 	}
 	
@@ -213,7 +219,7 @@ public class UserController {
 		// check there is a username in the request
 		if (acc.getUsername() == null || acc.getUsername().isEmpty()) {
 			return new ResponseMessage(ResponseMessage.Type.danger,
-					"usernameMissing", null);
+					"Username Missing", null);
 		}
 
 		// logger.debug("^^^^^^^^^^^^^^^^^^^^^ -4 ^^^^^^^^^^^^^^^^^^");
@@ -225,7 +231,7 @@ public class UserController {
 		// check there is a reset request on record
 		if (apr == null) {
 			return new ResponseMessage(ResponseMessage.Type.danger,
-					"noResetRequestFound", null);
+					"No reset request found", null);
 		}
 
 		// logger.debug("^^^^^^^^^^^^^^^^^^^^^ -2 ^^^^^^^^^^^^^^^^^^");
@@ -234,7 +240,7 @@ public class UserController {
 		// request
 		if (!apr.getCurrentToken().equals(token)) {
 			return new ResponseMessage(ResponseMessage.Type.danger,
-					"incorrectToken", null);
+					"Invalid request", null);
 		}
 
 		// logger.debug("^^^^^^^^^^^^^^^^^^^^^ -1 ^^^^^^^^^^^^^^^^^^");
@@ -242,7 +248,7 @@ public class UserController {
 		// check token is not expired
 		if (apr.isTokenExpired()) {
 			return new ResponseMessage(ResponseMessage.Type.danger,
-					"expiredToken", null);
+					"Request has expired", null);
 		}
 
 		// logger.debug("^^^^^^^^^^^^^^^^^^^^^ 0 ^^^^^^^^^^^^^^^^^^");
@@ -256,7 +262,12 @@ public class UserController {
 
 		// logger.debug("^^^^^^^^^^^^^^^^^^^^^ 2 ^^^^^^^^^^^^^^^^^^");
 
-		userService.changePassword(acc.getPassword(), userId);
+		try {
+			userService.changePassword(acc.getPassword(), userId);
+		} catch (PasswordChangeException e) {
+			return new ResponseMessage(ResponseMessage.Type.danger,
+					e.getMessage(), null);
+		}
 		
 		// logger.debug("^^^^^^^^^^^^^^^^^^^^^ 3 ^^^^^^^^^^^^^^^^^^");
 
@@ -357,21 +368,26 @@ public class UserController {
 		// check there is a username in the request
 		if (acc.getUsername() == null || acc.getUsername().isEmpty()) {
 			return new ResponseMessage(ResponseMessage.Type.danger,
-					"usernameMissing", null);
+					"Username Missing", null);
 		}
 
 		if (acc.getNewPassword() == null || acc.getNewPassword().length() < 4) {
 			return new ResponseMessage(ResponseMessage.Type.danger,
-					"invalidPassword", null);
+					"Invalid Password", null);
 		}
 
 		Account onRecordAccount = accountRepository.findOne(accountId);
 		if (!onRecordAccount.getUsername().equals(acc.getUsername())) {
 			return new ResponseMessage(ResponseMessage.Type.danger,
-					"invalidUsername", null);
+					"Invalid Username", null);
 		}
 
-		userService.changePassword(onRecordAccount, acc);
+		try {
+			userService.changePasswordForUser(onRecordAccount, acc);
+		} catch (PasswordChangeException e) {
+			return new ResponseMessage(ResponseMessage.Type.danger,
+					e.getMessage(), null);
+		}
 
 		// send email notification
 		this.sendChangeAccountPasswordNotification(onRecordAccount, acc.getNewPassword());

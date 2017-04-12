@@ -144,6 +144,7 @@ angular.module('tcl').controller('ExecutionCtrl', function (StatsService, Execut
         example : {
             name : '',
             uid : '',
+            runnable : true,
             metaData : {
                 version: ''
             }
@@ -165,6 +166,7 @@ angular.module('tcl').controller('ExecutionCtrl', function (StatsService, Execut
             example : {
                 name : '',
                 uid : '',
+                runnable : true,
                 metaData : {
                     version: ''
                 }
@@ -265,12 +267,12 @@ angular.module('tcl').controller('ExecutionCtrl', function (StatsService, Execut
     };
 
     $scope.eventLabel = function (event) {
-        if (!event.vaccination.date)
+        if (!event.date)
             return "";
-        if (event.vaccination.date._type) {
-            if (event.vaccination.date._type === 'fixed')
-                return $filter('date')(event.vaccination.date.fixed.date, "MM/dd/yyyy");
-            else if (event.vaccination.date._type === 'relative')
+        if (event.date._type) {
+            if (event.date._type === 'fixed')
+                return $filter('date')(event.date.fixed.date, "MM/dd/yyyy");
+            else if (event.date._type === 'relative')
                 return "Relative";
             else
                 return "Invalid Date";
@@ -413,7 +415,7 @@ angular.module('tcl').controller('ExecutionCtrl', function (StatsService, Execut
             if(Array.isArray(items)){
                 var toAdd = [];
                 for (var i = 0; i < items.length; i++) {
-                    if (!$scope.inQueue(items[i])) {
+                    if (!$scope.inQueue(items[i]) && items[i].runnable) {
                         items[i].running = false;
                         toAdd.push(items[i]);
                     }
@@ -603,7 +605,16 @@ angular.module('tcl').controller('ExecutionCtrl', function (StatsService, Execut
     $scope.deleteSavedReport = function (item, tc, id) {
         $http.get('api/report/delete/' + item.id).then(function (response) {
             if ($scope.savedReports[tc]) {
-                $scope.savedReports[tc].splice(id, 1);
+                var i = _.findIndex($scope.savedReports[tc],function (o) {
+                    return o.id === item.id;
+                });
+                if(~i){
+                    $scope.savedReports[tc].splice(i,1);
+                }
+                Notification.success({
+                    message : 'Report Deleted',
+                    delay : 3000
+                })
             }
         });
     };
@@ -654,10 +665,22 @@ angular.module('tcl').controller('ExecutionCtrl', function (StatsService, Execut
         delete $scope.container.reports[tc.id];
     };
 
+    $scope.addSavedReports = function (list) {
+        _.forEach(list,function (report) {
+            if($scope.savedReports.hasOwnProperty(report.tc)) {
+                $scope.savedReports[report.tc].push(report);
+            }
+            else {
+                $scope.savedReports[report.tc] = [report];
+            }
+        });
+    };
+
     $scope.saveReports = function () {
         $http.post('api/report/save', $scope.container.asList).then(
             function (response) {
                 $scope.saved = true;
+                $scope.addSavedReports($scope.container.asList);
                 Notification
                     .success({
                         message: "Reports Saved",
@@ -676,17 +699,29 @@ angular.module('tcl').controller('ExecutionCtrl', function (StatsService, Execut
 
     $scope.getSimulationList = function (report) {
 
-        $http.post('api/report/json',$scope.container.asList).then(function (response) {
-            var anchor = angular.element('<a/>');
-            anchor.css({display: 'none'}); // Make sure it's not visible
-            angular.element(document.body).append(anchor); // Attach to document
-            anchor.attr({
-                href: 'data:attachment/json;charset=utf-8,' + encodeURI(JSON.stringify(response.data)),
-                target: '_blank',
-                download: 'simulation.json'
-            })[0].click();
-            anchor.remove();
-        });
+        // $http.post('api/report/json',$scope.container.asList).then(function (response) {
+        //     var anchor = angular.element('<a/>');
+        //     anchor.css({display: 'none'}); // Make sure it's not visible
+        //     angular.element(document.body).append(anchor); // Attach to document
+        //     anchor.attr({
+        //         href: 'data:attachment/json;charset=utf-8,' + encodeURI(JSON.stringify(response.data)),
+        //         target: '_blank',
+        //         download: 'simulation.json'
+        //     })[0].click();
+        //     anchor.remove();
+        // });
+        // $http.post('api/report/zip',$scope.container.asList).then(function (response) {
+        //     var anchor = angular.element('<a/>');
+        //     anchor.css({display: 'none'}); // Make sure it's not visible
+        //     angular.element(document.body).append(anchor); // Attach to document
+        //     anchor.attr({
+        //         href: 'data:attachment/zip;charset=utf-8,' + encodeURI(JSON.stringify(response.data)),
+        //         target: '_blank',
+        //         download: 'simulation.zip'
+        //     })[0].click();
+        //     anchor.remove();
+        // });
+
     };
 
 //---------------------------- WATCHERS -----------------------

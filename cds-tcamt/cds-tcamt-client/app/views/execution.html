@@ -53,11 +53,11 @@
                                 class="btn btn-xs btn-success" style="margin: 0px; margin-right: 10px;">
                             <span><i class="fa fa-floppy-o fa-fw"></i>Save Reports</span>
                         </button>
-                        <button ng-show="false" ng-click="getSimulationList()"
-                                ng-show="exec && showResults && report && container.asList && container.asList.length > 0 "
-                                class="btn btn-xs btn-success" style="margin: 0px; margin-right: 10px;">
-                            <span><i class="fa fa-floppy-o fa-fw"></i>Save Reports</span>
-                        </button>
+                        <!--<button ng-show="true" ng-click="getSimulationList()"-->
+                                <!--ng-show="exec && showResults && report && container.asList && container.asList.length > 0 "-->
+                                <!--class="btn btn-xs btn-success" style="margin: 0px; margin-right: 10px;">-->
+                            <!--<span><i class="fa fa-floppy-o fa-fw"></i>Save Reports</span>-->
+                        <!--</button>-->
                         <button ng-click="clear()" ng-show="!exec && tcQueue.length > 0" class="btn btn-xs btn-danger"
                                 style="margin: 0px; margin-right: 10px;">
                             <i class="fa fa-trash-o" style="font-size : 1.5em;" aria-hidden="true"></i>
@@ -238,7 +238,7 @@
                                             </button>
                                         </div>
                                         <div flex="80">
-                                            <report ng-if="selectedReport" vxm="vxm"
+                                            <report ng-if="viewReport() && selectedReport" vxm="vxm"
                                                     report="selectedReport"></report>
                                             <p ng-show="!viewReport()"
                                                style="text-align: center; margin-top: 10px;"><strong>No report in the queue.</strong></p>
@@ -615,27 +615,27 @@
         <tr>
             <td md-whiteframe="2" colspan="4" style="text-align : justify;">
                 <div style="width : 100%;" layout="row" layout-align="start center"
-                     ng-show="rp.veRequirement.vEvent.vaccination.administred.discriminator === 'generic'">
+                     ng-show="rp.veRequirement.vEvent.administred.discriminator === 'generic'">
                     <div flex="30" layout="column" layout-align="center center">
                         <span style="background-color: red;" class="badge">G</span>
-                        <span style="background-color: green;" class="badge">CVX#{{rp.veRequirement.vEvent.vaccination.administred.cvx}}</span>
+                        <span style="background-color: green;" class="badge">CVX#{{rp.veRequirement.vEvent.administred.cvx}}</span>
                     </div>
                     <div flex="50" layout="column" layout-align="start center">
-                        <span><strong>{{rp.veRequirement.vEvent.vaccination.administred.name}}</strong></span>
+                        <span><strong>{{rp.veRequirement.vEvent.administred.name}}</strong></span>
                         <span>Date Administred : {{rp.veRequirement.dateAdministred | date:"MM/dd/yyyy"}}</span>
                     </div>
                 </div>
                 <div style="width : 100%;" layout="row" layout-align="start center"
-                     ng-show="rp.veRequirement.vEvent.vaccination.administred.discriminator === 'specific'">
+                     ng-show="rp.veRequirement.vEvent.administred.discriminator === 'specific'">
                     <div flex="30" layout="column" layout-align="center center">
                         <span style="background-color: red;" class="badge">S</span>
-                        <span style="background-color: green;" class="badge">CVX#{{getVx(rp.veRequirement.vEvent.vaccination.administred).cvx}}</span>
-                        <span style="background-color: blue;" class="badge">MVX#{{rp.veRequirement.vEvent.vaccination.administred.mx.mvx}}</span>
+                        <span style="background-color: green;" class="badge">CVX#{{getVx(rp.veRequirement.vEvent.administred).cvx}}</span>
+                        <span style="background-color: blue;" class="badge">MVX#{{rp.veRequirement.vEvent.administred.mx.mvx}}</span>
                     </div>
                     <div flex="50" layout="column" layout-align="start center" style="text-align : left;">
-                        <span><strong>{{getVx(rp.veRequirement.vEvent.vaccination.administred).name}}</strong></span>
-                        <span><strong>By</strong> {{rp.veRequirement.vEvent.vaccination.administred.mx.name}}</span>
-                        <span><strong>{{rp.veRequirement.vEvent.vaccination.administred.name}}</strong></span>
+                        <span><strong>{{getVx(rp.veRequirement.vEvent.administred).name}}</strong></span>
+                        <span><strong>By</strong> {{rp.veRequirement.vEvent.administred.mx.name}}</span>
+                        <span><strong>{{rp.veRequirement.vEvent.administred.name}}</strong></span>
                         <span>Date Administred : {{rp.veRequirement.dateAdministred | date:"MM/dd/yyyy"}}</span>
                     </div>
                 </div>

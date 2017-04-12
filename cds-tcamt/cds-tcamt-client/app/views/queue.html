@@ -75,10 +75,20 @@
         </md-list-item>
     </md-list>
     <md-divider></md-divider>
-    <div ng-show="$parent.tcQueue.length === 0" style="width: 100%; text-align: center; font-size: 17px;">
-        <strong>Drop Here</strong>
+    <div ng-show="$parent.tcQueue.length === 0 && !$parent.exec " style="width: 100%; text-align: center; font-size: 17px;
+                                                                        background-color: rgba(33, 150, 243, 0.06); border: 2px dashed black;
+                                                                        border-bottom: 0;">
+        <div style="text-align: center; margin-top: 120px;
+                    margin-left: auto;
+                    margin-right: auto;
+                    left: 0;
+                    right: 0;
+                    top: 0;
+                    position: absolute;">
+            <strong>DROP TEST PLANS, TEST CASE GROUPS, TEST CASES HERE</strong>
+        </div>
     </div>
-    <md-virtual-repeat-container ng-class="{'drop-zone' :  $parent.tcQueue.length === 0 }" style="height : 280px;" id="qbody" dnd-list="tcQueue"  dnd-drop="drop(list, item, index)" md-top-index="$parent.controls.top">
+    <md-virtual-repeat-container ng-class="{'drop-zone' :  $parent.tcQueue.length === 0 && !$parent.exec }" style="height : 280px;" id="qbody" dnd-list="tcQueue"  dnd-drop="drop(list, item, index)" md-top-index="$parent.controls.top">
         <md-list-item md-virtual-repeat="tc in $parent.viewTc = (tcQueue | testcase:$parent.filter.queueSearch | fcFilter:$parent.filter:$parent.showResults | evFilter:$parent.filter:$parent.showResults | execSuccess:$parent.filter.exec:$parent.showResults )" class="repeated-item" flex
                       layout="row"
                       ng-class="{'cursor-move' : !$parent.exec, 'fail' : tc._s === false, 'info' : $index === x.rp && $parent.showResults }"

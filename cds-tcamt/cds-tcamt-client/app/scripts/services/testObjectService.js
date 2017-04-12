@@ -8,14 +8,12 @@ angular.module('tcl').factory('TestObjectUtil', function () {
         updateEventId : function (evList,oId,nId) {
             console.log("UPDATE EV ID");
           for(var i = 0; i < evList.length; i++){
-              if(evList[i].hasOwnProperty("vaccination")){
-                  var vEvent = evList[i].vaccination;
-                  if(vEvent.position+'' === oId+''){
-                      vEvent.position = nId;
-                  }
-                  if(vEvent.date && vEvent.date.type === 'relative'){
-                      this.updateRulesVId(vEvent.date.rules,oId,nId);
-                  }
+              var vEvent = evList[i];
+              if(vEvent.position+'' === oId+''){
+                  vEvent.position = nId;
+              }
+              if(vEvent.date && vEvent.date.type === 'relative'){
+                  this.updateRulesVId(vEvent.date.rules,oId,nId);
               }
           }
         },
@@ -76,7 +74,7 @@ angular.module('tcl').factory('TestObjectUtil', function () {
                     }
                 }
                 else {
-                    for (var i in obj) {
+                    for (var i = 0; i < obj.length; i++) {
                         testObjectService.cleanObject(obj[i], exp);
                     }
                 }
@@ -286,27 +284,13 @@ angular.module('tcl').factory('TestObjectUtil', function () {
         },
 
         markWithCLID: function (obj) {
-            obj.id = "cl_" + testObjectService.generateUID();
+            obj.id = new ObjectId().toString();
         },
 
         isLocal: function (obj) {
-            return obj.hasOwnProperty("id") && typeof obj.id === 'string' ? (obj.id.indexOf("cl_") === 0 ? true : false) : true;
-            //return true;
+            return obj && obj.hasOwnProperty("_local") && obj._local;
         },
 
-        isLocalID: function (id) {
-            return typeof id === 'string' ? (id.indexOf("cl_") === 0 ? true : false) : true;
-        },
-
-        generateUID: function () {
-            var d = new Date().getTime();
-            var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-                var r = (d + Math.random() * 16) % 16 | 0;
-                d = Math.floor(d / 16);
-                return (c == 'x' ? r : (r & 0x3 | 0x8)).toString(16);
-            });
-            return uuid;
-        },
         prepare: function (tc) {
             var _tc = JSON.parse(angular.toJson(tc));
             if (_tc.hasOwnProperty("position")) {
@@ -318,18 +302,6 @@ angular.module('tcl').factory('TestObjectUtil', function () {
             testObjectService.cleanDates(_tc);
             testObjectService.cleanObject(_tc, new RegExp("^_.*"));
             return _tc;
-        },
-        updateDose: function (events) {
-            var groups = _.groupBy(events, function (item) {
-                return item.vaccination.administred ? item.vaccination.administred.name : "new";
-            });
-
-            for (var group in groups) {
-                var list = groups[group];
-                for (var i = 0; i < list.length; i++) {
-                    list[i].vaccination.doseNumber = i + 1;
-                }
-            }
         }
     };
     return testObjectService;
@@ -361,7 +333,8 @@ angular.module('tcl').factory('TestObjectFactory', function (TestObjectUtil) {
         },
         createGRP: function (id) {
             return {
-                id: "cl_" + TestObjectUtil.generateUID(),
+                _local : true,
+                id: new ObjectId().toString(),
                 name: 'New Group',
                 testPlan: id,
                 testCases: []
@@ -404,12 +377,15 @@ angular.module('tcl').factory('TestObjectFactory', function (TestObjectUtil) {
         createTC: function (tp,grp,version) {
             var dt = new Date();
             var tc = {
+                _local : true,
                 name: "New TC",
                 uid : '',
                 _changed: true,
                 description: "",
                 dateType: 'FIXED',
                 _dateType: 'FIXED',
+                runnable : true,
+                errors : [],
                 testPlan: tp,
                 group : grp,
                 patient: {
@@ -435,6 +411,7 @@ angular.module('tcl').factory('TestObjectFactory', function (TestObjectUtil) {
         createTP: function () {
             var dt = new Date();
             var tp = {
+                _local : true,
                 name: "New Test Plan",
                 description: "",
                 metaData: {
@@ -460,18 +437,14 @@ angular.module('tcl').factory('TestObjectFactory', function (TestObjectUtil) {
             else {
                 dt = testObjectService.createRD();
             }
-            var ev = {
-                _type: "vaccination",
-                vaccination: {
+            return {
                     administred: null,
                     evaluations: [],
-                    type: "VACCINATION",
+                    type: "vaccination",
                     date: dt,
                     doseNumber: 1,
                     position: pos
-                }
             };
-            return ev;
         },
 
         createForecast: function (t) {
@@ -525,9 +498,9 @@ angular.module('tcl').factory('TestObjectSynchronize', function ($q, $http, Test
                 tp.testCases[tci].testPlan = tp.id;
             }
         },
-        syncTC: function (where, id, tc) {
+        syncTC: function (where, obj, tc) {
             var deferred = $q.defer();
-            if (TestObjectUtil.isLocalID(id)) {
+            if (TestObjectUtil.isLocal(obj)) {
                 console.log("Cannot Save, Local TP, Must Save");
                 deferred.reject({
                     message: "TestPlan must be saved first",
@@ -538,11 +511,11 @@ angular.module('tcl').factory('TestObjectSynchronize', function ($q, $http, Test
             else {
                 var _tc = TestObjectSynchronize.prepare(tc);
                 console.log("Saving ");
-                $http.post('api/testcase/' + where + '/' + id + '/save', _tc).then(
+                $http.post('api/testcase/save', _tc).then(
                     function (response) {
                         var newTC = response.data;
                         TestObjectUtil.sanitizeDates(newTC);
-                        TestObjectUtil.sanitizeEvents(newTC);
+                        //TestObjectUtil.sanitizeEvents(newTC);
                         newTC._dateType = newTC.dateType;
                         deferred.resolve({
                             status: true,
@@ -568,7 +541,7 @@ angular.module('tcl').factory('TestObjectSynchronize', function ($q, $http, Test
             delete _tp.testCaseGroups;
             _tp = TestObjectSynchronize.prepare(_tp);
 
-            $http.post('api/testplan/partial/save', _tp).then(
+            $http.post('api/testplan/save', _tp).then(
                 function (response) {
                     var newTP = response.data;
 
@@ -589,9 +562,9 @@ angular.module('tcl').factory('TestObjectSynchronize', function ($q, $http, Test
 
             return deferred.promise;
         },
-        syncTG: function (tg) {
+        syncTG: function (tg,tp) {
             var deferred = $q.defer();
-            if (TestObjectUtil.isLocalID(tg.testPlan)) {
+            if (TestObjectUtil.isLocal(tp)) {
                 console.log("Cannot Save, Local TG, Must Save");
                 deferred.reject({
                     message: "TestGroup must be saved first",
@@ -605,7 +578,7 @@ angular.module('tcl').factory('TestObjectSynchronize', function ($q, $http, Test
                 delete _tg.testCases;
                 _tg = TestObjectSynchronize.prepare(_tg);
 
-                $http.post('api/testCaseGroup/partial/save', _tg).then(
+                $http.post('api/testcasegroup/save', _tg).then(
                     function (response) {
                         var newTCG = response.data;
                         deferred.resolve({
@@ -625,26 +598,15 @@ angular.module('tcl').factory('TestObjectSynchronize', function ($q, $http, Test
             }
             return deferred.promise;
         },
-        mergeTP: function (local, remote) {
-            local.id = remote.id;
-            local.name = remote.name;
-            local.description = remote.description;
-            local.metaData = remote.metaData;
-
-            for (var tc in remote.testCases) {
-                var i = TestObjectUtil.index(local.testCases, "id", remote.testCases[tc].id);
-                local.testCases[i] = remote.testCases[tc];
-            }
-        },
         prepare: function (tc) {
             var _tc = JSON.parse(angular.toJson(tc));
-            if (_tc.hasOwnProperty("position")) {
-                delete _tc.position;
-            }
-            if (TestObjectUtil.isLocal(_tc)) {
-                delete _tc.id;
-            }
-            TestObjectUtil.cleanDates(_tc);
+            // if (_tc.hasOwnProperty("position")) {
+            //     delete _tc.position;
+            // }
+            // if (TestObjectUtil.isLocal(_tc)) {
+            //     delete _tc.id;
+            // }
+            // TestObjectUtil.cleanDates(_tc);
             TestObjectUtil.cleanObject(_tc, new RegExp("^_.*"));
             return _tc;
         }
@@ -652,7 +614,7 @@ angular.module('tcl').factory('TestObjectSynchronize', function ($q, $http, Test
     return TestObjectSynchronize;
 });
 
-angular.module('tcl').factory('TestDataService', function ($http, $q, TestObjectUtil) {
+angular.module('tcl').factory('TestDataService', function (DataSynchService,$http, $q, TestObjectUtil) {
     return {
         loadTestPlans: function () {
             var deferred = $q.defer();
@@ -662,15 +624,15 @@ angular.module('tcl').factory('TestDataService', function ($http, $q, TestObject
                     tps = angular.fromJson(response.data);
                     TestObjectUtil.sanitizeDates(tps);
                     for (var tp = 0; tp < tps.length; tp++) {
-                        TestObjectUtil.tpUpdateHash(tps[tp]);
+                        //TestObjectUtil.tpUpdateHash(tps[tp]);
                         for (var tc = 0; tc < tps[tp].testCases.length; tc++) {
                             tps[tp].testCases[tc]._dateType = tps[tp].testCases[tc].dateType;
-                            TestObjectUtil.sanitizeEvents(tps[tp].testCases[tc]);
+                            //TestObjectUtil.sanitizeEvents(tps[tp].testCases[tc]);
                         }
                         for (var tg = 0; tg < tps[tp].testCaseGroups.length; tg++) {
                             for (var tci = 0; tci < tps[tp].testCaseGroups[tg].testCases.length; tci++) {
                                 tps[tp].testCaseGroups[tg].testCases[tci]._dateType = tps[tp].testCaseGroups[tg].testCases[tci].dateType;
-                                TestObjectUtil.sanitizeEvents(tps[tp].testCaseGroups[tg].testCases[tci]);
+                                //TestObjectUtil.sanitizeEvents(tps[tp].testCaseGroups[tg].testCases[tci]);
                             }
                             //TestObjectUtil.hash(tps[tp].testCaseGroups[tg].testCases);
                         }
@@ -694,12 +656,12 @@ angular.module('tcl').factory('TestDataService', function ($http, $q, TestObject
                     
                     for (var tc = 0; tc < tp.testCases.length; tc++) {
                         tp.testCases[tc]._dateType = tp.testCases[tc].dateType;
-                        TestObjectUtil.sanitizeEvents(tp.testCases[tc]);
+                        //TestObjectUtil.sanitizeEvents(tp.testCases[tc]);
                     }
                     for (var tg = 0; tg < tp.testCaseGroups.length; tg++) {
                         for (var tci = 0; tci < tp.testCaseGroups[tg].testCases.length; tci++) {
                             tp.testCaseGroups[tg].testCases[tci]._dateType = tp.testCaseGroups[tg].testCases[tci].dateType;
-                            TestObjectUtil.sanitizeEvents(tp.testCaseGroups[tg].testCases[tci]);
+                            //TestObjectUtil.sanitizeEvents(tp.testCaseGroups[tg].testCases[tci]);
                         }
                         TestObjectUtil.hash(tp.testCaseGroups[tg].testCases);
                     }

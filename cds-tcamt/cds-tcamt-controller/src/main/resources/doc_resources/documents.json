@@ -1,14 +1,8 @@
 [
 	{
-		"name" : "Test Case XML Schema (NIST Format)",
-		"date" : 1491493210,
-		"fileName" : "testCaseXSD.xsd",
-		"location" : "/doc_resources/testCaseXSD.xsd"
-	},
-	{
-		"name" : "Validation Report XML Schema (NIST Format)",
-		"date" : 1491493210,
-		"fileName" : "reportXSD.xsd",
-		"location" : "/doc_resources/reportXSD.xsd"
+		"name" : "Test Case & Validation Report XML Schema (NIST Format)",
+		"date" : "Wednesday, April 12, 2017",
+		"fileName" : "fits_nist_xml.xsd",
+		"location" : "/doc_resources/fits_nist_format_report_testcase.xsd"
 	}
 ]
