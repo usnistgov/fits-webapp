@@ -27,9 +27,7 @@ var app = angular
         'restangular',
         'angularjs-dropdown-multiselect',
         'dndLists',
-        'froala',
-        'ngNotificationsBar'
-        ,
+        'ngNotificationsBar',
         'ngMockE2E',
         'ngDragDrop',
         'ui.tree',
@@ -38,7 +36,11 @@ var app = angular
         'ui.codemirror',
         'angularjs-dropdown-multiselect',
         'ui-notification',
-        'btorfs.multiselect'
+        'btorfs.multiselect',
+        'ui.select',
+        'infinite-scroll',
+        'dndLists',
+        'autocomplete'
     ]);
 
 var
@@ -96,6 +98,9 @@ app.config(function ($routeProvider, RestangularProvider, $httpProvider, Keepali
         }).when('/useraccount', {
             templateUrl: 'views/account/userAccount.html',
             controller: 'AccountMgtCtrl'
+        })
+        .when('/validation', {
+            templateUrl: 'views/execution.html'
         })
 //        .when('/account', {
 //            templateUrl: 'views/account/account.html',
@@ -328,12 +333,31 @@ app.filter("sanitize", ['$sce', function($sce) {
 
 
 
-app.run(function ($rootScope, $location, Restangular, $modal, $filter, base64, userInfoService, $http, AppInfo,StorageService,$templateCache,$window,notifications) {
+app.run(function ($rootScope, $anchorScroll, $location, Restangular, $modal, $filter, base64, userInfoService, $http, AppInfo,StorageService,$templateCache,$window,notifications) {
     $rootScope.appInfo = {};
+    $rootScope.releaseNotes = [
+        {
+            version : '1.0-Beta',
+            date : new Date(),
+            updates : [
+                'Update1', 'Update2'
+            ]
+
+        }
+    ];
+
+    $rootScope.documents = [
+        {
+            name : 'AIRA',
+            date : new Date(),
+            location : '/docs/document.pptx',
+            fileName : "file.pptx"
+        }
+    ];
     //Check if the login dialog is already displayed.
     $rootScope.loginDialogShown = false;
     $rootScope.subActivePath = null;
-
+    $anchorScroll.yOffset = 9999999;
     // load app info
     // load app info
     AppInfo.get().then(function (appInfo) {
@@ -423,7 +447,6 @@ app.run(function ($rootScope, $location, Restangular, $modal, $filter, base64, u
             //Let's get user info now
             httpHeaders.common['Authorization'] = null;
             $http.get('api/accounts/cuser').success(function (data) {
-                console.log("setCurrentUser=" + data);
                 userInfoService.setCurrentUser(data);
                 $rootScope.$broadcast('event:loginConfirmed');
             });

@@ -2,6 +2,8 @@ package gov.nist.healthcare.cds.tcamt.config;
 
 import gov.nist.healthcare.cds.auth.config.WebSecurityConfig;
 
+import javax.servlet.Filter;
+
 import org.springframework.web.servlet.support.AbstractAnnotationConfigDispatcherServletInitializer;
 
 public class WebAppInitializer extends
@@ -23,6 +25,12 @@ public class WebAppInitializer extends
 		return new String[]{
 	            "/api/*"
 	        };
+	}
+	
+
+	@Override
+	protected Filter[] getServletFilters() {
+		return new Filter[]{};
 	}
 
 }

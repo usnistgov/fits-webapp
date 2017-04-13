@@ -17,31 +17,82 @@ body {
 </script>
 <!-- <span ng-show="!aTCisSelected()">No test case selected.</span> -->
 <div>
-	<md-list ng-cloak>
-		 <md-list-item
-		 			   ng-repeat="event in selectedTC.events track by $index"
-		 			   ng-click="selectEvent(event)" 
-		 			   style="cursor: pointer; height : 50px;"
-						ng-class="{'sinfo' : isSelectedEvent(event), 'fle' : $index === 0, 'le' : true}"
-						context-menu="eventCM" model="$index" >
+	<table style="width: 100%;" class="table-hover">
+		<tbody>
+			<tr ng-repeat="ev in selectedTC.events | orderBy:'ev.position' " ng-click="selectEvent(ev)"
+				style="cursor: pointer; height : 50px;"
+				ng-class="{'sinfo' : isSelectedEvent(ev), 'fle' : $index === 0, 'le' : true}"
+				context-menu="eventCM" model="$index" >
 
-		 			<table style="width : 100%;">
-		 				<tr>
-		 					<td>
-		 						<span class="badge sbadge" style="vertical-align:middle;" >{{$index+1}}</span>
-		 					</td>
-		 					<td style="margin-bottom : 0;" ng-hide="event.vaccination.administred === null">
-		 						<strong>{{event.vaccination.administred.name}}</strong> - 
-		 						{{eventLabel(event)}}
-		 					</td>
-		 					<td ng-show="event.vaccination.administred === null">
-		 						<strong>New Event</strong>
-		 					</td>
-		 				</tr>
-		 			</table>
+				<td colspan="3" style="text-align : justify; padding: 10px;">
+					<div style="width : 100%;" layout="row" layout-align="start center" ng-show="ev.administred && ev.administred.discriminator === 'generic'">
+						<div flex="10" layout="column" layout-align="center center">
+							<span><strong>ID # {{ev.position+1}}</strong></span>
+						</div>
+						<div flex="25" layout="column" layout-align="center center">
+							<span style="background-color: green;" class="badge">CVX {{ev.administred.cvx}}</span>
+						</div>
+						<div flex="65" layout="column" layout-align="start center">
+							<span><strong>{{ev.administred.name}}</strong></span>
+							<span>{{eventLabel(ev)}}</span>
+						</div>
+					</div>
+					<div style="width : 100%;" layout="row" layout-align="start center" ng-show="ev.administred && ev.administred.discriminator === 'specific'">
+						<div flex="10" layout="column" layout-align="center center">
+							<span><strong>ID # {{ev.position+1}}</strong></span>
+						</div>
+						<div flex="25" layout="column" layout-align="center center">
+							<span style="background-color: green;" class="badge">CVX {{getV(ev.administred).cvx}}</span>
+							<span style="background-color: blue;" class="badge">MVX {{ev.administred.mx.mvx}}</span>
+						</div>
+						<div flex="65" layout="column" layout-align="start center" style="text-align : left;">
+							<!--<span><strong>{{getV(ev.administred).name}}</strong></span>-->
+							<span><strong>{{ev.administred.name}}</strong></span>
+							<span>{{eventLabel(ev)}}</span>
+						</div>
+					</div>
+					<div style="width : 100%;" layout="row" layout-align="start center" ng-show="!ev.administred">
+						<div flex="30" layout="column" layout-align="center center">
+							<span class="badge sbadge">ID # {{ev.position+1}}</span>
+						</div>
+						<div flex="50" layout="column" layout-align="start center" style="text-align : left;">
+							<span><strong>New Event</strong></span>
+							<span>{{eventLabel(ev)}}</span>
+						</div>
+					</div>
+				</td>
 
-		 </md-list-item>
-	</md-list>
+			</tr>
+		</tbody>
+	</table>
+
+	<!--<md-list ng-cloak>-->
+		<!--<div ng-repeat="(group, events) in selectedTC.events | groupEvents">-->
+			<!--<md-list-item-->
+
+
+					<!--&gt;-->
+
+				<!--<table style="width : 100%;">-->
+					<!--<tr>-->
+						<!--<td>-->
+							<!--<span class="badge sbadge" style="vertical-align:middle;" >Dose {{$index+1}}</span>-->
+							<!--<span style="background-color: green;" class="badge">ID # {{ev[ev._type].id}}</span>-->
+						<!--</td>-->
+						<!--<td style="margin-bottom : 0;" ng-hide="ev.vaccination.administred === null">-->
+							<!--<strong>{{ev.vaccination.administred.name}}</strong> - -->
+							<!--{{eventLabel(ev)}}-->
+						<!--</td>-->
+						<!--<td ng-show="ev.vaccination.administred === null">-->
+							<!--<strong>New Event</strong>-->
+						<!--</td>-->
+					<!--</tr>-->
+				<!--</table>-->
+
+			<!--</md-list-item>-->
+		<!--</div>-->
+
+	<!--</md-list>-->
 <!-- 	<table class="table table-hover"> -->
 <!-- 		<tr ng-repeat="event in selectedTC.events track by $index"> -->
 <!-- 			<td ng-click="selectEvent(event)" style="cursor: pointer;" -->

@@ -11,95 +11,143 @@
 </script>
 <div class="igamt-home">
     <div class="container" style="margin-bottom: 20px">
-                    <div class="row">
+        <div class="row">
 
-                        <div class="col-md-12" style="margin-bottom: 20px">
-                            <div clas="page-header"><div class="header5">Welcome to the Test Case Authoring and Management Tool (TCAMT)</div>
-                           </div>
-                            <hr />
-                        </div>
-
-                             <div class="col-md-6">
-                                <div class="panel panel-primary home-page-panel">
-                                    <div class="panel-heading">
-                                        <span style="font-size: 14px; font-weight: bold">Have a Question?</span>
-                                    </div>
-                                    <div class="panel-body">
-                                        <div class="home-page-panel-content">
-                                            <p style="text-align: left;">A Google Group <a class="point"
-                                                                                           ng-href="https://groups.google.com/forum/#!forum/nist-tcamt"
-                                                                                           target="_blank">NIST-TCAMT</a>
-                                                has been established for discussion/questions about the tool. No
-                                                membership is required. A Google account is required for posting.</p>
-                                            <ul>
-                                                <li>Site: <a class="point" target="_blank"
-                                                             ng-href="https://groups.google.com/forum/#!forum/nist-tcamt">https://groups.google.com/forum/#!forum/nist-tcamt</a>
-                                                </li>
-                                                <li>Email: nist-tcamt@googlegroups.com</li>
-                                            </ul>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="col-md-6">
-                                <div class="panel panel-primary home-page-panel">
-                                    <div class="panel-heading">
-                                        <span style="font-size: 14px; font-weight: bold">Supported Browsers</span>
-                                    </div>
-                                    <div class="panel-body">
-                                        <div class="home-page-panel-content">
-                                            <p style="text-align: left">The following browsers are supported:
-                                            <ul>
-                                                <li>Chrome <span style="color:red">(Recommended)</span></li>
-                                                <li>Firefox <span style="color:red"></span></li>
-                                                <li>Safari</li>
-                                            </ul>
-                                            </p>
-
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                     </div>
+            <div class="col-md-12" style="margin-bottom: 20px">
+                <div clas="page-header"><div class="header5">Welcome to the NIST Forecasting for Immunization Test Suite (FITS)</div>
                 </div>
+                <hr />
+            </div>
 
+            <div class="col-md-12" style="margin-bottom: 20px; ">
+                <div class="panel panel-info home-page-panel" style="height: initial;border: 1px solid #8ae6ff;">
+                    <div class="panel-heading" layout="row" layout-align="start center">
+                        <i class="fa fa-info-circle" aria-hidden="true" style="font-size: 2em;"></i>
+                        <span style="font-size: 15px; font-weight: bold; margin-left: 10px; ">Beta Note</span>
+                    </div>
+                    <div class="panel-body" style="border-top: 1px solid #8ae6ff;">
+                        FITS is currently provided as a beta pre-release in order to gather feedback from the larger community.  While very close in look,
+                        feel, and function to the production release, design changes will likely often occur over the course of the next 60 days.  We will do our best to preserve
+                        stored user data (test cases) as much as possible, but we cannot guarantee no data may be lost if the database is reloaded during redeployment.
+                        Exporting test cases to the file system in XML is the best way to ensure the stability of test cases in case of database changes.
+                    </div>
+                </div>
+            </div>
 
-        <!-- Three columns of text below the carousel -->
-        <div class="row" style="text-align: center; margin-top: 20px">
-            <div class="col-md-3" style="width:25%">
-                <a style="border:0px" class="btn btn-default" href="#/registration" role="button">
-                    <p>
-                            <span style="margin-top:5px" class="btn btn-primary btn-lg" role="button"><i
-                                    class="fa fa-user fa-fw"></i>&nbsp; Create an Account</span>
-                    </p>
-                </a>
+            <div class="col-md-4">
+                <div class="panel panel-primary home-page-panel">
+                    <div class="panel-heading">
+                        <span style="font-size: 14px; font-weight: bold">FITS Overview</span>
+                    </div>
+                    <div class="panel-body">
+                        <div class="home-page-panel-content" style="text-align: justify !important;">
+                            <p>
+                            FITS (Forecasting for Immunization Test Suite) is a web-based
+                            application for testing immunization CDS engines against ACIP
+                            recommendations. FITS creates and manages test cases, runs and validates
+                            the test cases, creates reports in standardized formats, and provides
+                            standardized (FHIR) and non-standardized (proprietary) interfaces to the
+                            CDS engines.
+                            </p>
+                            <p>
+                            FITS can be used to validate immunization CDS engines independently of
+                            the system in which the CDS resides or is associated (e.g., an EHR or
+                            IIS). FITS will contain a set of test cases authored and maintained by
+                            the CDC CDSi project (<a class="point" target="_blank"
+                            ng-href="https://www.cdc.gov/vaccines/programs/iis/cdsi.html">https://www.cdc.gov/vaccines/programs/iis/cdsi.html</a>)
+                            that are available to be used to test CDS engines. Additionally, a user
+                            can create and persist their own test cases.
+                            </p>
+                            <p>
+                            FITS is developed by the NIST in collaboration with the CDC and AIRA.
+                            </p>
+
+                        </div>
+                    </div>
+                </div>
             </div>
-            <!-- /.col-lg-4 -->
-            <div class="col-md-3" style="width:25%">
-                <a style="border:0px" class="btn btn-default" href="#/tp" role="button">
-                    <p><span style="margin-top:5px" class="btn btn-primary btn-lg" role="button"><i
-                            class="fa fa-book fa-fw"></i>&nbsp;Test Plans</span>
-                    </p>
-                </a>
+
+            <div class="col-md-4">
+                <div class="panel panel-primary home-page-panel">
+                    <div class="panel-heading">
+                        <span style="font-size: 14px; font-weight: bold">Have a Question?</span>
+                    </div>
+                    <div class="panel-body">
+                        <div class="home-page-panel-content">
+                            <p style="text-align: left;">A Google Group <a class="point"
+                                                                           ng-href="https://groups.google.com/forum/#!forum/fits-immunization-testing"
+                                                                           target="_blank">FITS</a>
+                                has been established for discussion/questions about the tool. No
+                                membership is required. A Google account is required for posting.</p>
+                            <ul>
+                                <li>Site: <a class="point" target="_blank"
+                                             ng-href="https://groups.google.com/forum/#!forum/fits-immunization-testing">https://groups.google.com/forum/#!forum/fits-immunization-testing</a>
+                                </li>
+                                <li>Email: fits-immunization-testing@googlegroups.com</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <!-- /.col-lg-4 -->
-            <div class="col-md-3" style="width:25%">
-                <a style="border:0px" style="border:0px" class="btn btn-default" href="#/issue" role="button">
-                    <p><span style="margin-top:5px" class="btn btn-primary btn-lg" role="button"><i
-                            class="fa fa-question fa-fw"></i>&nbsp;Issue</span>
-                    </p>
-                </a>
-            </div>
-            <!-- /.col-lg-4 -->
-            <div class="col-md-3" style="width:25%">
-                <a style="border:0px" class="btn btn-default" href="#/about" role="button">
-                    <p><span style="margin-top:5px" class="btn btn-primary btn-lg" role="button"><i
-                            class="fa fa-info fa-fw"></i>&nbsp;About</span>
-                    </p>
-                </a>
+
+            <div class="col-md-4">
+                <div class="panel panel-primary home-page-panel">
+                    <div class="panel-heading">
+                        <span style="font-size: 14px; font-weight: bold">Supported Browsers</span>
+                    </div>
+                    <div class="panel-body">
+                        <div class="home-page-panel-content">
+                            <p style="text-align: left">The following browsers are supported:
+                            <ul>
+                                <li>Chrome <span style="color:red">(Recommended)</span></li>
+                                <li>Firefox <span style="color:red"></span></li>
+                                <li>Safari</li>
+                            </ul>
+                            </p>
+
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
+    </div>
+
+
+    <!-- Three columns of text below the carousel -->
+        <!--<div class="row" style="text-align: center; margin-top: 20px">-->
+        <!--<div class="col-md-3" style="width:25%">-->
+        <!--<a style="border:0px" class="btn btn-default" href="#/registration" role="button">-->
+        <!--<p>-->
+        <!--<span style="margin-top:5px" class="btn btn-primary btn-lg" role="button"><i-->
+        <!--class="fa fa-user fa-fw"></i>&nbsp; Create an Account</span>-->
+        <!--</p>-->
+        <!--</a>-->
+        <!--</div>-->
+        <!--&lt;!&ndash; /.col-lg-4 &ndash;&gt;-->
+        <!--<div class="col-md-3" style="width:25%">-->
+        <!--<a style="border:0px" class="btn btn-default" href="#/tp" role="button">-->
+        <!--<p><span style="margin-top:5px" class="btn btn-primary btn-lg" role="button"><i-->
+        <!--class="fa fa-book fa-fw"></i>&nbsp;Test Plans</span>-->
+        <!--</p>-->
+        <!--</a>-->
+        <!--</div>-->
+        <!--&lt;!&ndash; /.col-lg-4 &ndash;&gt;-->
+        <!--<div class="col-md-3" style="width:25%">-->
+        <!--<a style="border:0px" style="border:0px" class="btn btn-default" href="#/issue" role="button">-->
+        <!--<p><span style="margin-top:5px" class="btn btn-primary btn-lg" role="button"><i-->
+        <!--class="fa fa-question fa-fw"></i>&nbsp;Issue</span>-->
+        <!--</p>-->
+        <!--</a>-->
+        <!--</div>-->
+        <!--&lt;!&ndash; /.col-lg-4 &ndash;&gt;-->
+        <!--<div class="col-md-3" style="width:25%">-->
+        <!--<a style="border:0px" class="btn btn-default" href="#/about" role="button">-->
+        <!--<p><span style="margin-top:5px" class="btn btn-primary btn-lg" role="button"><i-->
+        <!--class="fa fa-info fa-fw"></i>&nbsp;About</span>-->
+        <!--</p>-->
+        <!--</a>-->
+        <!--</div>-->
+        <!--</div>-->
         <!-- /.row -->
     </div>
 

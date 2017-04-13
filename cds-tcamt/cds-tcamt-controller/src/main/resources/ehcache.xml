@@ -1,0 +1,65 @@
+<ehcache xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="ehcache.xsd" updateCheck="true"
+	monitoring="autodetect" dynamicConfig="true">
+	<diskStore path="java.io.tmpdir" />
+
+	<cache name="testplans" maxEntriesLocalHeap="10000"
+		maxEntriesLocalDisk="10000" eternal="true" diskSpoolBufferSizeMB="20"
+		memoryStoreEvictionPolicy="LFU" transactionalMode="off">
+		<persistence strategy="localTempSwap" />
+	</cache>
+
+	<cache name="testplans-user" maxEntriesLocalHeap="10000"
+		maxEntriesLocalDisk="10000" eternal="true" diskSpoolBufferSizeMB="20"
+		memoryStoreEvictionPolicy="LFU" transactionalMode="off">
+		<persistence strategy="localTempSwap" />
+	</cache>
+
+	<cache name="testcases" maxEntriesLocalHeap="10000"
+		maxEntriesLocalDisk="10000" eternal="true" diskSpoolBufferSizeMB="20"
+		memoryStoreEvictionPolicy="LFU" transactionalMode="off">
+		<persistence strategy="localTempSwap" />
+	</cache>
+
+	<cache name="vaccine-name" maxEntriesLocalHeap="10000"
+		maxEntriesLocalDisk="10000" eternal="true" diskSpoolBufferSizeMB="20"
+		memoryStoreEvictionPolicy="LFU" transactionalMode="off">
+		<persistence strategy="localTempSwap" />
+	</cache>
+
+	<defaultCache name="defaut" maxEntriesLocalHeap="10000"
+		maxEntriesLocalDisk="10000" eternal="true" diskSpoolBufferSizeMB="20"
+		memoryStoreEvictionPolicy="LFU" transactionalMode="off">
+	</defaultCache>
+	
+		<cache name="vaccine-name-case" maxEntriesLocalHeap="10000"
+			maxEntriesLocalDisk="10000" eternal="true" diskSpoolBufferSizeMB="20"
+			memoryStoreEvictionPolicy="LFU" transactionalMode="off">
+			<persistence strategy="localTempSwap" />
+		</cache>
+
+		<cache name="vaccine" maxEntriesLocalHeap="10000"
+			maxEntriesLocalDisk="10000" eternal="true" diskSpoolBufferSizeMB="20"
+			memoryStoreEvictionPolicy="LFU" transactionalMode="off">
+			<persistence strategy="localTempSwap" />
+		</cache>
+
+		<cache name="mappings" maxEntriesLocalHeap="10000"
+			maxEntriesLocalDisk="10000" eternal="true" diskSpoolBufferSizeMB="20"
+			memoryStoreEvictionPolicy="LFU" transactionalMode="off">
+			<persistence strategy="localTempSwap" />
+		</cache>
+		<!-- <cache name="zipCache" maxEntriesLocalHeap="10000" maxEntriesLocalDisk="1000" 
+			eternal="true" diskSpoolBufferSizeMB="20" memoryStoreEvictionPolicy="LFU" 
+			transactionalMode="off"> <persistence strategy="localTempSwap" /> </cache> 
+			<cache name="testCaseCache" maxEntriesLocalHeap="10000" maxEntriesLocalDisk="1000" 
+			eternal="true" diskSpoolBufferSizeMB="20" memoryStoreEvictionPolicy="LFU" 
+			transactionalMode="off"> <persistence strategy="localTempSwap" /> </cache> 
+			<cache name="documentationCache" maxEntriesLocalHeap="10000" maxEntriesLocalDisk="1000" 
+			eternal="true" diskSpoolBufferSizeMB="20" memoryStoreEvictionPolicy="LFU" 
+			transactionalMode="off"> <persistence strategy="localTempSwap" /> </cache> -->
+
+
+
+
+</ehcache>

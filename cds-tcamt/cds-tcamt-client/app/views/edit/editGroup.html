@@ -1,0 +1,42 @@
+<style id="antiClickjack">
+    body {
+        display: none !important;
+    }
+</style>
+<script type="text/javascript">
+    if (self === top) {
+        var antiClickjack = document.getElementById("antiClickjack");
+        antiClickjack.parentNode.removeChild(antiClickjack);
+    } else {
+        top.location = self.location;
+    }
+</script>
+<script type="text/ng-template" id="EditTestGroupMetadata.html">
+    <md-content>
+        <md-tabs md-selected="tabs.selectedTabTC" md-dynamic-height md-border-bottom>
+            <md-tab label="Test Case Group MetaData">
+                <md-content class="md-padding" ng-model-options="{updateOn : 'change blur'}">
+                    <form name="groupMD" class="form-horizontal" novalidate>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="col-md-12">
+                                    <md-input-container style="width: 100%;">
+                                        <label>Test Case Group Name</label>
+                                        <input ng-model="selectedTG.name" ng-change="changedTG(selectedTG)" type="text"  ng-trim="false" required/>
+                                    </md-input-container>
+                                </div>
+                                <div class="col-md-12">
+                                    <md-input-container style="width: 100%;">
+                                        <label>Description</label>
+                                        <textarea style="background-color: rgb(241, 241, 241);" ng-model="selectedTG.description" rows="5">
+										</textarea>
+                                    </md-input-container>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </md-content>
+            </md-tab>
+        </md-tabs>
+    </md-content>
+</script>

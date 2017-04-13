@@ -25,11 +25,22 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.hibernate4.Hibernate4Module;
 
+
 @Configuration
 @EnableWebMvc
 @ComponentScan({ "gov.nist.healthcare.cds" })
 public class WebAppConfig extends WebMvcConfigurerAdapter {
 
+//    @Bean
+//    public Docket api() { 
+//        return new Docket(DocumentationType.SWAGGER_2)  
+//          .select()                                  
+//          .apis(RequestHandlerSelectors.basePackage("gov.nist.healthcare.cds.tcamt.controller"))              
+//          .paths(PathSelectors.ant("/api/*"))                          
+//          .build();                                           
+//    }
+//    
+    
 	@Override
 	public void configureDefaultServletHandling(
 			DefaultServletHandlerConfigurer configurer) {
@@ -87,6 +98,11 @@ public class WebAppConfig extends WebMvcConfigurerAdapter {
 		registry.addResourceHandler("/scripts/**/*").addResourceLocations("/scripts/");
 		registry.addResourceHandler("/styles/**/*").addResourceLocations("/styles/");
 		registry.addResourceHandler("/views/**/*").addResourceLocations("/views/");
+		registry.addResourceHandler("swagger-ui.html")
+	      .addResourceLocations("classpath:/META-INF/resources/");
+	 
+	    registry.addResourceHandler("/webjars/**")
+	      .addResourceLocations("classpath:/META-INF/resources/webjars/");
 	}
 	
 	@Bean

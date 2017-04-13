@@ -1,0 +1,82 @@
+<div ng-controller="UserManagementCtrl" ng-init="init()">
+    <div layout="column" layout-align="center start">
+        <h3> Manage Users </h3>
+        <div layout="row" layout-align="center" style="width: 100%;">
+            <table flex="50" class="table table-condensed table-striped">
+                <thead>
+                <tr>
+                    <th>Total</th>
+                    <th>Filter</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>
+                        <div layout="column" layout-align="center center">
+                            {{accounts.length}}
+                        </div>
+                    </td>
+                    <td>
+                        <md-select ng-model="filterS">
+                            <md-option ng-value="'e'">Enabled</md-option>
+                            <md-option ng-value="'d'">Disabled</md-option>
+                            <md-option ng-value="''">All</md-option>
+                        </md-select>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div layout="row" layout-align="center center" style="width: 100%;">
+            <table flex="60" class="table table-condensed table-striped">
+                <thead>
+                <tr>
+                    <th>
+                        Username
+                    </th>
+                    <th>
+                        Email
+                    </th>
+                    <th>
+                        Full Name
+                    </th>
+                    <th>
+                        Phone Number
+                    </th>
+                    <th>
+                        Employer
+                    </th>
+                    <th>
+                        Enable/Disable
+                    </th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr ng-repeat="ac in accounts | pending:filterS">
+                    <td>
+                        {{ac.username}}
+                    </td>
+                    <td>
+                        {{ac.email}}
+                    </td>
+                    <td>
+                        {{ac.fullName}}
+                    </td>
+                    <td>
+                        {{ac.phone}}
+                    </td>
+                    <td>
+                        {{ac.employer}}
+                    </td>
+                    <td>
+                        <button class="btn btn-sm" ng-class="{'btn-success' : ac.pending, 'btn-danger' : !ac.pending}" ng-click="toggle(ac)">
+                            {{ ac.pending ? 'Enable' : 'Disable'}}
+                        </button>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>

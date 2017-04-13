@@ -25,7 +25,6 @@ var app = angular
         'restangular',
         'angularjs-dropdown-multiselect',
         'dndLists',
-        'froala',
         'ngNotificationsBar',
         'ngDragDrop',
         'ui.tree', 
@@ -33,8 +32,11 @@ var app = angular
         'ui.bootstrap',
         'ui.codemirror',
         'ui-notification',
-        'btorfs.multiselect'
+        'btorfs.multiselect',
+        'ui.select',
+        'autocomplete'
     ]);
+
 app.config(function(NotificationProvider) {
     NotificationProvider.setOptions({
         delay: 10000,
@@ -103,6 +105,9 @@ app.config(function ($routeProvider, RestangularProvider, $httpProvider, Keepali
         }) .when('/glossary', {
             templateUrl: 'views/glossary.html'
         })
+        .when('/validation', {
+            templateUrl: 'views/execution.html'
+        })
 //        .when('/account', {
 //            templateUrl: 'views/account/account.html',
 //            controller: 'AccountCtrl',
@@ -133,6 +138,10 @@ app.config(function ($routeProvider, RestangularProvider, $httpProvider, Keepali
         .when('/registrationSubmitted', {
             templateUrl: 'views/account/registrationSubmitted.html'
         })
+
+    .when('/usermanagement', {
+        templateUrl: 'views/account/usermanagement.html'
+    })
         .otherwise({
             redirectTo: '/'
         });
@@ -298,12 +307,28 @@ app.config(function ($routeProvider, RestangularProvider, $httpProvider, Keepali
 });
 
 
-app.run(function ($rootScope, $location, Restangular, $modal, $filter, base64, userInfoService, $http, AppInfo, StorageService, $templateCache, $window, notifications) {
-    $rootScope.appInfo = {};
+app.run(function ($rootScope, $location, $anchorScroll, Restangular, $modal, $filter, base64, userInfoService, $http, AppInfo, StorageService, $templateCache, $window, notifications) {
+
+    $http.get("api/appInfo").then(function (result) {
+        $rootScope.appInfo = result.data;
+    });
+
+    $http.get("api/documentation/docs").then(function (result) {
+        $rootScope.documents = result.data;
+    });
+
+    $http.get("api/documentation/res").then(function (result) {
+        $rootScope.documentationResources = result.data;
+    });
+
+    $http.get("api/documentation/releaseNotes").then(function (result) {
+        $rootScope.releaseNotes = result.data;
+    });
+
     //Check if the login dialog is already displayed.
     $rootScope.loginDialogShown = false;
     $rootScope.subActivePath = null;
-
+    $anchorScroll.yOffset = 9999999;
     // load app info
 //    AppInfo.get().then(function (appInfo) {
 //        $rootScope.appInfo = appInfo;
@@ -389,7 +414,6 @@ app.run(function ($rootScope, $location, Restangular, $modal, $filter, base64, u
         }
         $rootScope.requests401 = [];
 
-        $location.url('/ig');
     });
 
     /*jshint sub: true */
@@ -421,9 +445,9 @@ app.run(function ($rootScope, $location, Restangular, $modal, $filter, base64, u
      * On 'logoutRequest' invoke logout on the server.
      */
     $rootScope.$on('event:logoutRequest', function () {
+        $http.get('logout');
         httpHeaders.common['Authorization'] = null;
         userInfoService.setCurrentUser(null);
-        $http.get('j_spring_security_logout');
     });
 
     /**

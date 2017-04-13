@@ -1,0 +1,71 @@
+<style id="antiClickjack">
+    body {
+        display: none !important;
+    }
+
+    .handle-custom {
+        background-color: red;
+    }
+</style>
+<script type="text/javascript">
+    if (self === top) {
+        var antiClickjack = document.getElementById("antiClickjack");
+        antiClickjack.parentNode.removeChild(antiClickjack);
+    } else {
+        top.location = self.location;
+    }
+</script>
+<div layout="column" layout-align="start" style="height: 100%; width: 100%;">
+    <div layout="column" layout-align="start" style="margin-top : 20px;">
+        <div ng-hide="addConfig" flex="20" layout="row" layout-align="center center">
+            <md-input-container  flex="60" style="margin-right: 10px;" >
+                <label>Software</label>
+                <md-select ng-model="$parent.main.selectedConfig" ng-model-options="{trackBy: '$value.id'}">
+                    <md-option class="config" ng-repeat="conf in configs" ng-value="conf">
+                        <div layout="row" style="width: 100%;">
+                            <div flex="25">
+                                <button ng-click="deleteConfig(conf.id,$index)" class="btn btn-xs btn-danger" style="margin: 0px;">
+                                    <i class="fa fa-trash-o" aria-hidden="true"></i>
+                                </button>
+                            </div>
+                            <div flex="75" style="text-align: center;">
+                                <strong>{{conf.name}}</strong>
+                            </div>
+                        </div>
+                    </md-option>
+                </md-select>
+            </md-input-container>
+            <button flex="20" ng-click="addConfig = true;" class="btn btn-info btn-sm" >
+                <i class="fa fa-plus" aria-hidden="true"></i>
+            </button>
+        </div>
+        <div ng-hide="addConfig" flex="20" layout="row" layout-align="center center">
+            <date-choose flex="95" nullable="false" type="'FIXED'" label="'Assessment Date for Relative Dates'" dt="$parent.assessmentDate" events="'[]'"></date-choose>
+        </div>
+
+        <md-input-container ng-show="addConfig" flex="10" style="width: 100%; margin-top: 15px;">
+            <label>Name</label>
+            <input ng-model="configStub.name" type="text"/>
+        </md-input-container>
+        <md-input-container ng-show="addConfig" flex="10" style="width: 100%;">
+            <label>End Point</label>
+            <input ng-model="configStub.endPoint" type="text"/>
+        </md-input-container>
+        <md-input-container ng-show="addConfig" flex="10" style="width: 100%;">
+            <label>Connector Type</label>
+            <md-select ng-model="configStub.connector" >
+                <md-option ng-value="'TCH'">TCH</md-option>
+                <md-option ng-value="'ICE'">ICE</md-option>
+                <md-option ng-value="'FHIR'">FHIR</md-option>
+            </md-select>
+        </md-input-container>
+        <div flex="10" ng-show="addConfig" style="width: 100%;" layout="row" layout-align="end center">
+            <button ng-click="saveConfig(); addConfig = false;" class="btn btn-success" >
+                <i class="fa fa-floppy-o" aria-hidden="true"></i>
+            </button>
+            <button ng-click="addConfig = false;" class="btn btn-danger" >
+                <i class="fa fa-times" aria-hidden="true"></i>
+            </button>
+        </div>
+    </div>
+</div>

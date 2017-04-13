@@ -12,6 +12,8 @@ import gov.nist.healthcare.cds.repositories.VaccineMappingRepository;
 import gov.nist.healthcare.cds.repositories.VaccineRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -49,13 +51,6 @@ public class VaccineController {
 	@ResponseBody
 	public List<VaccineMapping> vm(){
 		return vxMRepository.findAll();
-	}
-	
-	@RequestMapping(value = "/vx", method = RequestMethod.POST)
-	@ResponseBody
-	public String vm(@RequestBody Vaccine v){
-		System.out.println(v);
-		return "";
 	}
 	
 	@RequestMapping(value = "/vxg", method = RequestMethod.GET)

@@ -13,44 +13,120 @@
     <div class="container2">
         <div class="row">
             <div class="col-md-12" style="margin-bottom: 20px">
-                <div class="page-header">
-                    <div class="header5">Release Notes</div>
-                </div>
-                <div>
-                    <table class="table table-striped table-bordered">
-                        <thead>
-                        <tr class="tbl-header">
+                <div style="margin-bottom: 20px">
+                    <div class="panel-about panel-info">
+                        <div class="panel-heading"><strong>Release Notes</strong></div>
+                        <div class="panel-body">
+                            <table class="table table-striped table-bordered">
+                            <thead>
+                            <tr class="tbl-header1">
                             <th>
-                                Version
+                            Version
                             </th>
                             <th>
-                                Date
+                            Date
                             </th>
 
                             <th>
-                                Updates
+                            Updates
                             </th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <tr ng-repeat="releaseNote in releaseNotes">
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr ng-repeat="releaseNote in releaseNotes">
                             <td>
-                                {{releaseNote.version}}
+                            {{releaseNote.version}}
                             </td>
                             <td>
-                                {{releaseNote.date | date: 'MM/dd/yyyy HH:mm:ss'}}
+                            {{releaseNote.date | date: 'MM/dd/yyyy HH:mm:ss'}}
                             </td>
                             <td>
-                                <ul>
-                                    <li ng-repeat="update in releaseNote.updates">
-                                       {{update}}
-                                    </li>
-                                </ul>
+                            <ul>
+                            <li ng-repeat="update in releaseNote.updates">
+                            {{update}}
+                            </li>
+                            </ul>
                             </td>
-                        </tr>
-                        </tbody>
-                    </table>
+                            </tr>
+                            </tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
+                <div style="margin-bottom: 20px">
+                    <div class="panel-about panel-info">
+                        <div class="panel-heading"><strong>About</strong></div>
+                        <div class="panel-body">
+                            <p>
+                                Tool Version:{{appInfo.version}}
+                            </p>
+
+                            <p>
+                                Deployment Date: {{appInfo.date |  date: 'MM/dd/yyyy HH:mm:ss'}}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div style="margin-bottom: 20px">
+                    <div class="panel-about panel-info">
+                        <div class="panel-heading"><strong>Acknowledgement</strong></div>
+                        <div class="panel-body">
+                            <p>
+                                This Test Suite, the test data, and associated artifacts were developed by the National Institute of Standards and Technology (NIST) in collaboration with the Center for Disease Control and Prevention (CDC) and American Immunization Registries Association (AIRA).
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div style="margin-bottom: 20px">
+                    <div class="panel-about panel-info">
+                        <div class="panel-heading"><strong>Disclaimer</strong></div>
+                        <div class="panel-body">
+                            <p>
+                            Favorable outcome in the use of the test materials on this site does not imply conformance recognition by National Institute of Standards and Technology (NIST). Links to non-Federal Government Web sites do not imply NIST endorsement of any particular product, service, organization, company, information provider, or content. This software was developed at the NIST by employees of the Federal Government in the course of their official duties. Pursuant to title 17 Section 105 of the United States Code this software is not subject to copyright protection and is in the public domain. NIST assumes no responsibility whatsoever for its use by other parties, and makes no guarantees, expressed or implied, about its quality, reliability, or any other characteristic. We would appreciate acknowledgment if the software is used. This software can be redistributed and/or modified freely provided that any derivative works bear some notice that they are derived from it, and any modified versions bear some notice that they have been modified.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!--<div class="page-header">-->
+                    <!--<div class="header5">Release Notes</div>-->
+                <!--</div>-->
+                <!--<div>-->
+                    <!--<table class="table table-striped table-bordered">-->
+                        <!--<thead>-->
+                        <!--<tr class="tbl-header">-->
+                            <!--<th>-->
+                                <!--Version-->
+                            <!--</th>-->
+                            <!--<th>-->
+                                <!--Date-->
+                            <!--</th>-->
+
+                            <!--<th>-->
+                                <!--Updates-->
+                            <!--</th>-->
+                        <!--</tr>-->
+                        <!--</thead>-->
+                        <!--<tbody>-->
+                        <!--&lt;!&ndash;<tr ng-repeat="releaseNote in releaseNotes">&ndash;&gt;-->
+                            <!--&lt;!&ndash;<td>&ndash;&gt;-->
+                                <!--&lt;!&ndash;{{releaseNote.version}}&ndash;&gt;-->
+                            <!--&lt;!&ndash;</td>&ndash;&gt;-->
+                            <!--&lt;!&ndash;<td>&ndash;&gt;-->
+                                <!--&lt;!&ndash;{{releaseNote.date | date: 'MM/dd/yyyy HH:mm:ss'}}&ndash;&gt;-->
+                            <!--&lt;!&ndash;</td>&ndash;&gt;-->
+                            <!--&lt;!&ndash;<td>&ndash;&gt;-->
+                                <!--&lt;!&ndash;<ul>&ndash;&gt;-->
+                                    <!--&lt;!&ndash;<li ng-repeat="update in releaseNote.updates">&ndash;&gt;-->
+                                       <!--&lt;!&ndash;{{update}}&ndash;&gt;-->
+                                    <!--&lt;!&ndash;</li>&ndash;&gt;-->
+                                <!--&lt;!&ndash;</ul>&ndash;&gt;-->
+                            <!--&lt;!&ndash;</td>&ndash;&gt;-->
+                        <!--&lt;!&ndash;</tr>&ndash;&gt;-->
+                        <!--</tbody>-->
+                    <!--</table>-->
+                <!--</div>-->
+
             </div>
         </div>
     </div>

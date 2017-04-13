@@ -88,50 +88,50 @@
                  </div>
             </div>
 
-            <div class="control-group form-group" ng-class="{'has-success has-feedback': editAccountForm.inputPhoneNumber.$valid, 'igl-has-error has-feedback': !editAccountForm.inputPhoneNumber.$valid}">
-                <label class="control-label col-sm-2" for="inputPhoneNumber"><div msg key='account.phone'></div></label>
-                <div class="controls col-sm-7">
-                    <input type="text" class="form-control immediate-help account-input" name="inputPhoneNumber" id="inputPhoneNumber" ig-check-phone ng-model='account.phone'
-                         >
-                    <div class="input-help">
-                        <h4><div msg key='registration.phone.error'></div></h4>
-                        <ul>
-                            <li ng-class="phoneIsNumber">
-                                <div msg key='registration.phone.error.notNumber'></div>
-                            </li>
-                            <li ng-class="phoneValidLength">
-                                <div msg key='registration.phone.error.length'></div>
-                            </li>
-                        </ul>
-                    </div>
-                 </div>
-            </div>
-
-            <div class="control-group form-group" ng-class="{'has-success has-feedback': editAccountForm.inputEmployer.$valid, 'igl-has-error has-feedback': !editAccountForm.inputEmployer.$valid}">
-                <label class="control-label col-sm-2" for="inputEmployer"><div msg key='account.employer'></div></label>
-                <div class="controls col-sm-7">
-                    <input type="text" class="form-control immediate-help account-input" name="inputEmployer" id="inputEmployer" ng-model='account.employer' ng-minlength="2"
-                          >
-
+            <!--<div class="control-group form-group" ng-class="{'has-success has-feedback': editAccountForm.inputPhoneNumber.$valid, 'igl-has-error has-feedback': !editAccountForm.inputPhoneNumber.$valid}">-->
+                <!--<label class="control-label col-sm-2" for="inputPhoneNumber"><div msg key='account.phone'></div></label>-->
+                <!--<div class="controls col-sm-7">-->
+                    <!--<input type="text" class="form-control immediate-help account-input" name="inputPhoneNumber" id="inputPhoneNumber" ig-check-phone ng-model='account.phone'-->
+                         <!--&gt;-->
                     <!--<div class="input-help">-->
-                        <!--<h4><div msg key='account.employer.error'></div></h4>-->
+                        <!--<h4><div msg key='registration.phone.error'></div></h4>-->
+                        <!--<ul>-->
+                            <!--<li ng-class="phoneIsNumber">-->
+                                <!--<div msg key='registration.phone.error.notNumber'></div>-->
+                            <!--</li>-->
+                            <!--<li ng-class="phoneValidLength">-->
+                                <!--<div msg key='registration.phone.error.length'></div>-->
+                            <!--</li>-->
+                        <!--</ul>-->
                     <!--</div>-->
-                    <!--<span class="valid" ng-show="editAccountForm.inputEmployer.$valid"><img alt="check OK" src="images/check.png" ></span><br>-->
-                </div>
-            </div>
+                 <!--</div>-->
+            <!--</div>-->
 
-            <div class="control-group form-group" ng-class="{'has-success has-feedback': editAccountForm.inputTitle.$valid, 'igl-has-error has-feedback': !editAccountForm.inputTitle.$valid}">
-                <label class="control-label col-sm-2" for="inputTitle"><div msg key='account.title'></div></label>
-                <div class="controls col-sm-7">
-                    <input type="text" class="form-control immediate-help account-input" name="inputTitle" id="inputTitle" ng-model='account.title'
-                          >
-                </div>
-            </div>
+            <!--<div class="control-group form-group" ng-class="{'has-success has-feedback': editAccountForm.inputEmployer.$valid, 'igl-has-error has-feedback': !editAccountForm.inputEmployer.$valid}">-->
+                <!--<label class="control-label col-sm-2" for="inputEmployer"><div msg key='account.employer'></div></label>-->
+                <!--<div class="controls col-sm-7">-->
+                    <!--<input type="text" class="form-control immediate-help account-input" name="inputEmployer" id="inputEmployer" ng-model='account.employer' ng-minlength="2"-->
+                          <!--&gt;-->
 
-            <div class="control-group form-group" ng-class="{'has-success has-feedback': editAccountForm.inputJuridiction.$valid, 'igl-has-error has-feedback': !editAccountForm.inputJuridiction.$valid}">
-                <label class="control-label col-sm-2" for="inputJuridiction"><div msg key='account.juridiction'></div></label>
+                    <!--&lt;!&ndash;<div class="input-help">&ndash;&gt;-->
+                        <!--&lt;!&ndash;<h4><div msg key='account.employer.error'></div></h4>&ndash;&gt;-->
+                    <!--&lt;!&ndash;</div>&ndash;&gt;-->
+                    <!--&lt;!&ndash;<span class="valid" ng-show="editAccountForm.inputEmployer.$valid"><img alt="check OK" src="images/check.png" ></span><br>&ndash;&gt;-->
+                <!--</div>-->
+            <!--</div>-->
+
+            <!--<div class="control-group form-group" ng-class="{'has-success has-feedback': editAccountForm.inputTitle.$valid, 'igl-has-error has-feedback': !editAccountForm.inputTitle.$valid}">-->
+                <!--<label class="control-label col-sm-2" for="inputTitle"><div msg key='account.title'></div></label>-->
+                <!--<div class="controls col-sm-7">-->
+                    <!--<input type="text" class="form-control immediate-help account-input" name="inputTitle" id="inputTitle" ng-model='account.title'-->
+                          <!--&gt;-->
+                <!--</div>-->
+            <!--</div>-->
+
+            <div class="control-group form-group" ng-class="{'has-success has-feedback': editAccountForm.inputOrganization.$valid, 'igl-has-error has-feedback': !editAccountForm.inputOrganization.$valid}">
+                <label class="control-label col-sm-2" for="inputOrganization"><div msg key='account.organization'></div></label>
                 <div class="controls col-sm-7">
-                    <input type="text" class="form-control immediate-help account-input" name="inputJuridiction" id="inputJuridiction" ng-model='account.juridiction'
+                    <input type="text" class="form-control immediate-help account-input" name="inputOrganization" id="inputOrganization" ng-model='account.organization'
                            >
 
                     <!--<div class="input-help">-->

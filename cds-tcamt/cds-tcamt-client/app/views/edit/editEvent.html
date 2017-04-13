@@ -1,185 +1,218 @@
 <style id="antiClickjack">
-body {
-	display: none !important;
-}
+    body {
+        display: none !important;
+    }
 </style>
 <script type="text/javascript">
-	if (self === top) {
-		var antiClickjack = document.getElementById("antiClickjack");
-		antiClickjack.parentNode.removeChild(antiClickjack);
-	} else {
-		top.location = self.location;
-	}
+    if (self === top) {
+        var antiClickjack = document.getElementById("antiClickjack");
+        antiClickjack.parentNode.removeChild(antiClickjack);
+    } else {
+        top.location = self.location;
+    }
 </script>
 
 <script type="text/ng-template" id="EditEventData.html">
 
-<md-content> <md-tabs md-dynamic-height md-border-bottom>
-<md-tab label="Vaccination Event"> <md-content
-	class="md-padding">
-<form name="vaccineForm" class="form-horizontal" novalidate>
-	<div class="row">
-		<div class="col-md-8">
-			<div class="col-md-12">
-				<div style="width: 100%; margin-top : 10px;">
-					<label class="col-md-12" style="color: rgb(117, 117, 139);">Vaccine</label>	
-					<vaccine-picker allow-mvx="true" vxm="vxm"  vxg="vxgs" model="selectedEvent[selectedEvent._type].administred"></vaccine-picker>
-				</div>
-			</div>
-		</div>
-		<div class="col-md-4" style="margin-top: 10px;">
-			<date-choose ng-init="ctrl.init()" tc="selectedTC"
-				label="'Date Of Vaccination'"
-				dt="selectedEvent[selectedEvent._type].date"></date-choose>
-		</div>
-	</div>
-</form>
-</md-content> </md-tab> <md-tab label="Expected Evaluations"> <md-content
-	class="md-padding">
-<div>
-	<button title="Add Evaluation" type="button"
-		class="btn btn-sm btn-info pull-right" style="margin: 0px;"
-		ng-click="newEvaluation(selectedEvent[selectedEvent._type].evaluations)">
-		<span><i class="fa fa-plus fa-fw"></i> Add Evaluation </span>
-	</button>
-	<button title="PreFill" type="button"
-		ng-show ="selectedEvent[selectedEvent._type].administred && selectedEvent[selectedEvent._type].evaluations.length === 0"
-		class="btn btn-sm btn-info pull-right"
-		ng-click="prefill(selectedEvent[selectedEvent._type].evaluations,selectedEvent[selectedEvent._type].administred)" style="margin-top: 0px;"">
-		<span><i class="fa fa-pencil" aria-hidden="true"></i> Pre Fill </span>
-	</button>
-</div>
-<form
-	ng-repeat="evaluation in selectedEvent[selectedEvent._type].evaluations track by $index"
-	name="vaccineForm" class="form-horizontal" novalidate>
-	<div class="row">
-		<div class="col-md-12">
-			<div class="col-md-12">
-				<div style="width: 100%; margin-bottom: 30px;">
-					<label class="col-md-12" style="color: rgb(117, 117, 139);">Related To</label>	
-					<vaccine-picker allow-mvx="false" vxm="vxm"  vxg="vxgs" model="evaluation.relatedTo"></vaccine-picker>
-				</div>
-			</div>
-			<div class="col-md-5" style="margin-top: 10px;">
-				<md-input-container style="width: 100%;"> <label>Status</label>
-				<md-select ng-model="evaluation.status"
-					ng-model-options="{trackBy: '$value'}" ng-change="evalStatusChange(evaluation)">
-				<md-option ng-repeat=" enum in evalStatus " ng-value="enum.code">{{enum.details}}</md-option>
-				</md-select> </md-input-container>
-			</div>
-			<div class="col-md-6" style="margin-top: 10px;">
-				<md-input-container style="width: 100%;"> <label>Reason</label>
-				<md-select ng-disabled="evaluation.status !== 'INVALID'"
-					ng-model="evaluation.reason" ng-model-options="{trackBy: '$value'}"
-					ng-change="tcChanged()"> <md-option
-					ng-repeat=" enum in evalReason " ng-value="enum.code">{{enum.details}}</md-option>
-				</md-select> </md-input-container>
-			</div>
-			<div class="col-md-1" style="margin-top: 10px;">
-				<md-input-container style="width: 100%;">
-				<button title="Delete Evaluation" type="button"
-					class="btn btn-sm btn-danger" style="margin: 0px;"
-					ng-click="deleteEvaluation(selectedEvent[selectedEvent._type].evaluations,$index); tcChanged()">
-					<span><i class="fa fa-minus fa-fw"></i></span>
-				</button>
-				</md-input-container>
-			</div>
-		</div>
-	</div>
-	<hr />
-</form>
-</md-content> </md-tab> </md-tabs> </md-content>
+    <md-content>
+        <md-tabs md-dynamic-height md-border-bottom>
+            <md-tab label="Vaccination Event">
+                <md-content class="md-padding" >
+                    <div style="min-height: 350px;">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div style="width: 100%; margin-top : 10px;">
+                                    <label class="col-md-12" style="color: rgb(117, 117, 139);">Vaccine</label>
+                                    <vaccine-picker allow-mvx="true" vxm="vxm" vxg="vxgs"
+                                                    model="selectedEvent.administred"></vaccine-picker>
+                                </div>
+                            </div>
+                            <div class="col-md-12" style="margin-top: 10px;">
+                                <date-choose exclude="selectedEvent.position" nullable="false"
+                                             type="selectedTC.dateType" label="'Date Of Vaccination'"
+                                             dt="selectedEvent.date" events="selectedTC.events"></date-choose>
+                            </div>
+                        </div>
+                    </div>
+                </md-content>
+            </md-tab>
+            <md-tab label="Expected Evaluations">
+                <md-content class="md-padding">
+                    <div>
+                        <button title="Add Evaluation" type="button"
+                                class="btn btn-sm btn-info pull-right" style="margin: 0px;"
+                                ng-click="newEvaluation(selectedEvent.evaluations)">
+                            <span><i class="fa fa-plus fa-fw"></i> Add Evaluation </span>
+                        </button>
+                        <button title="PreFill" type="button"
+                                ng-show="selectedEvent.administred && selectedEvent.evaluations.length === 0"
+                                class="btn btn-sm btn-info pull-right"
+                                ng-click="prefill(selectedEvent.evaluations,selectedEvent.administred)"
+                                style="margin-top: 0px;"
+                        ">
+                        <span><i class="fa fa-pencil" aria-hidden="true"></i> Pre Fill </span>
+
+                        </button>
+                    </div>
+                    <form
+                            ng-repeat="evaluation in selectedEvent.evaluations track by $index"
+                            name="vaccineForm" class="form-horizontal" novalidate>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="col-md-12">
+                                    <div style="width: 100%; margin-bottom: 30px;">
+                                        <label class="col-md-12" style="color: rgb(117, 117, 139);">Related To</label>
+                                        <vaccine-picker allow-mvx="false" vxm="vxm" vxg="vxgs"
+                                                        model="evaluation.relatedTo"></vaccine-picker>
+                                    </div>
+                                </div>
+                                <div class="col-md-5" style="margin-top: 10px;">
+                                    <md-input-container style="width: 100%;"><label>Status</label>
+                                        <md-select ng-model="evaluation.status"
+                                                   ng-model-options="{trackBy: '$value'}"
+                                                   ng-change="evalStatusChange(evaluation)">
+                                            <md-option ng-repeat=" enum in evalStatus " ng-value="enum.code">
+                                                {{enum.details}}
+                                            </md-option>
+                                        </md-select>
+                                    </md-input-container>
+                                </div>
+                                <div class="col-md-6" style="margin-top: 10px;">
+                                    <md-input-container style="width: 100%;"><label>Reason</label>
+                                        <md-select ng-disabled="evaluation.status !== 'INVALID'"
+                                                   ng-model="evaluation.reason" ng-model-options="{trackBy: '$value'}"
+                                                   ng-change="tcChanged()">
+                                            <md-option
+                                                    ng-repeat=" enum in ::evalReason " ng-value="enum.code">
+                                                {{::enum.details}}
+                                            </md-option>
+                                        </md-select>
+                                    </md-input-container>
+                                </div>
+                                <div class="col-md-1" style="margin-top: 10px;">
+                                    <md-input-container style="width: 100%;">
+                                        <button title="Delete Evaluation" type="button"
+                                                class="btn btn-sm btn-danger" style="margin: 0px;"
+                                                ng-click="deleteEvaluation(selectedEvent.evaluations,$index); tcChanged()">
+                                            <span><i class="fa fa-minus fa-fw"></i></span>
+                                        </button>
+                                    </md-input-container>
+                                </div>
+                            </div>
+                        </div>
+                        <hr/>
+                    </form>
+                </md-content>
+            </md-tab>
+        </md-tabs>
+    </md-content>
 </script>
 <script type="text/ng-template" id="VaccineBrowse.html">
-<div style="padding: 0px; margin-top : 10px;" class="panel panel-primary col-md-12">
-	<div class="panel-heading">Vaccine Browser 
-   		<button class="btn btn-xs btn-warning pull-right" style="margin: 0px;" ng-click="cancel()">
-			<i class="fa fa-times" aria-hidden="true"></i>
-		</button>
+    <div style="padding: 0px; margin-top : 10px;" class="panel panel-primary col-md-12">
+        <div class="panel-heading">Vaccine Browser
+            <button class="btn btn-xs btn-warning pull-right" style="margin: 0px;" ng-click="cancel()">
+                <i class="fa fa-times" aria-hidden="true"></i>
+            </button>
+        </div>
+        <div class="panel-body">
+            <div class="input-group col-md-4" style="margin-top : 15px;"
+                 ng-class="{'col-md-4' : generic, 'col-md-12' : !generic }">
+                <span class="input-group-addon" id="basic-addon1"><i class="fa fa-search" aria-hidden="true"></i></span>
+                <input type="text" ng-change="vxdataChange()" ng-model="searchtxt" class="form-control"
+                       style="background-color : white;" placeholder="Search" aria-describedby="basic-addon1">
+            </div>
+            <div class="col-md-4" ng-show="generic">
+                <multiselect show-unselect-all="true" class="group-select" ng-model="vxGroups"
+                             ng-change="vxdataChange()" options="vxgs"
+                             id-prop="cvx" display-prop="name" search-limit="100" show-search="true">
+                </multiselect>
+            </div>
+            <div style="margin-top : 15px;" class="col-md-offset-1 col-md-3" ng-show="generic">
+                <md-checkbox ng-model="unspec" aria-label="Unspecified" ng-change="vxdataChange()">
+                    Unspecified Formulation
+                </md-checkbox>
+            </div>
+            <div ng-show="generic">
+                <md-card ng-class="{'alternate0' : isW($index), 'alternate1' : !isW($index) }"
+                         style="margin : 0; height : 125px;" class="col-md-6"
+                         ng-repeat="mp in filterData = ( vxm | vaccine:searchtxt | vxgroup:vxGroups | unspecified:unspec ) | limitTo:pageSize:pageSize*(pcG-1) track by $index">
+                    <md-card-title style="padding : 18px 10px 10px;" layout="row" layout-align="end center">
+                        <md-card-title-media style="margin-right : 10px;">
+                            <div class="md-media-sm card-media"
+                                 ng-class="{'alternate0' : !isW($index), 'alternate1' : isW($index) }" layout="column"
+                                 layout-align="center center">
+                                <span style="background-color: green;" class="badge">CVX</span>
+                                <span style="text-align: center; font-size: 20px;"><strong>{{mp.vx.cvx}}</strong></span>
+                            </div>
+                        </md-card-title-media>
+                        <md-card-title-text>
+                            <span class="md-headline" style="font-size : 18px; text-transform: capitalize;">{{mp.vx.name}}</span>
+                            <span class="md-subhead" style="font-size : 12px; text-transform: capitalize;">{{mp.vx.details}}</span>
+                        </md-card-title-text>
+                        <md-card-actions layout="column" layout-align="end center">
+                            <md-button ng-click="select(mp.vx)">
+                                <i style="font-size : 1.5em;" class="fa fa-hand-o-left" aria-hidden="true"></i>
+                            </md-button>
+                            <md-button ng-click="zoom(mp)" ng-show="mp.products && mp.products.length > 0 && allowMvx">
+                                <i style="font-size : 1.5em;" class="fa fa-search" aria-hidden="true"></i>
+                            </md-button>
+                        </md-card-actions>
+                    </md-card-title>
+                </md-card>
+            </div>
+            <div ng-hide="generic">
+                <div class="col-md-12"
+                     style="height : 40px; width : 100%; background-color : #f0f0f0; margin-top : 10px; margin-bottom : 10px;">
+                    <button class="btn btn-xs btn-primary" ng-click="unzoom()">
+                        <i class="fa fa-arrow-left" aria-hidden="true"></i> Back
+                    </button>
+                    <span style="text-transform : capitalize;">{{selectedMapping.vx.name}}#{{selectedMapping.vx.cvx}}</span>
+                </div>
+                <md-card ng-class="{'alternate0' : ($index%2) === 0, 'alternate1' : ($index%2) === 1 }"
+                         style="margin : 0;" class="col-md-12"
+                         ng-repeat="pr in filterPr = ( selectedMapping.products | product:searchtxt ) | limitTo:pageSize:pageSize*(pcS-1) track by $index">
+                    <md-card-title style="padding : 18px 10px 10px;" layout="row" layout-align="end center">
+                        <md-card-title-text>
+                            <span class="md-headline"
+                                  style="font-size : 18px; text-transform: capitalize;">{{pr.name}}</span>
+                            <span class="md-subhead">Manufacturer {{pr.mx.name}}</span>
+                            <span class="md-subhead">CVX #{{selectedMapping.vx.cvx}} </span>
+                            <span class="md-subhead">MVX #{{pr.mx.mvx}}</span>
+                        </md-card-title-text>
+                        <md-card-actions layout="column" layout-align="end center">
+                            <md-button ng-click="select(pr)">
+                                <i style="font-size : 1.5em;" class="fa fa-hand-o-left" aria-hidden="true"></i>
+                            </md-button>
+                        </md-card-actions>
+                    </md-card-title>
+                </md-card>
+            </div>
+            <nav ng-show="generic" aria-label="Page navigation" class="col-md-12">
+                <ul flex class="pagination">
+                    <li><a ng-click="forward()" aria-label="Previous"> <span
+                            aria-hidden="true">&laquo;</span>
+                    </a></li>
+                    <li ng-class="{'active' : pcG ===  ($index + 1)}"
+                        ng-repeat="i in pages(filterData) track by $index "><a
+                            ng-click="goToPageG($index+1)">{{$index+1}}</a></li>
+                    <li><a ng-click="backward()" aria-label="Next"> <span
+                            aria-hidden="true">&raquo;</span>
+                    </a></li>
+                </ul>
+            </nav>
+            <nav ng-hide="generic" aria-label="Page navigation" class="col-md-12">
+                <ul flex class="pagination">
+                    <li><a ng-click="forward()" aria-label="Previous"> <span
+                            aria-hidden="true">&laquo;</span>
+                    </a></li>
+                    <li ng-class="{'active' : pcS ===  ($index + 1)}"
+                        ng-repeat="i in pages(filterPr) track by $index"><a
+                            ng-click="goToPageS($index+1)">{{$index+1}}</a></li>
+                    <li><a ng-click="backward()" aria-label="Next"> <span
+                            aria-hidden="true">&raquo;</span>
+                    </a></li>
+                </ul>
+            </nav>
+        </div>
     </div>
-	<div class="panel-body">
-		<div class="input-group col-md-4" style="margin-top : 15px;" ng-class="{'col-md-4' : generic, 'col-md-12' : !generic }">
-					<span class="input-group-addon"  id="basic-addon1"><i class="fa fa-search" aria-hidden="true"></i></span>
-					<input type="text" ng-model="searchtxt" class="form-control" style="background-color : white;" placeholder="Search" aria-describedby="basic-addon1">
-		</div>
-		<div class="col-md-4" ng-show="generic">
-			<multiselect show-unselect-all="true" class="group-select" ng-model="vxGroups" options="vxgs"
-			id-prop="cvx" display-prop="name" search-limit="100" show-search="true">
-			</multiselect>
-		</div>
-		<div style="margin-top : 15px;" class="col-md-offset-1 col-md-3" ng-show="generic">
-			<md-checkbox ng-model="unspec" aria-label="Unspecified">
-				Unspecified Formulation
-			</md-checkbox>
-		</div>
-		<div ng-show="generic">
-			<md-card ng-class="{'alternate0' : isW($index), 'alternate1' : !isW($index) }" style="margin : 0; height : 125px;" class="col-md-6" ng-repeat="mp in filterData = ( vxm | vaccine:searchtxt | vxgroup:vxGroups | unspecified:unspec ) | limitTo:pageSize:pageSize*(pcG-1) track by $index">
-     				<md-card-title style="padding : 18px 10px 10px;" layout="row" layout-align="end center">
-       				<md-card-title-text>
-         					<span class="md-headline" style="font-size : 18px; text-transform: capitalize;">{{mp.vx.name}}</span>
-         					<span class="md-subhead">#{{mp.vx.cvx}}</span>
-         					<span class="md-subhead" style="font-size : 12px; text-transform: capitalize;">{{mp.vx.details}}</span>
-     					</md-card-title-text>
-       				<md-card-actions layout="column" layout-align="end center">
-      						<md-button ng-click="select(mp.vx)">
-							<i style="font-size : 1.5em;" class="fa fa-hand-o-left" aria-hidden="true"></i>
-						</md-button>
-						<md-button ng-click="zoom(mp)" ng-show="mp.products && mp.products.length > 0 && allowMvx">
-							<i style="font-size : 1.5em;" class="fa fa-search" aria-hidden="true"></i>
-						</md-button>
-     					</md-card-actions>
-     				</md-card-title>				
-   			</md-card>
-		</div>
-		<div ng-hide="generic">
-			<div class="col-md-12" style="height : 40px; width : 100%; background-color : #f0f0f0; margin-top : 10px; margin-bottom : 10px;">
-				<button class="btn btn-xs btn-primary" ng-click="unzoom()">
-					<i class="fa fa-arrow-left" aria-hidden="true"></i> Back
-				</button>
-				<span style="text-transform : capitalize;">{{selectedMapping.vx.name}}#{{selectedMapping.vx.cvx}}</span>
-			</div>
-			<md-card ng-class="{'alternate0' : ($index%2) === 0, 'alternate1' : ($index%2) === 1 }" style="margin : 0;" class="col-md-12" ng-repeat="pr in filterPr = ( selectedMapping.products | product:searchtxt ) | limitTo:pageSize:pageSize*(pcS-1) track by $index">
-    			<md-card-title style="padding : 18px 10px 10px;" layout="row" layout-align="end center">
-       				<md-card-title-text>
-         					<span class="md-headline" style="font-size : 18px; text-transform: capitalize;">{{pr.name}}</span>
-         					<span class="md-subhead">Manufacturer {{pr.mx.name}}</span>
-         					<span class="md-subhead">CVX #{{selectedMapping.vx.cvx}} </span>
-         					<span class="md-subhead">MVX #{{pr.mx.mvx}}</span>
-     					</md-card-title-text>
-       				<md-card-actions layout="column" layout-align="end center">
-      						<md-button ng-click="select(pr)">
-							<i style="font-size : 1.5em;" class="fa fa-hand-o-left" aria-hidden="true"></i>
-						</md-button>
-     				</md-card-actions>
-    			</md-card-title>				
-  			</md-card>
-		</div>
-		<nav ng-show="generic" aria-label="Page navigation" class="col-md-12">
-			<ul flex class="pagination">
-				<li><a ng-click="forward()" aria-label="Previous"> <span
-						aria-hidden="true">&laquo;</span>
-				</a></li>
-				<li ng-class="{'active' : pcG ===  ($index + 1)}"
-					ng-repeat="i in pages(filterData) track by $index "><a
-					ng-click="goToPageG($index+1)">{{$index+1}}</a></li>
-				<li><a ng-click="backward()" aria-label="Next"> <span
-						aria-hidden="true">&raquo;</span>
-				</a></li>
-			</ul>
-		</nav>
-		<nav ng-hide="generic" aria-label="Page navigation" class="col-md-12">
-			<ul flex class="pagination">
-				<li><a ng-click="forward()" aria-label="Previous"> <span
-						aria-hidden="true">&laquo;</span>
-				</a></li>
-				<li ng-class="{'active' : pcS ===  ($index + 1)}"
-					ng-repeat="i in pages(filterPr) track by $index"><a
-					ng-click="goToPageS($index+1)">{{$index+1}}</a></li>
-				<li><a ng-click="backward()" aria-label="Next"> <span
-						aria-hidden="true">&raquo;</span>
-				</a></li>
-			</ul>
-		</nav>
-	</div>
-</div>
 </script>

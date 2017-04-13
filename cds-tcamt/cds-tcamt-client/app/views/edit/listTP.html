@@ -9,30 +9,46 @@
         top.location = self.location;
     }
 </script>
-<div class="row">
+<!-- <div class="row"> -->
+<!-- <ul> -->
+<!-- <li ng-repeat=" i in ::it "><strong>{{i.x}}</strong> -->
+<!-- <button ng-click="editT(i)"> -->
+<!-- Edit -->
+<!-- </button> -->
+<!-- </li> -->
+<!-- </ul> -->
+
+<!-- <button ng-click="addT()"> -->
+<!-- ADD -->
+<!-- </button> -->
 
     <div ng-hide="loading">
-        <div class="col-md-12">
+        <span class="col-md-12" ng-show="tps.length === 0" style="text-align: center;"><strong>No TestPlan created yet.</strong></span>
+        <div ng-show="tps.length !== 0" class="col-md-12">
             <div ng-show="error === null">
                 <table st-table="tmpTps" st-safe-src="tps" class="smart-table table table-striped table-bordered">
                     <thead>
                         <tr class="tbl-header">
-                            <th st-ratio="5">#</th>
-                            <th st-ratio="20" st-sort="name">Name</th>
-                            <th st-ratio="30" st-sort="description">Description</th>
-                            <th st-ratio="15" st-sort="version">Version</th>
-                            <th st-ratio="15" st-sort="lastUpdateDate">Date</th>
-                            <th st-ratio="15">Actions</th>
+                            <!--<th st-ratio="5">#</th>-->
+                            <th st-ratio="22" st-sort="name">Name</th>
+                            <th st-ratio="20" st-sort="description">Description</th>
+                            <th st-ratio="10" st-sort="version">Version</th>
+                            <th st-ratio="11" st-sort="lastUpdateDate">Creation Date</th>
+                            <th st-ratio="12" st-sort="lastUpdateDate">Last Update Date</th>
+                            <th st-ratio="10" >Total Test Cases</th>
+                            <th st-ratio="10">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr ng-repeat="row in tmpTps | orderBy:'lastUpdateDate'">
-                            <td st-ratio="5">{{$index + 1}}</td>
-                            <td st-ratio="20" ng-bind="row.name"></td>
-                            <td st-ratio="30" ng-bind="row.description"></td>
-                            <td st-ratio="15" ng-bind="row.metaData.version"></td>
-   							<td st-ratio="15" ng-bind="row.metaData.dateCreated.fixed.date | date:'MM/dd/yyyy'"></td>
-                            <td st-ratio="15">
+                        <tr ng-repeat="row in tmpTps track by $index">
+                            <!--<td st-ratio="5">{{$index + 1}}</td>-->
+                            <td st-ratio="22" ng-bind="row.name"></td>
+                            <td st-ratio="20" ng-bind="row.description"></td>
+                            <td st-ratio="10" ng-bind="row.metaData.version"></td>
+   							<td st-ratio="11" ng-bind="row.metaData.dateCreated | date:'MM/dd/yyyy'"></td>
+                            <td st-ratio="12" ng-bind="row.metaData.dateLastUpdated | date:'MM/dd/yyyy'"></td>
+                            <td st-ratio="10" ng-bind="calculateTC(row)"></td>
+                            <td st-ratio="10">
                         	    <button title="Select"
                                     type="button" class="btn btn-xs btn-info no-margin"
                                     ng-click="selectTP(row)">
@@ -42,6 +58,10 @@
                                     ng-click="confirmDeleteTestPlan(row)">
                                     <span><i class="fa fa-trash-o fa-fw"></i></span>
                                 </button>
+                                <!--<button title="Delete" type="button" class="btn btn-xs btn-success no-margin"-->
+                                        <!--ng-click="cloneTP(row)">-->
+                                    <!--<span><i class="fa fa-files-o fa-fw" aria-hidden="true"></i></span>-->
+                                <!--</button>-->
                             </td>
                         </tr>
                     </tbody>

@@ -139,10 +139,10 @@ angular.module('tcl').factory('userInfoService', ['StorageService', 'userLoaderS
                         {
                         case 'user':
                              break;
-                        case 'admin':
+                        case 'ADMIN':
                             admin = true;
                              break;
-                        case 'author':
+                        case 'TESTER':
                             author = true;
                              break;
                         case 'supervisor':

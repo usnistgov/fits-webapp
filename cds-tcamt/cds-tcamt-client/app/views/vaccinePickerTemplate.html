@@ -3,31 +3,31 @@
 		<div style="padding: 10px;">
 			<table style="width: 100%;" ng-show="ctrl.model.discriminator === 'generic'">
 				<tr>
-					<td><img src="images/injection.png" /></td>
+					<td style="width: 100px;"><img src="images/injection.png" /></td>
 					<td style="margin-left: 10px;">
-						<span style="background-color: red;" class="badge">G</span>
-						<span style="background-color: green;" class="badge">CVX#{{ctrl.model.cvx}}</span> 
+						<span style="background-color: red;" class="badge">Generic</span>
+						<span style="background-color: green;" class="badge">CVX {{ctrl.model.cvx}}</span>
 						</br>
 						<span><strong>{{ctrl.model.name}}</strong></span></br>
 						<span>{{ctrl.model.details}}</span>
 					</td>
 					<td>
-						<button class="btn btn-xs pull-right" ng-click="ctrl.searchVx(selectedEvent)">
-							<i style="font-size: 2em;" class="fa fa-search" aria-hidden="true"></i>
-						</button>
-						<button class="btn btn-xs pull-right" ng-click="ctrl.clearVx(selectedEvent)">
-							<i style="font-size: 2em;" class="fa fa-times" aria-hidden="true"></i>
-						</button>
+						<md-button class="btn btn-xs pull-right" ng-click="ctrl.searchVx(selectedEvent)">
+							<i style="font-size: 2em;" class="fa fa-search" ></i>
+						</md-button>
+						<md-button class="btn btn-xs pull-right" ng-click="ctrl.clearVx(selectedEvent)">
+							<i style="font-size: 2em;" class="fa fa-times" ></i>
+						</md-button>
 					</td>
 				</tr>
 			</table>
 			<table style="width: 100%;" ng-show="ctrl.model.discriminator === 'specific'">
 				<tr>
-					<td><img src="images/injection.png" /></td>
+					<td style="width: 100px;"><img src="images/injection.png" /></td>
 					<td style="margin-left: 10px;">
-						<span style="background-color: red;" class="badge">S</span>
-						<span style="background-color: green;" class="badge">CVX#{{ctrl.getVx(ctrl.model).cvx}}</span> 
-						<span style="background-color: blue;" class="badge">MVX#{{ctrl.model.mx.mvx}}</span> 
+						<span style="background-color: red;" class="badge">Specific</span>
+						<span style="background-color: green;" class="badge">CVX {{ctrl.getVx(ctrl.model).cvx}}</span>
+						<span style="background-color: blue;" class="badge">MVX {{ctrl.model.mx.mvx}}</span>
 						</br>
 						<span><strong>{{ctrl.model.name}}</strong></span></br>
 						<span><strong>{{ctrl.getVx(ctrl.model).name}}</strong></span></br>
@@ -35,22 +35,101 @@
 						<span>{{ctrl.getVx(ctrl.model).details}}</span>
 					</td>
 					<td>
-						<button class="btn btn-xs pull-right" ng-click="ctrl.searchVx(selectedEvent)">
-							<i style="font-size: 2em;" class="fa fa-search" aria-hidden="true"></i>
-						</button>
-						<button class="btn btn-xs pull-right" ng-click="ctrl.clearVx(selectedEvent)">
-							<i style="font-size: 2em;" class="fa fa-times" aria-hidden="true"></i>
-						</button>
+						<md-button class="btn btn-xs pull-right" ng-click="ctrl.searchVx(selectedEvent)">
+							<i style="font-size: 2em;" class="fa fa-search" ></i>
+						</md-button>
+						<md-button class="btn btn-xs pull-right" ng-click="ctrl.clearVx(selectedEvent)">
+							<i style="font-size: 2em;" class="fa fa-times" ></i>
+						</md-button>
 					</td>
 				</tr>
 			</table>
 			<table style="width: 100%;" ng-show="!ctrl.model">
 				<tr>
-					<td><img src="images/injection.png" /></td>
-					<td style="margin-left: 10px; background-color : rgb(255, 230, 230); text-align : center; text-transform : uppercase;">
-						Select Vaccine
+					<td style="width: 100px;"><img src="images/injection.png" /></td>
+					<td style="margin-left: 10px; background-color : rgb(255, 230, 230); text-transform : uppercase;">
+						<div style="width: 100%;" layout="column" layout-align="center center">
+							<span style="text-align : center; ">Select Vaccine</span>
+							<div ng-show="ctrl.qMp" style="width: 100%;" layout="column" layout-align="center center">
+								<div style="margin-bottom : 5px; width: 100%; padding-left : 5px; padding-right : 5px;background-color: white; border : 1px solid black;"
+									 layout="row"
+									 layout-align="start center">
+									<div flex="20" layout="row" layout-align="start center">
+										<span style="background-color: green;" class="badge">CVX {{ctrl.qMp.vx.cvx}}</span>
+									</div>
+									<div flex="60" layout="row" layout-align="center center" style="text-align: center;">
+										<strong>{{ctrl.qMp.vx.name}}</strong>
+									</div>
+									<div flex="20" layout="row" layout-align="end center">
+										<button class="btn btn-xs btn-info" ng-click="ctrl.clearqMp()">
+											<i class="fa fa-times" aria-hidden="true"></i>
+										</button>
+									</div>
+								</div>
+								<div style="padding: 0px; width: 100%;" ng-show="ctrl.allowMvx && ctrl.qMp.products.length > 0">
+									<div ng-show="ctrl.qMx" style="width: 100%;" layout="column" layout-align="center center">
+										<div style="padding-left : 5px; padding-right : 5px; width : 100%; background-color: white; border : 1px solid black;"
+											 layout="row"
+											 layout-align="start center">
+											<div flex="20" layout="row" layout-align="start center" >
+												<span style="background-color: blue;" class="badge">MVX {{ctrl.qMx.mx.mvx}}</span>
+											</div>
+											<div flex="60" layout="row" layout-align="center center" style="text-align: center;">
+												<strong>{{ctrl.qMx.name}}</strong>
+											</div>
+											<div flex="20" layout="row" layout-align="end center">
+												<button class="btn btn-xs btn-info" ng-click="ctrl.clearqMx()">
+													<i class="fa fa-times" aria-hidden="true"></i>
+												</button>
+											</div>
+										</div>
+									</div>
+									<div ng-show="!ctrl.qMx" class="col-md-12"  style="padding: 0; margin-top: 10px;">
+										<input type="text" class="col-md-12 form-control" ng-model="ctrl.qsearchMx" style="background-color: white;" placeholder=" Search (name, cvx)">
+										<ul class="list-group col-md-12" style="padding: 0; max-height: 200px; overflow-y: scroll;" ng-hide="ctrl.qsearchLX.length === 0">
+											<li class="col-md-12 list-group-item myselect"
+												ng-click="ctrl.setqMx(pdt)"
+												style="background-color: white; cursor: pointer; height: 30px; border : 1px solid #0f0f0f0f;"
+												ng-class="{'fle' : $index === 0, 'le' : true}"
+												layout="column"
+												layout-align="center"
+												ng-repeat="pdt in ctrl.qsearchLX = (ctrl.qMp.products | product : ctrl.qsearchMx) track by $index">
+												<table>
+													<tr>
+														<td><span ng-bind-html="pdt.mx.mvx | highlight : ctrl.qsearchMx" ></span></td>
+														<td><span ng-bind-html="pdt.name | highlight : ctrl.qsearchMx"></span> </td>
+													</tr>
+												</table>
+											</li>
+										</ul>
+									</div>
+								</div>
+								<div class="col-md-12" layout="row" layout-align="center">
+									<button flex="25" class="btn btn-xs btn-success" ng-click="ctrl.select()"> Confirm </button>
+								</div>
+							</div>
+							<div ng-show="!ctrl.qMp" class="col-md-12" style="padding: 0px;">
+								<input type="text" class="col-md-12 form-control" ng-model="ctrl.qsearch" style="background-color: white;" placeholder=" Search (name, cvx)">
+								<ul class="list-group col-md-12" style="padding: 0px; z-index : 999; max-height: 200px; position: absolute; overflow-y: scroll;" ng-hide="ctrl.qsearchL.length === 0">
+									<li class="col-md-12 list-group-item myselect"
+										ng-click="ctrl.setqMp(mp)"
+										style="background-color: white; cursor: pointer; height: 30px; border : 1px solid #0f0f0f0f;"
+										ng-class="{'fle' : $index === 0, 'le' : true}"
+										layout="column"
+										layout-align="center"
+										ng-repeat="mp in ctrl.qsearchL = (ctrl.vxm | vaccineEpt : ctrl.qsearch) track by $index">
+										<table>
+											<tr>
+												<td>#<span ng-bind-html="mp.vx.cvx | highlight : ctrl.qsearch" ></span></td>
+												<td><span ng-bind-html="mp.vx.name | highlight : ctrl.qsearch"></span> </td>
+											</tr>
+										</table>
+									</li>
+								</ul>
+							</div>
+						</div>
 					</td>
-					<td>
+					<td style="width: 100px;">
 						<button class="btn btn-xs pull-right" ng-click="ctrl.searchVx(selectedEvent)">
 							<i style="font-size: 2em;" class="fa fa-search" aria-hidden="true"></i>
 						</button>

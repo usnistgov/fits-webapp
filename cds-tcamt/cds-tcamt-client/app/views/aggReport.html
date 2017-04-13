@@ -1,0 +1,138 @@
+<style id="antiClickjack">
+    body {
+        display: none !important;
+    }
+
+    .handle-custom {
+        background-color: red;
+    }
+</style>
+<script type="text/javascript">
+    if (self === top) {
+        var antiClickjack = document.getElementById("antiClickjack");
+        antiClickjack.parentNode.removeChild(antiClickjack);
+    } else {
+        top.location = self.location;
+    }
+</script>
+<md-content class="md-padding" layout="column" layout-align="space-around center">
+    <h3><strong>General Analysis</strong></h3>
+    <div style="width: 100%; margin-bottom: 30px;" layout="column" ng-show="aggregate.total > 0">
+        <div style="width: 100%;" layout="row" layout-align="start">
+            <div flex="50" style="text-align: left;">
+                <span style="color: green;"><strong>Correct {{(aggregate.correct/aggregate.total)*100 | number:2}}%</strong></span>
+            </div>
+            <div flex="50" style="text-align: right;">
+                <span style="color: red;"><strong>With Errors {{(aggregate.errors/aggregate.total)*100 | number:2}}%</strong></span>
+            </div>
+        </div>
+        <md-progress-linear id="graphAgg" style="width: 100%;" md-mode="determinate" value="{{(aggregate.correct/aggregate.total)*100}}"></md-progress-linear>
+    </div>
+    <table class="table table-condensed table-bordered">
+        <thead>
+            <tr style="background-color: #293856; color: white;">
+                <th style="text-align: center;">Total Test Cases Validated</th>
+                <th style="text-align: center;">Correct Test Cases</th>
+                <th style="text-align: center;">Test Cases with Errors</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td style="text-align: center;"><strong>{{aggregate.total}}</strong></td>
+                <td class="success" style="text-align: center; color : black !important;"><strong>{{aggregate.correct}}</strong></td>
+                <td class="danger" style="text-align: center; color : black !important;"><strong>{{aggregate.errors}}</strong></td>
+            </tr>
+        </tbody>
+    </table>
+    <h3><strong>Detailed Analysis</strong></h3>
+    <table class="table table-condensed table-bordered">
+        <thead>
+        <tr style="background-color: #293856; color: white;">
+            <th style="text-align: center;">Criterion</th>
+            <th style="text-align: center;">Correct</th>
+            <th style="text-align: center;">Errors</th>
+            <th style="text-align: center;">Warnings</th>
+            <th style="text-align: center;">Incomplete</th>
+            <th style="text-align: center;">Total Requirements</th>
+            <th style="text-align: center;">Completion</th>
+            <th style="text-align: center;">Correctness</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td md-whiteframe="2" colspan="8" style="background-color: #1296ea; color: white;">
+                <div  style="width : 100%; height : 100%; text-align: center;">
+                    <strong> Evaluations </strong>
+                </div>
+            </td>
+        </tr>
+        <tr style="color : black !important;">
+            <td style="text-align: center; color : black !important;">Evaluation Status</td>
+            <td class="success" style="text-align: center; color : black !important;">{{aggregate.counts.EvaluationStatus.p}}</td>
+            <td class="danger" style="text-align: center; color : black !important;">{{aggregate.counts.EvaluationStatus.f}}</td>
+            <td class="warning" style="text-align: center; color : black !important;">{{aggregate.counts.EvaluationStatus.w}}</td>
+            <td class="unmatched" style="text-align: center; color : black !important;">{{aggregate.counts.EvaluationStatus.u}}</td>
+            <td style="text-align: center; color : black !important;">{{aggregate.counts.EvaluationStatus.f+aggregate.counts.EvaluationStatus.p+aggregate.counts.EvaluationStatus.u+aggregate.counts.EvaluationStatus.w}}</td>
+            <td style="text-align: center; color : black !important;">{{completion(aggregate.counts.EvaluationStatus.f,aggregate.counts.EvaluationStatus.p,aggregate.counts.EvaluationStatus.u,aggregate.counts.EvaluationStatus.w)}}%</td>
+            <td style="text-align: center; color : black !important;">{{correctness(aggregate.counts.EvaluationStatus.f,aggregate.counts.EvaluationStatus.p,aggregate.counts.EvaluationStatus.u,aggregate.counts.EvaluationStatus.w)}}%</td>
+        </tr>
+        <tr>
+            <td md-whiteframe="2" colspan="8" style="background-color: #1296ea; color: white;">
+                <div  style="width : 100%; height : 100%; text-align: center;">
+                    <strong> Forecasts </strong>
+                </div>
+            </td>
+        </tr>
+        <tr>
+            <td style="text-align: center;">Dose Number</td>
+            <td class="success" style="text-align: center; color : black !important;">{{aggregate.counts.DoseNumber.p}}</td>
+            <td class="danger" style="text-align: center; color : black !important;">{{aggregate.counts.DoseNumber.f}}</td>
+            <td class="warning" style="text-align: center; color : black !important;">{{aggregate.counts.DoseNumber.w}}</td>
+            <td class="unmatched" style="text-align: center; color : black !important;">{{aggregate.counts.DoseNumber.u}}</td>
+            <td style="text-align: center; color : black !important;">{{aggregate.counts.DoseNumber.f+aggregate.counts.DoseNumber.p+aggregate.counts.DoseNumber.u+aggregate.counts.DoseNumber.w}}</td>
+            <td style="text-align: center; color : black !important;">{{completion(aggregate.counts.DoseNumber.f,aggregate.counts.DoseNumber.p,aggregate.counts.DoseNumber.u,aggregate.counts.DoseNumber.w)}}%</td>
+            <td style="text-align: center; color : black !important;">{{correctness(aggregate.counts.DoseNumber.f,aggregate.counts.DoseNumber.p,aggregate.counts.DoseNumber.u,aggregate.counts.DoseNumber.w)}}%</td>
+        </tr>
+        <tr style="color : black !important;">
+            <td style="text-align: center; color : black !important;">Earliest Date</td>
+            <td class="success" style="text-align: center; color : black !important;">{{aggregate.counts.EarliestDate.p}}</td>
+            <td class="danger" style="text-align: center; color : black !important;">{{aggregate.counts.EarliestDate.f}}</td>
+            <td class="warning" style="text-align: center; color : black !important;">{{aggregate.counts.EarliestDate.w}}</td>
+            <td class="unmatched" style="text-align: center; color : black !important;">{{aggregate.counts.EarliestDate.u}}</td>
+            <td style="text-align: center; color : black !important;">{{aggregate.counts.EarliestDate.f+aggregate.counts.EarliestDate.p+aggregate.counts.EarliestDate.u+aggregate.counts.EarliestDate.w}}</td>
+            <td style="text-align: center; color : black !important;">{{completion(aggregate.counts.EarliestDate.f,aggregate.counts.EarliestDate.p,aggregate.counts.EarliestDate.u,aggregate.counts.EarliestDate.w)}}%</td>
+            <td style="text-align: center; color : black !important;">{{correctness(aggregate.counts.EarliestDate.f,aggregate.counts.EarliestDate.p,aggregate.counts.EarliestDate.u,aggregate.counts.EarliestDate.w)}}%</td>
+        </tr>
+        <tr style="color : black !important;">
+            <td style="text-align: center; color : black !important;">Recommended Date</td>
+            <td class="success" style="text-align: center; color : black !important;">{{aggregate.counts.RecommendedDate.p}}</td>
+            <td class="danger" style="text-align: center; color : black !important;">{{aggregate.counts.RecommendedDate.f}}</td>
+            <td class="warning" style="text-align: center; color : black !important;">{{aggregate.counts.RecommendedDate.w}}</td>
+            <td class="unmatched" style="text-align: center; color : black !important;">{{aggregate.counts.RecommendedDate.u}}</td>
+            <td style="text-align: center; color : black !important;">{{aggregate.counts.RecommendedDate.f+aggregate.counts.RecommendedDate.p+aggregate.counts.RecommendedDate.u+aggregate.counts.RecommendedDate.w}}</td>
+            <td style="text-align: center; color : black !important;">{{completion(aggregate.counts.RecommendedDate.f,aggregate.counts.RecommendedDate.p,aggregate.counts.RecommendedDate.u,aggregate.counts.RecommendedDate.w)}}%</td>
+            <td style="text-align: center; color : black !important;">{{correctness(aggregate.counts.RecommendedDate.f,aggregate.counts.RecommendedDate.p,aggregate.counts.RecommendedDate.u,aggregate.counts.RecommendedDate.w)}}%</td>
+        </tr>
+        <tr style="color : black !important;">
+            <td style="text-align: center; color : black !important;">Past Due Date</td>
+            <td class="success" style="text-align: center; color : black !important;">{{aggregate.counts.PastDueDate.p}}</td>
+            <td class="danger" style="text-align: center; color : black !important;">{{aggregate.counts.PastDueDate.f}}</td>
+            <td class="warning" style="text-align: center; color : black !important;">{{aggregate.counts.PastDueDate.w}}</td>
+            <td class="unmatched" style="text-align: center; color : black !important;">{{aggregate.counts.PastDueDate.u}}</td>
+            <td style="text-align: center; color : black !important;">{{aggregate.counts.PastDueDate.f+aggregate.counts.PastDueDate.p+aggregate.counts.PastDueDate.u+aggregate.counts.PastDueDate.w}}</td>
+            <td style="text-align: center; color : black !important;">{{completion(aggregate.counts.PastDueDate.f,aggregate.counts.PastDueDate.p,aggregate.counts.PastDueDate.u,aggregate.counts.PastDueDate.w)}}%</td>
+            <td style="text-align: center; color : black !important;">{{correctness(aggregate.counts.PastDueDate.f,aggregate.counts.PastDueDate.p,aggregate.counts.PastDueDate.u,aggregate.counts.PastDueDate.w)}}%</td>
+        </tr>
+        <tr style="color : black !important;">
+            <td style="text-align: center; color : black !important;">Latest Date</td>
+            <td class="success" style="text-align: center; color : black !important;">{{aggregate.counts.CompleteDate.p}}</td>
+            <td class="danger" style="text-align: center; color : black !important;">{{aggregate.counts.CompleteDate.f}}</td>
+            <td class="warning" style="text-align: center; color : black !important;">{{aggregate.counts.CompleteDate.w}}</td>
+            <td class="unmatched" style="text-align: center; color : black !important;">{{aggregate.counts.CompleteDate.u}}</td>
+            <td style="text-align: center; color : black !important;">{{aggregate.counts.CompleteDate.f+aggregate.counts.CompleteDate.p+aggregate.counts.CompleteDate.u+aggregate.counts.CompleteDate.w}}</td>
+            <td style="text-align: center; color : black !important;">{{completion(aggregate.counts.CompleteDate.f,aggregate.counts.CompleteDate.p,aggregate.counts.CompleteDate.u,aggregate.counts.CompleteDate.w)}}%</td>
+            <td style="text-align: center; color : black !important;">{{correctness(aggregate.counts.CompleteDate.f,aggregate.counts.CompleteDate.p,aggregate.counts.CompleteDate.u,aggregate.counts.CompleteDate.w)}}%</td>
+        </tr>
+        </tbody>
+    </table>
+</md-content>

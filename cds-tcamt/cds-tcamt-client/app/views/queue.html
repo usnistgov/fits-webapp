@@ -1,0 +1,165 @@
+<style id="antiClickjack">
+    body {
+        display: none !important;
+    }
+
+    .handle-custom {
+        background-color: red;
+    }
+</style>
+<script type="text/javascript">
+    if (self === top) {
+        var antiClickjack = document.getElementById("antiClickjack");
+        antiClickjack.parentNode.removeChild(antiClickjack);
+    } else {
+        top.location = self.location;
+    }
+</script>
+<md-content layout="column">
+    <md-list md-whiteframe="4" layout="row" ng-show="$parent.tcQueue.length > 0" style="background-color: white; min-height: 45px; padding: 0px; border-top : 1px solid #dddddd;">
+        <md-list-item flex="{{exec ? 30 : 90 }}" style="border-right: 1px solid #dddddd;">
+            <div layout="row" layout-align="center center" flex="100" style="width: 100%;" >
+                <strong>Test Case Name</strong>
+            </div>
+        </md-list-item>
+        <md-list-item flex="30" ng-show="$parent.exec" style="text-align : center; border-right: 1px solid #dddddd;">
+            <div layout="column" layout-align="end" style="width: 100%;">
+                <strong>Evaluations</strong>
+                <div layout="row">
+                    <div flex="25" layout="row" layout-align="center center" class="detection-cell detection-cell-head">
+                        <span>Results</span>
+                        <md-tooltip md-direction="bottom">validation results</md-tooltip>
+                    </div>
+                    <div flex="25" layout="row" layout-align="center center" class="detection-cell detection-cell-head">
+                        <span>Requirements</span>
+                        <md-tooltip md-direction="bottom">total evaluation requirements</md-tooltip>
+                    </div>
+                    <div flex="25" layout="row" layout-align="center center" class="detection-cell detection-cell-head">
+                        <span>Correctness</span>
+                        <md-tooltip md-direction="bottom">% of passed checks out of verifiable requirements</md-tooltip>
+                    </div>
+                    <div flex="25" layout="row" layout-align="center center" class="detection-cell detection-cell-end detection-cell-head">
+                        <span>Completion</span>
+                        <md-tooltip md-direction="bottom">% of requirements that could be verified</md-tooltip>
+                    </div>
+                </div>
+            </div>
+        </md-list-item>
+        <md-list-item flex="30"  ng-show="$parent.exec" style="text-align : center; border-right: 1px solid #dddddd;">
+            <div layout="column" layout-align="end" style="width: 100%;">
+                <strong>Forecasts</strong>
+                <div layout="row">
+                    <div flex="25" layout="row" layout-align="center center" class="detection-cell detection-cell-head">
+                        <span>Results</span>
+                        <md-tooltip md-direction="bottom">validation results</md-tooltip>
+                    </div>
+                    <div flex="25" layout="row" layout-align="center center" class="detection-cell detection-cell-head">
+                        <span>Requirements</span>
+                        <md-tooltip md-direction="bottom">total forecast requirements</md-tooltip>
+                    </div>
+                    <div flex="25" layout="row" layout-align="center center" class="detection-cell detection-cell-head">
+                        <span>Correctness</span>
+                        <md-tooltip md-direction="bottom">% of passed checks out of verifiable requirements</md-tooltip>
+                    </div>
+                    <div flex="25" layout="row" layout-align="center center" class="detection-cell detection-cell-end detection-cell-head">
+                        <span>Completion</span>
+                        <md-tooltip md-direction="bottom">% of requirements that could be verified</md-tooltip>
+                    </div>
+                </div>
+            </div>
+        </md-list-item>
+        <md-list-item  flex="10">
+            <div layout="row" layout-align="center center" flex="100" style="width: 100%;" >
+                <strong>Actions</strong>
+            </div>
+        </md-list-item>
+    </md-list>
+    <md-divider></md-divider>
+    <div ng-show="$parent.tcQueue.length === 0 && !$parent.exec " style="width: 100%; text-align: center; font-size: 17px;
+                                                                        background-color: rgba(33, 150, 243, 0.06); border: 2px dashed black;
+                                                                        border-bottom: 0;">
+        <div style="text-align: center; margin-top: 120px;
+                    margin-left: auto;
+                    margin-right: auto;
+                    left: 0;
+                    right: 0;
+                    top: 0;
+                    position: absolute;">
+            <strong>DROP TEST PLANS, TEST CASE GROUPS, TEST CASES HERE</strong>
+        </div>
+    </div>
+    <md-virtual-repeat-container ng-class="{'drop-zone' :  $parent.tcQueue.length === 0 && !$parent.exec }" style="height : 280px;" id="qbody" dnd-list="tcQueue"  dnd-drop="drop(list, item, index)" md-top-index="$parent.controls.top">
+        <md-list-item md-virtual-repeat="tc in $parent.viewTc = (tcQueue | testcase:$parent.filter.queueSearch | fcFilter:$parent.filter:$parent.showResults | evFilter:$parent.filter:$parent.showResults | execSuccess:$parent.filter.exec:$parent.showResults )" class="repeated-item" flex
+                      layout="row"
+                      ng-class="{'cursor-move' : !$parent.exec, 'fail' : tc._s === false, 'info' : $index === x.rp && $parent.showResults }"
+                      style="height: 15px; border-bottom: 1px solid #dddddd; padding: 0; background-color: rgba(158, 158, 158, 0.17);"
+                      dnd-draggable="tc"
+                      dnd-disable-if="exec"
+                      dnd-moved="dragMoved($index)"
+                      dnd-effect-allowed="move"
+                      dnd-selected="models.selected = tc">
+            <md-list flex layout="row">
+                <md-list-item flex="{{exec ? 30 : 90 }}">
+                    <div layout="row" layout-align="start center" flex="100" style="width: 100%;" >
+                        <strong>{{ tc.uid ? '#'+tc.uid+' - ' : ''}}{{tc.name}}</strong>
+                    </div>
+                </md-list-item>
+                <div flex="60" layout="row" ng-if="exec">
+                    <div layout="row" layout-align="center center" style="width: 100%;" ng-if="tc._s" flex="100">
+                        <md-list-item  flex="50">
+                            <div style="width: 100%;" layout="row" ng-show="tc._events">
+                                <div flex="25" class="detection-cell detection-cell-data">
+                                    <span style="background-color: green;" ng-show="tc._events.p" class="badge">{{tc._events.p}}</span>
+                                    <span style="background-color: red;" ng-show="tc._events.f" class="badge">{{tc._events.f}}</span>
+                                    <span style="background-color: orange;" ng-show="tc._events.w" class="badge">{{tc._events.w}}</span>
+                                    <span style="background-color: grey;" ng-show="tc._events.u" class="badge">{{tc._events.u}}</span>
+                                </div>
+                                <div flex="25" class="detection-cell detection-cell-data">
+                                    <strong>{{tc._events.p + tc._events.f + tc._events.w + tc._events.u}}</strong>
+                                </div>
+                                <div flex="25" class="detection-cell detection-cell-data" >
+                                    <strong>{{tc._events.crt}}%</strong>
+                                </div>
+                                <div flex="25" class="detection-cell detection-cell-end detection-cell-data">
+                                    <strong>{{tc._events.cmp}}%</strong>
+                                </div>
+                            </div>
+                        </md-list-item>
+                        <md-list-item  flex="50">
+                            <div style="width: 100%;" layout="row" ng-show="tc._fc">
+                                <div flex="25" class="detection-cell detection-cell-data">
+                                    <span style="background-color: green;" ng-show="tc._fc.p" class="badge">{{tc._fc.p}}</span>
+                                    <span style="background-color: red;" ng-show="tc._fc.f" class="badge">{{tc._fc.f}}</span>
+                                    <span style="background-color: orange;" ng-show="tc._fc.w" class="badge">{{tc._fc.w}}</span>
+                                    <span style="background-color: grey;" ng-show="tc._fc.u" class="badge">{{tc._fc.u}}</span>
+                                </div>
+                                <div flex="25" class="detection-cell detection-cell-data">
+                                    <strong>{{tc._fc.p + tc._fc.f + tc._fc.w + tc._fc.u}}</strong>
+                                </div>
+                                <div flex="25" class="detection-cell detection-cell-data" >
+                                    <strong>{{tc._fc.crt}}%</strong>
+                                </div>
+                                <div flex="25" class="detection-cell detection-cell-end detection-cell-data">
+                                    <strong>{{tc._fc.cmp}}%</strong>
+                                </div>
+                            </div>
+                        </md-list-item >
+                    </div>
+                    <div layout="row" layout-align="center center" ng-if="tc._s === false" flex="100">
+                        <strong>HTTP STATUS <span style="color: red;">({{tc._failure.status}}) - {{tc._failure.text}}</span></strong>
+                    </div>
+                </div>
+                <md-list-item flex="10">
+                    <div layout="row" layout-align="center center" style="width: 100%;">
+                        <button ng-click="deleteTCL($index)" ng-if="!exec || $parent.showResults || $parent.controls.paused && !has(tc,'_s')" class="btn btn-xs btn-danger" >
+                            <i class="fa fa-times" aria-hidden="true"></i>
+                        </button>
+                        <button ng-click="goToReport($index)" class="btn btn-xs btn-info" ng-if="$parent.exec && $parent.showResults">
+                            <i class="fa fa-search" aria-hidden="true"></i>
+                        </button>
+                    </div>
+                </md-list-item>
+            </md-list>
+        </md-list-item>
+    </md-virtual-repeat-container>
+</md-content>

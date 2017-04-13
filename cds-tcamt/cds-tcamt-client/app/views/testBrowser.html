@@ -1,0 +1,68 @@
+<style id="antiClickjack">
+    body {
+        display: none !important;
+    }
+
+    .handle-custom {
+        background-color: red;
+    }
+</style>
+<script type="text/javascript">
+    if (self === top) {
+        var antiClickjack = document.getElementById("antiClickjack");
+        antiClickjack.parentNode.removeChild(antiClickjack);
+    } else {
+        top.location = self.location;
+    }
+</script>
+<div ui-tree="treeOptions">
+    <ol ui-tree-nodes="" dnd-list="tps"  dnd-drop="false" ng-model="tps">
+        <li data-nodrag ng-repeat="tp in tps track by $index" ui-tree-node
+            dnd-draggable="tp"
+            dnd-moved="onMoved(list)"
+            dnd-dragstart="dstart(true)"
+            dnd-dragend="dstart(false)"
+            dnd-effect-allowed="move"
+            collapsed="false">
+            <div ui-tree-handle ng-click="selectTP(tp)" ng-class="{selected1 : isSelectedTP(tp)}">
+                <div>
+                    <i data-nodrag ng-click="toggle(this)" class="fa" ng-class="{'fa-caret-right': collapsed, 'fa-caret-down': !collapsed}"></i>
+                    <span data-nodrag>
+	                                                <span class="label label-plan label-icon">TP</span>
+	                                                {{tp.name}}
+	                                            </span>
+                </div>
+            </div>
+            <ol ui-tree-nodes="" ng-model="tp.testCases">
+                <li collapsed="group === 'Ungrouped' ? false : true" data-collapsed="{{group === 'Ungrouped' ? false : true}}" ng-repeat="(group, tcs) in groupBy((tp.testCases | testcase:tcSearch),'group') track by $index" ui-tree-node ng-hide="$parentNodeScope.collapsed">
+                    <div>
+                        <div style="margin-left: 5px;">
+                            <i data-nodrag ng-click="toggle(this)" class="fa" ng-class="{'fa-caret-right': collapsed, 'fa-caret-down': !collapsed}"></i>
+                            <span data-nodrag>
+															<span class="label label-group label-icon">G</span><strong>{{ group }}</strong> <span style="font-style: italic; color: #e09443;">({{tcs.length}} TC)</span>
+														</span>
+                        </div>
+                    </div>
+                    <ol dnd-list="tp.testCases" dnd-drop="false" ui-tree-nodes="" ng-model="tcs">
+                        <li data-nodrag ng-repeat="tc in tcs track by $index" ui-tree-node ng-hide="$parentNodeScope.collapsed"
+                            dnd-draggable="multipleSel ? selected : tc"
+                            dnd-moved="onMoved(list)"
+                            dnd-selected="select(tc)"
+                            dnd-dragstart="dstart(true)"
+                            dnd-dragend="dstart(false)"
+                            dnd-effect-allowed="move">
+
+                            <div ui-tree-handle ng-click="selectTC(tc)" ng-class="{selected1 : isSelectedTC(tc) && !multipleSel, cdraggable : find(selected,tc) && multipleSel, inqueue : inQueue(tc)}">
+			                                                <span data-nodrag>
+			                                                    <span class="label label-component label-icon">T</span>
+			                                                    {{ tc.uid ? '#'+tc.uid+"- " : ""}}{{tc.name}}
+			                                                </span>
+                            </div>
+                        </li>
+                    </ol>
+                </li>
+            </ol>
+        </li>
+    </ol>
+</div>
+
