@@ -114,8 +114,7 @@ angular.module('tcl').factory('TCSaveService', function (DataSynchService, Entit
             var saveURL = EntityUtilsService.createURL(url);
 
             if(ctrl.canSave(tp,tc,location)){
-                console.log("CAN SAVE TC");
-                console.log("IN "+location);
+
                 var _tc = DataSynchService.clean(tc);
 
                 $http.post(saveURL,_tc).then(function (response) {
@@ -154,8 +153,7 @@ angular.module('tcl').factory('TCSaveService', function (DataSynchService, Entit
         ctrl.canSave = function (tp,tc,location) {
             if(location === EntityService.type.TEST_CASE_GROUP){
                 var grp = EntityUtilsService.findGroup(tp,tc.group);
-                console.log("CAN I SAVE ON ");
-                console.log(grp);
+
                 if(grp){
                     return !EntityUtilsService.isLocal(grp);
                 }

@@ -14,9 +14,7 @@ angular.module('tcl').directive('dateChoose', function() {
 			var ctrl = this;
 
             $scope.$watch('ctrl.type', function (newValue, oldValue) {
-            	console.log("watch");
-
-                if(oldValue && ctrl.dt.type !== newValue.toLowerCase()){
+                if(oldValue && newValue && ctrl.dt && ctrl.dt.type !== newValue.toLowerCase()){
                 	if(newValue === 'FIXED'){
 						ctrl.dt = ctrl.createFixed();
 					}
@@ -67,8 +65,8 @@ angular.module('tcl').directive('dateChoose', function() {
 				}
 			};
             ctrl.refType = function (rule) {
-            	if(rule.relativeTo.type && rule.relativeTo.type !== ''){
-            		if(rule.relativeTo.type === 'DOB' && rule.position === 'BEFORE'){
+            	if(rule.relativeTo.id && rule.relativeTo.id !== ''){
+            		if(rule.relativeTo.id === 'DOB' && rule.position === 'BEFORE'){
                         rule.position = 'AFTER';
 					}
 				}

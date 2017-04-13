@@ -62,7 +62,7 @@
 							<td>
 								<md-input-container style="width : 100%;">
 									<md-select ng-model="rule.position" required>
-										<md-option ng-value="'BEFORE'" ng-disabled="rule.relativeTo.type === 'DOB'">Before</md-option>
+										<md-option ng-value="'BEFORE'" ng-disabled="rule.relativeTo.id === 'DOB'">Before</md-option>
 										<md-option ng-value="'AFTER'">After</md-option>
 									</md-select>
 								</md-input-container>

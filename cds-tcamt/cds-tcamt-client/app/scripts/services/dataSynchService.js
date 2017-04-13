@@ -13,7 +13,7 @@ angular.module('tcl').factory('DataSynchService', function (TestObjectUtil,Entit
             if(exclude){
                 TestObjectUtil.cleanObject(obj, exclude);
             }
-            console.log(obj);
+
             TestObjectUtil.cleanObject(obj, new RegExp("^[_$]+.*"));
             return obj;
         };
@@ -21,6 +21,10 @@ angular.module('tcl').factory('DataSynchService', function (TestObjectUtil,Entit
         ctrl.fingerprint = function (obj,exclude) {
             var clone = ctrl.clean(obj,exclude);
             return objectHash.MD5(clone);
+        };
+
+        ctrl.unregister = function (id) {
+            delete ledger[id];
         };
 
         ctrl.register = function (object,exclude,edit) {

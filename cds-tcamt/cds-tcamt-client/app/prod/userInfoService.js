@@ -129,8 +129,6 @@ angular.module('tcl').factory('userInfoService', ['StorageService', 'userLoaderS
 
         var setCurrentUser = function(newUser) {
             currentUser = newUser;
-            console.log("USER");
-            console.log(newUser);
             if ( currentUser !== null && currentUser !== undefined ) {
                 username = currentUser.username;
                 id = currentUser.accountId;

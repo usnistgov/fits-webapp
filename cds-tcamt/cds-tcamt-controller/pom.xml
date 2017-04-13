@@ -15,8 +15,8 @@
 		<logback.version>1.0.13</logback.version>
 		<jcl-over-slf4j.version>1.7.5</jcl-over-slf4j.version>
 		<cds-base.version>0.0.1-SNAPSHOT</cds-base.version>
-		<project.version>0.0.1-SNAPSHOT</project.version>
-   		<timestamp>${maven.build.timestamp}</timestamp>
+		<info.version>1.0-Beta</info.version>
+   		<build.date>${maven.build.timestamp}</build.date>
    		<maven.build.timestamp.format>yyyy-MM-dd HH:mm</maven.build.timestamp.format>
 	</properties>
 	<dependencies>
@@ -146,19 +146,9 @@
 		<finalName>fits</finalName>
 		<resources>
 		   <resource>
-		      <directory>src/main/resources</directory>
+		      <directory>src/main/resources/filtered</directory>
 		      <filtering>true</filtering>
-		      <excludes>
-                <exclude>**/*.xlsx</exclude>
-            </excludes>
 		   </resource>
-		   <resource>
-            <directory>src/main/resources</directory>
-            <filtering>false</filtering>
-            <includes>
-                <include>**/*.xlsx</include>
-            </includes>
-        </resource>
 		</resources>
 		<plugins>
 			<plugin>

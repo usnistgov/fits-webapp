@@ -24,7 +24,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.MailException;
 import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -41,9 +40,6 @@ public class UserController {
 
 	@Autowired
 	private AccountService userService;
-	
-	@Autowired
-	private PrivilegeRepository privilegeRepo;
 
 	@Autowired
 	private AccountRepository accountRepository;
@@ -57,7 +53,7 @@ public class UserController {
 	@Autowired
 	private MailSender mailSender;
 
-	private final String ADMIN_EMAIL = "hossam.tamri@nist.gov";
+	private final String ADMIN_EMAIL = "robert.snelick@nist.gov";
 	//private final String ADMIN_EMAIL = "hossam.tamri@nist.gov";
 	
 	@RequestMapping(value = "/accounts/login", method = RequestMethod.GET)
@@ -397,38 +393,6 @@ public class UserController {
 				true);
 	}
 	
-//	@RequestMapping(value = "/accounts/{id}", method = RequestMethod.DELETE)
-//	public ResponseMessage deleteAccountById(@PathVariable String id) {
-//
-//		User u = userService.getCurrentUser();
-//		if(u == null || !u.isEnabled() || !isAdmin(u)){
-//			Account acc = accountRepository.findOne(id);
-//			return null;
-//		}
-//		
-//		Account acc = accountRepository.findOne(id);
-//
-//		if (acc == null || acc.isEntityDisabled()) {
-//			return new ResponseMessage(ResponseMessage.Type.danger,
-//					"badAccount", id.toString());
-//		} else {
-//			User u = userService.retrieveUserByUsername(acc.getUsername());
-//			if (u == null || !u.isEnabled()) {
-//				return new ResponseMessage(ResponseMessage.Type.danger,
-//						"badAccount", id.toString());
-//			} else {
-//				logger.debug("^^^^^^^^^^^^^^^^ about to disable user "
-//						+ acc.getUsername() + " ^^^^^^^^^^^^^^^^^");
-//				userService.disableUser(acc.getUsername());
-//				acc.setEntityDisabled(true);
-//				logger.debug("^^^^^^^^^^^^^^^^ about to save ^^^^^^^^^^^^^^^^^");
-//				accountRepository.save(acc);
-//				logger.debug("^^^^^^^^^^^^^^^^ saved ^^^^^^^^^^^^^^^^^");
-//				return new ResponseMessage(ResponseMessage.Type.success,
-//						"deletedAccount", id.toString(), true);
-//			}
-//		}
-//	}
 	
 	@RequestMapping(value = "/accounts/{accountId}/suspendaccount", method = RequestMethod.POST)
 	public Account accountsDisable(@PathVariable String accountId) {
@@ -524,16 +488,10 @@ public class UserController {
 		}
 		
 		
-		Privilege p = privilegeRepo.findByRole(account.getAccountType());
-
-		if (account.getAccountType() == null || p == null) {
-			return new ResponseMessage(ResponseMessage.Type.danger, "accountTypeNotValid", null);
-		}
-
-		// create new user with provider role
+		// create new user with tester role
 		try {
 			account.setPending(true);
-			userService.createUser(account,p);
+			userService.createTester(account);
 		} catch (Exception e) {
 			return new ResponseMessage(ResponseMessage.Type.danger,
 					"errorWithUser", null);

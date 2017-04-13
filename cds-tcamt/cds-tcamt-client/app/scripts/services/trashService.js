@@ -2,7 +2,7 @@
  * Created by Hossam Tamri on 4/8/17.
  */
 
-angular.module('tcl').factory('TrashService', function (EntityUtilsService, ResponseService, EntityService, $q, $http) {
+angular.module('tcl').factory('TrashService', function (EntityUtilsService, ResponseService, EntityService, $q, $http, $rootScope) {
 
     function TrashService() {
         var deleteTC = "testcase/{id}/delete";
@@ -17,12 +17,14 @@ angular.module('tcl').factory('TrashService', function (EntityUtilsService, Resp
 
             if(EntityUtilsService.isLocal(obj)){
                 ctrl.clean(lists, obj);
+                $rootScope.$broadcast('entity_deleted', obj);
                 deferred.resolve(ResponseService.success(type,action, "Deleted Successfully", null));
             }
             else {
 
                 $http.delete(url).then(function () {
                     ctrl.clean(lists, obj);
+                    $rootScope.$broadcast('entity_deleted', obj);
                     deferred.resolve(ResponseService.success(type,action, "Deleted Successfully", null));
                 },
                 function (error) {

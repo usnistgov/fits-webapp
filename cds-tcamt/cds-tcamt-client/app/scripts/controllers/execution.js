@@ -298,11 +298,8 @@ angular.module('tcl').controller('ExecutionCtrl', function (StatsService, Execut
                         $scope[k] = data[k];
                 }
                 d.resolve(true);
-                console.log("VX");
-                console.log($scope.vxm);
             },
             function (err) {
-                console.log(err);
                 d.resolve(false);
             });
         return d.promise;
@@ -318,7 +315,6 @@ angular.module('tcl').controller('ExecutionCtrl', function (StatsService, Execut
                 d.resolve(true);
             },
             function (err) {
-                console.log(err);
                 d.resolve(false);
             });
         return d.promise;
@@ -329,7 +325,7 @@ angular.module('tcl').controller('ExecutionCtrl', function (StatsService, Execut
                 $scope.tps = data;
             },
             function (err) {
-                console.log(err);
+
             });
     };
 
@@ -344,9 +340,6 @@ angular.module('tcl').controller('ExecutionCtrl', function (StatsService, Execut
         $scope.init();
     });
 
-    $scope.$on('$routeChangeStart',function(angularEvent,next,current) {
-        console.log("Leaving TP EXEC");
-    });
 
 
 //------------------------------- CONFIG CONTROL ----------------
@@ -426,7 +419,7 @@ angular.module('tcl').controller('ExecutionCtrl', function (StatsService, Execut
                     .concat($scope.tcQueue.slice(index));
             }
         } else {
-            console.log(items);
+
             if(items.hasOwnProperty('testCases') || items.hasOwnProperty('testCaseGroups')){
                 $scope.multipleSel = true;
                 var listItems = [];
@@ -437,7 +430,7 @@ angular.module('tcl').controller('ExecutionCtrl', function (StatsService, Execut
                     for(var g = 0; g < items.testCaseGroups.length; g++){
                         listItems = listItems.concat(items.testCaseGroups[g].testCases);
                     }
-                    console.log(listItems);
+
                 }
                 return $scope.drop($scope.tcQueue, listItems, index);
             }
@@ -448,7 +441,7 @@ angular.module('tcl').controller('ExecutionCtrl', function (StatsService, Execut
                         id = j;
                     }
                 }
-                console.log("ID " + id);
+
                 if (id > -1) {
                     $scope.tcQueue.splice(id, 1);
                     if (index > id)
@@ -467,7 +460,7 @@ angular.module('tcl').controller('ExecutionCtrl', function (StatsService, Execut
     };
 
     $scope.dragMoved = function (index) {
-        console.log(index);
+
     };
 
     $scope.inQueue = function (tc) {
@@ -522,8 +515,7 @@ angular.module('tcl').controller('ExecutionCtrl', function (StatsService, Execut
 //------------------------- QUEUE CONTROL -----------------------
 
     $scope.rootConfig = function () {
-        console.log("R C");
-        console.log($rootScope.selectedConfig);
+
     };
     $scope.canRun = function () {
         return $rootScope.selectedConfig && $scope.tcQueue.length;
@@ -644,14 +636,11 @@ angular.module('tcl').controller('ExecutionCtrl', function (StatsService, Execut
     $scope.goToReport = function (i,noSlide) {
         var tc = $scope.viewTc[i];
         $scope.x.rp = i;
-        console.log($scope.container.reports);
-        console.log($scope.container);
+
         if(!tc._s || !$scope.container.reports.hasOwnProperty(tc.id)){
-            console.log("NOT FOUND");
             $scope.selectedReport = null;
         }
         else {
-            console.log("FOUND");
             $scope.selectedReport = $scope.container.reports[tc.id];
         }
         if(!noSlide){
@@ -732,7 +721,6 @@ angular.module('tcl').controller('ExecutionCtrl', function (StatsService, Execut
             var tc = $scope.selectedTC.id;
             $http.get('api/report/tc/' + tc).then(function (response) {
                 if (response.data && response.data.length > 0) {
-                    console.log(response.data.length + " Reports found");
                     $scope.savedReports[tc] = response.data;
                 }
             });
@@ -765,12 +753,10 @@ angular.module('tcl').controller('ExecutionCtrl', function (StatsService, Execut
             $scope.resultsHandle(response);
         },
         function (error) {
-            console.log(error);
         });
     };
 
     $scope.resultsHandle = function (response) {
-        console.log(response);
         if(response.signal === 'FINISH' && $scope.exec){
             if(response.data && response.data.reports){
                 var list = $scope.objToList(response.data.reports);
@@ -800,19 +786,16 @@ angular.module('tcl').controller('ExecutionCtrl', function (StatsService, Execut
 
 
     $scope.pause = function () {
-        console.log("PAUSE");
         $scope.controls.paused = true;
         $scope.controls.running = false;
     };
 
     $scope.resume = function () {
-        console.log("RESUME");
         $scope.controls.paused = true;
         ExecutionService.resume($scope.tcQueue,$rootScope.selectedConfig.id,$scope.assessmentDate._dateObj.getTime(),$scope.controls,$scope.container).then(function (response) {
             $scope.resultsHandle(response);
         },
         function (error) {
-            console.log(error);
         });
     };
 
@@ -821,7 +804,6 @@ angular.module('tcl').controller('ExecutionCtrl', function (StatsService, Execut
             $scope.resultsHandle(response);
         },
         function (error) {
-            console.log(error);
         });
     };
 

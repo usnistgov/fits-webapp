@@ -9,9 +9,7 @@ angular.module('tcl')
             var resetReq = new ForgottenRequest();
             resetReq.username = $scope.username;
             resetReq.$save(function() {
-                console.log("RESET");
-                console.log(resetReq);
-                console.log(resetReq.text);
+
                 if ( resetReq.text === 'resetRequestProcessed' ) {
                     Notification.success({message:"An e-mail with instructions on how to reset  has been sent ", delay:1500});
                     $scope.username = '';

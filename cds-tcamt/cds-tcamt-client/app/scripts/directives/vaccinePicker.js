@@ -47,7 +47,6 @@ angular.module('tcl').directive('vaccinePicker', function() {
       };
 
       $rootScope.$on('vp_clear', function(event, data) {
-        console.log("vp_clear");
         if (data) {
           ctrl.clearqMp();
           ctrl.clearqMx();

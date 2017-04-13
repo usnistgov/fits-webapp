@@ -474,7 +474,7 @@ angular
                         d.resolve(true);
                     },
                     function (err) {
-                        console.log(err);
+
                         d.resolve(false);
                     });
                 return d.promise;
@@ -490,31 +490,30 @@ angular
                         d.resolve(true);
                     },
                     function (err) {
-                        console.log(err);
+
                         d.resolve(false);
                     });
                 return d.promise;
             };
 
-            $scope.initHasIncomplete = function (tps) {
+            $scope.initHasIncomplete = function (tp) {
                 $scope.hasIncomplete = false;
-                _.forEach(tps,function (tp) {
+                if(tp){
                     _.forEach(tp.testCases,function (tc) {
                         if(tc && tc.hasOwnProperty("runnable") && !tc.runnable){
-                            console.log(tc);
+
                             $scope.hasIncomplete = true;
                         }
                     });
                     _.forEach(tp.testCaseGroups,function (tg) {
                         _.forEach(tg.testCases,function (tc) {
                             if(tc && tc.hasOwnProperty("runnable") && !tc.runnable) {
-                                console.log(tc);
+
                                 $scope.hasIncomplete = true;
                             }
                         });
                     });
-                });
-                console.log("INCOMPLETE ? "+$scope.hasIncomplete);
+                }
             };
 
             $scope.loadTestCases = function () {
@@ -522,7 +521,6 @@ angular
                 $scope.FITS_SERVER.loadTestPlans().then(function (data) {
                     if(data.status){
                         $scope.tps = data.obj;
-                        $scope.initHasIncomplete($scope.tps);
                         d.resolve(true);
                     }
                     else {
@@ -575,9 +573,10 @@ angular
             $scope.selectTP = function (tp,skip) {
                 $scope.warning(skip).then(function () {
                     $timeout(function () {
-                        console.log("SelectTP");
+
                         DataSynchService.register(tp,null,$scope.entityUtils.transformTP);
                         // Selection
+                        $scope.initHasIncomplete(tp);
                         $scope.selectedEvent = null;
                         $scope.selectedForecast = null;
                         $scope.selectedTC = null;
@@ -904,7 +903,6 @@ angular
             };
 
             $scope.changedTG = function (gp) {
-                console.log(gp._changed);
                 gp._changed = DataSynchService.changed(gp,null,$scope.entityUtils.transformTG);
                 $scope.entityChangeLog[gp.id] = gp._changed;
             };
@@ -1036,13 +1034,10 @@ angular
                                 var v = $scope.selectedTC.events[evt];
                                 if (v && v.date) {
                                     for (var r = 0; r < v.date.rules.length; r++) {
-                                        console.log("r");
+
                                         var rule = v.date.rules[r];
-                                        console.log(rule);
-                                        console.log(index);
-                                        console.log(rule.relativeTo.id === index);
+
                                         if (rule && rule.relativeTo && rule.relativeTo.reference && rule.relativeTo.reference === 'dynamic' && rule.relativeTo.id + '' === index + '') {
-                                            console.log("ENTER");
                                             v.date.rules.splice(r, 1);
                                         }
                                     }
@@ -1077,12 +1072,10 @@ angular
                     function ($itemScope) {
                         var tp = $itemScope.tp;
                         var tc = TestObjectFactory.createTC(tp.id,"",tp.metaData.version);
-                        console.log("NEW TC");
-                        console.log(tc);
+
                         $scope.entityChangeLog[tc.id] = true;
                         tp.testCases.push(tc);
                         $scope.testCases.push(tc);
-                        console.log(tp);
                         $scope.selectTC(tc);
                         $scope.scrollTo('tc-' + tc.id,"");
                     }],
@@ -1151,7 +1144,6 @@ angular
                                 PopUp.stop();
                                 if(data.status){
                                     $scope.notify(data);
-                                    delete $scope.entityChangeLog[grp.id];
                                     $scope.selectTP($scope.selectedTP,true);
                                 }
                                 else {
@@ -1171,6 +1163,7 @@ angular
 
                         var obj = $itemScope.tc;
                         var clone = TestObjectUtil.cloneEntity(obj);
+                        clone._local = true;
                         clone.name = "[CLONE] " + clone.name;
                         $scope.entityUtils.sanitizeTC(clone);
 
@@ -1194,7 +1187,6 @@ angular
                                     PopUp.stop();
                                     if(data.status){
                                         $scope.notify(data);
-                                        delete $scope.entityChangeLog[tc.id];
                                         $scope.selectTP($scope.selectedTP,true);
                                     }
                                     else {
@@ -1270,8 +1262,6 @@ angular
 
             $scope.fileChange = function (files) {
 
-                console.log("change");
-                console.log(files[0].type);
                 if ($scope.export.type === 'NIST') {
                     if (files[0].type === "text/xml") {
                         $scope.$apply(function () {
@@ -1322,24 +1312,24 @@ angular
 
             $scope.canImport = function (tp) {
                 if(!tp){
-                    console.log("TP NULL");
+
                     return false;
                 }
                 if($scope.entityUtils.isLocal(tp)){
-                    console.log("TP LOCAL");
+
                     return false;
                 }
                 if(!$scope.saved(tp.testCases)){
-                    console.log("TCS NOT SAVED");
+
                     return false;
                 }
                 if(!$scope.saved(tp.testCaseGroups)){
-                    console.log("TCGS NOT SAVED");
+
                     return false;
                 }
                 for(var tc = 0; tc < tp.testCaseGroups.length; tc++){
                     if(!$scope.saved(tp.testCaseGroups[tc].testCases)){
-                        console.log("TCGS TCS NOT SAVED");
+
                         return false;
                     }
                 }
@@ -1349,7 +1339,7 @@ angular
             $scope.uploadNIST = function () {
                 if ($scope.sfileO != null && !$scope.fileErr) {
                     if(!$scope.canImport($scope.selectedTP)){
-                        console.log("CAN'T IMPORT");
+
                         var saveModal = $modal.open({
                             templateUrl: 'ImportSave.html',
                             controller: 'ImportSaveCtrl'
@@ -1380,7 +1370,7 @@ angular
                             })
                         .success(
                             function (data) {
-                                console.log(data);
+
                                 if (data.status) {
                                     var tp = angular.fromJson(data.testPlan);
                                     $scope.entityUtils.sanitizeTP(tp);
@@ -1521,7 +1511,7 @@ angular
             $scope.uploadCDC = function () {
                 if ($scope.sfileO != null && !$scope.fileErr) {
                     if(!$scope.canImport($scope.selectedTP)){
-                        console.log("CAN'T IMPORT");
+
                         var saveModal = $modal.open({
                             templateUrl: 'ImportSave.html',
                             controller: 'ImportSaveCtrl'
@@ -1622,7 +1612,7 @@ angular
                     $scope.loadTestCases().then(function (a) {
                         $scope.initEnums().then(function (b) {
                             $scope.loadVaccines().then(function (c) {
-                                console.log($scope.tps);
+
                                 $scope.loading = false;
                                 $scope.error = null;
                                 //$scope.autoSaveFct();
@@ -1664,7 +1654,7 @@ angular
                 if (groups.length === 0) {
                     var eval = TestObjectFactory.createEvaluation();
                     var mp = $scope.getMapping(x);
-                    console.log(x);
+
                     eval.relatedTo = $scope.getVx(mp.vx.cvx);
                     list.push(eval);
                 }
@@ -1757,8 +1747,7 @@ angular
 
             $scope.saveTG = function (tg,deep) {
                 var deferred = $q.defer();
-                console.log("SAVING TG");
-                console.log(tg);
+
                 $scope.FITS_SERVER.save($rootScope,EntityService.type.TEST_CASE_GROUP,tg,$scope.selectedTP).then(function (result) {
                     if(result.status){
                         if(deep){
@@ -1821,7 +1810,7 @@ angular
                 $scope.control.error.isSet = false;
                 $scope.control.error.obj = [];
                 var elm = $scope.activeElement();
-                console.log("ACTIVE ELEMENT "+elm);
+
                 try {
                     if(elm !== 'x'){
                         if (elm === 'tp') {
@@ -1949,6 +1938,20 @@ angular
                     $scope.tcBackups[entity.id] = angular.copy(entity);
                 }
             });
+
+            $scope.deleted = function (obj) {
+                var ids = $scope.entityUtils.extractIDs(obj);
+                _.forEach(ids,function (id) {
+                    DataSynchService.unregister(id);
+                    delete $scope.entityChangeLog[id];
+                    delete $scope.tcBackups[id];
+                });
+                $scope.initHasIncomplete($scope.selectedTP);
+            };
+
+            $rootScope.$on('entity_deleted', function (event, obj) {
+                $scope.deleted(obj);
+            });
         }
     );
 
@@ -1962,6 +1965,7 @@ angular.module('tcl').controller('ConfirmTestPlanDeleteCtrl',
             lists.push(tps);
             FITSBackEnd.delete([tps], $scope.testplanToDelete, EntityService.type.TEST_PLAN).then(function (result) {
                 if (result.status) {
+
                     $scope.loading = false;
                     $rootScope.msg().text = "testplanDeleteSuccess";
                     $rootScope.msg().type = "success";
@@ -2122,7 +2126,7 @@ angular.module('tcl').controller('VaccineBrowseCtrl',
         $scope.getNumber = function (num) {
             if (num == 0 || num < 0)
                 return [];
-            console.log(num);
+
             return new Array(num);
         };
 

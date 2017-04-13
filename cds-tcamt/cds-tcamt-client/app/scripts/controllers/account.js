@@ -41,9 +41,7 @@ angular.module('tcl')
             //TODO: Check return value???
             //TODO: Check return value???
             user.$save(function(){
-                // $scope.msg = angular.fromJson(result);
-                console.log("RESULT_ACC");
-                console.log(user);
+
                 if(user.type === 'success'){
                     Notification.success({
                         message: "Password Changed Successfully",
@@ -177,8 +175,6 @@ angular.module('tcl')
                 //TODO: Check return value???
                 user.$save(function(){
                     // $scope.msg = angular.fromJson(result);
-                    console.log("RESULT_ACC");
-                    console.log(user);
                     if(user.type === 'success'){
                         Notification.success({
                             message: "Password Changed Successfully",
@@ -199,7 +195,6 @@ angular.module('tcl')
                     $scope.msg = null;
                     new MultiAuthorsLoader().then(function (response) {
                         $scope.accountList = response;
-                        console.log(response);
                         $scope.tmpAccountList = [].concat($scope.accountList);
                     });
                 }

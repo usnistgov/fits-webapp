@@ -51,8 +51,7 @@ angular.module('tcl').factory('ResponseService', function (EntityService) {
                 code : code,
                 additional : additional
             };
-            console.log("RESP_OBJ");
-            console.log(response);
+
             return response;
         };
 
@@ -108,6 +107,27 @@ angular.module('tcl').factory('EntityUtilsService', function () {
                 }
             }
             throw "FITS : Group NOT Found (Grp : "+group+" )";
+        };
+
+        this.extractIDs = function (entity) {
+            var ids = [];
+            if(entity && entity.id){
+                ids.push(entity.id);
+                if(entity.hasOwnProperty("testCases")){
+                    _.forEach(entity.testCases,function (tc) {
+                        ids.push(tc.id);
+                    });
+                }
+                if(entity.hasOwnProperty("testCaseGroups")){
+                    _.forEach(entity.testCaseGroups,function (tg) {
+                        ids.push(tg.id);
+                        _.forEach(tg.testCases,function (tc) {
+                            ids.push(tc.id);
+                        });
+                    });
+                }
+            }
+            return ids;
         };
 
         this.locateEntityInList = function (list,entity) {

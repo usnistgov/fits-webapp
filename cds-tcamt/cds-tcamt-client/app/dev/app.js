@@ -447,7 +447,6 @@ app.run(function ($rootScope, $anchorScroll, $location, Restangular, $modal, $fi
             //Let's get user info now
             httpHeaders.common['Authorization'] = null;
             $http.get('api/accounts/cuser').success(function (data) {
-                console.log("setCurrentUser=" + data);
                 userInfoService.setCurrentUser(data);
                 $rootScope.$broadcast('event:loginConfirmed');
             });

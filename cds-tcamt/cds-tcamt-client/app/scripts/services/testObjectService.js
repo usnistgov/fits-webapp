@@ -6,7 +6,6 @@ angular.module('tcl').factory('TestObjectUtil', function () {
             }
         },
         updateEventId : function (evList,oId,nId) {
-            console.log("UPDATE EV ID");
           for(var i = 0; i < evList.length; i++){
               var vEvent = evList[i];
               if(vEvent.position+'' === oId+''){
@@ -55,8 +54,6 @@ angular.module('tcl').factory('TestObjectUtil', function () {
         },
         updateHash: function (tc) {
             var _tc = testObjectService.prepare(tc);
-            console.log(tc);
-            console.log(_tc);
             delete _tc.metaData.dateLastUpdated;
             var str = testObjectService.toStringObj(_tc);
             tc._hash = md5(str);
@@ -215,15 +212,11 @@ angular.module('tcl').factory('TestObjectUtil', function () {
             for(var i = 0; i < newTP.testCaseGroups.length; i++){
                 var group = testObjectService.getGroupByID(oldTP,newTP.testCaseGroups[i].id);
                 if(group){
-                    console.log("GROUP "+newTP.testCaseGroups[i].name+" FOUND");
                     for(var tc = 0; tc < newTP.testCaseGroups[i].testCases.length; tc++){
                         group.testCases.push(newTP.testCaseGroups[i].testCases[tc]);
                     }
-                    console.log(group);
-                    console.log(oldTP);
                 }
                 else {
-                    console.log("GROUP "+newTP.testCaseGroups[i].name+" NOT FOUND");
                     oldTP.testCaseGroups.push(newTP.testCaseGroups[i]);
                 }
             }
@@ -501,7 +494,6 @@ angular.module('tcl').factory('TestObjectSynchronize', function ($q, $http, Test
         syncTC: function (where, obj, tc) {
             var deferred = $q.defer();
             if (TestObjectUtil.isLocal(obj)) {
-                console.log("Cannot Save, Local TP, Must Save");
                 deferred.reject({
                     message: "TestPlan must be saved first",
                     status: false,
@@ -510,7 +502,6 @@ angular.module('tcl').factory('TestObjectSynchronize', function ($q, $http, Test
             }
             else {
                 var _tc = TestObjectSynchronize.prepare(tc);
-                console.log("Saving ");
                 $http.post('api/testcase/save', _tc).then(
                     function (response) {
                         var newTC = response.data;
@@ -565,7 +556,6 @@ angular.module('tcl').factory('TestObjectSynchronize', function ($q, $http, Test
         syncTG: function (tg,tp) {
             var deferred = $q.defer();
             if (TestObjectUtil.isLocal(tp)) {
-                console.log("Cannot Save, Local TG, Must Save");
                 deferred.reject({
                     message: "TestGroup must be saved first",
                     status: false,

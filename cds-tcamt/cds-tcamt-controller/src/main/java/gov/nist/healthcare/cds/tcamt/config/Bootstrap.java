@@ -1,17 +1,8 @@
 package gov.nist.healthcare.cds.tcamt.config;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
@@ -19,65 +10,25 @@ import java.util.Set;
 import javax.annotation.PostConstruct;
 
 import gov.nist.fhir.client.ir.TestRunnerServiceFhirImpl;
-import gov.nist.healthcare.cds.auth.domain.Account;
 import gov.nist.healthcare.cds.auth.domain.Privilege;
 import gov.nist.healthcare.cds.auth.repo.PrivilegeRepository;
-import gov.nist.healthcare.cds.auth.service.AccountService;
-import gov.nist.healthcare.cds.domain.DateReference;
-import gov.nist.healthcare.cds.domain.ExpectedEvaluation;
-import gov.nist.healthcare.cds.domain.ExpectedForecast;
-import gov.nist.healthcare.cds.domain.FixedDate;
-import gov.nist.healthcare.cds.domain.Patient;
-import gov.nist.healthcare.cds.domain.RelativeDate;
-import gov.nist.healthcare.cds.domain.RelativeDateRule;
 import gov.nist.healthcare.cds.domain.SoftwareConfig;
-import gov.nist.healthcare.cds.domain.StaticDateReference;
-import gov.nist.healthcare.cds.domain.TestCase;
-import gov.nist.healthcare.cds.domain.TestCaseGroup;
-import gov.nist.healthcare.cds.domain.TestPlan;
-import gov.nist.healthcare.cds.domain.VaccinationEvent;
-import gov.nist.healthcare.cds.domain.Vaccine;
-import gov.nist.healthcare.cds.domain.VaccineDateReference;
 import gov.nist.healthcare.cds.domain.VaccineMapping;
 import gov.nist.healthcare.cds.domain.exception.VaccineNotFoundException;
-import gov.nist.healthcare.cds.domain.wrapper.ActualEvaluation;
-import gov.nist.healthcare.cds.domain.wrapper.ActualForecast;
 import gov.nist.healthcare.cds.domain.wrapper.AppInfo;
 import gov.nist.healthcare.cds.domain.wrapper.Document;
 import gov.nist.healthcare.cds.domain.wrapper.Documents;
-import gov.nist.healthcare.cds.domain.wrapper.EngineResponse;
-import gov.nist.healthcare.cds.domain.wrapper.MetaData;
 import gov.nist.healthcare.cds.domain.wrapper.Resources;
-import gov.nist.healthcare.cds.domain.wrapper.ResponseVaccinationEvent;
 import gov.nist.healthcare.cds.domain.wrapper.SimulatedResult;
 import gov.nist.healthcare.cds.domain.wrapper.SimulationMap;
-import gov.nist.healthcare.cds.domain.wrapper.VaccineRef;
-import gov.nist.healthcare.cds.enumeration.DatePosition;
-import gov.nist.healthcare.cds.enumeration.DateType;
-import gov.nist.healthcare.cds.enumeration.EvaluationStatus;
-import gov.nist.healthcare.cds.enumeration.EventType;
 import gov.nist.healthcare.cds.enumeration.FHIRAdapter;
-import gov.nist.healthcare.cds.enumeration.Gender;
-import gov.nist.healthcare.cds.enumeration.RelativeTo;
-import gov.nist.healthcare.cds.enumeration.SerieStatus;
-import gov.nist.healthcare.cds.repositories.ManufacturerRepository;
-import gov.nist.healthcare.cds.repositories.ProductRepository;
 import gov.nist.healthcare.cds.repositories.SoftwareConfigRepository;
-import gov.nist.healthcare.cds.repositories.TestCaseRepository;
-import gov.nist.healthcare.cds.repositories.TestPlanRepository;
-import gov.nist.healthcare.cds.repositories.VaccineGroupRepository;
 import gov.nist.healthcare.cds.repositories.VaccineMappingRepository;
-import gov.nist.healthcare.cds.repositories.VaccineRepository;
-import gov.nist.healthcare.cds.service.MetaDataService;
-import gov.nist.healthcare.cds.service.NISTFormatService;
 import gov.nist.healthcare.cds.service.TestCaseExecutionService;
 import gov.nist.healthcare.cds.service.TestRunnerService;
 import gov.nist.healthcare.cds.service.VaccineImportService;
 import gov.nist.healthcare.cds.service.impl.validation.ExecutionService;
-import gov.nist.healthcare.cds.service.impl.validation.simulation.MockTestRunner;
-import gov.nist.healthcare.cds.service.impl.validation.simulation.TestExecutionSimulation;
 
-import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.PropertySource;
@@ -88,26 +39,16 @@ import org.springframework.oxm.castor.CastorMarshaller;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.RestTemplate;
-
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Service
-@PropertySource("classpath:app-info.properties" )
-@PropertySource("classpath:admin.properties" )
+@PropertySource("classpath:filtered/app-info.properties" )
 public class Bootstrap {
 
 	@Autowired
 	private Environment env;
-	
-	@Autowired
-	private MetaDataService mdService;
-	
-	@Autowired
-	private AccountService accountService;
 	
 	@Autowired
 	private VaccineImportService vaccineService;
@@ -115,20 +56,12 @@ public class Bootstrap {
 	@Autowired
 	private PrivilegeRepository privilegeRepository;
 	
-	@Autowired
-	private TestPlanRepository testPlanRepository;
-	
-	@Autowired
-	private TestCaseRepository testCaseRepository;
 	
 	@Autowired
 	private SoftwareConfigRepository softwareConfRepository;
 	
 	@Autowired
 	private VaccineMappingRepository vaccineRepository;
-	
-	@Autowired
-	private NISTFormatService nistService;
 	
 	@Bean
 	public PasswordEncoder passEncode(){
@@ -175,7 +108,6 @@ public class Bootstrap {
 	
 	@Bean
 	public TestRunnerService testRunner(){
-//		return new MockTestRunner();
 //		return new TestRunnerServiceFhirImpl("https://p860556.campus.nist.gov:8443/forecast/ImmunizationRecommendations");
 		return new TestRunnerServiceFhirImpl("https://hit-dev.nist.gov:15001/forecast/ImmunizationRecommendations");
 	}
@@ -212,7 +144,6 @@ public class Bootstrap {
 	@Bean
 	public TestCaseExecutionService testExecution(){
 		return new ExecutionService();
-//		return new TestExecutionSimulation();
 	}
 	
 	public void createVaccine() throws IOException{
@@ -264,26 +195,6 @@ public class Bootstrap {
 		System.out.println("[PRIME SOFTWARE CONFIG] existing");
 	}
 	
-	private List<TestCase> loadTestCases(String folder, String tp) throws IOException, VaccineNotFoundException{
-		List<TestCase> tcs = new ArrayList<TestCase>();
-		final URL url = Bootstrap.class.getResource("/" + folder);
-		if (url != null) {
-	        try {
-	            final File apps = new File(url.toURI());
-	            for (File app : apps.listFiles()) {
-	            	FileInputStream fisTargetFile = new FileInputStream(app);
-	            	String targetFileStr = IOUtils.toString(fisTargetFile, "UTF-8");
-	            	TestCase tc = nistService._import(targetFileStr);
-	            	tc.setTestPlan(tp);
-	            	tcs.add(tc);
-					
-	            }
-	        } catch (URISyntaxException ex) {
-	            // never happens
-	        }
-	    }
-		return tcs;
-	}
 	
 	@PostConstruct
 	public void init() throws ParseException, IOException, VaccineNotFoundException {

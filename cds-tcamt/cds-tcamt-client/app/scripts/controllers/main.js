@@ -70,9 +70,6 @@ angular.module('tcl').controller('MainCtrl', ['DataSynchService','TestObjectUtil
             $scope.username = $scope.password = null;
             $scope.$emit('event:logoutRequest');
             StorageService.remove(StorageService.IG_DOCUMENT);
-            $rootScope.initMaps();
-            $rootScope.igdocument = null;
-            AutoSaveService.stop();
             $location.url('/home');
         };
 
