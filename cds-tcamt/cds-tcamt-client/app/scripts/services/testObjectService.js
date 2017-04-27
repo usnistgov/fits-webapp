@@ -374,6 +374,8 @@ angular.module('tcl').factory('TestObjectFactory', function (TestObjectUtil) {
                 name: "New TC",
                 uid : '',
                 _changed: true,
+                evaluationType : "",
+                forecastType : "",
                 description: "",
                 dateType: 'FIXED',
                 _dateType: 'FIXED',

@@ -1261,7 +1261,7 @@ angular
             //         }]];
 
             $scope.fileChange = function (files) {
-
+                $scope.files = files;
                 if ($scope.export.type === 'NIST') {
                     if (files[0].type === "text/xml") {
                         $scope.$apply(function () {
@@ -1928,6 +1928,59 @@ angular
                 }
             });
 
+            $rootScope.$on('tp_import_success',function (event,result) {
+                console.log("IMPORT SUCCESS");
+                console.log(result.testPlan);
+                console.log($scope.tps);
+                var tp = result.testPlan;
+                if(tp){
+                    var id = _.findIndex($scope.tps,function (tpF) {
+                        return tpF.id === tp.id;
+                    });
+                    console.log("ID "+id);
+                    if(~id){
+                        $scope.entityUtils.sanitizeTP(tp);
+                        $scope.tps.splice(id,1,tp);
+                        $scope.selectTP(tp);
+                    }
+                }
+
+                $scope.sum = $modal.open({
+                    templateUrl: 'ImportSummary.html',
+                    controller: 'ImportSummaryCtrl',
+                    resolve: {
+                        sum: function () {
+                            return result;
+                        }
+                    }
+                });
+            });
+
+            $rootScope.$on('tp_import_failure',function (event,result) {
+                console.log("IMPORT FAILURE");
+                $scope.sum = $modal.open({
+                    templateUrl: 'ImportSummary.html',
+                    controller: 'ImportSummaryCtrl',
+                    resolve: {
+                        sum: function () {
+                            return result;
+                        }
+                    }
+                });
+                PopUp.stop();
+            });
+
+            $rootScope.$on('start_import',function (event) {
+                console.log("START IMPORT");
+                PopUp.start("Importing Test Cases...");
+            });
+
+            $rootScope.$on('end_import',function (event) {
+                console.log("END IMPORT");
+                PopUp.stop();
+            });
+
+
             $rootScope.$on('entity_saved', function (event, entity, transform) {
                 DataSynchService.save(transform);
                 if(entity){
@@ -2053,6 +2106,16 @@ angular.module('tcl').controller('DateCtrl',
             $uibModalInstance.dismiss('cancel');
         };
     });
+
+angular.module('tcl').controller('ImportSummaryCtrl',
+    function ($scope, $uibModalInstance, sum) {
+        $scope.summary = sum;
+
+        $scope.dismiss = function () {
+            $uibModalInstance.dismiss('cancel');
+        };
+    });
+
 
 angular.module('tcl').controller('GrpNameCtrl',
     function ($scope, $uibModalInstance, name) {

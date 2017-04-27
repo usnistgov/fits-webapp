@@ -12,6 +12,8 @@ angular.module('tcl').factory('FITSBackEnd', function ($q, TrashService, SaveSer
         ctrl.delete = TrashService.deleteEntity;
         // (wire, type, obj, container)
         ctrl.save = SaveService.save;
+        // (wire, obj, tp)
+        ctrl.saveAll = SaveService.saveAll;
         // NO ARG
         ctrl.loadTestPlans = EntityLoadService.loadTPs;
 

@@ -81,7 +81,7 @@ angular.module('tcl').factory('ResponseService', function (EntityService) {
     return new ResponseFactory();
 });
 
-angular.module('tcl').factory('EntityUtilsService', function () {
+angular.module('tcl').factory('EntityUtilsService', function (EntityService,Notification) {
 
     function Utils() {
 
@@ -90,6 +90,89 @@ angular.module('tcl').factory('EntityUtilsService', function () {
 
         this.createURL = function (url) {
             return baseURL+url;
+        };
+
+        this.inSynchList = function (list) {
+            if(list && list.length > 0){
+                for(var i = 0; i < list.length; i++){
+                    if(!ctrl.inSynch(list[i]))
+                        return false;
+                }
+            }
+            return true;
+        };
+
+        this.getUnsavedObject = function (tp) {
+            var obj = {};
+
+            obj[EntityService.type.TEST_PLAN] = [];
+            obj[EntityService.type.TEST_CASE] = [];
+            obj[EntityService.type.TEST_CASE_GROUP] = [];
+
+            if(!ctrl.inSynch(tp)){
+                obj[EntityService.type.TEST_PLAN].push(tp);
+            }
+
+            _.forEach(tp.testCases,function (tc) {
+                if(!ctrl.inSynch(tc)){
+                    obj[EntityService.type.TEST_CASE].push(tc);
+                }
+            });
+
+            _.forEach(tp.testCaseGroups,function (tg) {
+                if(!ctrl.inSynch(tg)){
+                    obj[EntityService.type.TEST_CASE_GROUP].push(tg);
+                }
+                _.forEach(tg.testCases,function (tc) {
+                    if(!ctrl.inSynch(tc)){
+                        obj[EntityService.type.TEST_CASE].push(tc);
+                    }
+                });
+            });
+
+            return obj;
+        };
+
+        this.unsavedObjectIsEmpty = function (obj) {
+            return !obj || (obj[EntityService.type.TEST_PLAN].length === 0 && obj[EntityService.type.TEST_CASE].length === 0 && obj[EntityService.type.TEST_CASE_GROUP].length === 0);
+        };
+
+        this.tpIsSynchronized = function (tp) {
+            if(!tp || !ctrl.inSynch(tp))
+                return false;
+            if(!ctrl.inSynchList(tp.testCases)){
+                return false;
+            }
+            if(!ctrl.inSynchList(tp.testCaseGroups)){
+                return false;
+            }
+            for(var tg = 0; tg < tp.testCaseGroups.length; tg++){
+                if(!ctrl.inSynchList(tp.testCaseGroups[tg].testCases)){
+                    return false;
+                }
+            }
+            return true;
+        };
+
+        this.notify = function (response) {
+            if(response.severity === EntityService.severity.ERROR){
+                Notification.error({
+                    message: response.message,
+                    delay: 3000
+                });
+            }
+            else if(response.severity === EntityService.severity.WARNING) {
+                Notification.warning({
+                    message: response.message,
+                    delay: 3000
+                });
+            }
+            else if(response.severity === EntityService.severity.SUCCESS){
+                Notification.success({
+                    message: response.message,
+                    delay: 3000
+                });
+            }
         };
 
         this.isLocal = function (obj) {

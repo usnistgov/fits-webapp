@@ -2,10 +2,6 @@ package gov.nist.healthcare.cds.tcamt.controller;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -104,6 +100,7 @@ public class DocumentationController {
 		} else if (fileExtension.equals("ppt")) {
 			contentType = "application/vnd.ms-powerpoint";
 		}
+		System.out.println("[CTNTYPE] "+contentType);
 		return contentType;
 	}
 

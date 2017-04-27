@@ -26,7 +26,7 @@
         <span class="col-md-12" ng-show="tps.length === 0" style="text-align: center;"><strong>No TestPlan created yet.</strong></span>
         <div ng-show="tps.length !== 0" class="col-md-12">
             <div ng-show="error === null">
-                <table st-table="tmpTps" st-safe-src="tps" class="smart-table table table-striped table-bordered">
+                <table st-table="tps" class="smart-table table table-striped table-bordered">
                     <thead>
                         <tr class="tbl-header">
                             <!--<th st-ratio="5">#</th>-->
@@ -40,7 +40,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr ng-repeat="row in tmpTps track by $index">
+                        <tr ng-repeat="row in tps track by $index">
                             <!--<td st-ratio="5">{{$index + 1}}</td>-->
                             <td st-ratio="22" ng-bind="row.name"></td>
                             <td st-ratio="20" ng-bind="row.description"></td>

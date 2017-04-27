@@ -8,6 +8,45 @@ angular.module('tcl').factory('SaveService', function ($timeout, PopUp, $q, Resp
         var ctrl = this;
         var action = EntityService.action.SAVE;
 
+        this.saveAll = function (wire, obj, tp) {
+            var delay = $q.defer();
+
+            var qTP = [];
+            //-- Save Test Plans
+            for(var i = 0; i < obj[EntityService.type.TEST_PLAN].length; i++){
+                qTP.push(ctrl.save(wire,EntityService.type.TEST_PLAN, obj[EntityService.type.TEST_PLAN][i], null));
+            }
+
+            $q.all(qTP).then(function (dTP) {
+
+                var qTG = [];
+                //-- Save Test Case Groups
+                for(var j = 0; j < obj[EntityService.type.TEST_CASE_GROUP].length; j++){
+                    qTG.push(ctrl.save(wire,EntityService.type.TEST_CASE_GROUP, obj[EntityService.type.TEST_CASE_GROUP][j], tp));
+                }
+
+                $q.all(qTG).then(function (dTG) {
+
+                    var qTC = [];
+                    //-- Save Test Cases
+                    for(var k = 0; k < obj[EntityService.type.TEST_CASE].length; k++){
+                        qTC.push(ctrl.save(wire,EntityService.type.TEST_CASE, obj[EntityService.type.TEST_CASE][k], tp));
+                    }
+
+                    $q.all(qTC).then(function (dTC) {
+                        delay.resolve(dTP.concat(dTG).concat(dTC));
+                    });
+
+                });
+            });
+
+
+
+
+
+            return delay.promise;
+        };
+
         this.save = function (wire, type, obj, container) {
             var delay = $q.defer();
 
