@@ -53,11 +53,6 @@
                                 class="btn btn-xs btn-success" style="margin: 0px; margin-right: 10px;">
                             <span><i class="fa fa-floppy-o fa-fw"></i>Save Reports</span>
                         </button>
-                        <!--<button ng-show="true" ng-click="getSimulationList()"-->
-                                <!--ng-show="exec && showResults && report && container.asList && container.asList.length > 0 "-->
-                                <!--class="btn btn-xs btn-success" style="margin: 0px; margin-right: 10px;">-->
-                            <!--<span><i class="fa fa-floppy-o fa-fw"></i>Save Reports</span>-->
-                        <!--</button>-->
                         <button ng-click="clear()" ng-show="!exec && tcQueue.length > 0" class="btn btn-xs btn-danger"
                                 style="margin: 0px; margin-right: 10px;">
                             <i class="fa fa-trash-o" style="font-size : 1.5em;" aria-hidden="true"></i>
@@ -87,10 +82,10 @@
                         </tr>
                         </thead>
                         <thead ng-hide="exec">
-                        <tr>
-                            <th style="color: blue; text-align: center;"><strong>Configuration</strong></th>
-                            <th style="color: blue; text-align: center;"><strong>Test Cases List</strong></th>
-                        </tr>
+                            <tr>
+                                <th style="color: blue; text-align: center;"><strong>Configuration</strong></th>
+                                <th style="color: blue; text-align: center;"><strong>Test Cases List</strong></th>
+                            </tr>
                         </thead>
                         <tbody>
                         <tr>
@@ -215,6 +210,7 @@
             <span style="background-color: orange;" class="badge">WARNINGS</span>
             <span style="background-color: grey;" class="badge">INCOMPLETE</span>
         </div>
+        <!-- Results -->
         <div class="col-md-12" ng-show="exec">
             <div class="panel panel-primary" style="padding: 0px; margin-top : 15px;">
                 <div class="panel-heading col-md-12" style="background-color: #293856;">
@@ -260,7 +256,9 @@
                 </div>
             </div>
         </div>
+
         <div class="row" ng-hide="exec">
+            <!-- Tree and Filters TC -->
             <div class="col-md-4">
                 <div class="panel panel-primary" style="padding: 0px; margin: 15px;">
                     <div class="panel-heading col-md-12" layout="row" layout-align="center center"
@@ -348,8 +346,7 @@
                     </div>
                 </div>
             </div>
-
-
+            <!-- Test View Area -->
             <div class="col-md-8">
                 <div class="panel panel-primary" style="padding: 0px; margin: 15px;">
                     <div class="panel-heading" style="background-color: #293856">

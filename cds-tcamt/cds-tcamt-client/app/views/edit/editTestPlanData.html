@@ -62,88 +62,14 @@ body {
 					</form>
 				</md-content>
 			</md-tab>
-			<md-tab label="Import">
-				<entity-import save="saveTP" tp="selectedTP"></entity-import>
-			</md-tab>
+			<!--<md-tab label="Import">-->
+			<!--</md-tab>-->
+			<!--<md-tab label="Export">-->
+			<!--</md-tab>-->
 		</md-tabs>
 	</md-content>
 </script>
-<script type="text/ng-template" id="import.html">
-	<md-content class="md-padding">
-		<form name="testplanMetaDataForm" class="form-horizontal" novalidate>
-			<div layout="column" layout-align="center center">
-				<div layout="row" layout-align="start center" style="width : 100%;">
-					<md-input-container flex="80">
-						<label>Format Type</label>
-						<md-select ng-model="FORMAT">
-							<md-option ng-repeat="format in ctrl.configs" ng-value="format.id">{{format.name}}</md-option>
-						</md-select>
-					</md-input-container>
-					<div style="margin-left: 20px;" class="btn btn-sm btn-info" flex="20">
-						<i class="fa fa-file pull-left" aria-hidden="true"></i>
-						BROWSE
-						<input style="width: 100%; height: 100%" multiple type="file" ng-if='isMulti()' class="upload" onchange="angular.element(this).scope().select(this.files)"/>
-						<input style="width: 100%; height: 100%" type="file" ng-if='!isMulti()' class="upload" onchange="angular.element(this).scope().select(this.files)"/>
-					</div>
-				</div>
-				<div layout="row" layout-align="center center" ng-if="selectedFiles.length > 0 && isMulti()" style="width : 100%; height : 50px; text-align: left;" >
-					<span style="background-color: black; margin-left: 10px;" class="badge">{{selectedFiles.length}} Selected Files</span>
-					<span style="background-color: green; margin-left: 10px;" class="badge">{{validFiles.length}} Valid Files</span>
-					<span style="background-color: red; margin-left: 10px;" class="badge">{{selectedFiles.length - validFiles.length}} Invalid Files</span>
-				</div>
-				<div style="width : 100%; border : 1px solid black;" ng-if="selectedFiles.length > 0" >
-					<md-list style="padding: 0;">
-						<md-list-item layout="row" layout-align="start center" ng-repeat="file in selectedFiles" ng-style="$index !== selectedFiles.length -1 ? { 'border-bottom' : '1px solid #e4e4e4' } : {}"  ng-class="{ 'invalid-file' : !ctrl.isValid(file), 'valid-file' :  ctrl.isValid(file)}">
-							<div flex="60">
-								{{file.name}}
-							</div>
-							<div flex="30">
-								<span ng-show="!ctrl.isValid(file)" style="color: red;">{{message}}</span>
-							</div>
-							<div flex="10" layout="row" layout-align="end center">
-								<button ng-show="isMulti()" class="pull-right" ng-click="ctrl.rmFile($index)">
-									<i style="color: red;"  class="fa fa-times" aria-hidden="true"></i>
-								</button>
-							</div>
-						</md-list-item>
-					</md-list>
-				</div>
-				<div ng-if="validFiles.length > 0 && FORMAT === ctrl.formats.CDC_SP" layout="column" layout-align="start start" style="width : 100%; border : 1px solid black; margin-top : 10px; padding: 20px;" >
-					<form name="importConfig">
-						<md-input-container style="width: 100%;">
-							<label>Sheet Position</label>
-							<input ng-model="exportConfig.position" min="1" type="number">
-						</md-input-container>
-						<div layout="row" layout-align="start end" style="width: 100%;">
-							<md-radio-group flex="20" ng-model="exportConfig.all">
-								<md-radio-button ng-value="true">Import All</md-radio-button>
-								<md-radio-button ng-value="false">Select TestCases</md-radio-button>
-							</md-radio-group>
-							<div flex="80" ng-show="!exportConfig.all">
-								<md-input-container style="width: 100%;">
-									<label>Lines (e.g : 1-10;13;....) </label>
-									<input ng-model="exportConfig.lines" ng-pattern="regex" min="0" type="text">
-								</md-input-container>
-							</div>
-						</div>
-						<md-input-container style="width: 100%;" >
-							<label>Handling Unknown Products</label>
-							<md-select name="sl" id="sl" ng-model="exportConfig.ignore">
-								<md-option ng-value="true">Ignore</md-option>
-								<md-option ng-value="false">Use CVX Only</md-option>
-							</md-select>
-						</md-input-container>
-					</form>
-				</div>
-				<div style="width: 100%;" layout="row" layout-align="end center" ng-show="validFiles.length > 0">
-					<button class="btn btn-success btn" ng-click="import()">
-						Import
-					</button>
-				</div>
-			</div>
-		</form>
-	</md-content>
-</script>
+
 <script type="text/ng-template" id="ImportSummary.html">
 	<div class="modal-header fits-m-h">
 		<h3 class="modal-title">Import Summary</h3>

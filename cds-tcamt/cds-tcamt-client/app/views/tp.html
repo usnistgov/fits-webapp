@@ -39,30 +39,6 @@
                         Assessment Date and Patient Information
                     </li>
                 </ol>
-                <!--<div ng-show="control.error.isSet">-->
-                    <!--<div uib-alert class="alert-danger" close="dismissError()">-->
-                        <!--<div style="width: 100%;" layout="row" layout-align="center center">-->
-                            <!--<table flex="50" class="table table-condensed">-->
-                                <!--<tbody ng-repeat="errorObj in control.error.list track by $index">-->
-                                <!--<tr>-->
-                                    <!--<td colspan="2" style="text-align: center;">-->
-                                        <!--<strong>{{errorObj.action === 'IMPORT_NIST' ? 'Import Errors' : errorObj.action-->
-                                            <!--=== 'SAVE_TC' ? 'Saving TestCase '+ errorObj.obj.name : 'Errors'}}</strong>-->
-                                    <!--</td>-->
-                                <!--</tr>-->
-                                <!--<tr ng-repeat="e in errorObj.errors track by $index">-->
-                                    <!--<td><strong>{{e.path}}</strong></td>-->
-                                    <!--<td>{{e.message}}</td>-->
-                                <!--</tr>-->
-                                <!--</tbody>-->
-                            <!--</table>-->
-                        <!--</div>-->
-                    <!--</div>-->
-                <!--</div>-->
-                <!--<div class="pull-left">-->
-                    <!---->
-
-                <!--</div>-->
 
                 <div layout="row" layout-align="end start" style="padding-right: 15px; padding-left: 15px;">
                     <div layout="row" flex="grow" layout-align="start start">
@@ -104,16 +80,8 @@
                                 </table>
                             </div>
                         </div>
-                        <!--<div layout="row" ng-show="accordi.tpDetails">-->
-                            <!--<md-checkbox md-no-ink ng-show="accordi.tpDetails && aTPisSelected()" ng-model="autoSave.active" class="md-primary">-->
-                                <!--Auto Save (refresh rate 10s)-->
-                            <!--</md-checkbox>-->
-                            <!--<span ng-show="autoSave.active" style="color : blue; margin-left: 5px;"><strong> Last Saved : {{autoSave.lastSave.getTime() | date:'HH:mm:ss'}}</strong></span>-->
-                            <!--<div ng-show="autoSave.saving && autoSave.active" style="margin-left: 5px;">-->
-                                <!--<i  class="fa fa-spinner fa-pulse"></i>-->
-                            <!--</div>-->
-                        <!--</div>-->
                     </div>
+
                     <div layout="row" flex="nogrow" layout-align="end start" >
                         <button ng-show="accordi.tpList" type="button" class="btn btn-info btn-sm" ng-click="newTestPlan()">
                             <i class="fa fa-plus"></i>
@@ -127,9 +95,17 @@
                                 class="btn btn-sm btn-info" ng-click="importButton()">
                             <span><i class="fa fa-download fa-fw"></i>Import</span>
                         </button>
-                        <button ng-show="accordi.tpDetails && aTCisSelected() && !selectedTC.changed" type="button" class="btn btn-info btn-sm" ng-click="exportNIST()">
-                            <span><i class="fa fa-upload fa-fw"></i> Export</span>
-                        </button>
+                        <div ng-show="aTPisSelected()" class="btn-group" uib-dropdown is-open="status.isopen">
+                            <button ng-click="goToExportButton()" ng-style="(aTCisSelected() && !selectedTC.changed) ? { 'padding-right' : '10px' } : { 'padding-right' : '20px' }" type="button" class="btn btn-info btn-sm"  uib-dropdown-toggle ng-disabled="disabled">
+                                <span><i class="fa fa-upload fa-fw"></i> Export</span> <i ng-if="aTCisSelected() && !selectedTC.changed" style="margin-left: 10px;" class="fa fa-chevron-down"></i>
+                            </button>
+                            <ul ng-if="aTCisSelected() && !selectedTC.changed" class="dropdown-menu" uib-dropdown-menu role="menu" aria-labelledby="single-button">
+                                <li role="menuitem"><a ng-click="goToExportView()">Open Export View</a></li>
+                                <li class="divider"></li>
+                                <li role="menuitem"><a ng-click="export('nist')">Export Test Case To XML</a></li>
+                                <li role="menuitem"><a ng-click="export('pdf')">Export Test Case To PDF</a></li>
+                            </ul>
+                        </div>
                         <button title="Save Changes" type="button" class="btn btn-sm btn-success" ng-show="aTPisSelected()"
                                 ng-click="saveAllChangedTestPlans()">
                             <span><i class="fa fa-floppy-o fa-fw"></i> Save</span>

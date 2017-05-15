@@ -120,7 +120,8 @@ public class Bootstrap {
 	@Bean
 	public TestRunnerService testRunner(){
 //		return new TestRunnerServiceFhirImpl("https://p860556.campus.nist.gov:8443/forecast/ImmunizationRecommendations");
-		return new TestRunnerServiceFhirImpl("https://hit-dev.nist.gov:15001/forecast/ImmunizationRecommendations");
+//		return new TestRunnerServiceFhirImpl("https://hit-dev.nist.gov:15001/forecast/ImmunizationRecommendations");
+		return new TestRunnerServiceFhirImpl("http://hit-dev.nist.gov:11080/fhirAdapter/fhir/Parameters/$cds-forecast");
 	}
 	
 	@Bean

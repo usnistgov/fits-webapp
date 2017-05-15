@@ -256,7 +256,7 @@ body {
 		</div>
 
 		<div class="fill col-md-8">
-			<div class="panel panel-primary" style="background-color: rgb(250, 250, 250);">
+			<div ng-show="mainView === 'dashboard'" class="panel panel-primary" style="background-color: rgb(250, 250, 250);">
 				<div class="panel-heading" style="background-color: #293856">
 					<strong>Dashboard</strong>
 					<button  ng-show="aTCisSelected()" ng-click="summary()" class="btn btn-xs btn-info pull-right" style="margin: 0px;">
@@ -278,6 +278,252 @@ body {
 					</div>
 				</div>
 			</div>
+			<div ng-show="mainView === 'import'" class="panel panel-info" style="background-color: rgb(250, 250, 250);">
+				<div class="panel-heading"  style="background-color: #293856;" layout="row" layout-align="center center">
+					<div flex="50" layout="row">
+						<button flex="40" ng-click="goToDash()" class="btn btn-xs btn-info" style="margin: 0px;">
+							<i class="fa fa-chevron-left">&nbsp; </i>
+							Dashboard
+						</button>
+					</div>
+					<div flex="50">
+						<strong>Import</strong>
+					</div>
+				</div>
+				<div class="panel-body panel-resizable"
+					 style="padding-bottom: 10px; height : 100%; bottom : 0; min-height: 400px;">
+					<entity-import save="saveTP" tp="selectedTP"></entity-import>
+				</div>
+			</div>
+			<div ng-show="mainView === 'export'" class="panel panel-info" style="background-color: rgb(250, 250, 250);">
+				<div class="panel-heading"  style="background-color: #293856;" layout="row" layout-align="center center">
+					<div flex="50" layout="row">
+						<button flex="40" ng-click="goToDash()" class="btn btn-xs btn-info" style="margin: 0px;">
+							<i class="fa fa-chevron-left">&nbsp; </i>
+							Dashboard
+						</button>
+					</div>
+					<div flex="50">
+						<strong>Export</strong>
+					</div>
+				</div>
+				<div class="panel-body panel-resizable"
+					 style="padding-bottom: 10px; height : 100%; bottom : 0; min-height: 400px;">
+					<entity-export save="saveTC" tp="selectedTP"></entity-export>
+				</div>
+			</div>
 		</div>
 	</div>
 </div>
+<script type="text/ng-template" id="export.html">
+	<md-content class="md-padding">
+		<form name="testplanMetaDataForm" class="form-horizontal" novalidate>
+			<div layout="column" layout-align="center center">
+				<div layout="column" style="width : 100%;">
+					<label>
+						<span style="background-color: blue; margin-left: 10px;" class="badge">1</span>
+						- Pick your Export Format
+					</label>
+					<div style="width: 100%; padding-left : 10px; padding-right : 10px;" >
+						<md-select ng-model="FORMAT">
+							<md-option ng-repeat="format in ctrl.configs" ng-value="format.id">{{format.name}}</md-option>
+						</md-select>
+					</div>
+				</div>
+				<div layout="column" style="width : 100%;">
+					<div layout="row" layout-align="start center" style="width: 100%;">
+						<div flex="30" layout="row" layout-align="start center">
+							<div flex="20">
+								<label>
+									<span style="background-color: blue; margin-left: 10px;" class="badge">2</span> -
+								</label>
+							</div>
+							<button flex="80" style="margin-left: 5px; width: 100%;" ng-class="{'btn-info' : $root.blockTree, 'btn-primary' : !$root.blockTree}" class="btn btn-sm btn-info" ng-click="toggleDragAndDrop()">
+								<span ng-style="$root.blockTree ? { 'background-color' : '#47ef47' } : { 'background-color' : '#ff4040' } " style="padding: 0 !important; margin-right: 5px; font-size: 10px;" class="badge">&nbsp;</span>
+								Select your Test Cases
+							</button>
+						</div>
+						<button flex="10" ng-click="clear()" ng-show="exportList.length > 0" class="btn btn-sm btn-danger"s tyle="margin-left: 5px;" >
+							<i class="fa fa-trash-o" aria-hidden="true"></i>
+						</button>
+						<div flex="60" layout="row" layout-align="end center">
+							<span ng-if="(exportList.length > 0)" style="background-color: black; margin-left: 10px;" class="badge">{{exportList.length}} Selected TestCases</span>
+							<span ng-if="(validTCs().length > 0)" style="background-color: green; margin-left: 10px;" class="badge">{{validTCs().length}} Valid TestCases</span>
+							<span ng-if="(exportList.length - validTCs().length > 0)"style="background-color: red; margin-left: 10px;" class="badge">{{exportList.length - validTCs().length}} Invalid TestCases</span>
+						</div>
+					</div>
+					<div layout="row" layout-align="start center">
+						<div flex="{{exportList.length - validTCs().length === 0 ? 100 : 75}}" ng-show="exportList.length > 0" class="input-group" style="border : 1px solid #d2d2d2;">
+							<span class="input-group-addon" style="background-color: white;" id="basic-addon1"><i class="fa fa-search" aria-hidden="true"></i></span>
+							<input type="text" ng-model="str"
+								   style="background-color : white; width: 100%" placeholder=" Search" aria-describedby="basic-addon1">
+						</div>
+						<md-checkbox ng-if="(exportList.length - validTCs().length > 0)" flex="25" ng-model="ctrl.invalid" aria-label="Show invalid test cases only" style="margin-bottom: 0px; margin-left: 5px;" >
+							Invalid test cases only
+						</md-checkbox>
+					</div>
+
+					<md-list ng-show="$root.blockTree" md-whiteframe="4" layout="row" style="background-color: white; min-height: 45px; padding: 0px; border-top : 1px solid #dddddd;">
+						<md-list-item flex="80" style="border-right: 1px solid #dddddd;">
+							<div layout="column" layout-align="center start" flex="100" style="width: 100%;" >
+								<div layout="row" layout-align="center center" style="width: 100%;">
+									<strong>Test Case Name</strong>
+								</div>
+								<div layout="row" layout-align="start center">
+								</div>
+							</div>
+						</md-list-item>
+						<md-list-item  flex="20">
+							<div layout="row" layout-align="center center" flex="100" style="width: 100%;" >
+								<strong>Actions</strong>
+							</div>
+						</md-list-item>
+					</md-list>
+					<md-virtual-repeat-container ng-show="$root.blockTree" ng-class="{'drop-zone' :  exportList.length === 0 }" style="height : 280px; border: 1px solid #d2d2d2; padding: 0;" id="qbody" dnd-list="exportList"  dnd-drop="drop(list, item, index)">
+						<md-list-item md-virtual-repeat="tc in exportList | validExportTc:ctrl.invalid | exportTcSearch:str" class="repeated-item cursor-move" flex layout="row"
+									  ng-class="{ 'fail' : !tc.valid }"
+									  style="border-bottom: 1px solid #dddddd; padding: 0; background-color: rgba(228,228,228,0.17);"
+									  dnd-draggable="tc"
+									  dnd-effect-allowed="move">
+							<md-list flex layout="row" style="padding: 0;">
+								<md-list-item flex="80">
+									<div layout="row" layout-align="start center" flex="100" style="width: 100%;" >
+										<div style="margin-right: 10px;">
+											<span class="label label-case label-icon">TC</span>
+										</div>
+										<div layout="column" layout-align="center start">
+											<strong>{{ tc.uid ? '#'+tc.uid+' - ' : ''}}{{tc.name}}</strong>
+										</div>
+										<div style="margin-left: 10px;" layout="column" layout-align="center start">
+											<span style="color: red;" ng-repeat="msg in tc.err">{{msg}}</span>
+										</div>
+									</div>
+								</md-list-item>
+								<md-list-item flex="20">
+									<div layout="row" layout-align="end center" flex="100" style="width: 100%;" >
+										<button ng-show="!inSynch(tc.tc)" style="margin-right: 5px;" class="pull-right" ng-click="saveTC(tc)">
+											<i style="color: green;"  class="fa fa-floppy-o" aria-hidden="true"></i>
+										</button>
+										<button class="pull-right" ng-click="delete(tc)">
+											<i style="color: red;"  class="fa fa-times" aria-hidden="true"></i>
+										</button>
+									</div>
+								</md-list-item>
+							</md-list>
+						</md-list-item>
+					</md-virtual-repeat-container>
+				</div>
+				<div layout="column" layout-align="start start" style="width : 100%; margin-top : 10px; " ng-show="validTCs().length > 0">
+					<!--<label>-->
+					<!--<span style="background-color: blue; margin-left: 10px;" class="badge">4</span>-->
+					<!-- - Submit-->
+					<!--</label>-->
+					<div style="width: 100%;" layout="row" layout-align="center center">
+						<button class="btn btn-success btn" ng-click="export()">
+							Export
+						</button>
+					</div>
+				</div>
+			</div>
+		</form>
+	</md-content>
+</script>
+<script type="text/ng-template" id="import.html">
+	<md-content class="md-padding">
+		<form name="testplanMetaDataForm" class="form-horizontal" novalidate>
+			<div layout="column" layout-align="center center">
+				<div layout="column" style="width : 100%;">
+					<label>
+						<span style="background-color: blue; margin-left: 10px;" class="badge">1</span>
+						- Pick your Import Format
+					</label>
+					<div style="width: 100%; padding-left : 10px; padding-right : 10px;" >
+						<md-select ng-model="FORMAT">
+							<md-option ng-repeat="format in ctrl.configs" ng-value="format.id">{{format.name}}</md-option>
+						</md-select>
+					</div>
+				</div>
+				<div layout="column" style="width : 100%;">
+					<div layout="row" layout-align="start center">
+						<label>
+							<span style="background-color: blue; margin-left: 10px;" class="badge">2</span>
+							- Select your files
+						</label>
+						<span ng-if="selectedFiles.length > 0 && isMulti() && (selectedFiles.length > 0)" style="background-color: black; margin-left: 10px;" class="badge">{{selectedFiles.length}} Selected Files</span>
+						<span ng-if="selectedFiles.length > 0 && isMulti() && (validFiles.length > 0)" style="background-color: green; margin-left: 10px;" class="badge">{{validFiles.length}} Valid Files</span>
+						<span ng-if="selectedFiles.length > 0 && isMulti() && (selectedFiles.length - validFiles.length) > 0 "style="background-color: red; margin-left: 10px;" class="badge">{{selectedFiles.length - validFiles.length}} Invalid Files</span>
+					</div>
+					<div layout="column" layout-align="start center" style="width: 100%; min-height: 100px; padding-left : 10px; padding-right : 10px;" >
+						<button class="btn btn-sm btn-info" style="width: 100%;">
+							BROWSE FILES
+							<input style="width: 100%; height: 100%" type="file" ng-if='!isMulti()' class="upload" onchange="angular.element(this).scope().select(this.files)"/>
+							<input style="width: 100%; height: 100%" multiple type="file" ng-if='isMulti()' class="upload" onchange="angular.element(this).scope().select(this.files)"/>
+						</button>
+						<div style="width : 100%; border : 1px solid #dcdcdc; margin-top : 10px;" ng-if="selectedFiles.length > 0">
+							<md-list style="padding: 0; width: 100%; " >
+								<md-list-item layout="row" layout-align="start center" ng-repeat="file in selectedFiles" ng-style="$index !== selectedFiles.length -1 ? { 'border-bottom' : '1px solid #e4e4e4' } : {}"  ng-class="{ 'invalid-file' : !ctrl.isValid(file), 'valid-file' :  ctrl.isValid(file)}">
+									<div flex="90">
+										<div style="width: 100%;" layout="column" layout-align="center center">
+											<span><strong>{{file.name}}</strong></span>
+											<md-tooltip ng-show="!ctrl.isValid(file)" >{{message}}</md-tooltip>
+										</div>
+									</div>
+									<div flex="10" layout="row" layout-align="end center">
+										<button ng-show="isMulti()" class="pull-right" ng-click="ctrl.rmFile($index)">
+											<i style="color: red;"  class="fa fa-times" aria-hidden="true"></i>
+										</button>
+									</div>
+								</md-list-item>
+							</md-list>
+						</div>
+					</div>
+				</div>
+				<div ng-if="validFiles.length > 0 && FORMAT === ctrl.formats.CDC_SP" layout="column" layout-align="start start" style="width : 100%; margin-top : 10px; " >
+					<label>
+						<span style="background-color: blue; margin-left: 10px;" class="badge">3</span>
+						- Configuration
+					</label>
+					<div style="width : 100%; margin-top : 10px; padding: 20px;">
+						<form name="importConfig">
+							<md-input-container style="width: 100%;">
+								<label>Sheet Position</label>
+								<input ng-model="exportConfig.position" min="1" type="number">
+							</md-input-container>
+							<div layout="row" layout-align="start end" style="width: 100%;">
+								<md-radio-group flex="20" ng-model="exportConfig.all">
+									<md-radio-button ng-value="true">Import All</md-radio-button>
+									<md-radio-button ng-value="false">Select TestCases</md-radio-button>
+								</md-radio-group>
+								<div flex="80" ng-show="!exportConfig.all">
+									<md-input-container style="width: 100%;">
+										<label>Lines (e.g : 1-10;13;....) </label>
+										<input ng-model="exportConfig.lines" ng-pattern="regex" min="0" type="text">
+									</md-input-container>
+								</div>
+							</div>
+							<md-input-container style="width: 100%;" >
+								<label>Handling Unknown Products</label>
+								<md-select name="sl" id="sl" ng-model="exportConfig.ignore">
+									<md-option ng-value="true">Ignore</md-option>
+									<md-option ng-value="false">Use CVX Only</md-option>
+								</md-select>
+							</md-input-container>
+						</form>
+					</div>
+				</div>
+				<div layout="column" layout-align="start start" style="width : 100%; margin-top : 10px; " ng-show="validFiles.length > 0">
+					<!--<label>-->
+					<!--<span style="background-color: blue; margin-left: 10px;" class="badge">4</span>-->
+					<!-- - Submit-->
+					<!--</label>-->
+					<div style="width: 100%;" layout="row" layout-align="center center">
+						<button class="btn btn-success btn" ng-click="import()">
+							Import
+						</button>
+					</div>
+				</div>
+
+			</div>
+		</form>
+	</md-content>
+</script>

@@ -300,7 +300,7 @@ angular.module('tcl').factory('TestObjectUtil', function () {
     return testObjectService;
 });
 
-angular.module('tcl').factory('TestObjectFactory', function (TestObjectUtil) {
+angular.module('tcl').factory('TestObjectFactory', function (EntityService, TestObjectUtil) {
     var testObjectService = {
         createFD: function () {
             var dt = new Date();
@@ -327,7 +327,9 @@ angular.module('tcl').factory('TestObjectFactory', function (TestObjectUtil) {
         createGRP: function (id) {
             return {
                 _local : true,
+                _type : EntityService.type.TEST_CASE_GROUP,
                 id: new ObjectId().toString(),
+                description : "",
                 name: 'New Group',
                 testPlan: id,
                 testCases: []
@@ -370,7 +372,9 @@ angular.module('tcl').factory('TestObjectFactory', function (TestObjectUtil) {
         createTC: function (tp,grp,version) {
             var dt = new Date();
             var tc = {
+                id: new ObjectId().toString(),
                 _local : true,
+                _type : EntityService.type.TEST_CASE,
                 name: "New TC",
                 uid : '',
                 _changed: true,
@@ -406,7 +410,9 @@ angular.module('tcl').factory('TestObjectFactory', function (TestObjectUtil) {
         createTP: function () {
             var dt = new Date();
             var tp = {
+                id: new ObjectId().toString(),
                 _local : true,
+                _type : EntityService.type.TEST_PLAN,
                 name: "New Test Plan",
                 description: "",
                 metaData: {

@@ -1,12 +1,9 @@
 package gov.nist.healthcare.cds.tcamt.controller;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.security.Principal;
-
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 
 import springfox.documentation.annotations.ApiIgnore;
@@ -22,16 +19,13 @@ import gov.nist.healthcare.cds.domain.exception.IllegalDelete;
 import gov.nist.healthcare.cds.domain.exception.IllegalSave;
 import gov.nist.healthcare.cds.domain.exception.UnsupportedFormat;
 import gov.nist.healthcare.cds.domain.wrapper.AppInfo;
+import gov.nist.healthcare.cds.domain.wrapper.EntityResult;
+import gov.nist.healthcare.cds.domain.wrapper.ZipExportSummary;
 import gov.nist.healthcare.cds.domain.wrapper.ImportConfig;
-import gov.nist.healthcare.cds.domain.wrapper.ImportResult;
 import gov.nist.healthcare.cds.domain.wrapper.ImportSummary;
 import gov.nist.healthcare.cds.domain.xml.ErrorModel;
-import gov.nist.healthcare.cds.repositories.TestCaseRepository;
 import gov.nist.healthcare.cds.repositories.TestPlanRepository;
-import gov.nist.healthcare.cds.service.CDCSpreadSheetFormatService;
 import gov.nist.healthcare.cds.service.DeleteTestObjectService;
-import gov.nist.healthcare.cds.service.MetaDataService;
-import gov.nist.healthcare.cds.service.NISTFormatService;
 import gov.nist.healthcare.cds.service.PropertyService;
 import gov.nist.healthcare.cds.service.SaveService;
 import gov.nist.healthcare.cds.service.ValidateTestCase;
@@ -60,8 +54,6 @@ import org.springframework.web.multipart.MultipartFile;
 @RestController
 public class TestCaseController {
 
-	@Autowired
-	private TestCaseRepository testCaseRepository;
 
 	@Autowired
 	private TestPlanRepository testPlanRepository;
@@ -70,10 +62,9 @@ public class TestCaseController {
 	private NISTFormatServiceImpl nistFormatService;
 	
 	@Autowired
-	private MetaDataService mdService;
-	
-	@Autowired
 	private gov.nist.healthcare.cds.service.impl.persist.ImportService importService;
+	@Autowired
+	private gov.nist.healthcare.cds.service.impl.persist.ExportService exportService;
 
 	@Autowired
 	private PropertyService ledger;
@@ -181,39 +172,50 @@ public class TestCaseController {
 	//--------------------------- IMPORT/EXPORT NIST OPERATION ------------------------------
 	
 	@ApiOperation(value = "Export TestCase To NIST Format")
-	@RequestMapping(value = "/testcase/{id}/export/{format}", method = RequestMethod.POST)
+	@RequestMapping(value = "/testcase/{ids}/export/{format}", method = RequestMethod.POST)
 	@ResponseBody
 	public void exportTestCaseNIST(
-			@ApiParam(value = "TestCase ID") @PathVariable String id, 
+			@ApiParam(value = "TestCase ID List") @PathVariable String[] ids, 
 			@ApiParam(value = "Export Format (nist/cdc)") @PathVariable String format, 
 			@ApiIgnore HttpServletRequest request,
 			@ApiIgnore HttpServletResponse response, 
-			@AuthenticationPrincipal Principal p) throws IOException {
+			@AuthenticationPrincipal Principal p) throws IOException, UnsupportedFormat, ConfigurationException {
 		
-		TestCase tc = ledger.tcBelongsTo(id, p.getName());
-		if (format.equals("nist") && tc != null) {
-			response.setContentType("text/xml");
-			response.setHeader("Content-disposition", "attachment;filename=" + tc.getName().replace(" ", "_") + ".xml");
-			if (tc.getGroupTag() != null && !tc.getGroupTag().isEmpty()) {
-				TestPlan tp = ledger.tpBelongsTo(tc.getTestPlan(), p.getName());
-				if (tp != null) {
-					TestCaseGroup grp = tp.getGroup(tc.getGroupTag());
-					if (grp != null) {
-						tc.setGroupTag(grp.getName());
-					}
+		List<TestCase> tcs = new ArrayList<>();
+		List<EntityResult> eResult = new ArrayList<>();
+		
+		for(String id : ids){
+			TestCase tc = ledger.tcBelongsTo(id, p.getName());
+			if(tc != null){
+				if(tc.getGroupTag() != null && !tc.getGroupTag().isEmpty()){
+					TestCaseGroup tcg = ledger.tgBelongsTo(tc.getGroupTag(), p.getName());
+					tc.setGroupTag(tcg.getName());
 				}
+				tcs.add(tc);
 			}
-
-			InputStream stream = nistFormatService._exportOne(tc);
-			FileCopyUtils.copy(stream, response.getOutputStream());
+			else {
+				EntityResult entityResult = new EntityResult("TestCase ID "+id);
+				entityResult.getErrors().add(new ErrorModel("Permission","TestCase does not belong to user"));
+				eResult.add(entityResult);
+			}
 		}
+		
+		
+		ZipExportSummary exportResult = exportService.exportTestCases(tcs, format, null);
+		if(exportResult.getOut() != null){
+			response.setContentType("application/zip");
+			response.setHeader("Content-disposition", "attachment;filename=fits_testCases_export.zip");
+			exportResult.getOut().close();
+			response.getOutputStream().write(exportResult.getBaos().toByteArray());
+		}
+
 	}
 
 	
 	@ApiOperation(value = "Import TestCases")
 	@RequestMapping(value = "/testcase/import/{id}/{format}", method = RequestMethod.POST)
 	public ImportSummary importRoute(
-			@ApiParam(value = "EXCEL File") @RequestPart("files") List<MultipartFile> files, 
+			@ApiParam(value = "List of files") @RequestPart("files") List<MultipartFile> files, 
 			@ApiParam(value = "TestPlan Container ID") @PathVariable String id, 
 			@ApiParam(value = "Import format (nist/cdc)") @PathVariable String format, 
 			@ApiParam(value = "Import Configuration") @RequestPart(value="config",required=false) ImportConfig config, 

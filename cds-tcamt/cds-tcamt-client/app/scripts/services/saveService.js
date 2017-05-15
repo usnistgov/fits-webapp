@@ -163,7 +163,7 @@ angular.module('tcl').factory('TCSaveService', function (DataSynchService, Entit
                     tc.errors = response.data.errors;
                     _.merge(tc,response.data);
 
-                    wire.$broadcast('entity_saved', tc, tc);
+                    wire.$broadcast('entity_saved', tc, tc, EntityService.type.TEST_CASE);
                     if(tc.runnable){
                         deferred.resolve(ResponseService.success(type,action, "Test Case Saved Successfully", tc));}
                     else{
@@ -241,7 +241,7 @@ angular.module('tcl').factory('TPSaveService', function (DataSynchService, Entit
                 EntityUtilsService.sanitizeTP(response.data);
                 _.merge(tp,response.data);
 
-                wire.$broadcast('entity_saved', tp, EntityUtilsService.transformTP(tp));
+                wire.$broadcast('entity_saved', tp, EntityUtilsService.transformTP(tp),EntityService.type.TEST_PLAN);
                 deferred.resolve(ResponseService.success(type,action, "Test Plan Saved Successfully", tp));
             },
             function (error) {
@@ -281,7 +281,7 @@ angular.module('tcl').factory('TGSaveService', function (DataSynchService, Entit
                     EntityUtilsService.sanitizeTG(response.data);
                     _.merge(tg,response.data);
 
-                    wire.$broadcast('entity_saved', tg, EntityUtilsService.transformTG(tg));
+                    wire.$broadcast('entity_saved', tg, EntityUtilsService.transformTG(tg),EntityService.type.TEST_CASE_GROUP);
                     deferred.resolve(ResponseService.success(type,action, "Test Case Group Saved Successfully", tg));
                 },
                 function (error) {

@@ -36,6 +36,44 @@ angular.module('tcl').factory('EntityService', function () {
     return new Entity();
 });
 
+angular.module('tcl').factory('QueryService', function (EntityService) {
+
+    function Query() {
+        var ctrl = this;
+
+        this.get = function (tp, type, id) {
+            if(type === EntityService.type.TEST_CASE_GROUP){
+                var index = _.findIndex(tp.testCaseGroups, function (gr) {
+                    return gr.id === id;
+                });
+
+                return ~index ? tp.testCaseGroups[index] : null;
+            }
+            else if(type === EntityService.type.TEST_CASE){
+
+                for(var i = 0; i < tp.testCases.length ; i++){
+                    if(tp.testCases[i].id === id){
+                        return tp.testCases[i];
+                    }
+                }
+
+                for(var j = 0; j < tp.testCaseGroups.length; j++){
+                    for(var k = 0; k < tp.testCaseGroups[j].testCases.length; k++){
+                        if(tp.testCaseGroups[j].testCases[k].id === id){
+                            return tp.testCaseGroups[j].testCases[k];
+                        }
+                    }
+                }
+
+                return null;
+            }
+        }
+
+    }
+
+    return new Query();
+});
+
 angular.module('tcl').factory('ResponseService', function (EntityService) {
 
     function ResponseFactory() {
@@ -154,6 +192,12 @@ angular.module('tcl').factory('EntityUtilsService', function (EntityService,Noti
             return true;
         };
 
+        this.notifyAll = function (all) {
+            _.forEach(all,function (response) {
+                ctrl.notify(response);
+            });
+        };
+
         this.notify = function (response) {
             if(response.severity === EntityService.severity.ERROR){
                 Notification.error({
@@ -244,6 +288,7 @@ angular.module('tcl').factory('EntityUtilsService', function (EntityService,Noti
 
 
         this.sanitizeTC = function (tc) {
+            tc._type = EntityService.type.TEST_CASE;
             tc._dateType = tc.dateType;
             // if(tc.hasOwnProperty("errors") && tc.errors.length > 0){
             //     // _.forEach(tc.errors,function (error) {
@@ -282,6 +327,7 @@ angular.module('tcl').factory('EntityUtilsService', function (EntityService,Noti
 
 
         this.sanitizeTP = function (tp) {
+            tp._type = EntityService.type.TEST_PLAN;
             ctrl.sanitizeDates(tp.metaData);
             _.forEach(tp.testCaseGroups, function(tg) {
                 ctrl.sanitizeTG(tg);
@@ -292,6 +338,7 @@ angular.module('tcl').factory('EntityUtilsService', function (EntityService,Noti
         };
 
         this.sanitizeTG = function (tg) {
+            tg._type = EntityService.type.TEST_CASE_GROUP;
             _.forEach(tg.testCases, function(tc) {
                 ctrl.sanitizeTC(tc);
             });

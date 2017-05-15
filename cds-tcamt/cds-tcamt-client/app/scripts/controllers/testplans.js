@@ -190,7 +190,7 @@ angular
         function ($parse, $document, $scope, $rootScope, $templateCache,
                   Restangular, $http, $filter, $modal, $cookies, $anchorScroll, $location,
                   $timeout, userInfoService, ngTreetableParams,DataSynchService,PopUp,
-                  $interval, ViewSettings, StorageService, $q,
+                  $interval, ViewSettings, StorageService, $q, QueryService,
                   notifications, IgDocumentService, ElementUtils,
                   AutoSaveService, $sce, Notification, TestObjectUtil, TestObjectFactory, VaccineService, TestObjectSynchronize, TestDataService, FITSBackEnd, EntityService, EntityUtilsService) {
             $scope.vxm = [];
@@ -200,6 +200,7 @@ angular
             $scope.sfile = "BROWSE";
             $scope.sfileO = null;
             $scope.fileErr = false;
+            $rootScope.blockTree = false;
             $scope.selectedTestStepTab = 1;
             $scope.selectedEvent = {};
             $rootScope.selectedTestPlan1 = {};
@@ -304,6 +305,12 @@ angular
 
             $scope.print = function (x) {
                 console.log(x);
+            };
+
+            $scope.goToExportButton = function () {
+              if(!$scope.aTCisSelected()){
+                  $scope.mainView = 'export';
+              }
             };
 
             $scope.valueForEnum = function (code, enumList) {
@@ -545,6 +552,7 @@ angular
                     // $scope.selectedEvent = $scope.selectedTC.events.find(function (evt) {
                     //     evt.position = id;
                     // });
+                    $scope.mainView = 'dashboard';
                     $scope.selectedEvent = ev;
                     $scope.selectedForecast = null;
                     $scope.patientSelected = false;
@@ -560,6 +568,7 @@ angular
             $scope.selectForecast = function (f) {
                 $timeout(function () {
                     // Selection
+                    $scope.mainView = 'dashboard';
                     $scope.selectedForecast = f;
                     $scope.selectedEvent = null;
                     $scope.selectedType = "fc";
@@ -573,7 +582,7 @@ angular
             $scope.selectTP = function (tp,skip) {
                 $scope.warning(skip).then(function () {
                     $timeout(function () {
-
+                        $scope.mainView = 'dashboard';
                         DataSynchService.register(tp,null,$scope.entityUtils.transformTP);
                         // Selection
                         $scope.initHasIncomplete(tp);
@@ -603,9 +612,12 @@ angular
             };
 
             $scope.selectTC = function (tc,skip,goToSummary) {
+                if($rootScope.blockTree)
+                    return;
+
                 $scope.warning(skip || tc === $scope.selectedTC).then(function () {
                     $timeout(function () {
-
+                        $scope.mainView = 'dashboard';
                         DataSynchService.register(tc);
                         if ($scope.entityUtils.inSynch(tc)) {
 
@@ -635,6 +647,7 @@ angular
             $scope.selectPatient = function () {
                 $timeout(function () {
                     // View
+                    $scope.mainView = 'dashboard';
                     $scope.selectedEvent = null;
                     $scope.selectedForecast = null;
                     $scope.patientSelected = true;
@@ -645,8 +658,12 @@ angular
 
 
             $scope.selectTG = function (tg,skip) {
+                if($rootScope.blockTree)
+                    return;
+
                 $scope.warning(skip).then(function () {
                     $timeout(function () {
+                        $scope.mainView = 'dashboard';
                         DataSynchService.register(tg,null,$scope.entityUtils.transformTG);
                         // Selection
                         $scope.selectedEvent = null;
@@ -942,6 +959,18 @@ angular
                 return f === $scope.selectedForecast;
             };
 
+            $scope.isSelectedEvv = function () {
+                return $scope.subview === "EditEventData.html";
+            };
+
+            $scope.isSelectedFcv = function () {
+                return $scope.subview === "EditForecastData.html";
+            };
+
+            $scope.isSelectedPtv = function () {
+                return $scope.subview === "EditPatientInformation.html";
+            };
+
             $scope.isSelectedTPv = function () {
                 return $scope.subview === "EditTestPlanData.html";
             };
@@ -957,6 +986,7 @@ angular
             $scope.aTCisSelected = function () {
                 return $scope.selectedTC && $scope.selectedTC !== {};
             };
+
 
             $scope.aTPisSelected = function () {
                 return $scope.selectedTP && $scope.selectedTP !== {};
@@ -1012,8 +1042,26 @@ angular
             };
 
             $scope.importButton = function () {
-                $scope.selectTP($scope.selectedTP);
-                $scope.tabs.selectedTabTP = 1;
+                // $scope.selectTP($scope.selectedTP);
+                // $scope.tabs.selectedTabTP = 1;
+                $scope.mainView = 'import';
+            };
+
+            $scope.goToDash = function () {
+                $scope.mainView = 'dashboard';
+            };
+
+            $scope.$watch('mainView',function () {
+                $rootScope.blockTree = false;
+            });
+
+            $scope.goToExportView = function () {
+                $scope.mainView = 'export';
+            };
+
+            openMenu = function($mdMenu, ev) {
+                originatorEv = ev;
+                $mdMenu.open(ev);
             };
 
             $scope.summary = function () {
@@ -1078,11 +1126,11 @@ angular
                         $scope.testCases.push(tc);
                         $scope.selectTC(tc);
                         $scope.scrollTo('tc-' + tc.id,"");
-                    }],
-                ['Import Test Case',
-                    function ($itemScope) {
-                        $scope.importButton();
                     }]
+                // ['Import Test Case',
+                //     function ($itemScope) {
+                //         $scope.importButton();
+                //     }]
             ];
 
             // $scope.tgCM = [
@@ -1585,11 +1633,11 @@ angular
             };
 
 
-            $scope.exportNIST = function () {
+            $scope.export = function (format) {
                 if ($scope.entityUtils.inSynch($scope.selectedTC)) {
                     var form = document.createElement("form");
-                    form.action = $rootScope.api('api/testcase/'
-                        + $scope.selectedTC.id + '/export/nist');
+
+                    form.action = $rootScope.api('api/testcase/'+$scope.selectedTC.id+'/export/'+format);
                     form.method = "POST";
                     form.target = "_target";
                     form.style.display = 'none';
@@ -1980,15 +2028,27 @@ angular
                 PopUp.stop();
             });
 
+            $scope.mainView = 'dashboard';
 
-            $rootScope.$on('entity_saved', function (event, entity, transform) {
+            $rootScope.$on('entity_saved', function (event, entity, transform, type) {
                 DataSynchService.save(transform);
+                var treeEntity = QueryService.get($scope.selectedTP, type, entity.id);
+                console.log("SAVED *");
+                console.log("T : "+type);
+                console.log(treeEntity);
+                console.log(entity);
+                console.log("--");
+
                 if(entity){
                     entity._changed = false;
                     delete entity._local;
                     $scope.hasIncomplete = entity.hasOwnProperty("runnable") ? !entity.runnable : false;
                     $scope.entityChangeLog[entity.id] = false;
                     $scope.tcBackups[entity.id] = angular.copy(entity);
+                }
+                if(treeEntity){
+                    treeEntity._changed = false;
+                    delete treeEntity._local;
                 }
             });
 

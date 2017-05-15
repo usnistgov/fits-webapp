@@ -108,6 +108,11 @@ multiselect button:after {
   border-top: 0px;
 }
 
+.file-drop-zone {
+  background-color: rgba(33, 150, 243, 0.06);
+  border: 2px dashed black;
+}
+
 .md-tab {
   font-size: 18px !important;
 }
@@ -246,7 +251,7 @@ body {
 }
 
 .fail {
-  background-color : #ffe1d7;
+  background-color : #ffe1d7 !important;
 }
 
 .run {
@@ -300,7 +305,7 @@ table{
     margin: 10px;
 }
 .upload {
-    position: absolute;
+  position: absolute;
     top: 0;
     right: 0;
     margin: 0;

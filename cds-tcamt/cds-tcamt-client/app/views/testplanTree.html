@@ -16,8 +16,10 @@ body {
 	}
 </script>
 <div ui-tree="treeOptions">
-	<ol ui-tree-nodes ng-model="tpTree">
-		<li ui-tree-node ng-repeat="tp in tpTree" data-drag-enabled="false" >
+	<ol ui-tree-nodes ng-model="tpTree" dnd-drop="false" dnd-list="tpTree">
+		<li ui-tree-node ng-repeat="tp in tpTree" data-drag-enabled="false"
+			dnd-draggable="tp">
+
 			<div id="{{'tp-'+tp.id}}" ng-click="selectTP(tp)" ng-class="{selected1 : isSelectedTPv()}" context-menu="tpCM">
 				<div style="margin-left: 5px;">
 					 <i ng-click="toggle(this)" class="fa" ng-class="{'fa-caret-right': collapsed, 'fa-caret-down': !collapsed}"></i>
@@ -30,9 +32,11 @@ body {
 					</span>
 				</div>
 			</div>
-			<ol ui-tree-nodes ng-model="tp.testCases">
+			<ol ui-tree-nodes dnd-list="tp.testCases" dnd-drop="false" ng-model="tp.testCases">
 				<!--<li data-drag-enabled="false" ng-repeat="tc in  $scope.filterActive(tcFilter) ? (tp.testCases | filter:tcFilter.example | dateMD:tcFilter.dates.created:'dateCreated' | dateMD:tcFilter.dates.updated:'dateLastUpdated' | changed:tcFilter.changed) : tp.testCases" ui-tree-node ng-hide="$parentNodeScope.collapsed">-->
-				<li data-drag-enabled="false" ng-repeat="tc in  tp.testCases | tcFilter:tcFilter" ui-tree-node ng-hide="$parentNodeScope.collapsed">
+				<li data-drag-enabled="false" ng-repeat="tc in  tp.testCases | tcFilter:tcFilter" ui-tree-node ng-hide="$parentNodeScope.collapsed"
+					dnd-draggable="tc">
+
 					<div id="{{'tc-'+tc.id}}"  ng-click="selectTC(tc)"  ng-class="{selected1 : isSelectedTC(tc)}" context-menu="tcCM">
 						<div style="margin-left: 5px;">
 							<span ng-class="{selected1 : isSelectedTC(tc)}">
@@ -51,8 +55,10 @@ body {
 					</div>
 				</li>
 			</ol>
-			<ol ui-tree-nodes data-nodrop-enabled="true" ng-model="tp.testCaseGroups">
-				<li data-drag-enabled="false" data-collapsed="{{!isLocal(group)}}" ng-repeat="group in tp.testCaseGroups track by $index" ui-tree-node ng-hide="$parentNodeScope.collapsed || (filterActive(tcFilter) && (group._gtc.length === 0 || !group._gtc))">
+			<ol dnd-list="tp.testCaseGroups" dnd-drop="false" ui-tree-nodes data-nodrop-enabled="true" ng-model="tp.testCaseGroups">
+				<li data-drag-enabled="false" data-collapsed="{{!isLocal(group)}}" ng-repeat="group in tp.testCaseGroups track by $index" ui-tree-node ng-hide="$parentNodeScope.collapsed || (filterActive(tcFilter) && (group._gtc.length === 0 || !group._gtc))"
+					dnd-draggable="group">
+
 					<div context-menu="tgCM" id="{{'gr-'+group.id}}" ng-click="selectTG(group)" ng-class="{selected1 : isSelectedTG(group) && isSelectedTGv()}" >
 						<div style="margin-left: 5px;">
 							<i ng-click="toggle(this)" class="fa" ng-class="{'fa-caret-right': collapsed, 'fa-caret-down': !collapsed}"></i>
@@ -66,8 +72,10 @@ body {
 							</span>
 						</div>
 					</div>
-					<ol ui-tree-nodes ng-model="group.testCases">
-						<li data-drag-enabled="false" ng-repeat="tc in ($parentNodeScope.collapsed ? [] : group._gtc = (group.testCases | tcFilter:tcFilter)) track by $index" ui-tree-node ng-hide="$parentNodeScope.collapsed">
+					<ol dnd-list="group.testCases" dnd-drop="false" ui-tree-nodes ng-model="group.testCases">
+						<li data-drag-enabled="false" ng-repeat="tc in ($parentNodeScope.collapsed ? [] : group._gtc = (group.testCases | tcFilter:tcFilter)) track by $index" ui-tree-node ng-hide="$parentNodeScope.collapsed"
+							dnd-draggable="tc">
+
 							<div id="{{'tc-'+tc.id}}" ng-click="selectTC(tc)"  ng-class="{selected1 : isSelectedTC(tc)}" context-menu="tcCM">
 								<div style="margin-left: 5px;">
 									<span ng-class="{selected1 : isSelectedTC(tc)}">
