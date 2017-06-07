@@ -22,8 +22,8 @@
             dnd-moved="onMoved(list)"
             dnd-dragstart="dstart(true)"
             dnd-dragend="dstart(false)"
-            dnd-effect-allowed="move"
-            collapsed="true">
+            dnd-effect-allowed="move">
+
             <div id="{{'tp-'+tp.id}}" ng-click="selectTP(tp)" ng-class="{selected1 : isSelectedTPv()}">
                 <div style="margin-left: 5px;">
                     <i ng-click="toggle(this)" class="fa" ng-class="{'fa-caret-right': collapsed, 'fa-caret-down': !collapsed}"></i>

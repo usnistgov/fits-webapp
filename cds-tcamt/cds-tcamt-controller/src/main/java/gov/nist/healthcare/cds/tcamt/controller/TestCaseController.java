@@ -1,7 +1,6 @@
 package gov.nist.healthcare.cds.tcamt.controller;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
@@ -10,6 +9,7 @@ import springfox.documentation.annotations.ApiIgnore;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import gov.nist.healthcare.cds.domain.TestCase;
 import gov.nist.healthcare.cds.domain.TestCaseGroup;
@@ -28,8 +28,9 @@ import gov.nist.healthcare.cds.repositories.TestPlanRepository;
 import gov.nist.healthcare.cds.service.DeleteTestObjectService;
 import gov.nist.healthcare.cds.service.PropertyService;
 import gov.nist.healthcare.cds.service.SaveService;
+import gov.nist.healthcare.cds.service.TestPlanExtractUtils;
 import gov.nist.healthcare.cds.service.ValidateTestCase;
-import gov.nist.healthcare.cds.service.impl.transformation.NISTFormatServiceImpl;
+import gov.nist.healthcare.cds.service.impl.data.TestPlanClone;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -37,7 +38,6 @@ import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.propertyeditors.StringTrimmerEditor;
 import org.springframework.security.web.bind.annotation.AuthenticationPrincipal;
-import org.springframework.util.FileCopyUtils;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -57,12 +57,16 @@ public class TestCaseController {
 
 	@Autowired
 	private TestPlanRepository testPlanRepository;
-
+	
 	@Autowired
-	private NISTFormatServiceImpl nistFormatService;
+	private TestPlanClone testPlanClone;
+	
+	@Autowired
+	private TestPlanExtractUtils testPlanExtract;
 	
 	@Autowired
 	private gov.nist.healthcare.cds.service.impl.persist.ImportService importService;
+	
 	@Autowired
 	private gov.nist.healthcare.cds.service.impl.persist.ExportService exportService;
 
@@ -168,15 +172,41 @@ public class TestCaseController {
 		trash.deleteTestCaseGroup(id, p.getName());
 		
 	}
+	
+	//--------------------------------- CLONE OPERATIONS ------------------------------------
+	@ApiOperation(value = "Clone test plan to authenticated user account")
+	@RequestMapping(value = "/testplan/{id}/clone", method = RequestMethod.POST)
+	@ResponseBody
+	public TestPlan cloneTestPlan(
+			@ApiParam(value = "Id of test plan to clone") @PathVariable String id,
+			@AuthenticationPrincipal Principal p,
+			@ApiIgnore HttpServletResponse response) throws IOException {
+		
+		TestPlan tp = ledger.tpBelongsTo(id, p.getName());
+		
+		if(tp != null){
+			testPlanClone.clone(tp);
+			return tp;
+		}
+		else
+			response.sendError(404);
+		
+		return null;
+		
+	}
 
 	//--------------------------- IMPORT/EXPORT NIST OPERATION ------------------------------
+	//---------------------------------------EXPORT------------------------------------------
 	
-	@ApiOperation(value = "Export TestCase To NIST Format")
-	@RequestMapping(value = "/testcase/{ids}/export/{format}", method = RequestMethod.POST)
+	
+	@ApiOperation(value = "Prepare Export")
+	@RequestMapping(value = "/testcase/export/{format}/{tpId}", method = RequestMethod.POST)
 	@ResponseBody
-	public void exportTestCaseNIST(
-			@ApiParam(value = "TestCase ID List") @PathVariable String[] ids, 
+	public void prepareExport(
+			@ApiParam(value = "TestCase ID List") @RequestBody String[] ids, 
+			@ApiParam(value = "Test Plan ID") @PathVariable String tpId, 
 			@ApiParam(value = "Export Format (nist/cdc)") @PathVariable String format, 
+			@ApiIgnore HttpSession session,
 			@ApiIgnore HttpServletRequest request,
 			@ApiIgnore HttpServletResponse response, 
 			@AuthenticationPrincipal Principal p) throws IOException, UnsupportedFormat, ConfigurationException {
@@ -184,34 +214,50 @@ public class TestCaseController {
 		List<TestCase> tcs = new ArrayList<>();
 		List<EntityResult> eResult = new ArrayList<>();
 		
-		for(String id : ids){
-			TestCase tc = ledger.tcBelongsTo(id, p.getName());
-			if(tc != null){
-				if(tc.getGroupTag() != null && !tc.getGroupTag().isEmpty()){
-					TestCaseGroup tcg = ledger.tgBelongsTo(tc.getGroupTag(), p.getName());
-					tc.setGroupTag(tcg.getName());
-				}
-				tcs.add(tc);
-			}
-			else {
-				EntityResult entityResult = new EntityResult("TestCase ID "+id);
-				entityResult.getErrors().add(new ErrorModel("Permission","TestCase does not belong to user"));
-				eResult.add(entityResult);
-			}
+		TestPlan tp = ledger.tpBelongsTo(tpId, p.getName());
+		if(tp != null){
+			tcs.addAll(testPlanExtract.extract(tp, ids));
 		}
-		
+		else {
+			EntityResult entityResult = new EntityResult("TestPlan ID "+tpId);
+			entityResult.getErrors().add(new ErrorModel("Permission","TestPlan does not belong to user"));
+			eResult.add(entityResult);
+		}
 		
 		ZipExportSummary exportResult = exportService.exportTestCases(tcs, format, null);
 		if(exportResult.getOut() != null){
-			response.setContentType("application/zip");
-			response.setHeader("Content-disposition", "attachment;filename=fits_testCases_export.zip");
 			exportResult.getOut().close();
-			response.getOutputStream().write(exportResult.getBaos().toByteArray());
+			byte[] result = exportResult.getBaos().toByteArray();
+			session.setAttribute("export_prepared", result);
+			response.setStatus(200);
+		}
+		else {
+			response.setStatus(400);
 		}
 
 	}
-
 	
+	@ApiOperation(value = "Collect exported ZIP from session (prior call to Prepare Export)")
+	@RequestMapping(value = "/testcase/export", method = RequestMethod.GET)
+	@ResponseBody
+	public void exportTestCaseNIST(
+			@ApiIgnore HttpSession session,
+			@ApiIgnore HttpServletRequest request,
+			@ApiIgnore HttpServletResponse response, 
+			@AuthenticationPrincipal Principal p) throws IOException, UnsupportedFormat, ConfigurationException {
+		byte[] zip = session.getAttribute("export_prepared") != null ? (byte[]) session.getAttribute("export_prepared") : null;
+		if(zip != null) {
+			response.setContentType("application/zip");
+			response.setHeader("Content-disposition", "attachment;filename=fits_testCases_export.zip");
+			response.getOutputStream().write(zip);
+		}
+		else {
+			response.sendError(400, "No export found");
+		}
+	}
+
+
+	//---------------------------------------IMPORT------------------------------------------
 	@ApiOperation(value = "Import TestCases")
 	@RequestMapping(value = "/testcase/import/{id}/{format}", method = RequestMethod.POST)
 	public ImportSummary importRoute(

@@ -31,7 +31,7 @@
                                         <md-select ng-model="selectedForecast.serieStatus"
                                                    ng-model-options="{trackBy: '$value'}"
                                                    ng-change="serieStatusChange(selectedForecast.serieStatus,selectedForecast)">
-                                            <md-option ng-repeat=" enum in serieStatus " ng-value="enum.code">
+                                            <md-option ng-if="enum.code !== 'U'" ng-repeat=" enum in serieStatus " ng-value="enum.code">
                                                 {{enum.details}}
                                             </md-option>
                                         </md-select>

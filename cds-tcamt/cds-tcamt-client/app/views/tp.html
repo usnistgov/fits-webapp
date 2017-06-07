@@ -42,7 +42,6 @@
 
                 <div layout="row" layout-align="end start" style="padding-right: 15px; padding-left: 15px;">
                     <div layout="row" flex="grow" layout-align="start start">
-                        <span ng-show="accordi.tpList" class="header4" >Test Plans List</span>
                         <div md-whiteframe="2" ng-if="!accordi.tpList && aTCisSelected() && selectedTC.errors.length > 0" style="margin-right : 10px; margin-top : 10px; margin-bottom : 10px; width: 100%;">
                             <div  class="alert alert-warning" style="padding: 0; margin-bottom: 0px;">
                                 <table class="table-condensed" style="width: 100%; margin: 0;">
@@ -82,11 +81,7 @@
                         </div>
                     </div>
 
-                    <div layout="row" flex="nogrow" layout-align="end start" >
-                        <button ng-show="accordi.tpList" type="button" class="btn btn-info btn-sm" ng-click="newTestPlan()">
-                            <i class="fa fa-plus"></i>
-                            New
-                        </button>
+                    <div layout="row" flex="nogrow" layout-align="end start">
                         <button ng-show="accordi.tpDetails" title="View TestPlan List" type="button"
                                 class="btn btn-sm btn-info" ng-click="closeTestPlanEdit()">
                             <span><i class="fa fa-list fa-fw"></i>List</span>
@@ -116,6 +111,10 @@
 
             <div class="row">
                 <div ng-show="accordi.tpList" ng-include="'views/edit/listTP.html'"></div>
+                <!--<div style="padding-left: 15px;">-->
+                    <!--<h3><strong>Shared with me</strong></h3>-->
+                <!--</div>-->
+                <!--<div ng-show="accordi.tpList" ng-include="'views/edit/listTP.html'"></div>-->
                 <div ng-show="accordi.tpDetails" ng-include="'views/edit/editTP.html'"></div>
                 <button ng-show="aTPisSelected()" ng-click="saveAllChangedTestPlans(selectedTC,selectedTP)"
                         class="md-fab md-button btn-success md-ink-ripple"

@@ -9,70 +9,134 @@
         top.location = self.location;
     }
 </script>
-<!-- <div class="row"> -->
-<!-- <ul> -->
-<!-- <li ng-repeat=" i in ::it "><strong>{{i.x}}</strong> -->
-<!-- <button ng-click="editT(i)"> -->
-<!-- Edit -->
-<!-- </button> -->
-<!-- </li> -->
-<!-- </ul> -->
-
-<!-- <button ng-click="addT()"> -->
-<!-- ADD -->
-<!-- </button> -->
-
-    <div ng-hide="loading">
-        <span class="col-md-12" ng-show="tps.length === 0" style="text-align: center;"><strong>No TestPlan created yet.</strong></span>
-        <div ng-show="tps.length !== 0" class="col-md-12">
-            <div ng-show="error === null">
-                <table st-table="tps" class="smart-table table table-striped table-bordered">
-                    <thead>
-                        <tr>
-                            <!--<th st-ratio="5">#</th>-->
-                            <th st-ratio="22" st-sort="name">Name</th>
-                            <th st-ratio="20" st-sort="description">Description</th>
-                            <th st-ratio="10" st-sort="version">Version</th>
-                            <th st-ratio="11" st-sort="lastUpdateDate">Creation Date</th>
-                            <th st-ratio="12" st-sort="lastUpdateDate">Last Update Date</th>
-                            <th st-ratio="10" >Total Test Cases</th>
-                            <th st-ratio="10">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr ng-repeat="row in tps track by $index">
-                            <!--<td st-ratio="5">{{$index + 1}}</td>-->
-                            <td st-ratio="22" ng-bind="row.name"></td>
-                            <td st-ratio="20" ng-bind="row.description"></td>
-                            <td st-ratio="10" ng-bind="row.metaData.version"></td>
-   							<td st-ratio="11" ng-bind="row.metaData.dateCreated | date:'MM/dd/yyyy'"></td>
-                            <td st-ratio="12" ng-bind="row.metaData.dateLastUpdated | date:'MM/dd/yyyy'"></td>
-                            <td st-ratio="10" ng-bind="calculateTC(row)"></td>
-                            <td st-ratio="10">
-                        	    <button title="Select"
-                                    type="button" class="btn btn-xs btn-info no-margin"
-                                    ng-click="selectTP(row)">
-                                        <span><i class="fa fa-pencil fa-fw"></i></span>
-                                </button>
-                                <button title="Delete" type="button" class="btn btn-xs btn-danger no-margin"
-                                    ng-click="confirmDeleteTestPlan(row)">
-                                    <span><i class="fa fa-trash-o fa-fw"></i></span>
-                                </button>
-                                <!--<button title="Delete" type="button" class="btn btn-xs btn-success no-margin"-->
-                                        <!--ng-click="cloneTP(row)">-->
-                                    <!--<span><i class="fa fa-files-o fa-fw" aria-hidden="true"></i></span>-->
-                                <!--</button>-->
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-
+<md-content class="md-padding" style="padding-bottom: 50px;" layout="column" layout-align="center center">
+    <div style="width: 100%;" layout="row" layout-align="start center">
+        <div flex="50">
+            <span ng-show="accordi.tpList"><h3><strong>My Test Plans</strong></h3></span>
+        </div>
+        <div flex="50" layout="row" layout-align="end center">
+            <button ng-show="accordi.tpList" type="button" class="btn btn-info btn-sm pull-right no-margin" ng-click="newTestPlan()">
+                <i class="fa fa-plus"> </i>
+                New
+            </button>
         </div>
     </div>
-</div>
-<div ng-show="loading" style="text-align:center">
-    <i class="fa fa-spinner fa-pulse fa-2x"></i>
-</div>
+    <md-list style="width: 100%;" ng-show="!loading && tps.length > 0">
+        <md-list-item ng-repeat="tp in tps" layout="row" layout-align="start"
+                       md-whiteframe="2" class="hov"
+                      style="border-top : 1px solid #dddddd; border-right : 1px solid #dddddd; border-left : 1px solid #dddddd; background-color: white; padding-top: 5px;padding-bottom: 5px;" ng-style="$index === tps.length - 1 ? { 'border-bottom' : '1px solid #dddddd' } : {}">
+            <div flex="90" layout="row" layout-align="start" ng-click="openTP(tp)">
+                <div flex="25" layout="column" layout-align="center center">
+                    <span>
+                        <strong>{{tp.name}}</strong><span class="label label-case label-icon" style="margin-left: 10px; color: black; font-size: 13px;">{{calculateTC(tp)}}</span>
+                    </span>
+                </div>
+                <div flex="40" layout="column" layout-align="center center" style="text-align: justify;">
+                    {{tp.description}}
+                </div>
+                <div flex="20" layout="column" layout-align="start start">
+                    <span>
+                        <strong>Created On </strong>{{tp.metaData.dateCreated | date:'MM/dd/yyyy'}}
+                    </span>
+                        <span>
+                        <strong>Last Updated On </strong>{{tp.metaData.dateLastUpdated | date:'MM/dd/yyyy'}}
+                    </span>
+                        <span>
+                        <strong>Version </strong>{{tp.metaData.version}}
+                    </span>
+                </div>
+                <div flex="15" layout="column" layout-align="start start">
+                    <span>
+                        <strong>Owner </strong>
+                    </span>
+                    <span>
+                        <i class="fa fa-user" style="color: darkgreen;" aria-hidden="true"></i> {{getUsername()}}
+                    </span>
+                </div>
+                <!--<div flex="10" layout="column" layout-align="start start">-->
+                    <!--<span>-->
+                        <!--<strong>Shared With</strong>-->
+                    <!--</span>-->
+                        <!--<span>-->
+                        <!--<i class="fa fa-user" style="color: saddlebrown;" aria-hidden="true"></i> Robert Snelick-->
+                    <!--</span>-->
+                        <!--<span>-->
+                        <!--<i class="fa fa-user" style="color: saddlebrown;" aria-hidden="true"></i> Michael Indovina-->
+                    <!--</span>-->
+                <!--</div>-->
+            </div>
+            <div flex="10" style="padding-left: 20px;" layout="row" layout-align="end start" layout-wrap>
+                <button type="button" class="btn btn-sm btn-danger "
+                        ng-click="confirmDeleteTestPlan(tp)" style="margin-top: 5px; margin-bottom: 0;">
+                    <span><i class="fa fa-trash-o fa-fw"></i></span>
+                </button>
+                <!--<button type="button" class="btn btn-sm btn-info "-->
+                        <!--ng-click="confirmDeleteTestPlan(tp)" style="margin-top: 5px; margin-bottom: 0;">-->
+                    <!--<span><i class="fa fa-share"></i></span>-->
+                <!--</button>-->
+                <button type="button" class="btn btn-sm btn-primary "
+                        ng-disabled="!entityUtils.inSynch(tp)"
+                        ng-click="cloneTestPlan(tp)" style="margin-top: 5px; margin-bottom: 0;">
+                    <span><i class="fa fa-file"></i></span>
+                </button>
+            </div>
+        </md-list-item>
+    </md-list>
+    <div style="text-align: center; color: #a0a0a0;" ng-show="!loading && tps.length === 0">
+        <strong>No Test Plan available.<br> Create one by clicking on the [New] button</strong>
+    </div>
+    <div ng-show="loading" style="text-align:center">
+        <i class="fa fa-spinner fa-pulse fa-2x"></i>
+    </div>
+</md-content>
 
-</div>
+    <!--<div ng-hide="loading">-->
+        <!--<span class="col-md-12" ng-show="tps.length === 0" style="text-align: center;"><strong>No TestPlan created yet.</strong></span>-->
+        <!--<div ng-show="tps.length !== 0" class="col-md-12">-->
+            <!--<div ng-show="error === null">-->
+                <!--<table st-table="tps" class="smart-table table table-striped table-bordered">-->
+                    <!--<thead>-->
+                        <!--<tr>-->
+                            <!--&lt;!&ndash;<th st-ratio="5">#</th>&ndash;&gt;-->
+                            <!--<th st-ratio="22" st-sort="name">Name</th>-->
+                            <!--<th st-ratio="20" st-sort="description">Description</th>-->
+                            <!--<th st-ratio="10" st-sort="version">Version</th>-->
+                            <!--<th st-ratio="11" st-sort="lastUpdateDate">Creation Date</th>-->
+                            <!--<th st-ratio="12" st-sort="lastUpdateDate">Last Update Date</th>-->
+                            <!--<th st-ratio="10" >Total Test Cases</th>-->
+                            <!--<th st-ratio="10">Actions</th>-->
+                        <!--</tr>-->
+                    <!--</thead>-->
+                    <!--<tbody>-->
+                        <!--<tr ng-repeat="row in tps track by $index">-->
+                            <!--&lt;!&ndash;<td st-ratio="5">{{$index + 1}}</td>&ndash;&gt;-->
+                            <!--<td st-ratio="22" ng-bind="row.name"></td>-->
+                            <!--<td st-ratio="20" ng-bind="row.description"></td>-->
+                            <!--<td st-ratio="10" ng-bind="row.metaData.version"></td>-->
+   							<!--<td st-ratio="11" ng-bind="row.metaData.dateCreated | date:'MM/dd/yyyy'"></td>-->
+                            <!--<td st-ratio="12" ng-bind="row.metaData.dateLastUpdated | date:'MM/dd/yyyy'"></td>-->
+                            <!--<td st-ratio="10" ng-bind="calculateTC(row)"></td>-->
+                            <!--<td st-ratio="10">-->
+                        	    <!--<button title="Select"-->
+                                    <!--type="button" class="btn btn-xs btn-info no-margin"-->
+                                    <!--ng-click="selectTP(row)">-->
+                                        <!--<span><i class="fa fa-pencil fa-fw"></i></span>-->
+                                <!--</button>-->
+                                <!--<button title="Delete" type="button" class="btn btn-xs btn-danger no-margin"-->
+                                    <!--ng-click="confirmDeleteTestPlan(row)">-->
+                                    <!--<span><i class="fa fa-trash-o fa-fw"></i></span>-->
+                                <!--</button>-->
+                                <!--&lt;!&ndash;<button title="Delete" type="button" class="btn btn-xs btn-success no-margin"&ndash;&gt;-->
+                                        <!--&lt;!&ndash;ng-click="cloneTP(row)">&ndash;&gt;-->
+                                    <!--&lt;!&ndash;<span><i class="fa fa-files-o fa-fw" aria-hidden="true"></i></span>&ndash;&gt;-->
+                                <!--&lt;!&ndash;</button>&ndash;&gt;-->
+                            <!--</td>-->
+                        <!--</tr>-->
+                    <!--</tbody>-->
+                <!--</table>-->
+            <!--</div>-->
+
+        <!--</div>-->
+    <!--</div>-->
+
+

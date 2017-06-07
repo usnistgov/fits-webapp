@@ -12,15 +12,6 @@ angular.module('tcl').factory('PopUp', function ($rootScope,$modal,$timeout) {
             ctrl.open(message);
         };
 
-        // $rootScope.$on("block_ui",function (ev,message) {
-        //     ctrl.start(message);
-        //     console.log("START "+start);
-        // });
-        //
-        // $rootScope.$on("free_ui",function () {
-        //     ctrl.stop();
-        //     console.log("START "+stop);
-        // });
 
         ctrl.stop = function () {
             ctrl.close();

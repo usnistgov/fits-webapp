@@ -55,7 +55,9 @@ angular.module('tcl').directive('entityImport', function ($modal, FITSBackEnd, E
                 all: true,
                 ignore: false,
                 lines : "",
-                position: 1
+                position: 1,
+                ovGroup : false,
+                groupId : ''
             };
 
             $scope.isMulti = function () {
@@ -144,11 +146,9 @@ angular.module('tcl').directive('entityImport', function ($modal, FITSBackEnd, E
                             })
                             .success(function (result) {
                                 $rootScope.$broadcast("tp_import_success",result);
-                                $rootScope.$broadcast("end_import");
                             })
                             .error(function (result) {
                                 $rootScope.$broadcast("tp_import_failure",result);
-                                $rootScope.$broadcast("end_import");
                             });
                     }
                     catch(ex){

@@ -321,6 +321,10 @@ angular
                 }
                 return "";
             };
+
+            $scope.getUsername = function () {
+                return userInfoService.getUsername();
+            };
             //
             // $scope.autoSaveFct = function () {
             //     $timeout(function () {
@@ -579,6 +583,18 @@ angular
                 }, 0);
             };
 
+            $scope.openTP = function (tp) {
+                PopUp.start("Opening Test Plan...");
+
+                var tpObj = JSON.parse(JSON.stringify(tp));
+                $scope.entityUtils.sanitizeTP(tpObj);
+                $timeout(function () {
+                    $scope.selectTP(tpObj);
+                    $timeout(function () {
+                        PopUp.stop();
+                    },100);
+                },500);
+            };
             $scope.selectTP = function (tp,skip) {
                 $scope.warning(skip).then(function () {
                     $timeout(function () {
@@ -1018,15 +1034,47 @@ angular
                 $scope.selectForecast(fc);
             };
 
+            $scope.lastOpen = null;
 
-            $scope.closeTestPlanEdit = function () {
+            $scope.cleanUpWorkSpace = function () {
+                DataSynchService.clear();
+                $scope.entityChangeLog = {};
                 $scope.selectedEvent = null;
                 $scope.selectedForecast = null;
+                $scope.lastOpen = $scope.selectedTP;
                 $scope.selectedTP = null;
                 $scope.selectedTC = null;
                 $scope.selectedTG = null;
                 $scope.selectedType = "";
                 $scope.selectTPTab(0);
+            };
+
+            $scope.closeTestPlanEdit = function () {
+
+                if($scope.workSpaceChanges()){
+                    var modal = $modal.open({
+                        templateUrl: 'ExitTab.html',
+                        controller: 'ExitTabCtrl',
+                        backdrop : 'static',
+                        keyboard : false
+                    });
+
+                    modal.result.then(function (){
+
+                    }, function () {
+
+                        $scope.FITS_SERVER.loadTestPlans().then(function (data) {
+                            if(data.status){
+                                $scope.tps = data.obj;
+                            }
+                        });
+                        $scope.cleanUpWorkSpace();
+                    });
+                }
+                else {
+                    $scope.cleanUpWorkSpace();
+                }
+
             };
 
             $scope.has = function (a, b) {
@@ -1052,7 +1100,10 @@ angular
             };
 
             $scope.$watch('mainView',function () {
-                $rootScope.blockTree = false;
+                if($scope.mainView === 'export')
+                    $rootScope.blockTree = true;
+                else
+                    $rootScope.blockTree = false;
             });
 
             $scope.goToExportView = function () {
@@ -1126,50 +1177,12 @@ angular
                         $scope.testCases.push(tc);
                         $scope.selectTC(tc);
                         $scope.scrollTo('tc-' + tc.id,"");
+                    }],
+                ['Import Test Case',
+                    function () {
+                        $scope.importButton();
                     }]
-                // ['Import Test Case',
-                //     function ($itemScope) {
-                //         $scope.importButton();
-                //     }]
             ];
-
-            // $scope.tgCM = [
-            //     ['Add Test Case',
-            //         function ($itemScope) {
-            //             var grp = $itemScope.group;
-            //             var tc = TestObjectFactory.createTC(grp.testPlan, grp.id, $scope.selectedTP.metaData.version);
-            //             tc.group = grp.id;
-            //             grp.testCases.push(tc);
-            //             $scope.testCases.push(tc);
-            //             $scope.selectTC(tc);
-            //             $scope.scrollTo('tc-' + tc.id,tc.group);
-            //         }],
-            //     ['Delete Test Case Group',
-            //         function ($itemScope) {
-            //             var grp = $itemScope.group;
-            //             var index = TestObjectUtil.index($scope.selectedTP.testCaseGroups, "id", grp.id);
-            //             if(TestObjectUtil.isLocal(grp)){
-            //                 $scope.selectedTP.testCaseGroups.splice(index, 1);
-            //                 $scope.notify(true,"Test Case Group deleted");
-            //                 if($scope.selectedTC && grp.id === $scope.selectedTC.group){
-            //                     $scope.selectedTC = null;
-            //                 }
-            //                 $scope.selectTP($scope.selectedTP,true);
-            //             }
-            //             else {
-            //                 $http.post('api/testcasegroup/'+grp.id+'/delete').then(function (success) {
-            //                         $scope.selectedTP.testCaseGroups.splice(index, 1);
-            //                         $scope.notify(true,"Test Case Group deleted");
-            //                         if($scope.selectedTC && grp.id === $scope.selectedTC.group){
-            //                             $scope.selectedTC = null;
-            //                         }
-            //                         $scope.selectTP($scope.selectedTP,true);
-            //                     },
-            //                     function () {
-            //                         $scope.notify(false,"Failed to delete Test Case Group");
-            //                     });
-            //             }
-            //         }]];
 
             $scope.tgCM = [
                 ['Add Test Case',
@@ -1654,9 +1667,31 @@ angular
 
             // --------------------------------------------------------------------------------------------------------
 
+            $scope.cloneTestPlan = function (tp) {
+                $http.post("api/testplan/"+tp.id+"/clone").success(function (response) {
+                    var data = response;
+                    $scope.entityUtils.sanitizeTP(data);
+                    var notification = {
+                        severity :  EntityService.severity.SUCCESS,
+                        message : "Test Plan Cloned"
+                    };
+
+                    $scope.tps.push(data);
+                    $scope.notify(notification);
+                }).error(function () {
+                    var notification = {
+                        severity :  EntityService.severity.ERROR,
+                        message : "Failed to clone test plan"
+                    };
+
+                    $scope.notify(notification);
+                });
+            };
+
             $scope.initTestCases = function () {
                 if (userInfoService.isAuthenticated()) {
                     $scope.loading = true;
+                    DataSynchService.clear();
                     $scope.loadTestCases().then(function (a) {
                         $scope.initEnums().then(function (b) {
                             $scope.loadVaccines().then(function (c) {
@@ -1980,6 +2015,7 @@ angular
                 console.log("IMPORT SUCCESS");
                 console.log(result.testPlan);
                 console.log($scope.tps);
+                PopUp.stop();
                 var tp = result.testPlan;
                 if(tp){
                     var id = _.findIndex($scope.tps,function (tpF) {
@@ -2006,6 +2042,7 @@ angular
 
             $rootScope.$on('tp_import_failure',function (event,result) {
                 console.log("IMPORT FAILURE");
+                PopUp.stop();
                 $scope.sum = $modal.open({
                     templateUrl: 'ImportSummary.html',
                     controller: 'ImportSummaryCtrl',
@@ -2015,7 +2052,6 @@ angular
                         }
                     }
                 });
-                PopUp.stop();
             });
 
             $rootScope.$on('start_import',function (event) {

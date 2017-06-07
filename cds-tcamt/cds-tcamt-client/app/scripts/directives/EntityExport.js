@@ -27,7 +27,7 @@ angular.module('tcl').filter('exportTcSearch', function () {
 });
 
 
-angular.module('tcl').directive('entityExport', function ($modal, FITSBackEnd, EntityService, EntityUtilsService, $http, $rootScope) {
+angular.module('tcl').directive('entityExport', function ($modal, PopUp, FITSBackEnd, EntityService, EntityUtilsService, $http, $rootScope) {
     return {
         restrict: 'E',
         templateUrl: 'export.html',
@@ -89,7 +89,8 @@ angular.module('tcl').directive('entityExport', function ($modal, FITSBackEnd, E
                 {
                     id : ctrl.formats.PDF,
                     name : 'PDF Document',
-                    api : 'pdf'
+                    api : 'pdf',
+                    valid : ctrl.preCondition
                 }
 
             ];
@@ -218,24 +219,38 @@ angular.module('tcl').directive('entityExport', function ($modal, FITSBackEnd, E
 
             $scope.export = function () {
                 var conf = ctrl.configFor($scope.FORMAT);
-                var form = document.createElement("form");
+                PopUp.start("Generating your files...");
+                $http.post('api/testcase/export/'+conf.api+'/'+$scope.tp.id, $scope.listID())
+                    .success(function () {
 
-                form.action = $rootScope.api('api/testcase/'+$scope.encodeURL()+'/export/'+conf.api);
-                form.method = "POST";
-                form.target = "_target";
-                form.style.display = 'none';
-                document.body.appendChild(form);
-                form.submit();
+                        var form = document.createElement("form");
+
+                        form.action = $rootScope.api('api/testcase/export');
+                        form.method = "GET";
+                        form.target = "_target";
+                        form.style.display = 'none';
+                        document.body.appendChild(form);
+                        form.submit();
+                        PopUp.stop();
+
+                    })
+                    .error(function (error) {
+                        console.log("ERROR");
+                        console.log(error);
+                        PopUp.stop();
+                    });
+
+
             };
 
-            $scope.encodeURL = function () {
+            $scope.listID = function () {
                 var list = $scope.validTCs();
-                var str = "";
+                var ids = [];
                 _.forEach(list,function (elm) {
-                   str += elm.id+",";
+                    ids.push(elm.id);
                 });
 
-                return str.substring(0,str.length - 1);
+                return ids;
             };
         }
     }

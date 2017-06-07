@@ -102,11 +102,7 @@ angular.module('tcl').controller('ExecutionCtrl', function (StatsService, Execut
         tab: 0
     };
     $scope.savedReports = {};
-    $scope.configStub = {
-        name: "",
-        endPoint: "",
-        connector: ""
-    };
+    $scope.configStub = null;
     $scope.today = new Date();
     $scope.selectedReport = {};
     $scope.assessmentDate = {
@@ -137,7 +133,7 @@ angular.module('tcl').controller('ExecutionCtrl', function (StatsService, Execut
     $scope.showResults = false;
     $scope.report = {};
     $scope.aggregate = {};
-
+    $scope.nbRelativeTC = 0;
 //--------------------------------- FILTER ---------------------
     $scope.tcFilterView = false;
     $scope.tcFilter = {
@@ -241,7 +237,32 @@ angular.module('tcl').controller('ExecutionCtrl', function (StatsService, Execut
     };
 //--------------------------------- UTILS ----------------------
 
+    $scope.createConf = function () {
+        var x = {
+            _local : true,
+            id :  new ObjectId().toString(),
+            name : "New",
+            endPoint : "",
+            connector : ""
+        };
+        $scope.configs.push(x);
+        $scope.onConfig(x);
+    };
 
+    $scope.onConfig = function (config) {
+        if(!config){
+            $scope.configStub = null;
+        }
+        if(!config._local){
+            $rootScope.selectedConfig = config;
+            $scope.configStub = JSON.parse(angular.toJson(config));
+        }
+        else {
+            $rootScope.selectedConfig = null;
+            $scope.configStub = JSON.parse(angular.toJson(config));
+        }
+
+    };
 
     $scope.groupName = function (id) {
         if (id && id !== "") {
@@ -347,18 +368,44 @@ angular.module('tcl').controller('ExecutionCtrl', function (StatsService, Execut
     $scope.saveConfig = function () {
         $http.post("api/exec/configs/save", $scope.configStub).then(function (result) {
             var conf = angular.fromJson(result.data);
-            $scope.configs.push(conf);
-            $rootScope.selectedConfig = conf;
+            var idx = _.findIndex($scope.configs,function (x) {
+                return x.id === conf.id;
+            });
+            if(~idx){
+                $scope.configs.splice(idx,1,conf);
+            }
+            else {
+                $scope.configs.push(conf);
+            }
+            $scope.onConfig(conf);
         });
     };
 
-    $scope.deleteConfig = function (id,index) {
-        $http.post("api/exec/configs/delete/"+id).then(function () {
-            if($rootScope.selectedConfig.id === id){
+    $scope.toggleSoftware = function () {
+        $scope.cEdit = true;
+        $scope.onConfig($rootScope.selectedConfig);
+    };
+
+    $scope.deleteConfig = function (index, id,local) {
+        if(local){
+            if($scope.configs[index].id === $scope.configStub.id){
+                $scope.configStub = null;
                 $rootScope.selectedConfig = null;
             }
             $scope.configs.splice(index,1);
-        });
+        }
+        else{
+            $http.post("api/exec/configs/delete/"+id).then(function () {
+                if($rootScope.selectedConfig.id === id){
+                    $rootScope.selectedConfig = null;
+                }
+                if($scope.configs[index].id === $scope.configStub.id){
+                    $scope.configStub = null;
+                    $rootScope.selectedConfig = null;
+                }
+                $scope.configs.splice(index,1);
+            });
+        }
     };
 
     // $scope.defaultConfig = function () {
@@ -411,6 +458,9 @@ angular.module('tcl').controller('ExecutionCtrl', function (StatsService, Execut
                     if (!$scope.inQueue(items[i]) && items[i].runnable) {
                         items[i].running = false;
                         toAdd.push(items[i]);
+                        if(items[i].dateType === 'RELATIVE'){
+                            $scope.nbRelativeTC++;
+                        }
                     }
                 }
 
@@ -449,6 +499,9 @@ angular.module('tcl').controller('ExecutionCtrl', function (StatsService, Execut
                 }
                 items.running = false;
                 $scope.tcQueue.splice(index, 0, items);
+                if(items.dateType === 'RELATIVE'){
+                    $scope.nbRelativeTC++;
+                }
             }
         }
         $scope.multipleSel = false;
@@ -482,6 +535,7 @@ angular.module('tcl').controller('ExecutionCtrl', function (StatsService, Execut
     $scope.back = function () {
         $scope.controls.abort = true;
         $scope.controls.running = false;
+        $scope.nbRelativeTC = 0;
         $scope.saved = false;
         $scope.resetFilter();
         $scope.tabs.reportTab = 0;
@@ -525,6 +579,11 @@ angular.module('tcl').controller('ExecutionCtrl', function (StatsService, Execut
         var tc = $scope.viewTc[id];
         var i = TestObjectUtil.index($scope.tcQueue,'id',tc.id);
         $scope.tcQueue.splice(i, 1);
+
+        if(tc.dateType === 'RELATIVE'){
+            $scope.nbRelativeTC--;
+        }
+
         if ($scope.container.reports.hasOwnProperty(tc.id)) {
             if (id === $scope.viewTc.length - 1) {
                 $scope.x.rp--;
@@ -537,11 +596,15 @@ angular.module('tcl').controller('ExecutionCtrl', function (StatsService, Execut
 
     $scope.clear = function () {
         $scope.tcQueue = [];
+        $scope.nbRelativeTC = 0;
     };
 
     $scope.addQueue = function (tc) {
         tc.running = false;
         $scope.tcQueue.push(tc);
+        if(tc.dateType === 'RELATIVE'){
+            $scope.nbRelativeTC++;
+        }
     };
 
 //--------------------------- REPORT --------------------------------

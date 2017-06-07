@@ -16,7 +16,6 @@ import gov.nist.healthcare.cds.auth.domain.Privilege;
 import gov.nist.healthcare.cds.auth.repo.PrivilegeRepository;
 import gov.nist.healthcare.cds.auth.service.AccountService;
 import gov.nist.healthcare.cds.domain.SoftwareConfig;
-import gov.nist.healthcare.cds.domain.TestCase;
 import gov.nist.healthcare.cds.domain.VaccineMapping;
 import gov.nist.healthcare.cds.domain.exception.VaccineNotFoundException;
 import gov.nist.healthcare.cds.domain.wrapper.AppInfo;
@@ -47,7 +46,6 @@ import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 
 @Service
 @PropertySource("classpath:filtered/app-info.properties" )
@@ -121,6 +119,7 @@ public class Bootstrap {
 	public TestRunnerService testRunner(){
 //		return new TestRunnerServiceFhirImpl("https://p860556.campus.nist.gov:8443/forecast/ImmunizationRecommendations");
 //		return new TestRunnerServiceFhirImpl("https://hit-dev.nist.gov:15001/forecast/ImmunizationRecommendations");
+		//return new TestRunnerServiceFhirImpl("http://hit-dev.nist.gov:11080/fhirAdapter/fhir/Parameters/$cds-forecast");
 		return new TestRunnerServiceFhirImpl("http://hit-dev.nist.gov:11080/fhirAdapter/fhir/Parameters/$cds-forecast");
 	}
 	
@@ -210,7 +209,7 @@ public class Bootstrap {
 	
 	@PostConstruct
 	public void init() throws ParseException, IOException, VaccineNotFoundException {
-		
+			
 		//Vaccine
 		this.createVaccine();
 		

@@ -141,6 +141,11 @@ angular.module('tcl').directive('eventReport', function() {
           return null;
       };
 
+      $scope.evalStatusSanitize = function(x) {
+          if(x === 'INVALID') return 'NOT VALID';
+          else return x;
+      };
+
       $scope.actual = function(node) {
         if (node.status === 'P') {
           return "PASSED";

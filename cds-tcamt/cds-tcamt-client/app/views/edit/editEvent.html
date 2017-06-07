@@ -79,7 +79,7 @@
                                 </div>
                                 <div class="col-md-6" style="margin-top: 10px;">
                                     <md-input-container style="width: 100%;"><label>Reason</label>
-                                        <md-select ng-disabled="evaluation.status !== 'INVALID'"
+                                        <md-select ng-disabled="evaluation.status === 'VALID'"
                                                    ng-model="evaluation.reason" ng-model-options="{trackBy: '$value'}"
                                                    ng-change="tcChanged()">
                                             <md-option

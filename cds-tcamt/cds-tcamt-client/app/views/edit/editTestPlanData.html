@@ -15,10 +15,10 @@ body {
 	<md-content block-ui="editPanel">
 		<md-tabs md-selected="tabs.selectedTabTP" md-dynamic-height md-border-bottom>
 			<md-tab label="Test Plan Information">
-				<md-content class="md-padding" ng-model-options="{updateOn : 'change blur'}">
-					<form name="testplanMetaDataForm" class="form-horizontal" novalidate>
-						<div class="row">
-							<div class="col-md-12">
+				<md-content class="md-padding" ng-model-options="{updateOn : 'change blur'}" style="height: 100%;">
+					<form name="testplanMetaDataForm" class="form-horizontal" style="height: 100%;" novalidate>
+						<div class="row" style="height: 100%;">
+							<div class="col-md-12" style="height: 100%;" >
 								<div class="col-md-12">
 									<md-input-container style="width: 100%;">
 										<label>Name</label>
@@ -43,8 +43,8 @@ body {
 										<md-datepicker ng-model="selectedTP.metaData._dateLastUpdated" ng-change="dateChange(selectedTP.metaData,'dateLastUpdated')" ng-disabled="true"></md-datepicker>
 									</md-input-container>
 								</div>
-								<div class="col-md-12">
-									<md-input-container style="width: 100%;">
+								<div class="col-md-12" style="height: 100%;">
+									<md-input-container style="width: 100%; height: 100%;">
 										<label>Description</label>
 										<textarea style="background-color: rgb(241, 241, 241);" ng-change="changedTP(selectedTP)" ng-model="selectedTP.description" rows="5">
 										</textarea>

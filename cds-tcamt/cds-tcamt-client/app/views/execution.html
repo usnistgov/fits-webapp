@@ -73,6 +73,9 @@
                     </div>
                 </div>
                 <div class="panel-body" style="padding: 0; padding-bottom: 0px; margin: 0;" ng-show="qview">
+                    <!--<md-content class="md-padding" ng-hide="exec" >-->
+                        <!--<ng-include src="'views/configuration.html'"/>-->
+                    <!--</md-content>-->
                     <table class="table table-condensed table-striped table-bordered" style="height: 100%;">
                         <thead ng-show="exec">
                         <tr layout="row">
@@ -89,12 +92,12 @@
                         </thead>
                         <tbody>
                         <tr>
-                            <td style="width: 30%;" ng-hide="exec">
+                            <td style="width: 35%;" ng-hide="exec">
                                 <ng-include src="'views/configuration.html'"/>
                             </td>
-                            <td style="width: 70%;">
+                            <td style="width: 65%;">
                                 <md-content layout="column" ng-show="showResults">
-                                    <div md-whiteframe="2" layout="column" style="width: 100%;">
+                                    <div layout="column" style="width: 100%;">
                                         <div layout="row" layout-align="start center" style="padding : 10px; background-color: #1f79c1; text-align: center; height: 100%; width: 100%; border : 1px solid #dddddd;">
                                             <span flex="90" style="font-size: 14px; color: white; ">
                                                 <strong>Filters</strong>
@@ -107,7 +110,7 @@
                                                 </button>
                                             </div>
                                         </div>
-                                        <div layout="row" style="background-color: white; padding: 0px;" ng-show="filterView">
+                                        <div layout="row" style="background-color: white; padding: 0px; border-right: 1px solid #b0b0b0; border-left: 1px solid #b0b0b0;" ng-show="filterView">
                                             <div flex="30" layout="column" layout-align="center center" style="border-right : 1px solid #dddddd;">
                                                 <div class="input-group" style="width : 90%; margin-left: 10px;">
                                                     <span class="input-group-addon"  style="background-color: rgb(240, 240, 240);" id="basic-addon1"><i class="fa fa-search" aria-hidden="true"></i></span>
@@ -642,8 +645,8 @@
             <td style="background-color: #FFFFFF;">
                 #{{eval.expEval.relatedTo.cvx}} - {{eval.expEval.relatedTo.name}}
             </td>
-            <td>{{eval.expEval.status}}</td>
-            <td>{{eval.validation.status === 'P' ? eval.expEval.status : eval.validation.status === 'U' ? '' : eval.validation.value}}</td>
+            <td>{{evalStatusSanitize(eval.expEval.status)}}</td>
+            <td>{{eval.validation.status === 'P' ? evalStatusSanitize(eval.expEval.status) : eval.validation.status === 'U' ? '' : evalStatusSanitize(eval.validation.value)}}</td>
             <td style="color : black;" ng-class="{ 'success' : eval.validation.status === 'P', 'danger' : eval.validation.status === 'F', 'unmatched' : eval.validation.status === 'U' }">
                 {{eval.validation.status === 'P' ? 'PASSED' : eval.validation.status === 'F' ? 'FAILED' : eval.validation.status === 'U' ? 'NO MATCH' : ''}}
             </td>
@@ -705,7 +708,7 @@
             </td>
         </tr>
         <tr ng-hide="fc.complete.status === 'N'">
-            <td style="background-color: #FFFFFF;">Complete</td>
+            <td style="background-color: #FFFFFF;">Latest</td>
             <td>{{fc.forecastRequirement.complete | date:"MM/dd/yyyy"}}</td>
             <td>{{fc.complete.status === 'U' ? '' : printDiff(fc.forecastRequirement.complete,fc.complete)}}</td>
             <td style="color : black;" ng-class="{ 'warning' : fc.complete.status === 'W', 'success' : fc.complete.status === 'P', 'danger' : fc.complete.status === 'F', 'unmatched' : fc.complete.status === 'U' }">

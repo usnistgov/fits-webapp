@@ -104,8 +104,7 @@ multiselect button:after {
 
 .drop-zone {
   background-color: rgba(33, 150, 243, 0.06);
-  border: 2px dashed black;
-  border-top: 0px;
+  border: 2px dashed #d2d2d2;
 }
 
 .file-drop-zone {
@@ -207,6 +206,12 @@ multiselect button:after {
 
 html {
   background-color: #021a4c;
+  height: 100%;
+}
+
+.hov:hover {
+  background-color : #d6d6d6 !important;
+  cursor: pointer;
 }
 
 .fill {
