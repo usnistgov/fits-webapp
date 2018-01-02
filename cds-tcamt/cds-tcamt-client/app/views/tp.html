@@ -9,7 +9,9 @@
         top.location = self.location;
     }
 </script>
+<ng-include src="'views/report/report-templates.html'"></ng-include>
 <div class="container" ng-controller="TestPlanCtrl" ng-init="initTestCases()">
+
     <div ng-show="isAuthenticated()">
         <div ng-show="!isPending()">
             <div class="row">
@@ -86,7 +88,7 @@
                                 class="btn btn-sm btn-info" ng-click="closeTestPlanEdit()">
                             <span><i class="fa fa-list fa-fw"></i>List</span>
                         </button>
-                        <button ng-show="aTPisSelected()" title="Import" type="button"
+                        <button ng-show="aTPisSelected() && !vOnly()" title="Import" type="button"
                                 class="btn btn-sm btn-info" ng-click="importButton()">
                             <span><i class="fa fa-download fa-fw"></i>Import</span>
                         </button>
@@ -101,7 +103,7 @@
                                 <li role="menuitem"><a ng-click="export('pdf')">Export Test Case To PDF</a></li>
                             </ul>
                         </div>
-                        <button title="Save Changes" type="button" class="btn btn-sm btn-success" ng-show="aTPisSelected()"
+                        <button title="Save Changes" type="button" class="btn btn-sm btn-success" ng-show="aTPisSelected() && !vOnly()"
                                 ng-click="saveAllChangedTestPlans()">
                             <span><i class="fa fa-floppy-o fa-fw"></i> Save</span>
                         </button>
@@ -116,19 +118,19 @@
                 <!--</div>-->
                 <!--<div ng-show="accordi.tpList" ng-include="'views/edit/listTP.html'"></div>-->
                 <div ng-show="accordi.tpDetails" ng-include="'views/edit/editTP.html'"></div>
-                <button ng-show="aTPisSelected()" ng-click="saveAllChangedTestPlans(selectedTC,selectedTP)"
+                <button ng-show="aTPisSelected() && !vOnly()" ng-click="saveAllChangedTestPlans(selectedTC,selectedTP)"
                         class="md-fab md-button btn-success md-ink-ripple"
                         style="position: fixed !important; top : auto; bottom: 20px; right: 20px;">
                     <span><i class="fa fa-floppy-o fa-fw" style="font-size: 1.5em;"></i></span>
                     <md-tooltip md-direction="top">Save</md-tooltip>
                 </button>
-                <button ng-show="aTCisSelected()" ng-click="summary()"
+                <button ng-show="aTCisSelected() && !vOnly()" ng-click="summary()"
                         class="md-fab md-button btn-primary md-ink-ripple"
                         style="position: fixed !important; top : auto; bottom: 20px; right: 80px;">
                     <span><i class="fa fa-file-text-o" style="font-size: 1.5em;" aria-hidden="true"></i></span>
                     <md-tooltip md-direction="top">Summary</md-tooltip>
                 </button>
-                <button ng-show="aTCisSelected()" ng-click="selectTC(selectedTC)"
+                <button ng-show="aTCisSelected() && !vOnly()" ng-click="selectTC(selectedTC)"
                         class="md-fab md-button btn-info md-ink-ripple"
                         style="position: fixed !important; top : auto; bottom: 20px; right: 140px;">
                     <span><i class="fa fa-info" style="font-size: 1.5em;" aria-hidden="true"></i></span>
@@ -142,6 +144,11 @@
         <!--<div msg key='account.pendingSection'></div>-->
         <!--</div>-->
 
+    </div>
+
+    <div ng-show="!isAuthenticated()" style="font-size: 18px;text-align: center">
+	<p>Please <a href="" ng-click="loginReq()"><i class="fa fa-sign-in"></i>&nbsp;login</a> to access this page. You
+	    can also <a href="#/registration"><i class="fa fa-chevron-circle-right"></i>&nbsp;register</a></p>
     </div>
 
     <script type="text/ng-template" id="ConfirmTestPlanDeleteCtrl.html">
@@ -256,7 +263,6 @@
         </div>
     </script>
 
-
     <script type="text/ng-template" id="Block.html">
         <div class="modal-body" layout="row" layout-align="center center">
             <div flex="90" style="text-align: center; font-size: 16px;">
@@ -291,13 +297,35 @@
         </div>
     </script>
 
-    <div ng-show="!isAuthenticated()" style="font-size: 18px;text-align: center">
-        <p>Please <a href="" ng-click="loginReq()"><i class="fa fa-sign-in"></i>&nbsp;login</a> to access this page. You
-            can also <a href="#/registration"><i class="fa fa-chevron-circle-right"></i>&nbsp;register</a></p>
-    </div>
+    <script type="text/ng-template" id="SharePanel.html">
+	<div class="modal-header fits-m-h">
+	    <h3 class="modal-title"><i class="fa fa-share-alt pull-left" style="color: blue;" aria-hidden="true"></i> Share Test Plan</h3>
+	</div>
+	<div class="modal-body fits-m-b" style="text-align: center;">
+	    <div style="width: 100%;" layout="column" layout-align="center start">
+		<div style="width: 100%;" layout="row" layout-align="center center">
+		    <span class="badge" ng-style="!visibility ? { 'background-color' : 'green' } : {}">Private</span>
+		    <md-switch ng-change="changeVisibility(visibility)" class="md-primary" style="margin : 0 5px 0 5px;" ng-model="visibility" aria-label="Switch 1"></md-switch>
+		    <span class="badge" ng-style="visibility ? { 'background-color' : 'green' } : {}">Public</span>
+		</div>
+		<div style="width: 100%;" layout="row" layout-align="start center">
+		    <input flex="90" type="text" ng-model="userId" style="background-color : white; width: 100%" placeholder=" Search" >
+		    <button ng-click="share()" class="btn btn-xs btn-success"><i class="fa fa-plus" aria-hidden="true"></i></button>
+		</div>
+		<span ng-show="viewers && viewers.length > 0"><strong>Shared with</strong></span>
+		<div style="width: 100%;" layout="column" layout-align="start center">
+		    <md-list style="width: 100%;">
+			<md-list-item ng-repeat="viewer in viewers" layout="row" layout-align="start center"
+				      md-whiteframe="2" class="hov"
+				      style="border-top : 1px solid #dddddd; border-right : 1px solid #dddddd; border-left : 1px solid #dddddd; background-color: white; padding-top: 5px;padding-bottom: 5px;">
 
-
-
-
+			    <span flex="90"><i class="fa fa-user" style="color: saddlebrown;" aria-hidden="true"></i> {{viewer}}</span>
+			    <button flex="10" ng-click="unshare($index)" class="btn btn-xs btn-danger"><i class="fa fa-times" aria-hidden="true"></i></button>
+			</md-list-item>
+		    </md-list>
+		</div>
+	    </div>
+	</div>
+    </script>
 
 </div>

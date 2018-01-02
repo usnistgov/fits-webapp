@@ -10,7 +10,7 @@ angular.module('tcl').directive('dateChoose', function() {
 			nullable : "=",
 			exclude : "="
 		},
-		controller : function($scope) {
+		controller : function($scope, $rootScope) {
 			var ctrl = this;
 
             $scope.$watch('ctrl.type', function (newValue, oldValue) {
@@ -76,6 +76,7 @@ angular.module('tcl').directive('dateChoose', function() {
                     position : 'AFTER',
                     year : 0,
 					month : 0,
+                    week : 0,
 					day : 0,
 					relativeTo : null
                 }
@@ -122,8 +123,12 @@ angular.module('tcl').directive('dateChoose', function() {
 			// });
 			//
 			ctrl.dateChange = function(dateObj){
-				dateObj.date = dateObj._dateObj.getTime();
+			    console.log(dateObj._dateObj);
+			    console.log(dateObj._dateObj.getTime());
+                console.log($rootScope.toUTC(dateObj._dateObj));
+				dateObj.date = $rootScope.toUTC(dateObj._dateObj);
 			};
+
 			//
 			// $scope.$watch('ctrl.dt.relative.relativeTo', function (newValue, oldValue, scope) {
 			//     if(newValue && newValue != ""){

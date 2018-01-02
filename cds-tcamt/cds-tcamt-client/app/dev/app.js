@@ -40,7 +40,8 @@ var app = angular
         'ui.select',
         'infinite-scroll',
         'dndLists',
-        'autocomplete'
+        'autocomplete',
+        'ngTagsInput'
     ]);
 
 var

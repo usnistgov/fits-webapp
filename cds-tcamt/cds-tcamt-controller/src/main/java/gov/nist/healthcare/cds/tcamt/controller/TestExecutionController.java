@@ -1,46 +1,36 @@
 package gov.nist.healthcare.cds.tcamt.controller;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.security.Principal;
-import java.util.Calendar;
+import java.util.ArrayList;
 import java.util.List;
-
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import javax.xml.bind.JAXBException;
-import javax.xml.datatype.DatatypeConfigurationException;
 
 import gov.nist.healthcare.cds.domain.SoftwareConfig;
 import gov.nist.healthcare.cds.domain.TestCase;
 import gov.nist.healthcare.cds.domain.TestCaseGroup;
-import gov.nist.healthcare.cds.domain.TestExecution;
 import gov.nist.healthcare.cds.domain.TestPlan;
+import gov.nist.healthcare.cds.domain.TransientExecRequest;
 import gov.nist.healthcare.cds.domain.exception.ConnectionException;
 import gov.nist.healthcare.cds.domain.exception.UnresolvableDate;
 import gov.nist.healthcare.cds.domain.wrapper.AggregateReport;
-import gov.nist.healthcare.cds.domain.wrapper.Counts;
 import gov.nist.healthcare.cds.domain.wrapper.ExecutionConfig;
 import gov.nist.healthcare.cds.domain.wrapper.Report;
+import gov.nist.healthcare.cds.domain.wrapper.TestPlanDetails;
+import gov.nist.healthcare.cds.enumeration.EntityAccess;
 import gov.nist.healthcare.cds.repositories.SoftwareConfigRepository;
-import gov.nist.healthcare.cds.repositories.TestCaseRepository;
 import gov.nist.healthcare.cds.repositories.TestPlanRepository;
 import gov.nist.healthcare.cds.service.AggregateReportService;
 import gov.nist.healthcare.cds.service.PropertyService;
-import gov.nist.healthcare.cds.service.ReportExportService;
 import gov.nist.healthcare.cds.service.TestCaseExecutionService;
+import gov.nist.healthcare.cds.service.impl.data.RWTestPlanFilter;
 
-import org.apache.http.HttpResponse;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.util.FileCopyUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -54,20 +44,19 @@ public class TestExecutionController {
 	private TestCaseExecutionService execService;
 	
 	@Autowired
-	private TestCaseRepository testCaseRepository;
-	
-	@Autowired
 	private TestPlanRepository testPlanRepository;
-	
-	@Autowired
-	private ReportExportService reportExport;
 	
 	@Autowired
 	private AggregateReportService aggregateService;
 	
 	@Autowired
 	private PropertyService ledger;
+	
+	@Autowired
+	private RWTestPlanFilter filter; 
 
+	//------------------------ SOFTWARE CONFIGURATION -----------------------------
+	
 	@RequestMapping(value = "/exec/configs", method = RequestMethod.GET)
 	@ResponseBody
 	public List<SoftwareConfig> configs(Principal p){
@@ -81,28 +70,6 @@ public class TestExecutionController {
 		return softwareConfigRepository.save(sc);
 	}
 	
-//	@RequestMapping(value = "/exec/start", method = RequestMethod.POST)
-//	public boolean start(@RequestBody ExecutionConfig sc, HttpSession session, Principal user) {
-//		SoftwareConfig config = softwareConfigRepository.findOne(sc.getSoftware());
-//		if(config.getUser().equals(user.getName())){
-//			TestExecution exec = new TestExecution();
-//			exec.setSoftware(config);
-//			if(sc.getDate() != null){
-//				exec.setExecutionDate(sc.getDate());
-//			}
-//			else {
-//				exec.setExecutionDate(Calendar.getInstance().getTime());
-//			}		
-//			session.setAttribute("exec", exec);
-//			session.setAttribute("defaultConfig", config);
-//			session.setAttribute("set", true);
-//			return true;
-//		}
-//		else{
-//			return false;
-//		}
-//	}
-	
 	@RequestMapping(value = "/exec/configs/delete/{id}", method = RequestMethod.POST)
 	public void defaultConfig(HttpSession session, @PathVariable String id, Principal user) {
 		SoftwareConfig config = softwareConfigRepository.findOne(id);
@@ -115,43 +82,47 @@ public class TestExecutionController {
 		}
 	}
 	
-	@RequestMapping(value = "/report/{id}/export/{format}", method = RequestMethod.POST)
+	//------------------------ TESTCASE LIST ---------------------------------
+	@RequestMapping(value = "/exec/tps", method = RequestMethod.GET)
 	@ResponseBody
-	public void export(@PathVariable String id,@PathVariable String format,HttpServletRequest request, HttpServletResponse response, Principal p) throws IOException, JAXBException, DatatypeConfigurationException{
-		Report report = ledger.reportBelongsTo(id, p.getName());
-		if(format.equals("xml") && report != null){
-			response.setContentType("text/xml");
-			response.setHeader("Content-disposition", "attachment;filename="+report.getTcInfo().getName().replace(" ", "_")+"_ValidationReport.xml" );
-			TestCase tc = testCaseRepository.findOne(report.getTc());
-			String str = reportExport.exportXML(report,tc);
-			System.out.println("[HTREPORT]");
-			System.out.println(str);
-			InputStream stream = new ByteArrayInputStream(str.getBytes(StandardCharsets.UTF_8));
-			FileCopyUtils.copy(stream, response.getOutputStream());
+	public List<TestPlan> tps(Principal p, HttpServletResponse response) throws UnresolvableDate, IOException {
+		List<TestPlan> tps = testPlanRepository.findByUser(p.getName());
+		for(TestPlan tp : testPlanRepository.sharedWithUser(p.getName())){
+			filter.filterTestPlan(tp);
+			tps.add(tp);
 		}
+		return tps;
 	}
 	
-	@RequestMapping(value = "/report/export/{format}", method = RequestMethod.POST)
+	@RequestMapping(value = "/exec/short/tps", method = RequestMethod.GET)
 	@ResponseBody
-	public String exportT(@RequestBody Report report,@PathVariable String format,HttpServletRequest request, HttpServletResponse response, Principal p) throws IOException, JAXBException, DatatypeConfigurationException{
-		if(format.equals("xml") && report != null){
-			//response.setContentType("text/xml");
-			//response.setHeader("Content-disposition", "attachment;filename="+report.getTcInfo().getName().replace(" ", "_")+"_ValidationReport.xml" );
-			TestCase tc = testCaseRepository.findOne(report.getTc());
-			String str = reportExport.exportXML(report,tc);
-			return str;
+	public List<TestPlanDetails> tpshort(Principal p, HttpServletResponse response) throws UnresolvableDate, IOException {
+		List<TestPlan> tps = testPlanRepository.findByUser(p.getName());
+		for(TestPlan tp : testPlanRepository.sharedWithUser(p.getName())){
+			filter.filterTestPlan(tp);
+			tps.add(tp);
 		}
-		return "";
+		List<TestPlanDetails> details = new ArrayList<>();
+		for(TestPlan tp : tps){
+			int nbTc = tp.getTestCases().size();
+			for(TestCaseGroup tcg : tp.getTestCaseGroups()){
+				nbTc += tcg.getTestCases().size();
+			}
+			details.add(new TestPlanDetails(tp.getName(), tp.getId(), nbTc));
+		}
+		return details;
 	}
-
-
+	
+	//------------------------ EXECUTE TEST CASE -----------------------------
 	
 	@RequestMapping(value = "/exec/tc/{id}", method = RequestMethod.POST)
 	@ResponseBody
 	public Report add(@RequestBody ExecutionConfig sc, @PathVariable String id,Principal user, HttpServletResponse response) throws UnresolvableDate, IOException {
-		TestCase tc = ledger.tcBelongsTo(id, user.getName());
+		TestCase tc = ledger.tcBelongsTo(id, user.getName(), EntityAccess.R);
 		SoftwareConfig config = ledger.configBelongsTo(sc.getSoftware(), user.getName());
 		if(tc == null || config == null){
+			System.out.println("TC "+tc);
+			System.out.println("CONF "+config);
 			response.sendError(403,"TestCase or Configuration does not belong to user");
 			return null;
 		}
@@ -170,6 +141,40 @@ public class TestExecutionController {
 		}
 	}
 	
+	@RequestMapping(value = "/exec/tcs", method = RequestMethod.POST)
+	@ResponseBody
+	public List<Report> execAll(@RequestBody TransientExecRequest execRequest,Principal user, HttpServletResponse response) throws UnresolvableDate, IOException {
+		List<Report> reports = new ArrayList<Report>();
+		for(String id : execRequest.getTestCases()){
+			TestCase tc = ledger.tcBelongsTo(id, user.getName(), EntityAccess.R);
+			SoftwareConfig config = execRequest.getSoftware();
+			if(tc == null || config == null){
+				response.sendError(403,"TestCase does not belong to user or Configuration is not set");
+				return null;
+			}
+			else if(!tc.isRunnable()){
+				response.sendError(500,"TestCase is not complete and therefore can't be executed");
+				return null;
+			}
+			else {
+				try {
+					reports.add(execService.execute(config, tc, execRequest.getDate()));
+				}
+				catch(ConnectionException ex){
+					response.sendError(this.code(ex.getStatusCode()),ex.getStatusText());
+					return null;
+				}
+			}
+		}
+		return reports;
+	}
+	
+	@RequestMapping(value = "/exec/agg", method = RequestMethod.POST)
+	@ResponseBody
+	public AggregateReport aggregate(@RequestBody List<Report> reports, Principal user) {
+		return aggregateService.aggregate(reports);
+	}
+	
 	private int code(String s){
 		if(s == null)
 			return 500;
@@ -183,18 +188,5 @@ public class TestExecutionController {
 			}
 		}
 	}
-	
-	@RequestMapping(value = "/exec/collect", method = RequestMethod.GET)
-	public TestExecution collect(HttpSession session, Principal user) {
-		TestExecution exec = (TestExecution) session.getAttribute("exec");
-		return exec;
-	}
-	
-	@RequestMapping(value = "/exec/agg", method = RequestMethod.POST)
-	@ResponseBody
-	public AggregateReport aggregate(@RequestBody List<Report> reports, HttpSession session, Principal user) {
-		return aggregateService.aggregate(reports);
-	}
-	
 	
 }

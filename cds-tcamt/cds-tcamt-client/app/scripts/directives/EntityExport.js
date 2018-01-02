@@ -68,11 +68,11 @@ angular.module('tcl').directive('entityExport', function ($modal, PopUp, FITSBac
                     api : 'cdc',
                     valid : function (tc) {
                         var msg = ctrl.preCondition(tc);
-                        if(tc.dateType === 'RELATIVE'){
-                            msg.push("Test Case has relative dates");
-                        }
-                        if(tc.forecast.length > 1)
-                            msg.push("Test Case has multiple forecasts");
+                        // if(tc.dateType === 'RELATIVE'){
+                        //     msg.push("Test Case has relative dates");
+                        // }
+                        // if(tc.forecast.length > 1)
+                        //     msg.push("Test Case has multiple forecasts");
                         var multiEval = false;
                         _.forEach(tc.events, function (ev) {
                             if(ev.evaluations.length > 1){
@@ -121,27 +121,42 @@ angular.module('tcl').directive('entityExport', function ($modal, PopUp, FITSBac
                 });
             };
 
+            // $scope.drop = function (list, item, index) {
+            //     console.log(item);
+            //     var conf = ctrl.configFor($scope.FORMAT);
+            //     if(item._type === EntityService.type.TEST_CASE){
+            //         $scope.dropTC(item,conf);
+            //     }
+            //     else if(item._type === EntityService.type.TEST_CASE_GROUP){
+            //         _.forEach(item.testCases, function (tc) {
+            //             $scope.dropTC(tc,conf);
+            //         });
+            //     }
+            //     else if(item._type === EntityService.type.TEST_PLAN){
+            //         _.forEach(item.testCases, function (tc) {
+            //             $scope.dropTC(tc,conf);
+            //         });
+            //         _.forEach(item.testCaseGroups, function (tg) {
+            //             _.forEach(tg.testCases, function (tc) {
+            //                 $scope.dropTC(tc,conf);
+            //             });
+            //         });
+            //     }
+            // };
+
             $scope.drop = function (list, item, index) {
-                
+
                 var conf = ctrl.configFor($scope.FORMAT);
-                if(item._type === EntityService.type.TEST_CASE){
+
+                if(item && Array.isArray(item) && item.length > 0){
+                    _.forEach(item, function (tc) {
+                        $scope.dropTC(tc,conf);
+                    });
+                }
+                else if(item && item._type === EntityService.type.TEST_CASE){
                     $scope.dropTC(item,conf);
                 }
-                else if(item._type === EntityService.type.TEST_CASE_GROUP){
-                    _.forEach(item.testCases, function (tc) {
-                        $scope.dropTC(tc,conf);
-                    });
-                }
-                else if(item._type === EntityService.type.TEST_PLAN){
-                    _.forEach(item.testCases, function (tc) {
-                        $scope.dropTC(tc,conf);
-                    });
-                    _.forEach(item.testCaseGroups, function (tg) {
-                        _.forEach(tg.testCases, function (tc) {
-                            $scope.dropTC(tc,conf);
-                        });
-                    });
-                }
+
             };
 
             $scope.toggleDragAndDrop = function () {
@@ -219,28 +234,9 @@ angular.module('tcl').directive('entityExport', function ($modal, PopUp, FITSBac
 
             $scope.export = function () {
                 var conf = ctrl.configFor($scope.FORMAT);
-                PopUp.start("Generating your files...");
-                $http.post('api/testcase/export/'+conf.api+'/'+$scope.tp.id, $scope.listID())
-                    .success(function () {
-
-                        var form = document.createElement("form");
-
-                        form.action = $rootScope.api('api/testcase/export');
-                        form.method = "GET";
-                        form.target = "_target";
-                        form.style.display = 'none';
-                        document.body.appendChild(form);
-                        form.submit();
-                        PopUp.stop();
-
-                    })
-                    .error(function (error) {
-                        console.log("ERROR");
-                        console.log(error);
-                        PopUp.stop();
-                    });
-
-
+                var form = EntityUtilsService.formData('api/testcase/export/'+conf.api+'/'+$scope.tp.id, "POST", 'java.lang.String', $scope.listID());
+                document.body.appendChild(form);
+                form.submit();
             };
 
             $scope.listID = function () {

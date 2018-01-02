@@ -43,10 +43,7 @@ angular.module('tcl').factory('PopUp', function ($rootScope,$modal,$timeout) {
 
         ctrl.close = function () {
             if(ctrl.myDiag){
-
-                $timeout(function () {
-                    ctrl.myDiag.close();
-                },0);
+                ctrl.myDiag.close();
             }
         };
 

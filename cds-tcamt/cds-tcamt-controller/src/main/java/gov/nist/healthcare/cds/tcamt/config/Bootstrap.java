@@ -3,20 +3,25 @@ package gov.nist.healthcare.cds.tcamt.config;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 
 import javax.annotation.PostConstruct;
+import javax.xml.bind.JAXBException;
 
 import gov.nist.fhir.client.ir.TestRunnerServiceFhirImpl;
 import gov.nist.healthcare.cds.auth.domain.Account;
 import gov.nist.healthcare.cds.auth.domain.Privilege;
 import gov.nist.healthcare.cds.auth.repo.PrivilegeRepository;
 import gov.nist.healthcare.cds.auth.service.AccountService;
+import gov.nist.healthcare.cds.domain.Injection;
+import gov.nist.healthcare.cds.domain.Product;
 import gov.nist.healthcare.cds.domain.SoftwareConfig;
 import gov.nist.healthcare.cds.domain.VaccineMapping;
+import gov.nist.healthcare.cds.domain.exception.ProductNotFoundException;
 import gov.nist.healthcare.cds.domain.exception.VaccineNotFoundException;
 import gov.nist.healthcare.cds.domain.wrapper.AppInfo;
 import gov.nist.healthcare.cds.domain.wrapper.Document;
@@ -24,6 +29,7 @@ import gov.nist.healthcare.cds.domain.wrapper.Documents;
 import gov.nist.healthcare.cds.domain.wrapper.Resources;
 import gov.nist.healthcare.cds.domain.wrapper.SimulatedResult;
 import gov.nist.healthcare.cds.domain.wrapper.SimulationMap;
+import gov.nist.healthcare.cds.domain.wrapper.VaccineRef;
 import gov.nist.healthcare.cds.enumeration.FHIRAdapter;
 import gov.nist.healthcare.cds.repositories.SoftwareConfigRepository;
 import gov.nist.healthcare.cds.repositories.TestCaseRepository;
@@ -31,7 +37,11 @@ import gov.nist.healthcare.cds.repositories.VaccineMappingRepository;
 import gov.nist.healthcare.cds.service.TestCaseExecutionService;
 import gov.nist.healthcare.cds.service.TestRunnerService;
 import gov.nist.healthcare.cds.service.VaccineImportService;
+import gov.nist.healthcare.cds.service.VaccineMatcherService;
+import gov.nist.healthcare.cds.service.VaccineService;
+import gov.nist.healthcare.cds.service.impl.validation.ConfigurableVaccineMatcher;
 import gov.nist.healthcare.cds.service.impl.validation.ExecutionService;
+import gov.nist.healthcare.cds.service.vaccine.VaccineMatcherConfiguration;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -61,9 +71,6 @@ public class Bootstrap {
 	private PrivilegeRepository privilegeRepository;
 	
 	@Autowired
-	private TestCaseRepository tR;
-	
-	@Autowired
 	private SoftwareConfigRepository softwareConfRepository;
 	
 	@Autowired
@@ -71,6 +78,8 @@ public class Bootstrap {
 	
 	@Autowired
 	private AccountService accService;
+	
+
 	
 	@Bean
 	public PasswordEncoder passEncode(){
@@ -111,7 +120,18 @@ public class Bootstrap {
 	}
 	
 	@Bean
+	public VaccineMatcherService matcher(){
+		return new ConfigurableVaccineMatcher();
+	}
+	
+	@Bean
+	public VaccineMatcherConfiguration matcherConfig() throws JAXBException{
+		return new VaccineMatcherConfiguration(Bootstrap.class.getResourceAsStream("/cdc/groups-mapping.xml"));
+	}
+	
+	@Bean
 	public Marshaller castorM(){
+		
 		return new CastorMarshaller();
 	}
 	
@@ -206,10 +226,23 @@ public class Bootstrap {
 		System.out.println("[PRIME SOFTWARE CONFIG] existing");
 	}
 	
-	
 	@PostConstruct
-	public void init() throws ParseException, IOException, VaccineNotFoundException {
-			
+	public void init() throws ParseException, IOException, VaccineNotFoundException, ProductNotFoundException {
+		
+		if(accService.getAccountByUsername("shareTest") == null){
+			Account a = new Account();
+			a.setUsername("shareTest");
+			a.setPassword("12QWASZx");
+			accService.createAdmin(a);
+		}
+		
+		if(accService.getAccountByUsername("hossam") == null){
+			Account a = new Account();
+			a.setUsername("hossam");
+			a.setPassword("12QWASZx");
+			accService.createAdmin(a);
+		}
+
 		//Vaccine
 		this.createVaccine();
 		

@@ -9,6 +9,7 @@ import gov.nist.healthcare.cds.enumeration.EvaluationStatus;
 import gov.nist.healthcare.cds.enumeration.Gender;
 import gov.nist.healthcare.cds.enumeration.RelativeTo;
 import gov.nist.healthcare.cds.enumeration.SerieStatus;
+import gov.nist.healthcare.cds.enumeration.WorkflowTag;
 import javassist.NotFoundException;
 
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -34,6 +35,16 @@ public class EnumController {
 	public List<EnumContainer> enumer() throws NotFoundException{
 		List<EnumContainer> ls = new ArrayList<EnumContainer>();
 		for(EvaluationReason es : EvaluationReason.values()){
+			ls.add(new EnumContainer(es.name(),es.getDetails()));
+		}
+		return ls;
+	}
+	
+	@RequestMapping(value = "/enum/wft", method = RequestMethod.GET)
+	@ResponseBody
+	public List<EnumContainer> enumwf() throws NotFoundException{
+		List<EnumContainer> ls = new ArrayList<EnumContainer>();
+		for(WorkflowTag es : WorkflowTag.values()){
 			ls.add(new EnumContainer(es.name(),es.getDetails()));
 		}
 		return ls;

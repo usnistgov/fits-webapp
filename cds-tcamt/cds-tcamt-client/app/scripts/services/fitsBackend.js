@@ -3,7 +3,7 @@
  */
 
 
-angular.module('tcl').factory('FITSBackEnd', function ($q, TrashService, SaveService, EntityLoadService) {
+angular.module('tcl').factory('FITSBackEnd', function ($q, TrashService, EntityService, SaveService, EntityLoadService, ShareService) {
 
     function BackEnd() {
         var ctrl = this;
@@ -14,9 +14,16 @@ angular.module('tcl').factory('FITSBackEnd', function ($q, TrashService, SaveSer
         ctrl.save = SaveService.save;
         // (wire, obj, tp)
         ctrl.saveAll = SaveService.saveAll;
+        // ACCESS
+        ctrl.loadTPSByAccess = EntityLoadService.loadTPSByAccess;
         // NO ARG
-        ctrl.loadTestPlans = EntityLoadService.loadTPs;
-
+        ctrl.loadSharedTestPlans = EntityLoadService.loadViewTPs;
+        // tpId, user
+        ctrl.shareTestPlan = ShareService.share;
+        // tpId, user
+        ctrl.unshareTestPlan = ShareService.unshare;
+        // tpId, bool
+        ctrl.makePublic = ShareService.public;
     }
     return new BackEnd();
 

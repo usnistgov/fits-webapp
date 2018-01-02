@@ -7,7 +7,7 @@
     "angular-bootstrap": "~0.14.2",
     "angular-cookies": "1.5.5",
     "angular-messages": "1.5.5",
-    "angular-material": "1.1.1",
+    "angular-material": "1.1.5",
     "angular-resource": "1.5.5",
     "angular-route": "1.5.5",
     "angular-sanitize": "1.5.5",
@@ -44,7 +44,9 @@
     "angular-ui-scroll": "^1.6.1",
     "json.sortify": "^2.1.0",
     "object-hash": "^1.1.7",
-    "angular-block-ui": "^0.2.2"
+    "angular-block-ui": "^0.2.2",
+    "moment": "^2.19.1",
+    "ng-tags-input": "^3.2.0"
   },
   "devDependencies": {
     "angular-scenario": "1.5.5",

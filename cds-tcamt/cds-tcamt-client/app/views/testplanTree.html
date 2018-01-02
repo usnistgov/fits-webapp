@@ -1,102 +1,131 @@
 <style id="antiClickjack">
-body {
+    body {
 	display: none !important;
-}
+    }
 
-.handle-custom {
+    .handle-custom {
 	background-color: red;
-}
+    }
 </style>
 <script type="text/javascript">
-	if (self === top) {
-		var antiClickjack = document.getElementById("antiClickjack");
-		antiClickjack.parentNode.removeChild(antiClickjack);
-	} else {
-		top.location = self.location;
-	}
+    if (self === top) {
+        var antiClickjack = document.getElementById("antiClickjack");
+        antiClickjack.parentNode.removeChild(antiClickjack);
+    } else {
+        top.location = self.location;
+    }
 </script>
 <div ui-tree="treeOptions">
-	<ol ui-tree-nodes ng-model="tpTree" dnd-drop="false" dnd-list="tpTree">
-		<li ui-tree-node ng-repeat="tp in tpTree" data-drag-enabled="false"
-			dnd-draggable="tp">
+    <ol ui-tree-nodes ng-model="tpTree" dnd-drop="false" dnd-list="tpTree">
+	<li ui-tree-node ng-repeat="tp in tpTree" data-drag-enabled="false"
+	    dnd-draggable="filterEntity(tp, eService.type.TEST_PLAN)">
 
-			<div id="{{'tp-'+tp.id}}" ng-click="selectTP(tp)" ng-class="{selected1 : isSelectedTPv()}" context-menu="tpCM">
-				<div style="margin-left: 5px;">
-					 <i ng-click="toggle(this)" class="fa" ng-class="{'fa-caret-right': collapsed, 'fa-caret-down': !collapsed}"></i>
-					<span>
-						<span class="label label-plan label-icon">TP</span>
-						<i title="Unsaved Changes" class="fa fa-refresh unsaved" aria-hidden="true" ng-show="!entityUtils.inSynch(tp)">
-							<md-tooltip>Unsaved Changes</md-tooltip>
-						</i>
-						<span>{{tp.name}} <span style="font-style: italic; color: #0000ff;">({{testCases.length}})</span></span>
-					</span>
-				</div>
+	    <div id="{{'tp-'+tp.id}}" ng-click="selectTP(tp)" ng-class="{selected1 : isSelectedTPv()}"
+		 context-menu="tpCM">
+		<div style="margin-left: 5px;">
+		    <i ng-click="toggle(this)" class="fa"
+		       ng-class="{'fa-caret-right': collapsed, 'fa-caret-down': !collapsed}"></i>
+		    <span>
+			<span class="label label-plan label-icon">TP</span>
+			<i title="Unsaved Changes" class="fa fa-refresh unsaved" aria-hidden="true"
+			   ng-show="!entityUtils.inSynch(tp)">
+			    <md-tooltip>Unsaved Changes</md-tooltip>
+			</i>
+			<span>{{tp.name}} <span
+				style="font-style: italic; color: #0000ff;">({{testCases.length}})</span></span>
+		    </span>
+		</div>
+	    </div>
+	    <ol ui-tree-nodes dnd-list="tp.testCases" dnd-drop="false" ng-model="tp.testCases">
+		<!--<li data-drag-enabled="false" ng-repeat="tc in  $scope.filterActive(tcFilter) ? (tp.testCases | filter:tcFilter.example | dateMD:tcFilter.dates.created:'dateCreated' | dateMD:tcFilter.dates.updated:'dateLastUpdated' | changed:tcFilter.changed) : tp.testCases" ui-tree-node ng-hide="$parentNodeScope.collapsed">-->
+		<li data-drag-enabled="false" ng-repeat="tc in  tp.testCases | tcFilter:tcFilter | workflow:tcFilter.wft | tags:tcFilter.tags" ui-tree-node
+		    ng-hide="$parentNodeScope.collapsed"
+		    dnd-draggable="tc">
+
+		    <div id="{{'tc-'+tc.id}}" ng-click="selectTC(tc)" ng-class="{selected1 : isSelectedTC(tc)}"
+			 context-menu="tcCM">
+			<div style="margin-left: 5px;">
+			    <span ng-class="{selected1 : isSelectedTC(tc)}">
+				<i ng-show="!tc.runnable"
+				   style="margin-left: -10px; color: red;"
+				   class="fa fa-exclamation" aria-hidden="true">
+				    <md-tooltip>Incomplete TestCase (Not Runnable)</md-tooltip>
+				</i>
+				<wf-tag code="tc.workflowTag"></wf-tag>
+				<span class="label label-case label-icon">TC</span>
+				<span style="font-weight: initial;">
+				    <i title="Unsaved Changes"
+				       class="fa fa-refresh unsaved"
+				       aria-hidden="true"
+				       ng-show="!entityUtils.inSynch(tc)">
+					<md-tooltip>Unsaved Changes</md-tooltip>
+				    </i>
+				    {{ tc.uid ? '#'+tc.uid+"- " : ""}}{{tc.name}}
+				</span>
+			    </span>
 			</div>
-			<ol ui-tree-nodes dnd-list="tp.testCases" dnd-drop="false" ng-model="tp.testCases">
-				<!--<li data-drag-enabled="false" ng-repeat="tc in  $scope.filterActive(tcFilter) ? (tp.testCases | filter:tcFilter.example | dateMD:tcFilter.dates.created:'dateCreated' | dateMD:tcFilter.dates.updated:'dateLastUpdated' | changed:tcFilter.changed) : tp.testCases" ui-tree-node ng-hide="$parentNodeScope.collapsed">-->
-				<li data-drag-enabled="false" ng-repeat="tc in  tp.testCases | tcFilter:tcFilter" ui-tree-node ng-hide="$parentNodeScope.collapsed"
-					dnd-draggable="tc">
-
-					<div id="{{'tc-'+tc.id}}"  ng-click="selectTC(tc)"  ng-class="{selected1 : isSelectedTC(tc)}" context-menu="tcCM">
-						<div style="margin-left: 5px;">
-							<span ng-class="{selected1 : isSelectedTC(tc)}">
-								<i ng-show="!tc.runnable" style="margin-left: -10px; color: red;" class="fa fa-exclamation" aria-hidden="true">
-									<md-tooltip>Incomplete TestCase (Not Runnable)</md-tooltip>
-								</i>
-								<span class="label label-case label-icon">TC</span>
-								<span style="font-weight: initial;">
-									<i title="Unsaved Changes" class="fa fa-refresh unsaved" aria-hidden="true" ng-show="!entityUtils.inSynch(tc)">
-										<md-tooltip>Unsaved Changes</md-tooltip>
-									</i>
-									{{ tc.uid ? '#'+tc.uid+"- " : ""}}{{tc.name}}
-								</span>
-							</span>
-						</div>
-					</div>
-				</li>
-			</ol>
-			<ol dnd-list="tp.testCaseGroups" dnd-drop="false" ui-tree-nodes data-nodrop-enabled="true" ng-model="tp.testCaseGroups">
-				<li data-drag-enabled="false" data-collapsed="{{!isLocal(group)}}" ng-repeat="group in tp.testCaseGroups track by $index" ui-tree-node ng-hide="$parentNodeScope.collapsed || (filterActive(tcFilter) && (group._gtc.length === 0 || !group._gtc))"
-					dnd-draggable="group">
-
-					<div context-menu="tgCM" id="{{'gr-'+group.id}}" ng-click="selectTG(group)" ng-class="{selected1 : isSelectedTG(group) && isSelectedTGv()}" >
-						<div style="margin-left: 5px;">
-							<i ng-click="toggle(this)" class="fa" ng-class="{'fa-caret-right': collapsed, 'fa-caret-down': !collapsed}"></i>
-							<span ng-class="{selected1 : isSelectedTG(group) && isSelectedTGv()}">
-								<span class="label label-group label-icon">GP</span>
-								<i title="Unsaved Changes" class="fa fa-refresh unsaved" aria-hidden="true" ng-show="!entityUtils.inSynch(group)">
-									<md-tooltip>Unsaved Changes</md-tooltip>
-								</i>
-								<strong>{{ group.name }}</strong>
-								<span style="font-style: italic; color: #0000ff;">({{group._gtc ? group._gtc.length : "0"}})</span>
-							</span>
-						</div>
-					</div>
-					<ol dnd-list="group.testCases" dnd-drop="false" ui-tree-nodes ng-model="group.testCases">
-						<li data-drag-enabled="false" ng-repeat="tc in ($parentNodeScope.collapsed ? [] : group._gtc = (group.testCases | tcFilter:tcFilter)) track by $index" ui-tree-node ng-hide="$parentNodeScope.collapsed"
-							dnd-draggable="tc">
-
-							<div id="{{'tc-'+tc.id}}" ng-click="selectTC(tc)"  ng-class="{selected1 : isSelectedTC(tc)}" context-menu="tcCM">
-								<div style="margin-left: 5px;">
-									<span ng-class="{selected1 : isSelectedTC(tc)}">
-										<i ng-show="!tc.runnable" style="margin-left: -10px; color: red;" class="fa fa-exclamation" aria-hidden="true">
-											<md-tooltip>Incomplete TestCase (can't be run)</md-tooltip>
-										</i>
-										<span class="label label-case label-icon">TC</span>
-										<span style="font-weight: initial;">
-											<i title="Unsaved Changes" class="fa fa-refresh unsaved" aria-hidden="true" ng-show="!entityUtils.inSynch(tc)">
-												<md-tooltip>Unsaved Changes</md-tooltip>
-											</i>
-											{{ tc.uid ? '#'+tc.uid+"- " : ""}}{{tc.name}}
-										</span>
-									</span>
-								</div>
-							</div>
-						</li>
-					</ol>
-				</li>
-			</ol>
+		    </div>
 		</li>
-	</ol>
+	    </ol>
+	    <ol dnd-list="tp.testCaseGroups" dnd-drop="false" ui-tree-nodes data-nodrop-enabled="true"
+		ng-model="tp.testCaseGroups">
+		<li data-drag-enabled="false" data-collapsed="{{!isLocal(group)}}"
+		    ng-repeat="group in tp.testCaseGroups track by $index" ui-tree-node
+		    ng-hide="$parentNodeScope.collapsed || (filterActive(tcFilter) && (group._gtc.length === 0 || !group._gtc))"
+		    dnd-draggable="filterEntity(group, eService.type.TEST_CASE_GROUP)">
+
+		    <div context-menu="tgCM" id="{{'gr-'+group.id}}" ng-click="selectTG(group)"
+			 ng-class="{selected1 : isSelectedTG(group) && isSelectedTGv()}">
+			<div style="margin-left: 5px;">
+			    <i ng-click="toggle(this)" class="fa"
+			       ng-class="{'fa-caret-right': collapsed, 'fa-caret-down': !collapsed}"></i>
+			    <span ng-class="{selected1 : isSelectedTG(group) && isSelectedTGv()}">
+				<span class="label label-group label-icon">GP</span>
+				<i title="Unsaved Changes" class="fa fa-refresh unsaved"
+				   aria-hidden="true"
+				   ng-show="!entityUtils.inSynch(group)">
+				    <md-tooltip>Unsaved Changes</md-tooltip>
+				</i>
+				<strong>{{ group.name }}</strong>
+				<span style="font-style: italic; color: #0000ff;">({{group._gtc ? group._gtc.length : "0"}})</span>
+			    </span>
+			</div>
+		    </div>
+		    <ol dnd-list="group.testCases" dnd-drop="false" ui-tree-nodes ng-model="group.testCases">
+			<li data-drag-enabled="false"
+			    ng-repeat="tc in ($parentNodeScope.collapsed ? [] : group._gtc = (group.testCases | tcFilter:tcFilter | workflow:tcFilter.wft | tags:tcFilter.tags)) track by $index"
+			    ui-tree-node ng-hide="$parentNodeScope.collapsed"
+			    dnd-draggable="tc">
+
+			    <div id="{{'tc-'+tc.id}}" ng-click="selectTC(tc)" ng-class="{selected1 : isSelectedTC(tc)}"
+				 context-menu="tcCM">
+				<div style="margin-left: 5px;">
+				    <span ng-class="{selected1 : isSelectedTC(tc)}">
+					<i ng-show="!tc.runnable"
+					   style="margin-left: -10px; color: red;"
+					   class="fa fa-exclamation"
+					   aria-hidden="true">
+					    <md-tooltip>Incomplete TestCase (can't be run)</md-tooltip>
+					</i>
+					<wf-tag code="tc.workflowTag"></wf-tag>
+					<span class="label label-case label-icon">TC</span>
+					<span style="font-weight: initial;">
+					    <i title="Unsaved Changes"
+					       class="fa fa-refresh unsaved"
+					       aria-hidden="true"
+					       ng-show="!entityUtils.inSynch(tc)">
+						<md-tooltip>Unsaved Changes</md-tooltip>
+					    </i>
+					    {{ tc.uid ? '#'+tc.uid+"- " : ""}}{{tc.name}}
+					</span>
+				    </span>
+				</div>
+			    </div>
+			</li>
+		    </ol>
+		</li>
+	    </ol>
+	</li>
+    </ol>
 </div>
 

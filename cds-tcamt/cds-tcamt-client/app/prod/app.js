@@ -34,7 +34,8 @@ var app = angular
         'ui-notification',
         'btorfs.multiselect',
         'ui.select',
-        'autocomplete'
+        'autocomplete',
+        'ngTagsInput'
     ]);
 
 app.config(function(NotificationProvider) {
@@ -423,7 +424,7 @@ app.run(function ($rootScope, $location, $anchorScroll, Restangular, $modal, $fi
     $rootScope.$on('event:loginRequest', function (event, username, password) {
         httpHeaders.common['Accept'] = 'application/json';
         httpHeaders.common['Authorization'] = 'Basic ' + base64.encode(username + ':' + password);
-
+        $rootScope.selectedConfig = null;
         $http.get('api/accounts/login').success(function () {
             //If we are here in this callback, login was successfull
             //Let's get user info now

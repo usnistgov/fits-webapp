@@ -4,7 +4,11 @@ angular.module('tcl').controller('MainCtrl', ['DataSynchService','TestObjectUtil
     function (DataSynchService,TestObjectUtil, $scope, $rootScope, i18n, $location, userInfoService, $modal, Restangular, $filter, base64, $http, Idle,notifications,IdleService,AutoSaveService,StorageService) {
         userInfoService.loadFromServer();
         $rootScope.loginDialog = null;
-
+        $rootScope.timezone = moment().format('UTC');
+        $rootScope.toUTC = function (date) {
+            var mDate = moment(date);
+            return Date.UTC(mDate.year(),mDate.month(),mDate.date());
+        };
         $scope.language = function () {
             return i18n.language;
         };
@@ -61,6 +65,7 @@ angular.module('tcl').controller('MainCtrl', ['DataSynchService','TestObjectUtil
                 }, function () {
                 });
             } else {
+
                 $scope.execLogout();
             }
         };
@@ -68,6 +73,7 @@ angular.module('tcl').controller('MainCtrl', ['DataSynchService','TestObjectUtil
         $scope.execLogout = function () {
             userInfoService.setCurrentUser(null);
             $scope.username = $scope.password = null;
+            $rootScope.selectedConfig = null;
             $scope.$emit('event:logoutRequest');
             StorageService.remove(StorageService.IG_DOCUMENT);
             $location.url('/home');

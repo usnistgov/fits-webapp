@@ -133,6 +133,16 @@
             <td style="text-align: center; color : black !important;">{{completion(aggregate.counts.CompleteDate.f,aggregate.counts.CompleteDate.p,aggregate.counts.CompleteDate.u,aggregate.counts.CompleteDate.w)}}%</td>
             <td style="text-align: center; color : black !important;">{{correctness(aggregate.counts.CompleteDate.f,aggregate.counts.CompleteDate.p,aggregate.counts.CompleteDate.u,aggregate.counts.CompleteDate.w)}}%</td>
         </tr>
+	<tr style="color : black !important;">
+	    <td style="text-align: center; color : black !important;">Series Status</td>
+	    <td class="success" style="text-align: center; color : black !important;">{{aggregate.counts.SeriesStatus.p}}</td>
+	    <td class="danger" style="text-align: center; color : black !important;">{{aggregate.counts.SeriesStatus.f}}</td>
+	    <td class="warning" style="text-align: center; color : black !important;">{{aggregate.counts.SeriesStatus.w}}</td>
+	    <td class="unmatched" style="text-align: center; color : black !important;">{{aggregate.counts.SeriesStatus.u}}</td>
+	    <td style="text-align: center; color : black !important;">{{aggregate.counts.SeriesStatus.f+aggregate.counts.SeriesStatus.p+aggregate.counts.SeriesStatus.u+aggregate.counts.SeriesStatus.w}}</td>
+	    <td style="text-align: center; color : black !important;">{{completion(aggregate.counts.SeriesStatus.f,aggregate.counts.SeriesStatus.p,aggregate.counts.SeriesStatus.u,aggregate.counts.SeriesStatus.w)}}%</td>
+	    <td style="text-align: center; color : black !important;">{{correctness(aggregate.counts.SeriesStatus.f,aggregate.counts.SeriesStatus.p,aggregate.counts.SeriesStatus.u,aggregate.counts.SeriesStatus.w)}}%</td>
+	</tr>
         </tbody>
     </table>
 </md-content>

@@ -1,0 +1,40 @@
+<script type="text/ng-template" id="viewTC.html">
+    <ng-include src="'views/testView.html'" />
+</script>
+<script type="text/ng-template" id="viewTP.html">
+    <md-content class="md-padding">
+	<h1 style="border: 0; color: rgb(93, 93, 189);text-align: center; font-weight: bold;">{{selectedTP.name}}</h1>
+	<div style="background-color: rgb(236,243,248);" class="md-padding">
+	    <table class="table table-condensed table-striped table-bordered" style="font-size : 13px;" >
+		<tr>
+		    <td style="width : 250px;"><strong>Description</strong></td>
+		    <td>{{ selectedTP.description }}</td>
+		</tr>
+		<tr>
+		    <td style="width : 250px;"><strong>Version</strong></td>
+		    <td>{{ selectedTP.metaData.version }}</td>
+		</tr>
+		<tr>
+		    <td style="width : 250px;"><strong>Creation Date</strong></td>
+		    <td>{{ selectedTP.metaData.dateCreated | date:'MM/dd/yyyy'}}</td>
+		</tr>
+		<tr>
+		    <td style="width : 250px;"><strong>Date Last Updated</strong></td>
+		    <td>{{ selectedTP.metaData.dateLastUpdated | date:'MM/dd/yyyy'}}</td>
+		</tr>
+		<tr>
+		    <td style="width : 250px;"><strong>Change Log</strong></td>
+		    <td>{{ selectedTP.metaData.changeLog }}</td>
+		</tr>
+	    </table>
+	</div>
+    </md-content>
+</script>
+<script type="text/ng-template" id="viewTG.html">
+    <md-content class="md-padding">
+	<h1 style="border: 0; color: rgb(93, 93, 189);text-align: center; font-weight: bold;">{{selectedTG.name}}</h1>
+	<div style="background-color: rgb(236,243,248);" class="md-padding">
+	    {{ selectedTG.description }}
+	</div>
+    </md-content>
+</script>

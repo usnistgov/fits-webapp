@@ -11,12 +11,19 @@ angular.module('tcl').factory('EntityService', function () {
             TEST_PLAN : 'Test Plan'
         };
 
+        this.access = {
+            READ_ONLY : 'ro',
+            WRITE : 'r',
+            EXEC : 'x'
+        };
+
         this.action = {
             SAVE : 'save',
             LOAD : 'load',
             DELETE : 'delete',
             IMPORT : 'import',
-            EXECUTE : 'execute'
+            EXECUTE : 'execute',
+            SHARE : 'share'
         };
 
         this.codes = {
@@ -128,6 +135,30 @@ angular.module('tcl').factory('EntityUtilsService', function (EntityService,Noti
 
         this.createURL = function (url) {
             return baseURL+url;
+        };
+
+        this.formData = function (url, method, type, obj) {
+            var form = document.createElement("form");
+
+            form.action = url;
+            form.method = method;
+            form.target = "_target";
+            form.style.display = 'none';
+
+
+            var input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = 'clazz';
+            input.value = type;
+            form.appendChild(input);
+
+            var input2 = document.createElement('input');
+            input2.type = 'hidden';
+            input2.name = 'json';
+            input2.value = JSON.stringify(obj);
+            form.appendChild(input2);
+
+            return form;
         };
 
         this.inSynchList = function (list) {
@@ -284,6 +315,19 @@ angular.module('tcl').factory('EntityUtilsService', function (EntityService,Noti
                 return obj;
 
             }
+        };
+        
+        this.findTC = function (list, id) {
+
+            for(var tp in list){
+                console.log("Look in");
+                console.log(tp);
+                console.log({ id : id });
+                var found = ctrl.findTcInTp(list[tp], { id : id });
+                if(found)
+                    return found;
+            }
+            return null;
         };
 
 

@@ -9,7 +9,6 @@ import gov.nist.healthcare.cds.auth.domain.Privilege;
 import gov.nist.healthcare.cds.auth.domain.ResponseMessage;
 import gov.nist.healthcare.cds.auth.repo.AccountPasswordResetRepository;
 import gov.nist.healthcare.cds.auth.repo.AccountRepository;
-import gov.nist.healthcare.cds.auth.repo.PrivilegeRepository;
 import gov.nist.healthcare.cds.auth.service.AccountService;
 
 import java.io.IOException;
@@ -54,7 +53,7 @@ public class UserController {
 	private MailSender mailSender;
 
 	private final String ADMIN_EMAIL = "robert.snelick@nist.gov";
-	//private final String ADMIN_EMAIL = "hossam.tamri@nist.gov";
+
 	
 	@RequestMapping(value = "/accounts/login", method = RequestMethod.GET)
 	public ResponseMessage doNothing() {

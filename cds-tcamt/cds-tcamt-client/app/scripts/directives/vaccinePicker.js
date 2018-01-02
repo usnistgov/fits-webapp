@@ -92,7 +92,8 @@ angular.module('tcl').directive('report', function() {
     restrict: 'E',
     scope: {
       report: "=",
-      vxm: "="
+      vxm: "=",
+        ssval : "="
     },
     controller: function($scope,$filter,$http) {
         $scope.exportReportL = function (report) {
@@ -165,7 +166,8 @@ angular.module('tcl').directive('forecastReport', function() {
     templateUrl: 'fcreport.html',
     restrict: 'E',
     scope: {
-      reportList: "=data"
+      reportList: "=data",
+        ssval : "="
     },
     controller: function($scope, $filter) {
       $scope.assessment = function(node) {
@@ -182,7 +184,7 @@ angular.module('tcl').directive('forecastReport', function() {
       };
 
       $scope.printDiff = function (exp,node) {
-          return $filter('date')(node.value, "MM/dd/yyyy") + $scope.diff(exp, node.value);
+          return $filter('date')(node.value, "MM/dd/yyyy", 'UTC') + $scope.diff(exp, node.value);
       };
 
       $scope.diff = function(expected, actual) {
@@ -192,6 +194,15 @@ angular.module('tcl').directive('forecastReport', function() {
             return " ( "+(ds > 0 ? "minus " : "plus ") +  Math.abs(Math.round(days)) + " days )";
         }
         return "";
+      };
+
+      $scope.getVal = function (code) {
+          for (var i in $scope.ssval) {
+              if ($scope.ssval[i].code === code) {
+                  return $scope.ssval[i].details;
+              }
+          }
+          return code;
       };
     }
   };

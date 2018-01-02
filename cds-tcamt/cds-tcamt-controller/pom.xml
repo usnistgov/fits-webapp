@@ -16,30 +16,30 @@
 		<jcl-over-slf4j.version>1.7.5</jcl-over-slf4j.version>
 		<cds-base.version>0.0.1-SNAPSHOT</cds-base.version>
 		<info.version>1.0-Beta</info.version>
-   		<build.date>${maven.build.timestamp}</build.date>
-   		<maven.build.timestamp.format>yyyy-MM-dd HH:mm</maven.build.timestamp.format>
+		<build.date>${maven.build.timestamp}</build.date>
+		<maven.build.timestamp.format>yyyy-MM-dd HH:mm</maven.build.timestamp.format>
 	</properties>
 	<dependencies>
-	<dependency>
+		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-context-support</artifactId>
 			<version>${spring.version}</version>
 		</dependency>
-<dependency>
-    <groupId>io.springfox</groupId>
-    <artifactId>springfox-swagger-ui</artifactId>
-    <version>2.4.0</version>
-</dependency>
+		<dependency>
+			<groupId>io.springfox</groupId>
+			<artifactId>springfox-swagger-ui</artifactId>
+			<version>2.4.0</version>
+		</dependency>
 		<dependency>
 			<groupId>io.springfox</groupId>
 			<artifactId>springfox-swagger2</artifactId>
 			<version>2.4.0</version>
 		</dependency>
-<dependency>
-    <groupId>io.springfox</groupId>
-    <artifactId>springfox-staticdocs</artifactId>
-    <version>2.4.0</version>
- </dependency> 
+		<dependency>
+			<groupId>io.springfox</groupId>
+			<artifactId>springfox-staticdocs</artifactId>
+			<version>2.4.0</version>
+		</dependency>
 		<dependency>
 			<groupId>javax.mail</groupId>
 			<artifactId>mail</artifactId>
@@ -77,21 +77,21 @@
 			<version>4.4</version>
 			<scope>test</scope>
 		</dependency>
-<!-- 		<dependency> -->
-<!-- 			<groupId>com.fasterxml.jackson.core</groupId> -->
-<!-- 			<artifactId>jackson-core</artifactId> -->
-<!-- 			<version>2.4.4</version> -->
-<!-- 		</dependency> -->
-<!-- 		<dependency> -->
-<!-- 			<groupId>com.fasterxml.jackson.core</groupId> -->
-<!-- 			<artifactId>jackson-databind</artifactId> -->
-<!-- 			<version>2.4.4</version> -->
-<!-- 		</dependency> -->
-<!-- 		<dependency> -->
-<!-- 			<groupId>com.fasterxml.jackson.datatype</groupId> -->
-<!-- 			<artifactId>jackson-datatype-hibernate4</artifactId> -->
-<!-- 			<version>2.5.3</version> -->
-<!-- 		</dependency> -->
+		<!-- <dependency> -->
+		<!-- <groupId>com.fasterxml.jackson.core</groupId> -->
+		<!-- <artifactId>jackson-core</artifactId> -->
+		<!-- <version>2.4.4</version> -->
+		<!-- </dependency> -->
+		<!-- <dependency> -->
+		<!-- <groupId>com.fasterxml.jackson.core</groupId> -->
+		<!-- <artifactId>jackson-databind</artifactId> -->
+		<!-- <version>2.4.4</version> -->
+		<!-- </dependency> -->
+		<!-- <dependency> -->
+		<!-- <groupId>com.fasterxml.jackson.datatype</groupId> -->
+		<!-- <artifactId>jackson-datatype-hibernate4</artifactId> -->
+		<!-- <version>2.5.3</version> -->
+		<!-- </dependency> -->
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-core</artifactId>
@@ -144,12 +144,8 @@
 	</dependencies>
 	<build>
 		<finalName>fits</finalName>
-<!-- 		<resources>
-		   <resource>
-		      <directory>src/main/resources/filtered</directory>
-		      <filtering>true</filtering>
-		   </resource>
-		</resources> -->
+		<!-- <resources> <resource> <directory>src/main/resources/filtered</directory> 
+			<filtering>true</filtering> </resource> </resources> -->
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>

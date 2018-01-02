@@ -29,7 +29,7 @@
                 <i class="fa fa-calendar" style="font-size: 2em;" aria-hidden="true"></i>
             </div>
             <div flex="80" layout="row" layout-align="center center">
-                <strong>{{assessmentDate.date | date:'fullDate' }}</strong>
+                <strong>{{assessmentDate.date | date:'fullDate' : 'UTC' }}</strong>
             </div>
             <div flex="10" layout="row" layout-align="center center">
                 <button class="btn btn-xs btn-info pull-right" style="margin: 0;" ng-model="aEdit" uib-btn-checkbox btn-checkbox-true="true" btn-checkbox-false="false">
@@ -121,8 +121,12 @@
 	                    <md-option ng-value="'STC'">STC</md-option>
                             <md-option ng-value="'ICE'">ICE</md-option>
                             <md-option ng-value="'FHIR'">FHIR</md-option>
+			    <!--<md-option ng-value="'HL7'">HL7</md-option>-->
                         </md-select>
                     </md-input-container>
+		    <!--<md-input-container style="width: 100%; margin-top: 15px;">-->
+			<!--<md-checkbox ng-model="configStub.auth" type="text" required>Authentication</md-checkbox>-->
+		    <!--</md-input-container>-->
                     <button ng-show="configForm.$valid" ng-click="saveConfig();" class="btn btn-success pull-right" >
                         <i class="fa fa-floppy-o" aria-hidden="true"></i>
                     </button>

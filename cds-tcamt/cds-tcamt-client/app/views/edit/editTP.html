@@ -1,16 +1,17 @@
 <style id="antiClickjack">
-body {
+    body {
 	display: none !important;
-}
+    }
 </style>
 <script type="text/javascript">
-	if (self === top) {
-		var antiClickjack = document.getElementById("antiClickjack");
-		antiClickjack.parentNode.removeChild(antiClickjack);
-	} else {
-		top.location = self.location;
-	}
+    if (self === top) {
+        var antiClickjack = document.getElementById("antiClickjack");
+        antiClickjack.parentNode.removeChild(antiClickjack);
+    } else {
+        top.location = self.location;
+    }
 </script>
+
 <ng-include src="'views/dateTemplate.html'"></ng-include>
 <ng-include src="'views/vaccinePickerTemplate.html'"></ng-include>
 <ng-include src="'views/edit/editTestPlan.html'"></ng-include>
@@ -19,368 +20,508 @@ body {
 <ng-include src="'views/edit/editForecast.html'"></ng-include>
 <ng-include src="'views/edit/editPatient.html'"></ng-include>
 <ng-include src="'views/edit/editGroup.html'"></ng-include>
+<ng-include src="'views/vOnly/view-templates.html'"></ng-include>
+
 <div class="row" ng-show="!selectedTestPlan1">
-	<div class="col-md-12">
-		<p>No Test Case Selected.</p>
-	</div>
+    <div class="col-md-12">
+	<p>No Test Case Selected.</p>
+    </div>
 </div>
 <div ng-show="selectedTP" class="fill">
-	<div class="row">
-		<div ng-show="!hideLoe" class="col-md-4">
-			<div class="panel panel-primary" ng-style="!tpview ? { 'margin-bottom' : '40px' } : {}">
-				<div class="panel-heading col-md-12"  layout="row" layout-align="start center" style="background-color: #293856;">
-					<div flex="15" style="padding: 0;">
-						<button class="btn btn-xs" ng-style="!tpview ? { 'background-color' : '#44bf6b' } : {}" ng-click="tpview = !tpview" style="margin: 0; margin-right: 10px;">
-							<md-tooltip md-direction="top">{{ tpview ? 'Hide' : 'Show'}}</md-tooltip>
-							<i ng-show="!tpview" class="fa fa-eye" aria-hidden="true" style="font-size : 1.8em; color: #2d5634;"></i>
-							<i ng-show="tpview" class="fa fa-eye-slash" aria-hidden="true" style="font-size : 1.8em; color: rgb(203, 167, 167);"></i>
-						</button>
-					</div>
-					<div flex="10" ng-show="workSpaceChanges() || hasIncomplete" layout="row">
-						<div ng-show="workSpaceChanges()" layout="row">
-							<i class="fa fa-refresh unsaved" aria-hidden="true"></i>
-							<md-tooltip md-direction="top">One or more test cases have unsaved changes</md-tooltip>
-						</div>
-						<div style="margin-left : 5px;" ng-show="hasIncomplete" layout="row">
-							<i class="fa fa-exclamation" aria-hidden="true" style="margin-right: 5px; color: red;"></i>
-							<md-tooltip md-direction="top">One or more test cases are incomplete</md-tooltip>
-						</div>
-					</div>
-					<div flex="{{workSpaceChanges() || hasIncomplete ? 60 : 70 }}" style="text-align: center;">
-						<strong> Test Browser </strong>
-					</div>
-					<div flex="15" layout="row" layout-align="end" style="padding: 0;">
-						<button class="btn btn-xs" ng-class="{ 'btn-info' : filterView, 'btn-primary' : !filterView }" ng-click="filterView = !filterView" style="margin: 0; margin-right: 10px;">
-							<span ng-style="filterActive(tcFilter) ? { 'background-color' : '#47ef47' } : { 'background-color' : '#ff4040' } " style="padding: 0 !important; margin-right: 5px; font-size: 10px;" class="badge">&nbsp;</span>
-							<i class="fa fa-filter" aria-hidden="true" style="font-size : 1.8em;"></i>
-							<md-tooltip md-direction="top">Filter</md-tooltip>
-						</button>
-					</div>
-				</div>
-				<div layout="column" style="width : 100%; background-color : rgb(241,241,241); border: 1px solid #dddddd; padding: 10px;" ng-show="filterView" ng-model-options="{updateOn : 'change blur'}">
-					<div layout="row" layout-align="center center">
-						<md-input-container style="width: 100%;">
-							<label>Name</label>
-							<input ng-model="tcFilter.example.name" type="text"/>
-						</md-input-container>
-					</div>
-					<div layout="row" layout-align="center center">
-						<md-input-container style="width: 100%;">
-							<label>ID</label>
-							<input ng-model="tcFilter.example.uid" type="text"/>
-						</md-input-container>
-						<md-input-container style="width: 100%;">
-							<label>Last Changed Version</label>
-							<input ng-model="tcFilter.example.metaData.version" type="text"/>
-						</md-input-container>
-					</div>
-					<div layout="row" layout-align="center center">
-						<md-input-container style="width: 100%;">
-							<label>Created</label>
-							<md-select ng-model="tcFilter.dates.created.position">
-								<md-option value="B">BEFORE</md-option>
-								<md-option value="A">AFTER</md-option>
-								<md-option value="O">ON</md-option>
-							</md-select>
-						</md-input-container>
-						<md-input-container style="width: 100%;">
-							<label>Date</label>
-							<md-datepicker
-									flex="50"
-									ng-model="tcFilter.dates.created.date"
-									md-placeholder="Creation Date">
-							</md-datepicker>
-						</md-input-container>
-					</div>
-					<div layout="row" layout-align="center center">
-						<md-input-container style="width: 100%;">
-							<label>Last Updated</label>
-							<md-select ng-model="tcFilter.dates.updated.position">
-								<md-option value="B">BEFORE</md-option>
-								<md-option value="A">AFTER</md-option>
-								<md-option value="O">ON</md-option>
-							</md-select>
-						</md-input-container>
-						<md-input-container style="width: 100%;">
-							<label>Date</label>
-							<md-datepicker
-									flex="50"
-									ng-model="tcFilter.dates.updated.date"
-									md-placeholder="Update Date">
-							</md-datepicker>
-						</md-input-container>
-					</div>
-					<div layout="row" layout-align="center center">
-						<md-checkbox ng-model="tcFilter.changed">
-							Unsaved Changes
-						</md-checkbox>
-						<md-checkbox ng-model="tcFilter.incomplete">
-							Incomplete
-						</md-checkbox>
-					</div>
-					<button class="btn btn-danger" style="width : 100%;" ng-click="resetTcFilter(tcFilter)">
-						Reset Filter
-					</button>
-				</div>
-				<div class="panel-body panel-resizable" style="{{aTCisSelected() ? 'height: 260px;' : 'height: 580px;'}}" ng-show="tpview">
-					<div style="white-space:nowrap;" layout="column">
-						<div>
-							<ng-include src="'views/testplanTree.html'" />
-						</div>
-						<div ></div>
-					</div>
-				</div>
+    <div class="row">
+	<div ng-show="!hideLoe" class="col-md-4">
+	    <div class="panel panel-primary" ng-style="!tpview ? { 'margin-bottom' : '40px' } : {}">
+		<div class="panel-heading col-md-12" layout="row" layout-align="start center"
+		     style="background-color: #293856;">
+		    <div flex="15" style="padding: 0;">
+			<button class="btn btn-xs" ng-style="!tpview ? { 'background-color' : '#44bf6b' } : {}"
+				ng-click="tpview = !tpview" style="margin: 0; margin-right: 10px;">
+			    <md-tooltip md-direction="top">{{ tpview ? 'Hide' : 'Show'}}</md-tooltip>
+			    <i ng-show="!tpview" class="fa fa-eye" aria-hidden="true"
+			       style="font-size : 1.8em; color: #2d5634;"></i>
+			    <i ng-show="tpview" class="fa fa-eye-slash" aria-hidden="true"
+			       style="font-size : 1.8em; color: rgb(203, 167, 167);"></i>
+			</button>
+		    </div>
+		    <div flex="10" ng-show="workSpaceChanges() || hasIncomplete" layout="row">
+			<div ng-show="workSpaceChanges()" layout="row">
+			    <i class="fa fa-refresh unsaved" aria-hidden="true"></i>
+			    <md-tooltip md-direction="top">One or more test cases have unsaved changes</md-tooltip>
 			</div>
-			<br />
-			<div class="panel panel-primary" ng-show="aTCisSelected()" style="margin-top: 10px;" ng-init="ptview = true;">
-				<div class="panel-heading panel-heading-collapsable" style="background-color: #293856" layout="row" layout-align="start center">
-					<button flex="15" class="btn btn-xs" ng-style="!ptview ? { 'background-color' : '#44bf6b' } : {}" ng-click="ptview = !ptview" style="margin: 0; margin-right: 10px;">
-						<md-tooltip md-direction="top">{{ ptview ? 'Hide' : 'Show'}}</md-tooltip>
-						<i ng-show="!ptview" class="fa fa-eye" aria-hidden="true" style="font-size : 1.8em; color: #2d5634;"></i>
-						<i ng-show="ptview" class="fa fa-eye-slash" aria-hidden="true" style="font-size : 1.8em; color: rgb(203, 167, 167);"></i>
-					</button>
-					<div flex="85" style="text-align: center">
-						<strong>Assessment Date and Patient Information</strong>
-					</div>
-				</div>
-				<div class="panel-body" ng-show="ptview">
-					<div class="toc-container">
-						<table class="table table-condensed table-bordered table-hover">
-							<tbody>
-								<tr ng-click="selectPatient()" style="cursor: pointer;" ng-class="{'sinfo' : patientSelected}">
-									<td>
-										<table style="width : 100%;">
-											<tr style="text-align: center;">
-												<td>
-													<strong>Assessment Date</strong>
-												</td>
-												<td style="text-align: center;">
-													<div layout="row" layout-align="center center">
-														<span ng-if="selectedTC.dateType === 'RELATIVE'">Today (Relative)</span>
-														<span ng-if="selectedTC.dateType === 'FIXED'">{{selectedTC.evalDate.date | date:'MM/dd/yyyy'}}</span>
-													</div>
-												</td>
-											</tr>
-											<tr style="text-align: center;" ng-if="selectedTC.patient.dob.type === 'fixed'">
-												<td>
-													<strong>Date Of Birth</strong>
-												</td>
-												<td style="text-align: center;">
-													<div layout="row" layout-align="center center">
-														<span>{{selectedTC.patient.dob.date | date:'MM/dd/yyyy'}}</span>
-													</div>
-												</td>
-											</tr>
-											<tr style="text-align: center;" ng-if="selectedTC.patient.dob.type === 'relative'">
-												<td>
-													<strong>Age</strong>
-												</td>
-												<td style="text-align: center;">
-													<div layout="row" layout-align="center center">
-														<table ng-if="selectedTC.patient.dob.type === 'relative'">
-															<tr ng-repeat="rule in selectedTC.patient.dob.rules track by $index">
-																<td><span ng-if="rule.year && rule.years === 0 && rule.month && rule.month === 0 && rule.day && rule.day === 0">0 Years</span><span ng-if="rule.year && rule.years !== 0">{{rule.year}} <strong ng-show="rule.year !== 1 && rule.year !== -1">Years</strong><strong ng-show="rule.year === 1 || rule.year === -1">Year</strong></span></td>
-																<td><span ng-if="rule.month && rule.month !== 0">{{rule.month}} <strong ng-show="rule.month !== 1 && rule.month !== -1">Months</strong><strong ng-show="rule.month === 1 || rule.month === -1">Month</strong></span></td>
-																<td><span ng-if="rule.day && rule.day !== 0">{{rule.day}} <strong ng-show="rule.day !== 1 && rule.day !== -1">Days</strong><strong ng-show="rule.day === 1 || rule.day === -1">Day</strong></span></td>
-															</tr>
-														</table>
-													</div>
-												</td>
-											</tr>
-											<tr style="text-align: center;">
-												<td>
-													<strong>Gender</strong>
-												</td>
-												<td>
-													{{selectedTC.patient.gender === 'F' ? 'Female' : (selectedTC.patient.gender === 'M' ? 'Male' : '') }}
-												</td>
-											</tr>
-										</table>
-									</td>
-								</tr>
-							</tbody>
-						</table>
-					</div>
-				</div>
+			<div style="margin-left : 5px;" ng-show="hasIncomplete" layout="row">
+			    <i class="fa fa-exclamation" aria-hidden="true" style="margin-right: 5px; color: red;"></i>
+			    <md-tooltip md-direction="top">One or more test cases are incomplete</md-tooltip>
 			</div>
-			<br />
-			<div class="panel panel-primary" ng-show="aTCisSelected()" style="margin-top: 10px;" ng-init="vxview = true;">
-				<div class="panel-heading panel-heading-collapsable" style="background-color: #293856;" layout="row" layout-align="start center">
-					<button flex="15" class="btn btn-xs" ng-style="!vxview ? { 'background-color' : '#44bf6b' } : {}" ng-click="vxview = !vxview" style="margin: 0; margin-right: 10px;">
-						<md-tooltip md-direction="top">{{ vxview ? 'Hide' : 'Show'}}</md-tooltip>
-						<i ng-show="!vxview" class="fa fa-eye" aria-hidden="true" style="font-size : 1.8em; color: #2d5634;"></i>
-						<i ng-show="vxview" class="fa fa-eye-slash" aria-hidden="true" style="font-size : 1.8em; color: rgb(203, 167, 167);"></i>
-					</button>
-					<div flex="70" style="text-align: center;">
-						<strong>Vaccination History and Expected Evaluations</strong>
-					</div>
-					<button flex="15" title="Add Event" type="button"
-						class="btn btn-xs btn-info pull-right"
-						ng-click="addEvent();"
-						ng-show="aTCisSelected()"
-						style="margin: 0px;">
-						<span><i class="fa fa-plus fa-fw"></i></span>
-					</button>
-				</div>
-				<div class="panel-body" ng-show="selectedTC.events.length > 0 && vxview">
-					<div class="toc-container">
-						<ng-include src="'views/toc.html'" />
-					</div>
-				</div>
-			</div>
-			<br />
-			<div class="panel panel-primary" ng-show="aTCisSelected()" style="margin-bottom: 100px;" ng-init="fcview = true;">
-				<div class="panel-heading panel-heading-collapsable" style="background-color: #293856" layout="row" layout-align="start center">
-					<button flex="15" class="btn btn-xs" ng-style="!fcview ? { 'background-color' : '#44bf6b' } : {}" ng-click="fcview = !fcview" style="margin: 0; margin-right: 10px;">
-						<md-tooltip md-direction="top">{{ fcview ? 'Hide' : 'Show'}}</md-tooltip>
-						<i ng-show="!fcview" class="fa fa-eye" aria-hidden="true" style="font-size : 1.8em; color: #2d5634;"></i>
-						<i ng-show="fcview" class="fa fa-eye-slash" aria-hidden="true" style="font-size : 1.8em; color: rgb(203, 167, 167);"></i>
-					</button>
-					<div flex="70" style="text-align: center;">
-						<strong>Expected Forecasts</strong>
-					</div>
-					<button flex="15" title="Add Forecast" type="button"
-						class="btn btn-xs btn-info pull-right"
-						style="margin: 0px;"
-						ng-show="aTCisSelected()"
-						ng-click="addForecast(); tcChanged()">
-						<span><i class="fa fa-plus fa-fw"></i></span>
-					</button>
-				</div>
-				<div class="panel-body" ng-show="selectedTC.forecast.length > 0 && fcview">
-					<div class="toc-container">
-					<ng-include src="'views/forecasts.html'" />
-					</div>
-				</div>
-			</div>
+		    </div>
+		    <div flex="{{workSpaceChanges() || hasIncomplete ? 60 : 70 }}" style="text-align: center;">
+			<strong> Test Browser </strong>
+		    </div>
+		    <div flex="15" layout="row" layout-align="end" style="padding: 0;">
+			<button class="btn btn-xs" ng-class="{ 'btn-info' : filterView, 'btn-primary' : !filterView }"
+				ng-click="filterView = !filterView" style="margin: 0; margin-right: 10px;">
+			    <span ng-style="filterActive(tcFilter) ? { 'background-color' : '#47ef47' } : { 'background-color' : '#ff4040' } "
+				  style="padding: 0 !important; margin-right: 5px; font-size: 10px;" class="badge">&nbsp;</span>
+			    <i class="fa fa-filter" aria-hidden="true" style="font-size : 1.8em;"></i>
+			    <md-tooltip md-direction="top">Filter</md-tooltip>
+			</button>
+		    </div>
 		</div>
-
-		<div class="fill col-md-8">
-			<div ng-show="mainView === 'dashboard'" class="panel panel-primary" style="background-color: rgb(250, 250, 250);">
-				<div class="panel-heading" style="background-color: #293856">
-					<strong>Dashboard</strong>
-					<button  ng-show="aTCisSelected()" ng-click="summary()" class="btn btn-xs btn-info pull-right" style="margin: 0px;">
-						Summary
-					</button>
-					<button style="margin: 0px; margin-right: 10px;" ng-show="aTCisSelected() && !entityUtils.inSynch(selectedTC) && hasBackUp(selectedTC)" class="btn btn-xs btn-danger pull-right" ng-click="discardChanges(selectedTC)">
-						<span><i class="fa fa-trash-o fa-fw">&nbsp; </i>Discard Changes</span>
-					</button>
-				</div>
-				<div class="panel-body panel-resizable"
-					style="padding-bottom: 10px; height : 100%; bottom : 0; min-height: 400px;">
-					<div class="col-md-12 fill"
-						ng-show="subview === null||subview===undefined|| !subview">
-						<p>No Element Selected</p>
-					</div>
-
-					<div id="edit"  ng-show="subview !== undefined" style="width: 100%; resize : none;">
-						<ng-include src="subview"></ng-include>
-					</div>
-				</div>
-			</div>
-			<div ng-show="mainView === 'import'" class="panel panel-info" style="background-color: rgb(250, 250, 250);">
-				<div class="panel-heading"  style="background-color: #293856;" layout="row" layout-align="center center">
-					<div flex="50" layout="row">
-						<button flex="40" ng-click="goToDash()" class="btn btn-xs btn-info" style="margin: 0px;">
-							<i class="fa fa-chevron-left">&nbsp; </i>
-							Dashboard
-						</button>
-					</div>
-					<div flex="50">
-						<strong>Import</strong>
-					</div>
-				</div>
-				<div class="panel-body panel-resizable"
-					 style="padding-bottom: 10px; height : 100%; bottom : 0; min-height: 400px;">
-					<entity-import save="saveTP" tp="selectedTP"></entity-import>
-				</div>
-			</div>
-			<div ng-show="mainView === 'export'" class="panel panel-info" style="background-color: rgb(250, 250, 250);">
-				<div class="panel-heading"  style="background-color: #293856;" layout="row" layout-align="center center">
-					<div flex="50" layout="row">
-						<button flex="40" ng-click="goToDash()" class="btn btn-xs btn-info" style="margin: 0px;">
-							<i class="fa fa-chevron-left">&nbsp; </i>
-							Dashboard
-						</button>
-					</div>
-					<div flex="50">
-						<strong>Export</strong>
-					</div>
-				</div>
-				<div class="panel-body panel-resizable"
-					 style="padding-bottom: 10px; height : 100%; bottom : 0; min-height: 400px;">
-					<entity-export save="saveTC" tp="selectedTP"></entity-export>
-				</div>
-			</div>
+		<div layout="column"
+		     style="width : 100%; background-color : rgb(241,241,241); border: 1px solid #dddddd; padding: 10px;"
+		     ng-show="filterView" ng-model-options="{updateOn : 'change blur'}">
+		    <div layout="row" layout-align="center center">
+			<md-input-container style="width: 100%;">
+			    <label>Name</label>
+			    <input ng-model="tcFilter.example.name" type="text"/>
+			</md-input-container>
+		    </div>
+		    <div layout="row" layout-align="center center">
+			<md-input-container style="width: 100%;">
+			    <label>ID</label>
+			    <input ng-model="tcFilter.example.uid" type="text"/>
+			</md-input-container>
+			<md-input-container style="width: 100%;">
+			    <label>Last Changed Version</label>
+			    <input ng-model="tcFilter.example.metaData.version" type="text"/>
+			</md-input-container>
+		    </div>
+		    <div layout="row" layout-align="center center">
+			<md-input-container style="width: 100%;">
+			    <label>Created</label>
+			    <md-select ng-model="tcFilter.dates.created.position">
+				<md-option value="B">BEFORE</md-option>
+				<md-option value="A">AFTER</md-option>
+				<md-option value="O">ON</md-option>
+			    </md-select>
+			</md-input-container>
+			<md-input-container style="width: 100%;">
+			    <label>Date</label>
+			    <md-datepicker
+				    flex="50"
+				    ng-model="tcFilter.dates.created.date"
+				    md-placeholder="Creation Date">
+			    </md-datepicker>
+			</md-input-container>
+		    </div>
+		    <div layout="row" layout-align="center center">
+			<md-input-container style="width: 100%;">
+			    <label>Last Updated</label>
+			    <md-select ng-model="tcFilter.dates.updated.position">
+				<md-option value="B">BEFORE</md-option>
+				<md-option value="A">AFTER</md-option>
+				<md-option value="O">ON</md-option>
+			    </md-select>
+			</md-input-container>
+			<md-input-container style="width: 100%;">
+			    <label>Date</label>
+			    <md-datepicker
+				    flex="50"
+				    ng-model="tcFilter.dates.updated.date"
+				    md-placeholder="Update Date">
+			    </md-datepicker>
+			</md-input-container>
+		    </div>
+		    <div layout="row" layout-align="center center">
+			<md-checkbox ng-model="tcFilter.changed">
+			    Unsaved Changes
+			</md-checkbox>
+			<md-checkbox ng-model="tcFilter.incomplete">
+			    Incomplete
+			</md-checkbox>
+		    </div>
+		    <button class="btn btn-danger" style="width : 100%;" ng-click="resetTcFilter(tcFilter)">
+			Reset Filter
+		    </button>
 		</div>
+		<div ng-if="!vOnly()" style="width: 100%; box-shadow: 1px 1px 1px 0px; margin-bottom : 5px; text-align: center; background-color: #f3f3f3; border: 1px solid black;"
+		     layout="column" layout-align="start stretch">
+
+            <div layout="row" layout-align="start center">
+                <div style="text-align: center;" flex="30">
+                    <label>WORKFLOW</label>
+                </div>
+
+                <!--<input ng-model-options="{ updateOn: 'blur'}" ng-model="selectedTC.group" type="text"/>-->
+                <md-select style="margin-left: 5px; margin-top: 0; margin-bottom: 0;" ng-model="$parent.tcFilter.wft" flex="70">
+                    <md-option ng-value="'ALL'"><strong>All</strong></md-option>
+                    <md-option ng-value="''"><wf-tag code="'none'" ></wf-tag><strong>Undefined</strong></md-option>
+                    <md-option ng-repeat="node in wfTag" ng-value="node.code">
+                        <wf-tag code="node.code" ></wf-tag><strong>{{node.details}}</strong>
+                    </md-option>
+                </md-select>
+            </div>
+            <div layout="row" layout-align="start center">
+                <div style="text-align: center;" flex="30">
+                    <label>TAGS</label>
+                </div>
+
+                <tags-input ng-model="tcFilter.tags" placeholder="" flex="70">
+                    <auto-complete source="loadTags($query)"
+                                   template="my-custom-template"
+                                   load-on-down-arrow="true"
+                                   load-on-focus="true"></auto-complete>
+                </tags-input>
+                <!--<input ng-model-options="{ updateOn: 'blur'}" ng-model="keywords" type="text" flex="70" />-->
+                <!--<md-select style="margin-left: 5px; margin-top: 0; margin-bottom: 0;" ng-model="$parent.tcFilter.wft" flex="80">-->
+                    <!--<md-option ng-value="'ALL'"><strong>All</strong></md-option>-->
+                    <!--<md-option ng-value="''"><wf-tag code="'none'" ></wf-tag><strong>Undefined</strong></md-option>-->
+                    <!--<md-option ng-repeat="node in wfTag" ng-value="node.code">-->
+                        <!--<wf-tag code="node.code" ></wf-tag><strong>{{node.details}}</strong>-->
+                    <!--</md-option>-->
+                <!--</md-select>-->
+            </div>
+
+
+
+		</div>
+		<div class="panel-body panel-resizable"
+		     style="{{ aTCisSelected() && !vOnly() ? 'height: 260px;' : 'height: 580px;'}}" ng-show="tpview">
+		    <div style="position : relative; white-space:nowrap;" layout="column">
+			<ng-include src="'views/testplanTree.html'"/>
+		    </div>
+		</div>
+	    </div>
+	    <br/>
+	    <div class="panel panel-primary" ng-show="aTCisSelected() && !vOnly()" style="margin-top: 10px;"
+		 ng-init="ptview = true;">
+		<div class="panel-heading panel-heading-collapsable" style="background-color: #293856" layout="row"
+		     layout-align="start center">
+		    <button flex="15" class="btn btn-xs" ng-style="!ptview ? { 'background-color' : '#44bf6b' } : {}"
+			    ng-click="ptview = !ptview" style="margin: 0; margin-right: 10px;">
+			<md-tooltip md-direction="top">{{ ptview ? 'Hide' : 'Show'}}</md-tooltip>
+			<i ng-show="!ptview" class="fa fa-eye" aria-hidden="true"
+			   style="font-size : 1.8em; color: #2d5634;"></i>
+			<i ng-show="ptview" class="fa fa-eye-slash" aria-hidden="true"
+			   style="font-size : 1.8em; color: rgb(203, 167, 167);"></i>
+		    </button>
+		    <div flex="85" style="text-align: center">
+			<strong>Assessment Date and Patient Information</strong>
+		    </div>
+		</div>
+		<div class="panel-body" ng-show="ptview">
+		    <div class="toc-container">
+			<table class="table table-condensed table-bordered table-hover">
+			    <tbody>
+			    <tr ng-click="selectPatient()" style="cursor: pointer;"
+				ng-class="{'sinfo' : patientSelected}">
+				<td>
+				    <table style="width : 100%;">
+					<tr style="text-align: center;">
+					    <td>
+						<strong>Assessment Date</strong>
+					    </td>
+					    <td style="text-align: center;">
+						<div layout="row" layout-align="center center">
+						    <span ng-if="selectedTC.dateType === 'RELATIVE'">Today (Relative)</span>
+						    <span ng-if="selectedTC.dateType === 'FIXED'">{{selectedTC.evalDate.date | date:'MM/dd/yyyy' : 'UTC'}}</span>
+						</div>
+					    </td>
+					</tr>
+					<tr style="text-align: center;" ng-if="selectedTC.patient.dob.type === 'fixed'">
+					    <td>
+						<strong>Date Of Birth</strong>
+					    </td>
+					    <td style="text-align: center;">
+						<div layout="row" layout-align="center center">
+						    <span>{{selectedTC.patient.dob.date | date:'MM/dd/yyyy' : 'UTC'}}</span>
+						</div>
+					    </td>
+					</tr>
+					<tr style="text-align: center;"
+					    ng-if="selectedTC.patient.dob.type === 'relative'">
+					    <td>
+						<strong>Age</strong>
+					    </td>
+					    <td style="text-align: center;">
+						<div layout="row" layout-align="center center">
+						    <table ng-if="selectedTC.patient.dob.type === 'relative'">
+							<tr ng-repeat="rule in selectedTC.patient.dob.rules track by $index">
+							    <td><span
+								    ng-if="rule.year && rule.years === 0 && rule.month && rule.month === 0 && rule.day && rule.day === 0">0 Years</span><span
+								    ng-if="rule.year && rule.years !== 0">{{rule.year}} <strong
+								    ng-show="rule.year !== 1 && rule.year !== -1">Years</strong><strong
+								    ng-show="rule.year === 1 || rule.year === -1">Year</strong></span>
+							    </td>
+							    <td><span ng-if="rule.month && rule.month !== 0">{{rule.month}} <strong
+								    ng-show="rule.month !== 1 && rule.month !== -1">Months</strong><strong
+								    ng-show="rule.month === 1 || rule.month === -1">Month</strong></span>
+							    </td>
+                                <td><span ng-if="rule.week && rule.week !== 0">{{rule.week}} <strong
+                                        ng-show="rule.week !== 1 && rule.week !== -1">Weeks</strong><strong
+                                        ng-show="rule.week === 1 || rule.week === -1">Week</strong></span>
+                                </td>
+							    <td><span
+								    ng-if="rule.day && rule.day !== 0">{{rule.day}} <strong
+								    ng-show="rule.day !== 1 && rule.day !== -1">Days</strong><strong
+								    ng-show="rule.day === 1 || rule.day === -1">Day</strong></span>
+							    </td>
+							</tr>
+						    </table>
+						</div>
+					    </td>
+					</tr>
+					<tr style="text-align: center;">
+					    <td>
+						<strong>Gender</strong>
+					    </td>
+					    <td>
+						{{selectedTC.patient.gender === 'F' ? 'Female' :
+						(selectedTC.patient.gender === 'M' ? 'Male' : '') }}
+					    </td>
+					</tr>
+				    </table>
+				</td>
+			    </tr>
+			    </tbody>
+			</table>
+		    </div>
+		</div>
+	    </div>
+	    <br/>
+	    <div class="panel panel-primary" ng-show="aTCisSelected() && !vOnly()" style="margin-top: 10px;"
+		 ng-init="vxview = true;">
+		<div class="panel-heading panel-heading-collapsable" style="background-color: #293856;" layout="row"
+		     layout-align="start center">
+		    <button flex="15" class="btn btn-xs" ng-style="!vxview ? { 'background-color' : '#44bf6b' } : {}"
+			    ng-click="vxview = !vxview" style="margin: 0; margin-right: 10px;">
+			<md-tooltip md-direction="top">{{ vxview ? 'Hide' : 'Show'}}</md-tooltip>
+			<i ng-show="!vxview" class="fa fa-eye" aria-hidden="true"
+			   style="font-size : 1.8em; color: #2d5634;"></i>
+			<i ng-show="vxview" class="fa fa-eye-slash" aria-hidden="true"
+			   style="font-size : 1.8em; color: rgb(203, 167, 167);"></i>
+		    </button>
+		    <div flex="70" style="text-align: center;">
+			<strong>Vaccination History and Expected Evaluations</strong>
+		    </div>
+		    <button flex="15" title="Add Event" type="button"
+			    class="btn btn-xs btn-info pull-right"
+			    ng-click="addEvent();"
+			    ng-show="aTCisSelected()"
+			    style="margin: 0px;">
+			<span><i class="fa fa-plus fa-fw"></i></span>
+		    </button>
+		</div>
+		<div class="panel-body" ng-show="selectedTC.events.length > 0 && vxview">
+		    <div class="toc-container">
+			<ng-include src="'views/toc.html'"/>
+		    </div>
+		</div>
+	    </div>
+	    <br/>
+	    <div class="panel panel-primary" ng-show="aTCisSelected() && !vOnly()" style="margin-bottom: 100px;"
+		 ng-init="fcview = true;">
+		<div class="panel-heading panel-heading-collapsable" style="background-color: #293856" layout="row"
+		     layout-align="start center">
+		    <button flex="15" class="btn btn-xs" ng-style="!fcview ? { 'background-color' : '#44bf6b' } : {}"
+			    ng-click="fcview = !fcview" style="margin: 0; margin-right: 10px;">
+			<md-tooltip md-direction="top">{{ fcview ? 'Hide' : 'Show'}}</md-tooltip>
+			<i ng-show="!fcview" class="fa fa-eye" aria-hidden="true"
+			   style="font-size : 1.8em; color: #2d5634;"></i>
+			<i ng-show="fcview" class="fa fa-eye-slash" aria-hidden="true"
+			   style="font-size : 1.8em; color: rgb(203, 167, 167);"></i>
+		    </button>
+		    <div flex="70" style="text-align: center;">
+			<strong>Expected Forecasts</strong>
+		    </div>
+		    <button flex="15" title="Add Forecast" type="button"
+			    class="btn btn-xs btn-info pull-right"
+			    style="margin: 0px;"
+			    ng-show="aTCisSelected() && !vOnly()"
+			    ng-click="addForecast(); tcChanged()">
+			<span><i class="fa fa-plus fa-fw"></i></span>
+		    </button>
+		</div>
+		<div class="panel-body" ng-show="selectedTC.forecast.length > 0 && fcview">
+		    <div class="toc-container">
+			<ng-include src="'views/forecasts.html'"/>
+		    </div>
+		</div>
+	    </div>
 	</div>
+
+	<div class="fill col-md-8">
+	    <div ng-show="mainView === 'dashboard'" class="panel panel-primary"
+		 style="background-color: rgb(250, 250, 250);">
+		<div class="panel-heading" style="background-color: #293856">
+		    <strong>Dashboard</strong> <span style="color: green;" ng-show="vOnly()"> <i class="fa fa-eye"
+												 aria-hidden="true"></i><strong> View Only</strong></span>
+		    <button ng-show="aTCisSelected() && !vOnly()" ng-click="summary()"
+			    class="btn btn-xs btn-info pull-right"
+			    style="margin: 0px;">
+			<strong>Summary</strong>
+		    </button>
+		    <div ng-show="aTCisSelected() && !vOnly()" class="btn-group pull-right" uib-dropdown
+			 is-open="qqr.isopen" style="margin-right: 10px; margin-top : 0; margin-bottom : 0;">
+			<button ng-click="goToExportButton()" type="button" class="btn btn-xs btn-success"
+				uib-dropdown-toggle>
+			    <strong>Quick Run</strong> <i class="fa fa-play">&nbsp; </i>
+			</button>
+			<ul class="dropdown-menu" uib-dropdown-menu role="menu" aria-labelledby="single-button">
+			    <li role="menuitem" ng-repeat="s in software"><a
+				    ng-click="exec(s,selectedTC)">{{s.name}}</a></li>
+			</ul>
+		    </div>
+		    <!--<button ng-show="aTCisSelected() && !vOnly()" ng-click="summary()" class="btn btn-xs btn-success pull-right"-->
+		    <!--style="margin-right: 10px; margin-top : 0; margin-bottom : 0;">-->
+		    <!--<strong>Quick Run</strong> <i class="fa fa-play">&nbsp; </i>-->
+		    <!--</button>-->
+		    <button style="margin: 0px; margin-right: 10px;"
+			    ng-show="!$scope.vOnly() && aTCisSelected() && !entityUtils.inSynch(selectedTC) && hasBackUp(selectedTC)"
+			    class="btn btn-xs btn-danger pull-right" ng-click="discardChanges(selectedTC)">
+			<span><i class="fa fa-trash-o fa-fw">&nbsp; </i>Discard Changes</span>
+		    </button>
+		</div>
+		<div class="panel-body panel-resizable"
+		     style="padding-bottom: 10px; height : 100%; bottom : 0; min-height: 400px;">
+		    <div class="col-md-12 fill"
+			 ng-show="subview === null||subview===undefined|| !subview ">
+			<p>No Element Selected</p>
+		    </div>
+		    <div id="edit" ng-show="subview !== undefined" style="width: 100%; resize : none;">
+			<ng-include src="subview"></ng-include>
+		    </div>
+		</div>
+	    </div>
+	    <div ng-show="mainView === 'import'" class="panel panel-info" style="background-color: rgb(250, 250, 250);">
+		<div class="panel-heading" style="background-color: #293856;" layout="row" layout-align="center center">
+		    <div flex="50" layout="row">
+			<button flex="40" ng-click="goToDash()" class="btn btn-xs btn-info" style="margin: 0px;">
+			    <i class="fa fa-chevron-left">&nbsp; </i>
+			    Dashboard
+			</button>
+		    </div>
+		    <div flex="50">
+			<strong>Import</strong>
+		    </div>
+		</div>
+		<div class="panel-body panel-resizable"
+		     style="padding-bottom: 10px; height : 100%; bottom : 0; min-height: 400px;">
+		    <entity-import save="saveTP" tp="selectedTP"></entity-import>
+		</div>
+	    </div>
+	    <div ng-show="mainView === 'export'" class="panel panel-info" style="background-color: rgb(250, 250, 250);">
+		<div class="panel-heading" style="background-color: #293856;" layout="row" layout-align="center center">
+		    <div flex="50" layout="row">
+			<button flex="40" ng-click="goToDash()" class="btn btn-xs btn-info" style="margin: 0px;">
+			    <i class="fa fa-chevron-left">&nbsp; </i>
+			    Dashboard
+			</button>
+		    </div>
+		    <div flex="50">
+			<strong>Export</strong>
+		    </div>
+		</div>
+		<div class="panel-body panel-resizable"
+		     style="padding-bottom: 10px; height : 100%; bottom : 0; min-height: 400px;">
+		    <entity-export save="saveTC" tp="selectedTP"></entity-export>
+		</div>
+	    </div>
+	    <div ng-show="mainView === 'report'" class="panel panel-info" style="background-color: rgb(250, 250, 250);">
+		<div class="panel-heading" style="background-color: #293856;" layout="row" layout-align="center center">
+		    <div flex="50" layout="row">
+			<button flex="40" ng-click="goToDash()" class="btn btn-xs btn-info" style="margin: 0px;">
+			    <i class="fa fa-chevron-left">&nbsp; </i>
+			    Dashboard
+			</button>
+		    </div>
+		    <div flex="50">
+			<strong>Report</strong>
+			<div ng-if="quickV.running" class="pull-right" layout="row" layout-align="center center">
+			    <img src="images/import.gif"/>
+			</div>
+		    </div>
+		</div>
+		<div class="panel-body" style="padding-bottom: 10px; height : 100%; bottom : 0;" layout="row"
+		     layout-align="center center">
+		    <div ng-if="!quickV.running && !quickV.error" flex="100">
+			<report vxm="vxm" ssval="serieStatus" report="quickV.validationReport"></report>
+		    </div>
+		    <div ng-if="!quickV.running && quickV.error" flex="100">
+			<uib-alert type="danger" style="text-align: center;"><strong>Failed to execute your Test
+			    Case</strong></uib-alert>
+		    </div>
+		</div>
+	    </div>
+	</div>
+    </div>
 </div>
 <script type="text/ng-template" id="export.html">
-	<md-content class="md-padding">
-		<form name="testplanMetaDataForm" class="form-horizontal" novalidate>
-			<div layout="column" layout-align="center center">
-				<div layout="column" style="width : 100%;">
-					<label>
-						<span style="background-color: blue; margin-left: 10px;" class="badge">1</span>
-						- Pick your Export Format
-					</label>
-					<div style="width: 100%; padding-left : 10px; padding-right : 10px;" >
-						<md-select ng-model="FORMAT">
-							<md-option ng-repeat="format in ctrl.configs" ng-value="format.id">{{format.name}}</md-option>
-						</md-select>
-					</div>
-				</div>
-				<div layout="column" style="width : 100%;">
-					<div layout="row" layout-align="start center" style="width: 100%;">
-						<div flex="40" layout="row" layout-align="start center">
-							<div>
-								<label>
-									<span style="background-color: blue; margin-left: 10px;" class="badge">2</span>
-									- Select your Test Cases
-								</label>
-							</div>
-						</div>
-						<div flex="60" layout="row" layout-align="end center">
-							<span ng-if="(exportList.length > 0)" style="background-color: black; margin-left: 10px;" class="badge">{{exportList.length}} Selected TestCases</span>
-							<span ng-if="(validTCs().length > 0)" style="background-color: green; margin-left: 10px;" class="badge">{{validTCs().length}} Valid TestCases</span>
-							<span ng-if="(exportList.length - validTCs().length > 0)"style="background-color: red; margin-left: 10px;" class="badge">{{exportList.length - validTCs().length}} Invalid TestCases</span>
-						</div>
-					</div>
-					<div layout="row" layout-align="start center">
-						<div flex="{{exportList.length - validTCs().length === 0 ? 95 : 70}}" ng-show="exportList.length > 0" class="input-group" style="border : 1px solid #d2d2d2;">
-							<span class="input-group-addon" style="background-color: white;" id="basic-addon1"><i class="fa fa-search" aria-hidden="true"></i></span>
-							<input type="text" ng-model="str"
-								   style="background-color : white; width: 100%" placeholder=" Search" aria-describedby="basic-addon1">
-						</div>
-						<button flex="5" ng-click="clear()" ng-if="exportList.length > 0" class="btn btn-xs btn-danger"s tyle="margin-left: 5px;" >
-							<i class="fa fa-trash-o" aria-hidden="true"></i>
-						</button>
-						<div flex="25" layout="row" layout-align="center center">
-							<md-checkbox ng-if="(exportList.length - validTCs().length > 0)"  ng-model="ctrl.invalid" aria-label="Show invalid test cases only" style="margin-bottom: 0px; margin-left: 5px;" >
-								Invalid test cases only
-							</md-checkbox>
-						</div>
-					</div>
+    <md-content class="md-padding">
+	<form name="testplanMetaDataForm" class="form-horizontal" novalidate>
+	    <div layout="column" layout-align="center center">
+		<div layout="column" style="width : 100%;">
+		    <label>
+			<span style="background-color: blue; margin-left: 10px;" class="badge">1</span>
+			- Pick your Export Format
+		    </label>
+		    <div style="width: 100%; padding-left : 10px; padding-right : 10px;">
+			<md-select ng-model="FORMAT">
+			    <md-option ng-repeat="format in ctrl.configs" ng-value="format.id">{{format.name}}
+			    </md-option>
+			</md-select>
+		    </div>
+		</div>
+		<div layout="column" style="width : 100%;">
+		    <div layout="row" layout-align="start center" style="width: 100%;">
+			<div flex="40" layout="row" layout-align="start center">
+			    <div>
+				<label>
+				    <span style="background-color: blue; margin-left: 10px;" class="badge">2</span>
+				    - Select your Test Cases
+				</label>
+			    </div>
+			</div>
+			<div flex="60" layout="row" layout-align="end center">
+			    <span ng-if="(exportList.length > 0)" style="background-color: black; margin-left: 10px;"
+				  class="badge">{{exportList.length}} Selected TestCases</span>
+			    <span ng-if="(validTCs().length > 0)" style="background-color: green; margin-left: 10px;"
+				  class="badge">{{validTCs().length}} Valid TestCases</span>
+			    <span ng-if="(exportList.length - validTCs().length > 0)"
+				  style="background-color: red; margin-left: 10px;" class="badge">{{exportList.length - validTCs().length}} Invalid TestCases</span>
+			</div>
+		    </div>
+		    <div layout="row" layout-align="start center">
+			<div flex="{{exportList.length - validTCs().length === 0 ? 95 : 70}}"
+			     ng-show="exportList.length > 0" class="input-group" style="border : 1px solid #d2d2d2;">
+			    <span class="input-group-addon" style="background-color: white;" id="basic-addon1"><i
+				    class="fa fa-search" aria-hidden="true"></i></span>
+			    <input type="text" ng-model="str"
+				   style="background-color : white; width: 100%" placeholder=" Search"
+				   aria-describedby="basic-addon1">
+			</div>
+			<button flex="5" ng-click="clear()" ng-if="exportList.length > 0" class="btn btn-xs btn-danger"
+				s tyle="margin-left: 5px;">
+			    <i class="fa fa-trash-o" aria-hidden="true"></i>
+			</button>
+			<div flex="25" layout="row" layout-align="center center">
+			    <md-checkbox ng-if="(exportList.length - validTCs().length > 0)" ng-model="ctrl.invalid"
+					 aria-label="Show invalid test cases only"
+					 style="margin-bottom: 0px; margin-left: 5px;">
+				Invalid test cases only
+			    </md-checkbox>
+			</div>
+		    </div>
 
-					<md-list ng-show="$root.blockTree" md-whiteframe="4" layout="row" style="background-color: white; min-height: 45px; padding: 0px; border-top : 1px solid #dddddd;">
-						<md-list-item flex="80" style="border-right: 1px solid #dddddd;">
-							<div layout="column" layout-align="center start" flex="100" style="width: 100%;" >
-								<div layout="row" layout-align="center center" style="width: 100%;">
-									<strong>Test Case Name</strong>
-								</div>
-								<div layout="row" layout-align="start center">
-								</div>
-							</div>
-						</md-list-item>
-						<md-list-item  flex="20">
-							<div layout="row" layout-align="center center" flex="100" style="width: 100%;" >
-								<strong>Actions</strong>
-							</div>
-						</md-list-item>
-					</md-list>
-					<div ng-show="$root.blockTree && exportList.length === 0"
-						 style="width: 100%; text-align: center; font-size: 17px; background-color: rgba(33, 150, 243, 0.06); border-bottom: 0;">
-						<div style="text-align: center; margin-top: 300px;
+		    <md-list ng-show="$root.blockTree" md-whiteframe="4" layout="row"
+			     style="background-color: white; min-height: 45px; padding: 0px; border-top : 1px solid #dddddd;">
+			<md-list-item flex="80" style="border-right: 1px solid #dddddd;">
+			    <div layout="column" layout-align="center start" flex="100" style="width: 100%;">
+				<div layout="row" layout-align="center center" style="width: 100%;">
+				    <strong>Test Case Name</strong>
+				</div>
+				<div layout="row" layout-align="start center">
+				</div>
+			    </div>
+			</md-list-item>
+			<md-list-item flex="20">
+			    <div layout="row" layout-align="center center" flex="100" style="width: 100%;">
+				<strong>Actions</strong>
+			    </div>
+			</md-list-item>
+		    </md-list>
+		    <div ng-show="$root.blockTree && exportList.length === 0"
+			 style="width: 100%; text-align: center; font-size: 17px; background-color: rgba(33, 150, 243, 0.06); border-bottom: 0;">
+			<div style="text-align: center; margin-top: 300px;
                     				margin-left: auto;
                     				margin-right: auto;
                     				left: 0;
@@ -388,163 +529,188 @@ body {
                     				top: 0;
                     				color: #a0a0a0;
                     				position: absolute;">
-							<strong>DROP TEST PLANS, TEST CASE GROUPS, TEST CASES HERE</strong>
-						</div>
-					</div>
-					<md-virtual-repeat-container ng-show="$root.blockTree" style="height : 280px; padding: 0;" class="drop-zone" id="qbody" dnd-list="exportList"  dnd-drop="drop(list, item, index)">
-						<md-list-item md-virtual-repeat="tc in exportList | validExportTc:ctrl.invalid | exportTcSearch:str" class="repeated-item cursor-move" flex layout="row"
-									  ng-class="{ 'fail' : !tc.valid }"
-									  style="border-bottom: 1px solid #dddddd; padding: 0; background-color: rgba(228,228,228,0.17);"
-									  dnd-draggable="tc"
-									  dnd-effect-allowed="move">
-							<md-list flex layout="row" style="padding: 0;">
-								<md-list-item flex="80">
-									<div layout="row" layout-align="start center" flex="100" style="width: 100%;" >
-										<div style="margin-right: 10px;">
-											<span class="label label-case label-icon">TC</span>
-										</div>
-										<div layout="column" layout-align="center start">
-											<strong>{{ tc.uid ? '#'+tc.uid+' - ' : ''}}{{tc.name}}</strong>
-										</div>
-										<div style="margin-left: 10px;" layout="column" layout-align="center start">
-											<span style="color: red;" ng-repeat="msg in tc.err">{{msg}}</span>
-										</div>
-									</div>
-								</md-list-item>
-								<md-list-item flex="20">
-									<div layout="row" layout-align="end center" flex="100" style="width: 100%;" >
-										<button ng-show="!inSynch(tc.tc)" style="margin-right: 5px;" class="pull-right" ng-click="saveTC(tc)">
-											<i style="color: green;"  class="fa fa-floppy-o" aria-hidden="true"></i>
-										</button>
-										<button class="pull-right" ng-click="delete(tc)">
-											<i style="color: red;"  class="fa fa-times" aria-hidden="true"></i>
-										</button>
-									</div>
-								</md-list-item>
-							</md-list>
-						</md-list-item>
-					</md-virtual-repeat-container>
-				</div>
-				<div layout="column" layout-align="start start" style="width : 100%; margin-top : 10px; " ng-show="validTCs().length > 0">
-					<!--<label>-->
-					<!--<span style="background-color: blue; margin-left: 10px;" class="badge">4</span>-->
-					<!-- - Submit-->
-					<!--</label>-->
-					<div style="width: 100%;" layout="row" layout-align="center center">
-						<button class="btn btn-success btn" ng-click="export()">
-							Export
-						</button>
-					</div>
-				</div>
+			    <strong>DROP TEST PLANS, TEST CASE GROUPS, TEST CASES HERE</strong>
 			</div>
-		</form>
-	</md-content>
+		    </div>
+		    <md-virtual-repeat-container ng-show="$root.blockTree" style="height : 280px; padding: 0;"
+						 class="drop-zone" id="qbody" dnd-list="exportList"
+						 dnd-drop="drop(list, item, index)">
+			<md-list-item
+				md-virtual-repeat="tc in exportList | validExportTc:ctrl.invalid | exportTcSearch:str"
+				class="repeated-item cursor-move" flex layout="row"
+				ng-class="{ 'fail' : !tc.valid }"
+				style="border-bottom: 1px solid #dddddd; padding: 0; background-color: rgba(228,228,228,0.17);"
+				dnd-draggable="tc"
+				dnd-effect-allowed="move">
+			    <md-list flex layout="row" style="padding: 0;">
+				<md-list-item flex="80">
+				    <div layout="row" layout-align="start center" flex="100" style="width: 100%;">
+					<div style="margin-right: 10px;">
+					    <span class="label label-case label-icon">TC</span>
+					</div>
+					<div layout="column" layout-align="center start">
+					    <strong>{{ tc.uid ? '#'+tc.uid+' - ' : ''}}{{tc.name}}</strong>
+					</div>
+					<div style="margin-left: 10px;" layout="column" layout-align="center start">
+					    <span style="color: red;" ng-repeat="msg in tc.err">{{msg}}</span>
+					</div>
+				    </div>
+				</md-list-item>
+				<md-list-item flex="20">
+				    <div layout="row" layout-align="end center" flex="100" style="width: 100%;">
+					<button ng-show="!inSynch(tc.tc)" style="margin-right: 5px;" class="pull-right"
+						ng-click="saveTC(tc)">
+					    <i style="color: green;" class="fa fa-floppy-o" aria-hidden="true"></i>
+					</button>
+					<button class="pull-right" ng-click="delete(tc)">
+					    <i style="color: red;" class="fa fa-times" aria-hidden="true"></i>
+					</button>
+				    </div>
+				</md-list-item>
+			    </md-list>
+			</md-list-item>
+		    </md-virtual-repeat-container>
+		</div>
+		<div layout="column" layout-align="start start" style="width : 100%; margin-top : 10px; "
+		     ng-show="validTCs().length > 0">
+		    <!--<label>-->
+		    <!--<span style="background-color: blue; margin-left: 10px;" class="badge">4</span>-->
+		    <!-- - Submit-->
+		    <!--</label>-->
+		    <div style="width: 100%;" layout="row" layout-align="center center">
+			<button class="btn btn-success btn" ng-click="export()">
+			    Export
+			</button>
+		    </div>
+		</div>
+	    </div>
+	</form>
+    </md-content>
 </script>
 <script type="text/ng-template" id="import.html">
-	<md-content class="md-padding">
-		<form name="testplanMetaDataForm" class="form-horizontal" novalidate>
-			<div layout="column" layout-align="center center">
-				<div layout="column" style="width : 100%;">
-					<label>
-						<span style="background-color: blue; margin-left: 10px;" class="badge">1</span>
-						- Pick your Import Format
-					</label>
-					<div style="width: 100%; padding-left : 10px; padding-right : 10px;" >
-						<md-select ng-model="FORMAT">
-							<md-option ng-repeat="format in ctrl.configs" ng-value="format.id">{{format.name}}</md-option>
-						</md-select>
+    <md-content class="md-padding">
+	<form name="testplanMetaDataForm" class="form-horizontal" novalidate>
+	    <div layout="column" layout-align="center center">
+		<div layout="column" style="width : 100%;">
+		    <label>
+			<span style="background-color: blue; margin-left: 10px;" class="badge">1</span>
+			- Pick your Import Format
+		    </label>
+		    <div style="width: 100%; padding-left : 10px; padding-right : 10px;">
+			<md-select ng-model="FORMAT">
+			    <md-option ng-repeat="format in ctrl.configs" ng-value="format.id">{{format.name}}
+			    </md-option>
+			</md-select>
+		    </div>
+		</div>
+		<div layout="column" style="width : 100%;">
+		    <div layout="row" layout-align="start center">
+			<label>
+			    <span style="background-color: blue; margin-left: 10px;" class="badge">2</span>
+			    - Select your files
+			</label>
+			<span ng-if="selectedFiles.length > 0 && isMulti() && (selectedFiles.length > 0)"
+			      style="background-color: black; margin-left: 10px;" class="badge">{{selectedFiles.length}} Selected Files</span>
+			<span ng-if="selectedFiles.length > 0 && isMulti() && (validFiles.length > 0)"
+			      style="background-color: green; margin-left: 10px;" class="badge">{{validFiles.length}} Valid Files</span>
+			<span ng-if="selectedFiles.length > 0 && isMulti() && (selectedFiles.length - validFiles.length) > 0 "
+			      style="background-color: red; margin-left: 10px;" class="badge">{{selectedFiles.length - validFiles.length}} Invalid Files</span>
+		    </div>
+		    <div layout="column" layout-align="start center"
+			 style="width: 100%; min-height: 100px; padding-left : 10px; padding-right : 10px;">
+			<button class="btn btn-sm btn-info" style="width: 100%;">
+			    BROWSE FILES
+			    <input style="width: 100%; height: 100%" type="file" ng-if='!isMulti()' class="upload"
+				   onchange="angular.element(this).scope().select(this.files)"/>
+			    <input style="width: 100%; height: 100%" multiple type="file" ng-if='isMulti()'
+				   class="upload" onchange="angular.element(this).scope().select(this.files)"/>
+			</button>
+			<div style="width : 100%; border : 1px solid #dcdcdc; margin-top : 10px;"
+			     ng-if="selectedFiles.length > 0">
+			    <md-list style="padding: 0; width: 100%; ">
+				<md-list-item layout="row" layout-align="start center" ng-repeat="file in selectedFiles"
+					      ng-style="$index !== selectedFiles.length -1 ? { 'border-bottom' : '1px solid #e4e4e4' } : {}"
+					      ng-class="{ 'invalid-file' : !ctrl.isValid(file), 'valid-file' :  ctrl.isValid(file)}">
+				    <div flex="90">
+					<div style="width: 100%;" layout="column" layout-align="center center">
+					    <span><strong>{{file.name}}</strong></span>
+					    <md-tooltip ng-show="!ctrl.isValid(file)">{{message}}</md-tooltip>
 					</div>
-				</div>
-				<div layout="column" style="width : 100%;">
-					<div layout="row" layout-align="start center">
-						<label>
-							<span style="background-color: blue; margin-left: 10px;" class="badge">2</span>
-							- Select your files
-						</label>
-						<span ng-if="selectedFiles.length > 0 && isMulti() && (selectedFiles.length > 0)" style="background-color: black; margin-left: 10px;" class="badge">{{selectedFiles.length}} Selected Files</span>
-						<span ng-if="selectedFiles.length > 0 && isMulti() && (validFiles.length > 0)" style="background-color: green; margin-left: 10px;" class="badge">{{validFiles.length}} Valid Files</span>
-						<span ng-if="selectedFiles.length > 0 && isMulti() && (selectedFiles.length - validFiles.length) > 0 "style="background-color: red; margin-left: 10px;" class="badge">{{selectedFiles.length - validFiles.length}} Invalid Files</span>
-					</div>
-					<div layout="column" layout-align="start center" style="width: 100%; min-height: 100px; padding-left : 10px; padding-right : 10px;" >
-						<button class="btn btn-sm btn-info" style="width: 100%;">
-							BROWSE FILES
-							<input style="width: 100%; height: 100%" type="file" ng-if='!isMulti()' class="upload" onchange="angular.element(this).scope().select(this.files)"/>
-							<input style="width: 100%; height: 100%" multiple type="file" ng-if='isMulti()' class="upload" onchange="angular.element(this).scope().select(this.files)"/>
-						</button>
-						<div style="width : 100%; border : 1px solid #dcdcdc; margin-top : 10px;" ng-if="selectedFiles.length > 0">
-							<md-list style="padding: 0; width: 100%; " >
-								<md-list-item layout="row" layout-align="start center" ng-repeat="file in selectedFiles" ng-style="$index !== selectedFiles.length -1 ? { 'border-bottom' : '1px solid #e4e4e4' } : {}"  ng-class="{ 'invalid-file' : !ctrl.isValid(file), 'valid-file' :  ctrl.isValid(file)}">
-									<div flex="90">
-										<div style="width: 100%;" layout="column" layout-align="center center">
-											<span><strong>{{file.name}}</strong></span>
-											<md-tooltip ng-show="!ctrl.isValid(file)" >{{message}}</md-tooltip>
-										</div>
-									</div>
-									<div flex="10" layout="row" layout-align="end center">
-										<button ng-show="isMulti()" class="pull-right" ng-click="ctrl.rmFile($index)">
-											<i style="color: red;"  class="fa fa-times" aria-hidden="true"></i>
-										</button>
-									</div>
-								</md-list-item>
-							</md-list>
-						</div>
-					</div>
-				</div>
-				<div ng-if="validFiles.length > 0" layout="column" layout-align="start start" style="width : 100%; margin-top : 10px; " >
-					<label>
-						<span style="background-color: blue; margin-left: 10px;" class="badge">3</span>
-						- Configuration
-					</label>
-					<div style="width : 100%; margin-top : 10px; padding-left: 30px;">
-						<div  style="width : 100%;" layout="row" layout-align="start center">
-							<md-checkbox class="no-ink" flex="30" ng-model="exportConfig.ovGroup"><span style="font-weight: 400;">Override Group</span></md-checkbox>
-							<md-select flex="70" ng-if="exportConfig.ovGroup" ng-model="exportConfig.groupId" style="margin : 0;">
-								<md-option style="background-color: #d2bf94;" ng-value="''">No Group</md-option>
-								<md-option ng-repeat="grp in tp.testCaseGroups" ng-value="grp.id">{{grp.name}}</md-option>
-							</md-select>
-						</div>
-						<div ng-if="FORMAT === ctrl.formats.CDC_SP" style="width : 100%;">
-							<form name="importConfig">
-								<md-input-container style="width: 100%;">
-									<label>Sheet Position</label>
-									<input ng-model="exportConfig.position" min="1" type="number">
-								</md-input-container>
-								<div layout="row" layout-align="start end" style="width: 100%;">
-									<md-radio-group flex="20" ng-model="exportConfig.all">
-										<md-radio-button ng-value="true" style="font-weight: 400;">Import All</md-radio-button>
-										<md-radio-button ng-value="false" style="font-weight: 400;">Select TestCases</md-radio-button>
-									</md-radio-group>
-									<div flex="80" ng-show="!exportConfig.all">
-										<md-input-container style="width: 100%;">
-											<label>Lines (e.g : 1-10;13;....) </label>
-											<input ng-model="exportConfig.lines" style="font-weight: 400;" ng-pattern="regex" min="0" type="text">
-										</md-input-container>
-									</div>
-								</div>
-								<md-input-container style="width: 100%;" >
-									<label>Handling Unknown Products</label>
-									<md-select name="sl" id="sl" style="font-weight: 400;" ng-model="exportConfig.ignore">
-										<md-option ng-value="true">Ignore</md-option>
-										<md-option ng-value="false">Use CVX Only</md-option>
-									</md-select>
-								</md-input-container>
-							</form>
-						</div>
-					</div>
-				</div>
-				<div layout="column" layout-align="start start" style="width : 100%; margin-top : 10px; " ng-show="validFiles.length > 0">
-					<!--<label>-->
-					<!--<span style="background-color: blue; margin-left: 10px;" class="badge">4</span>-->
-					<!-- - Submit-->
-					<!--</label>-->
-					<div style="width: 100%;" layout="row" layout-align="center center">
-						<button class="btn btn-success btn" ng-click="import()">
-							Import
-						</button>
-					</div>
-				</div>
-
+				    </div>
+				    <div flex="10" layout="row" layout-align="end center">
+					<button ng-show="isMulti()" class="pull-right" ng-click="ctrl.rmFile($index)">
+					    <i style="color: red;" class="fa fa-times" aria-hidden="true"></i>
+					</button>
+				    </div>
+				</md-list-item>
+			    </md-list>
 			</div>
-		</form>
-	</md-content>
+		    </div>
+		</div>
+		<div ng-if="validFiles.length > 0" layout="column" layout-align="start start"
+		     style="width : 100%; margin-top : 10px; ">
+		    <label>
+			<span style="background-color: blue; margin-left: 10px;" class="badge">3</span>
+			- Configuration
+		    </label>
+		    <div style="width : 100%; margin-top : 10px; padding-left: 30px;">
+			<div style="width : 100%;" layout="row" layout-align="start center">
+			    <md-checkbox class="no-ink" flex="30" ng-model="exportConfig.ovGroup"><span
+				    style="font-weight: 400;">Override Group</span></md-checkbox>
+			    <md-select flex="70" ng-if="exportConfig.ovGroup" ng-model="exportConfig.groupId"
+				       style="margin : 0;">
+				<md-option style="background-color: #d2bf94;" ng-value="''">No Group</md-option>
+				<md-option ng-repeat="grp in tp.testCaseGroups" ng-value="grp.id">{{grp.name}}
+				</md-option>
+			    </md-select>
+			</div>
+			<div ng-if="FORMAT === ctrl.formats.CDC_SP" style="width : 100%;">
+			    <form name="importConfig">
+				<md-input-container style="width: 100%;">
+				    <label>Sheet Position</label>
+				    <input ng-model="exportConfig.position" min="1" type="number">
+				</md-input-container>
+				<div layout="row" layout-align="start end" style="width: 100%;">
+				    <md-radio-group flex="20" ng-model="exportConfig.all">
+					<md-radio-button ng-value="true" style="font-weight: 400;">Import All
+					</md-radio-button>
+					<md-radio-button ng-value="false" style="font-weight: 400;">Select TestCases
+					</md-radio-button>
+				    </md-radio-group>
+				    <div flex="80" ng-show="!exportConfig.all">
+					<md-input-container style="width: 100%;">
+					    <label>Lines (e.g : 1-10;13;....) </label>
+					    <input ng-model="exportConfig.lines" style="font-weight: 400;"
+						   ng-pattern="regex" min="0" type="text">
+					</md-input-container>
+				    </div>
+				</div>
+				<md-input-container style="width: 100%;">
+				    <label>Handling Unknown Products</label>
+				    <md-select name="sl" id="sl" style="font-weight: 400;"
+					       ng-model="exportConfig.ignore">
+					<md-option ng-value="true">Ignore</md-option>
+					<md-option ng-value="false">Use CVX Only</md-option>
+				    </md-select>
+				</md-input-container>
+			    </form>
+			</div>
+		    </div>
+		</div>
+		<div layout="column" layout-align="start start" style="width : 100%; margin-top : 10px; "
+		     ng-show="validFiles.length > 0">
+		    <!--<label>-->
+		    <!--<span style="background-color: blue; margin-left: 10px;" class="badge">4</span>-->
+		    <!-- - Submit-->
+		    <!--</label>-->
+		    <div style="width: 100%;" layout="row" layout-align="center center">
+			<button class="btn btn-success btn" ng-click="import()">
+			    Import
+			</button>
+		    </div>
+		</div>
+
+	    </div>
+	</form>
+    </md-content>
 </script>

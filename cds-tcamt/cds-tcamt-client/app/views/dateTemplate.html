@@ -9,13 +9,13 @@
 			<form name="fform">
 				<md-input-container>
 					<md-datepicker
-							ng-model="ctrl.dt._dateObj"
-							md-placeholder="Enter date"
-							ng-change="ctrl.dateChange(ctrl.dt)" required>
+                            date-local
+							ng-model="ctrl.dt.date"
+							md-placeholder="Enter date" >
 					</md-datepicker>
 				</md-input-container>
 			</form>
-			<div ng-show="ctrl.dt.date" style="font-size: 15px; color: #0740C7; margin-left : 20px;">{{ctrl.dt.date | date : 'fullDate'}}</div>
+			<div ng-show="ctrl.dt.date" style="font-size: 15px; color: #0740C7; margin-left : 20px;">{{ctrl.dt.date | date : 'fullDate' : 'UTC'}}</div>
 		</div>
 		<div ng-show="ctrl.type === 'RELATIVE' && ctrl.dt" ng-class="{'invalid-date' : rform.$invalid || ctrl.dt.rules.length === 0, 'valid-date' : !rform.$invalid && ctrl.dt.rules.length > 0}" style="border: 1px solid #e1e1e1;" >
 			<form name="rform" layout="column" layout-align="center start">
@@ -33,6 +33,7 @@
 							<th></th>
 							<th>Years</th>
 							<th>Months</th>
+                            <th>Weeks</th>
 							<th>Days</th>
 							<th>Position</th>
 							<th>Relative To</th>
@@ -54,6 +55,11 @@
 									<input ng-model="rule.month" type="number" required>
 								</md-input-container>
 							</td>
+                            <td>
+                                <md-input-container style="width : 100%;" required>
+                                    <input ng-model="rule.week" type="number" required>
+                                </md-input-container>
+                            </td>
 							<td>
 								<md-input-container style="width : 100%;" required>
 									<input ng-model="rule.day" type="number" required>

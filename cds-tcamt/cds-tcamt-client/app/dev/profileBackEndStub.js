@@ -191,6 +191,14 @@ angular.module('tcl').run(function ($httpBackend, $q, $http) {
         return [request.status, profile, {}];
     });
 
+    $httpBackend.whenGET('api/enum/wft').respond(function (method, url, data, headers) {
+        var request = new XMLHttpRequest();
+        request.open('GET', '../../resources/wft.json', false);
+        request.send(null);
+        var profile = angular.fromJson(request.response);
+        return [request.status, profile, {}];
+    });
+
 
     $httpBackend.whenGET('api/igdocuments').respond(function (method, url, data, headers) {
         var request = new XMLHttpRequest();

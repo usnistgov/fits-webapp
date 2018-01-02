@@ -6,7 +6,7 @@ angular.module('tcl').filter('evFilter', function () {
         if (!input || !input.length) {
             return;
         }
-        if(!active){
+        if (!active) {
             return input;
         }
         return input.filter(function (elm) {
@@ -22,7 +22,7 @@ angular.module('tcl').filter('fcFilter', function () {
         if (!input || !input.length) {
             return;
         }
-        if(!active){
+        if (!active) {
             return input;
         }
         return input.filter(function (elm) {
@@ -39,13 +39,13 @@ angular.module('tcl').filter('execSuccess', function () {
         if (!input || !input.length) {
             return;
         }
-        if(!active || !exec){
+        if (!active || !exec) {
             return input;
         }
         return input.filter(function (elm) {
-           if(elm._s)
-               return true;
-           return false;
+            if (elm._s)
+                return true;
+            return false;
         })
     }
 });
@@ -57,8 +57,9 @@ angular.module('tcl').filter('execSuccess', function () {
  * # ExecutionCtrl
  * Controller of the clientApp
  */
-angular.module('tcl').controller('ExecutionCtrl', function (StatsService, ExecutionService, $modal, $filter, Notification, TestObjectUtil, $rootScope, $scope, VaccineService, $http, TestDataService, $timeout, ngTreetableParams, $parse, $q) {
+angular.module('tcl').controller('ExecutionCtrl', function (DataSynchService, EntityService, EntityUtilsService, StatsService, ExecutionService, $modal, $filter, Notification, TestObjectUtil, EntityLoadService, $rootScope, $scope, VaccineService, $http, TestDataService, $timeout, ngTreetableParams, $parse, $q) {
     $scope.tps = [];
+    $scope.tpList = [];
     $scope.selectedTC = null;
     $scope.selectedTP = null;
     $scope.tcQueue = [];
@@ -69,29 +70,30 @@ angular.module('tcl').controller('ExecutionCtrl', function (StatsService, Execut
     $scope.hideTcName = true;
     $scope.paused = false;
     $scope.tabs = {
-        reportTab : 0
+        reportTab: 0
     };
-
+    $scope.tpLoad = false;
+    $scope.eService = EntityService;
     $scope.filterView = false;
     $scope.viewTc = [];
     $scope.filter = {
-        queueSearch : "",
-        eCm : false,
-        fCm : false,
-        eCs : false,
-        fCs : false,
-        eCe : false,
-        fCe : false,
-        eCw : false,
-        fCw : false,
-        enCm : false,
-        fnCm : false,
-        exec : false,
-        fCr : {
-            e : false,
-            r : false,
-            d : false,
-            l : false
+        queueSearch: "",
+        eCm: false,
+        fCm: false,
+        eCs: false,
+        fCs: false,
+        eCe: false,
+        fCe: false,
+        eCw: false,
+        fCw: false,
+        enCm: false,
+        fnCm: false,
+        exec: false,
+        fCr: {
+            e: false,
+            r: false,
+            d: false,
+            l: false
         }
     };
     $scope.main = $rootScope;
@@ -106,9 +108,9 @@ angular.module('tcl').controller('ExecutionCtrl', function (StatsService, Execut
     $scope.today = new Date();
     $scope.selectedReport = {};
     $scope.assessmentDate = {
-        type : 'fixed',
-        _dateObj : $scope.today,
-        date : $scope.today.getTime()
+        type: 'fixed',
+        _dateObj: $scope.today,
+        date: $rootScope.toUTC($scope.today)
     };
     $scope.heigth = {
         'heigth': '100%'
@@ -117,18 +119,18 @@ angular.module('tcl').controller('ExecutionCtrl', function (StatsService, Execut
     $scope.completion = StatsService.completion;
     $scope.correctness = StatsService.correctness;
     $scope.x = {
-        runningId : 0,
-        rp : 0
+        runningId: 0,
+        rp: 0
     };
     $scope.dstartf = false;
     $scope.controls = {
-        running : false,
-        runningId : 0,
-        total : 0,
-        progress : 0,
-        paused : false,
-        top : 0,
-        abort : false
+        running: false,
+        runningId: 0,
+        total: 0,
+        progress: 0,
+        paused: false,
+        top: 0,
+        abort: false
     };
     $scope.showResults = false;
     $scope.report = {};
@@ -137,123 +139,169 @@ angular.module('tcl').controller('ExecutionCtrl', function (StatsService, Execut
 //--------------------------------- FILTER ---------------------
     $scope.tcFilterView = false;
     $scope.tcFilter = {
-        example : {
-            name : '',
-            uid : '',
-            runnable : true,
-            metaData : {
+        example: {
+            name: '',
+            uid: '',
+            runnable: true,
+            metaData: {
                 version: ''
             }
         },
-        changed : false,
-        dates : {
-            created : {
-                position : 'O',
-                date : null
+        changed: false,
+        dates: {
+            created: {
+                position: 'O',
+                date: null
             },
-            updated : {
-                position : 'O',
-                date : null
+            updated: {
+                position: 'O',
+                date: null
             }
         }
     };
+
+    $scope.filterList = function (list) {
+        if(list && Array.isArray(list) && list.length > 0){
+            return $scope.filterActive($scope.tcFilter) ? $filter('tcFilter')(list, $scope.tcFilter) : list;
+        }
+        else {
+            return [];
+        }
+    };
+
+    $scope.filterEntity = function (obj,type) {
+        if(type === $scope.eService.type.TEST_PLAN) {
+            var acc = [];
+            _.forEach(obj.testCaseGroups, function (group) {
+                var gtc = $scope.filterEntity(group, $scope.eService.type.TEST_CASE_GROUP);
+                if(gtc){
+                    acc = acc.concat(gtc);
+                }
+            });
+            var tcl = $scope.filterEntity(obj.testCases);
+            return acc.concat(tcl);
+        }
+        else if(type === $scope.eService.type.TEST_CASE_GROUP) {
+            return $scope.filterEntity(obj.testCases);
+        }
+        else {
+            return $scope.filterList(obj);
+        }
+    };
+
     $scope.resetTcFilter = function (f) {
-        Object.assign(f,{
-            example : {
-                name : '',
-                uid : '',
-                runnable : true,
-                metaData : {
+        Object.assign(f, {
+            example: {
+                name: '',
+                uid: '',
+                runnable: true,
+                metaData: {
                     version: ''
                 }
             },
-            changed : false,
-            dates : {
-                created : {
-                    position : 'O',
-                    date : null
+            changed: false,
+            dates: {
+                created: {
+                    position: 'O',
+                    date: null
                 },
-                updated : {
-                    position : 'O',
-                    date : null
+                updated: {
+                    position: 'O',
+                    date: null
                 }
             }
         });
     };
     $scope.filterActive = function (f) {
-        return   f.changed !== false || f.example.name !== '' || f.example.uid !== '' || f.example.metaData.version !== '' || f.dates.created.date !== null || f.dates.updated.date !== null;
+        return f.changed !== false || f.example.name !== '' || f.example.uid !== '' || f.example.metaData.version !== '' || f.dates.created.date !== null || f.dates.updated.date !== null;
     };
 
     $scope.resetFilter = function () {
         $scope.filter = {
-            queueSearch : "",
-            eCm : false,
-            fCm : false,
-            enCm : false,
-            fnCm : false,
-            eCs : false,
-            fCs : false,
-            eCe : false,
-            fCe : false,
-            eCw : false,
-            fCw : false,
-            exec : false,
-            fCr : {
-                e : false,
-                r : false,
-                d : false,
-                l : false
+            queueSearch: "",
+            eCm: false,
+            fCm: false,
+            enCm: false,
+            fnCm: false,
+            eCs: false,
+            fCs: false,
+            eCe: false,
+            fCe: false,
+            eCw: false,
+            fCw: false,
+            exec: false,
+            fCr: {
+                e: false,
+                r: false,
+                d: false,
+                l: false
             }
         };
     };
 
-    $scope.csuccess = function (t,b) {
-        if(b === true){
-            $scope.filter[t+'Ce'] = false;
-            $scope.filter[t+'Cw'] = false;
+    $scope.csuccess = function (t, b) {
+        if (b === true) {
+            $scope.filter[t + 'Ce'] = false;
+            $scope.filter[t + 'Cw'] = false;
         }
     };
 
-    $scope.compC = function (t,cpm, b) {
-        if(b === true){
-            if(cpm){
-                $scope.filter[t+'nCm'] = false;
+    $scope.compC = function (t, cpm, b) {
+        if (b === true) {
+            if (cpm) {
+                $scope.filter[t + 'nCm'] = false;
             }
             else {
-                $scope.filter[t+'Cm'] = false;
+                $scope.filter[t + 'Cm'] = false;
             }
         }
     };
 
-    $scope.cdetection = function (t,b) {
-        if(b === true){
-            $scope.filter[t+'Cs'] = false;
+    $scope.cdetection = function (t, b) {
+        if (b === true) {
+            $scope.filter[t + 'Cs'] = false;
         }
     };
 
     $scope.filterEngaged = function (filter) {
         return filter.queueSearch !== '' || filter.eCm || filter.fCm || filter.eCs || filter.fCs || filter.eCe || filter.fCe || filter.eCw || filter.fCw ||
-                filter.fCr.e || filter.fCr.r || filter.fCr.d || filter.fCr.l || filter.exec || filter.enCm || filter.fnCm;
+            filter.fCr.e || filter.fCr.r || filter.fCr.d || filter.fCr.l || filter.exec || filter.enCm || filter.fnCm;
     };
 //--------------------------------- UTILS ----------------------
 
+    $scope.switchTP = function (tpd) {
+        console.log("SWITCH TP ");
+        console.log(tpd);
+        $scope.tpLoad = true;
+        $http.get('api/testplan/'+tpd.id).then(function (success) {
+            $scope.tps = [];
+            $scope.tps.push(success.data);
+            $scope.tpLoad = false;
+            $scope.selectTP(success.data);
+            console.log($scope.tps);
+        },
+        function (error) {
+
+        });
+    };
+
     $scope.createConf = function () {
         var x = {
-            _local : true,
-            id :  new ObjectId().toString(),
-            name : "New",
-            endPoint : "",
-            connector : ""
+            _local: true,
+            id: new ObjectId().toString(),
+            name: "New",
+            endPoint: "",
+            connector: ""
         };
         $scope.configs.push(x);
         $scope.onConfig(x);
     };
 
     $scope.onConfig = function (config) {
-        if(!config){
+        if (!config) {
             $scope.configStub = null;
         }
-        if(!config._local){
+        if (!config._local) {
             $rootScope.selectedConfig = config;
             $scope.configStub = JSON.parse(angular.toJson(config));
         }
@@ -274,7 +322,7 @@ angular.module('tcl').controller('ExecutionCtrl', function (StatsService, Execut
         return "";
     };
 
-    $scope.has = function (x,prop) {
+    $scope.has = function (x, prop) {
         return x && x.hasOwnProperty(prop);
     };
 
@@ -292,7 +340,7 @@ angular.module('tcl').controller('ExecutionCtrl', function (StatsService, Execut
             return "";
         if (event.date._type) {
             if (event.date._type === 'fixed')
-                return $filter('date')(event.date.fixed.date, "MM/dd/yyyy");
+                return $filter('date')(event.date.fixed.date, "MM/dd/yyyy", 'UTC');
             else if (event.date._type === 'relative')
                 return "Relative";
             else
@@ -342,25 +390,39 @@ angular.module('tcl').controller('ExecutionCtrl', function (StatsService, Execut
     };
 
     $scope.loadTestCases = function () {
-        TestDataService.loadTestPlans().then(function (data) {
-                $scope.tps = data;
+        EntityLoadService.loadTPSByAccess(EntityService.access.EXEC).then(function (data) {
+                if(data.status) {
+                    $scope.tpList = data.obj;
+                }
             },
             function (err) {
 
             });
     };
 
+    $scope.loadTPDetails = function () {
+        console.log("DDD");
+        $http.get('api/exec/short/tps').then(function (result) {
+            console.log(result);
+            $scope.tpList = result.data;
+        },
+        function (error) {
+            console.log(error);
+        });
+    };
+
     $scope.init = function () {
         $scope.loadConfig();
-        $scope.loadTestCases();
+        $scope.loadTPDetails();
+        //$scope.loadTestCases();
         $scope.loadVaccines();
         $scope.loadEnums();
     };
 
+
     $rootScope.$on('event:loginConfirmed', function () {
         $scope.init();
     });
-
 
 
 //------------------------------- CONFIG CONTROL ----------------
@@ -368,11 +430,11 @@ angular.module('tcl').controller('ExecutionCtrl', function (StatsService, Execut
     $scope.saveConfig = function () {
         $http.post("api/exec/configs/save", $scope.configStub).then(function (result) {
             var conf = angular.fromJson(result.data);
-            var idx = _.findIndex($scope.configs,function (x) {
+            var idx = _.findIndex($scope.configs, function (x) {
                 return x.id === conf.id;
             });
-            if(~idx){
-                $scope.configs.splice(idx,1,conf);
+            if (~idx) {
+                $scope.configs.splice(idx, 1, conf);
             }
             else {
                 $scope.configs.push(conf);
@@ -386,24 +448,24 @@ angular.module('tcl').controller('ExecutionCtrl', function (StatsService, Execut
         $scope.onConfig($rootScope.selectedConfig);
     };
 
-    $scope.deleteConfig = function (index, id,local) {
-        if(local){
-            if($scope.configs[index].id === $scope.configStub.id){
+    $scope.deleteConfig = function (index, id, local) {
+        if (local) {
+            if ($scope.configs[index].id === $scope.configStub.id) {
                 $scope.configStub = null;
                 $rootScope.selectedConfig = null;
             }
-            $scope.configs.splice(index,1);
+            $scope.configs.splice(index, 1);
         }
-        else{
-            $http.post("api/exec/configs/delete/"+id).then(function () {
-                if($rootScope.selectedConfig.id === id){
+        else {
+            $http.post("api/exec/configs/delete/" + id).then(function () {
+                if ($rootScope.selectedConfig.id === id) {
                     $rootScope.selectedConfig = null;
                 }
-                if($scope.configs[index].id === $scope.configStub.id){
+                if ($scope.configs[index].id === $scope.configStub.id) {
                     $scope.configStub = null;
                     $rootScope.selectedConfig = null;
                 }
-                $scope.configs.splice(index,1);
+                $scope.configs.splice(index, 1);
             });
         }
     };
@@ -451,14 +513,14 @@ angular.module('tcl').controller('ExecutionCtrl', function (StatsService, Execut
     };
 
     $scope.drop = function (list, items, index) {
-        if ($scope.multipleSel) {
-            if(Array.isArray(items)){
+        // if ($scope.multipleSel) {
+            if (Array.isArray(items)) {
                 var toAdd = [];
                 for (var i = 0; i < items.length; i++) {
                     if (!$scope.inQueue(items[i]) && items[i].runnable) {
                         items[i].running = false;
                         toAdd.push(items[i]);
-                        if(items[i].dateType === 'RELATIVE'){
+                        if (items[i].dateType === 'RELATIVE') {
                             $scope.nbRelativeTC++;
                         }
                     }
@@ -467,17 +529,17 @@ angular.module('tcl').controller('ExecutionCtrl', function (StatsService, Execut
                 $scope.tcQueue = $scope.tcQueue.slice(0, index)
                     .concat(toAdd)
                     .concat($scope.tcQueue.slice(index));
-            }
+            // }
         } else {
 
-            if(items.hasOwnProperty('testCases') || items.hasOwnProperty('testCaseGroups')){
+            if (items.hasOwnProperty('testCases') || items.hasOwnProperty('testCaseGroups')) {
                 $scope.multipleSel = true;
                 var listItems = [];
                 if (items.hasOwnProperty('testCases')) {
                     listItems = listItems.concat(items.testCases);
                 }
-                if(items.hasOwnProperty('testCaseGroups')){
-                    for(var g = 0; g < items.testCaseGroups.length; g++){
+                if (items.hasOwnProperty('testCaseGroups')) {
+                    for (var g = 0; g < items.testCaseGroups.length; g++) {
                         listItems = listItems.concat(items.testCaseGroups[g].testCases);
                     }
 
@@ -499,7 +561,7 @@ angular.module('tcl').controller('ExecutionCtrl', function (StatsService, Execut
                 }
                 items.running = false;
                 $scope.tcQueue.splice(index, 0, items);
-                if(items.dateType === 'RELATIVE'){
+                if (items.dateType === 'RELATIVE') {
                     $scope.nbRelativeTC++;
                 }
             }
@@ -533,6 +595,9 @@ angular.module('tcl').controller('ExecutionCtrl', function (StatsService, Execut
     };
 
     $scope.back = function () {
+        if($scope.controls.running){
+            $scope.stop();
+        }
         $scope.controls.abort = true;
         $scope.controls.running = false;
         $scope.nbRelativeTC = 0;
@@ -543,8 +608,8 @@ angular.module('tcl').controller('ExecutionCtrl', function (StatsService, Execut
         $scope.showResults = false;
         $scope.report = {};
         $scope.container = {
-            reports : {},
-            asList : []
+            reports: {},
+            asList: []
         };
         $scope.selectedReport = null;
         $scope.aggregate = {};
@@ -567,6 +632,7 @@ angular.module('tcl').controller('ExecutionCtrl', function (StatsService, Execut
     };
 
 //------------------------- QUEUE CONTROL -----------------------
+    $scope.openTp = null;
 
     $scope.rootConfig = function () {
 
@@ -577,17 +643,17 @@ angular.module('tcl').controller('ExecutionCtrl', function (StatsService, Execut
 
     $scope.deleteTCL = function (id) {
         var tc = $scope.viewTc[id];
-        var i = TestObjectUtil.index($scope.tcQueue,'id',tc.id);
+        var i = TestObjectUtil.index($scope.tcQueue, 'id', tc.id);
         $scope.tcQueue.splice(i, 1);
 
-        if(tc.dateType === 'RELATIVE'){
+        if (tc.dateType === 'RELATIVE') {
             $scope.nbRelativeTC--;
         }
 
         if ($scope.container.reports.hasOwnProperty(tc.id)) {
             if (id === $scope.viewTc.length - 1) {
                 $scope.x.rp--;
-                $scope.goToReport($scope.x.rp,true);
+                $scope.goToReport($scope.x.rp, true);
             }
             delete $scope.container.reports[tc.id];
         }
@@ -600,10 +666,12 @@ angular.module('tcl').controller('ExecutionCtrl', function (StatsService, Execut
     };
 
     $scope.addQueue = function (tc) {
-        tc.running = false;
-        $scope.tcQueue.push(tc);
-        if(tc.dateType === 'RELATIVE'){
-            $scope.nbRelativeTC++;
+        if(tc) {
+            tc.running = false;
+            $scope.tcQueue.push(tc);
+            if (tc.dateType === 'RELATIVE') {
+                $scope.nbRelativeTC++;
+            }
         }
     };
 
@@ -622,22 +690,22 @@ angular.module('tcl').controller('ExecutionCtrl', function (StatsService, Execut
     };
 
 
-    // $scope.exportReport = function (content) {
-    //
-    //     var form = document.createElement("form");
-    //     form.action = $rootScope.api('api/report/export/xml');
-    //     form.method = "POST";
-    //     form.target = "_target";
-    //     form.style.display = 'none';
-    //     document.body.appendChild(form);
-    //     form.submit();
-    //
-    // };
+    $scope.exportExecReports = function () {
+
+        var list = [];
+        for(var k in $scope.container.reports){
+            list.push($scope.container.reports[k]);
+        }
+
+        var form = EntityUtilsService.formData('api/report/export/all/xml', "POST", 'gov.nist.healthcare.cds.domain.wrapper.Report', list);
+        document.body.appendChild(form);
+        form.submit();
+    };
 
     $scope.viewReport = function () {
-        if($scope.viewTc && $scope.viewTc.length > 0){
-            for(var i = 0; i < $scope.viewTc.length; i++){
-                if($scope.container.reports.hasOwnProperty($scope.viewTc[i].id)){
+        if ($scope.viewTc && $scope.viewTc.length > 0) {
+            for (var i = 0; i < $scope.viewTc.length; i++) {
+                if ($scope.container.reports.hasOwnProperty($scope.viewTc[i].id)) {
                     return true;
                 }
             }
@@ -660,15 +728,15 @@ angular.module('tcl').controller('ExecutionCtrl', function (StatsService, Execut
     $scope.deleteSavedReport = function (item, tc, id) {
         $http.get('api/report/delete/' + item.id).then(function (response) {
             if ($scope.savedReports[tc]) {
-                var i = _.findIndex($scope.savedReports[tc],function (o) {
+                var i = _.findIndex($scope.savedReports[tc], function (o) {
                     return o.id === item.id;
                 });
-                if(~i){
-                    $scope.savedReports[tc].splice(i,1);
+                if (~i) {
+                    $scope.savedReports[tc].splice(i, 1);
                 }
                 Notification.success({
-                    message : 'Report Deleted',
-                    delay : 3000
+                    message: 'Report Deleted',
+                    delay: 3000
                 })
             }
         });
@@ -696,17 +764,17 @@ angular.module('tcl').controller('ExecutionCtrl', function (StatsService, Execut
     };
 
     $scope.reportId = 0;
-    $scope.goToReport = function (i,noSlide) {
+    $scope.goToReport = function (i, noSlide) {
         var tc = $scope.viewTc[i];
         $scope.x.rp = i;
 
-        if(!tc._s || !$scope.container.reports.hasOwnProperty(tc.id)){
+        if (!tc._s || !$scope.container.reports.hasOwnProperty(tc.id)) {
             $scope.selectedReport = null;
         }
         else {
             $scope.selectedReport = $scope.container.reports[tc.id];
         }
-        if(!noSlide){
+        if (!noSlide) {
             $scope.tabs.reportTab = 1;
         }
 
@@ -718,8 +786,8 @@ angular.module('tcl').controller('ExecutionCtrl', function (StatsService, Execut
     };
 
     $scope.addSavedReports = function (list) {
-        _.forEach(list,function (report) {
-            if($scope.savedReports.hasOwnProperty(report.tc)) {
+        _.forEach(list, function (report) {
+            if ($scope.savedReports.hasOwnProperty(report.tc)) {
                 $scope.savedReports[report.tc].push(report);
             }
             else {
@@ -798,35 +866,71 @@ angular.module('tcl').controller('ExecutionCtrl', function (StatsService, Execut
 
     $scope.$watch('viewTc', function (newValue) {
         $scope.x.rp = 0;
-        if($scope.viewTc && $scope.viewTc.length > 0 && $scope.container && $scope.container.asList.length > 0){
-            $scope.goToReport($scope.x.rp,true);
+        if ($scope.viewTc && $scope.viewTc.length > 0 && $scope.container && $scope.container.asList.length > 0) {
+            $scope.goToReport($scope.x.rp, true);
         }
 
-    },true);
+    }, true);
 
 //----------------------- EXECUTION -----------------------------
     $scope.container = {
-        reports : {},
-        asList : []
+        reports: {},
+        asList: []
     };
 
-    $scope.exe = function () {
-        $scope.exec = true;
-        ExecutionService.play($scope.tcQueue,$rootScope.selectedConfig.id,$scope.assessmentDate._dateObj.getTime(),$scope.controls,$scope.container).then(function (response) {
-            $scope.resultsHandle(response);
-        },
-        function (error) {
+    $scope.execHistory = {
+        queue : [],
+        configuration : {
+            software : null,
+            date : null
+        }
+    };
+
+    $scope.archive = function (queueList, soft, date) {
+        $scope.execHistory.queue = [];
+        $scope.execHistory.configuration.software = soft;
+        $scope.execHistory.configuration.date = date;
+        _.forEach(queueList, function (e) {
+            $scope.execHistory.queue.push(e.id);
         });
     };
 
+    $scope.reloadFromHistory = function () {
+        $scope.back();
+        _.forEach($scope.execHistory.queue, function (e) {
+            var tc =  EntityUtilsService.findTC($scope.tps, e);
+            $scope.addQueue(tc);
+        });
+        console.log($scope.execHistory.queue);
+        console.log($scope.tcQueue);
+        // $scope.onConfig($scope.execHistory.configuration.software);
+        // $scope.assessmentDate.date = $scope.execHistory.configuration.date;
+        $scope.exe();
+    };
+
+    $scope.hasHistory = function () {
+      return $scope.execHistory.queue.length > 0;
+    };
+
+    $scope.exe = function () {
+        console.log("EXE");
+        $scope.exec = true;
+        $scope.archive($scope.tcQueue, $rootScope.selectedConfig, $scope.assessmentDate.date);
+        ExecutionService.play($scope.tcQueue, $rootScope.selectedConfig.id, $scope.assessmentDate.date, $scope.controls, $scope.container).then(function (response) {
+                $scope.resultsHandle(response);
+            },
+            function (error) {
+            });
+    };
+
     $scope.resultsHandle = function (response) {
-        if(response.signal === 'FINISH' && $scope.exec){
-            if(response.data && response.data.reports){
+        if (response.signal === 'FINISH' && $scope.exec) {
+            if (response.data && response.data.reports) {
                 var list = $scope.objToList(response.data.reports);
                 response.data.asList = list;
-                if(list.length > 0){
+                if (list.length > 0) {
                     ExecutionService.aggregate(list).then(function (aggResponse) {
-                        if(aggResponse.status){
+                        if (aggResponse.status) {
                             $scope.aggregate = aggResponse.result;
                         }
                     });
@@ -839,8 +943,8 @@ angular.module('tcl').controller('ExecutionCtrl', function (StatsService, Execut
 
     $scope.objToList = function (obj) {
         var list = [];
-        for(var k in obj){
-            if(obj.hasOwnProperty(k)){
+        for (var k in obj) {
+            if (obj.hasOwnProperty(k)) {
                 list.push(obj[k]);
             }
         }
@@ -855,19 +959,19 @@ angular.module('tcl').controller('ExecutionCtrl', function (StatsService, Execut
 
     $scope.resume = function () {
         $scope.controls.paused = true;
-        ExecutionService.resume($scope.tcQueue,$rootScope.selectedConfig.id,$scope.assessmentDate._dateObj.getTime(),$scope.controls,$scope.container).then(function (response) {
-            $scope.resultsHandle(response);
-        },
-        function (error) {
-        });
+        ExecutionService.resume($scope.tcQueue, $rootScope.selectedConfig.id, $scope.assessmentDate.date, $scope.controls, $scope.container).then(function (response) {
+                $scope.resultsHandle(response);
+            },
+            function (error) {
+            });
     };
 
     $scope.stop = function () {
-        ExecutionService.stop($scope.tcQueue,$scope.controls,$scope.container).then(function (response) {
-            $scope.resultsHandle(response);
-        },
-        function (error) {
-        });
+        ExecutionService.stop($scope.tcQueue, $scope.controls, $scope.container).then(function (response) {
+                $scope.resultsHandle(response);
+            },
+            function (error) {
+            });
     };
 
 

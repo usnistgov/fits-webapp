@@ -3,6 +3,7 @@ package gov.nist.healthcare.cds.tcamt.config;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.List;
+import java.util.TimeZone;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -24,11 +25,6 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.hibernate4.Hibernate4Module;
-
-import springfox.documentation.builders.PathSelectors;
-import springfox.documentation.builders.RequestHandlerSelectors;
-import springfox.documentation.spi.DocumentationType;
-import springfox.documentation.spring.web.plugins.Docket;
 
 
 @Configuration
@@ -60,7 +56,7 @@ public class WebAppConfig extends WebMvcConfigurerAdapter {
 		mapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
 		mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 		mapper.setSerializationInclusion(Include.NON_NULL);
-
+		mapper.setTimeZone(TimeZone.getTimeZone("UTC"));
 		// Registering Hibernate4Module to support lazy objects
 		mapper.registerModule(new Hibernate4Module());
 

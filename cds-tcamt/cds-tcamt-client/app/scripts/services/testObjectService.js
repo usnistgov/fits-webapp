@@ -300,20 +300,27 @@ angular.module('tcl').factory('TestObjectUtil', function () {
     return testObjectService;
 });
 
-angular.module('tcl').factory('TestObjectFactory', function (EntityService, TestObjectUtil) {
+angular.module('tcl').factory('TestObjectFactory', function (EntityService, TestObjectUtil, $rootScope) {
     var testObjectService = {
         createFD: function () {
             var dt = new Date();
             return {
                 type: 'fixed',
-                date: dt.getTime(),
+                date: $rootScope.toUTC(dt),
                 _dateObj: dt
             }
         },
         createRD: function () {
             return {
                 type: 'relative',
-                rules: []
+                rules: [{
+                    position : 'AFTER',
+                    year : 0,
+                    month : 0,
+                    week : 0,
+                    day : 0,
+                    relativeTo : null
+                }]
             }
         },
         createDate : function (type) {
@@ -360,6 +367,7 @@ angular.module('tcl').factory('TestObjectFactory', function (EntityService, Test
                         position: 'BEFORE',
                         year: 0,
                         month: 0,
+                        week : 0,
                         day: 0,
                         relativeTo: {
                             reference: 'static',
@@ -394,8 +402,8 @@ angular.module('tcl').factory('TestObjectFactory', function (EntityService, Test
                 metaData: {
                     version: version,
                     imported: false,
-                    dateCreated: dt.getTime(),
-                    dateLastUpdated: dt.getTime(),
+                    dateCreated: $rootScope.toUTC(dt),
+                    dateLastUpdated: $rootScope.toUTC(dt),
                     changeLog : ""
                 },
                 evalDate: testObjectService.createFD(),
@@ -418,8 +426,8 @@ angular.module('tcl').factory('TestObjectFactory', function (EntityService, Test
                 metaData: {
                     version: "1",
                     imported: false,
-                    dateCreated: dt.getTime(),
-                    dateLastUpdated: dt.getTime(),
+                    dateCreated: $rootScope.toUTC(dt),
+                    dateLastUpdated: $rootScope.toUTC(dt),
                     changeLog : ""
                 },
                 testCases: [],
@@ -688,7 +696,15 @@ angular.module('tcl').factory('TestDataService', function (DataSynchService,$htt
                                     $http.get('api/enum/gender').then(
                                         function (response) {
                                             enums.gender = response.data;
-                                            deferred.resolve(enums);
+                                            $http.get('api/enum/wft').then(
+                                                function (response) {
+                                                    enums.wfTag = response.data;
+                                                    deferred.resolve(enums);
+                                                },
+                                                function (error) {
+                                                    deferred.reject("Failed To Load WFT");
+                                                }
+                                            );
                                         },
                                         function (error) {
                                             deferred.reject("Failed To Load Genders");
@@ -709,6 +725,16 @@ angular.module('tcl').factory('TestDataService', function (DataSynchService,$htt
                     deferred.reject("Failed To Load Evaluation Status");
                 }
             );
+            return deferred.promise;
+        },
+
+        loadSoftware : function () {
+            var deferred = $q.defer();
+            $http.get("api/exec/configs").then(function (result) {
+                deferred.resolve(angular.fromJson(result.data));
+            }, function (error) {
+                deferred.reject("Failed To Load Software");
+            });
             return deferred.promise;
         }
     }

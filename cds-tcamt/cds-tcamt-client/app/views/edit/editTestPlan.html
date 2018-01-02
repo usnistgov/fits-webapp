@@ -1,133 +1,161 @@
 <style id="antiClickjack">
-body {
+    body {
 	display: none !important;
-}
+    }
 </style>
 <script type="text/javascript">
-	if (self === top) {
-		var antiClickjack = document.getElementById("antiClickjack");
-		antiClickjack.parentNode.removeChild(antiClickjack);
-	} else {
-		top.location = self.location;
-	}
+    if (self === top) {
+        var antiClickjack = document.getElementById("antiClickjack");
+        antiClickjack.parentNode.removeChild(antiClickjack);
+    } else {
+        top.location = self.location;
+    }
+</script>
+<script type="text/ng-template" id="my-custom-template">
+    <span>{{data.text}}</span>
 </script>
 <script type="text/ng-template" id="EditTestPlanMetadata.html">
-	<md-content ng-model-options="{updateOn : 'change blur'}">
-		<md-tabs md-selected="tabs.selectedTabTC" md-dynamic-height md-border-bottom>
-			<md-tab label="Test Case Information">
-				<md-content class="md-padding">
-					<form name="testCaseGeneralForm" class="form-horizontal" novalidate>
-						<div class="row">
-							<div class="col-md-12">
-								<div class="col-md-12">
-									<md-input-container style="width: 100%;">
-										<label>Name</label>
-										<input ng-model="selectedTC.name" type="text"  ng-trim="false" required/>
-									</md-input-container>
-								</div>
-								<div class="col-md-6">
-									<md-input-container style="width: 100%;">
-										<label>Evaluation Test Type</label>
-										<input ng-model="selectedTC.evaluationType" type="text"  ng-trim="false" />
-									</md-input-container>
-								</div>
-								<div class="col-md-6">
-									<md-input-container style="width: 100%;">
-										<label>Forecast Test Type</label>
-										<input ng-model="selectedTC.forecastType" type="text"  ng-trim="false" />
-									</md-input-container>
-								</div>
-								<div class="col-md-4">
-									<md-input-container style="width: 100%;">
-										<label>Group</label>
-										<!--<input ng-model-options="{ updateOn: 'blur'}" ng-model="selectedTC.group" type="text"/>-->
-										<md-select ng-model="selectedTC.group" ng-change="switchGroup(selectedTP,selectedTC)" >
-											<md-option style="background-color: #d2bf94;" ng-value="''">No Group</md-option>
-											<md-option ng-repeat="grp in selectedTP.testCaseGroups" ng-value="grp.id">{{grp.name}}</md-option>
-										</md-select>
-									</md-input-container>
-								</div>
-								<div class="col-md-4">
-									<md-input-container style="width: 100%;">
-										<label>ID</label>
-										<input ng-model="selectedTC.uid" type="text"/>
-									</md-input-container>
-								</div>
-								<div class="col-md-4">
-									<md-input-container style="width: 100%;">
-										<label>Date Type</label>
-										<md-select ng-model="selectedTC._dateType" ng-change="dateTypeChange(selectedTC)" ng-model-options="{trackBy: '$value'}" required>
-											<md-option ng-value="'FIXED'">Fixed Dates</md-option>
-											<md-option ng-value="'RELATIVE'">Relative Dates</md-option>
-										</md-select>
-									</md-input-container>
-								</div>
-								<div class="col-md-12">
-									<md-input-container style="width: 100%;">
-										<label>Description</label>
-										<textarea style="background-color: rgb(241, 241, 241);" ng-model="selectedTC.description" rows="5">
+    <md-content ng-model-options="{updateOn : 'change blur'}">
+	<md-tabs md-selected="tabs.selectedTabTC" md-dynamic-height md-border-bottom>
+	    <md-tab label="Test Case Information">
+		<md-content class="md-padding">
+		    <form name="testCaseGeneralForm" class="form-horizontal" novalidate>
+			<div class="row">
+			    <div class="col-md-12">
+                <div class="col-md-12" style="margin-bottom: 15px;">
+                    <span style="color: #4c4cff !important; font-weight : bold; font-size: 13px !important;">Test Case Tags</span><br>
+                    <tags-input ng-model="selectedTC.tags" on-tag-added="updateTags(selectedTP,$tag)" on-tag-removed="updateTags(selectedTP,$tag)" type="text">
+                        <auto-complete source="loadTags($query)"
+                                       template="my-custom-template"
+                                       load-on-down-arrow="true"
+                                       load-on-focus="true"></auto-complete>
+                    </tags-input>
+                </div>
+				<div class="col-md-8">
+				    <md-input-container style="width: 100%;">
+					<label>Name</label>
+					<input ng-model="selectedTC.name" type="text" ng-trim="false" required/>
+				    </md-input-container>
+				</div>
+				<div class="col-md-4">
+				    <md-input-container style="width: 100%;">
+					<label>Workflow Tag</label>
+					<!--<input ng-model-options="{ updateOn: 'blur'}" ng-model="selectedTC.group" type="text"/>-->
+					<md-select ng-model="selectedTC.workflowTag" ng-change="switchWorkflow(selectedTC.workflowTag)">
+					    <md-option style="background-color: #d2bf94;" ng-value="''">No Tag</md-option>
+					    <md-option ng-repeat="node in wfTag" ng-value="node.code">{{node.details}}</md-option>
+					</md-select>
+				    </md-input-container>
+				</div>
+				<div class="col-md-6">
+				    <md-input-container style="width: 100%;">
+					<label>Evaluation Test Type</label>
+					<input ng-model="selectedTC.evaluationType" type="text" ng-trim="false"/>
+				    </md-input-container>
+				</div>
+				<div class="col-md-6">
+				    <md-input-container style="width: 100%;">
+					<label>Forecast Test Type</label>
+					<input ng-model="selectedTC.forecastType" type="text" ng-trim="false"/>
+				    </md-input-container>
+				</div>
+				<div class="col-md-4">
+				    <md-input-container style="width: 100%;">
+					<label>Group</label>
+					<!--<input ng-model-options="{ updateOn: 'blur'}" ng-model="selectedTC.group" type="text"/>-->
+					<md-select ng-model="selectedTC.group"
+						   ng-change="switchGroup(selectedTP,selectedTC)">
+					    <md-option style="background-color: #d2bf94;" ng-value="''">No Group
+					    </md-option>
+					    <md-option ng-repeat="grp in selectedTP.testCaseGroups" ng-value="grp.id">
+						{{grp.name}}
+					    </md-option>
+					</md-select>
+				    </md-input-container>
+				</div>
+				<div class="col-md-4">
+				    <md-input-container style="width: 100%;">
+					<label>ID</label>
+					<input ng-model="selectedTC.uid" type="text"/>
+				    </md-input-container>
+				</div>
+				<div class="col-md-4">
+				    <md-input-container style="width: 100%;">
+					<label>Date Type</label>
+					<md-select ng-model="selectedTC._dateType"
+						   ng-change="dateTypeChange(selectedTC)"
+						   ng-model-options="{trackBy: '$value'}" required>
+					    <md-option ng-value="'FIXED'">Fixed Dates</md-option>
+					    <md-option ng-value="'RELATIVE'">Relative Dates</md-option>
+					</md-select>
+				    </md-input-container>
+				</div>
+				<div class="col-md-12">
+				    <md-input-container style="width: 100%;">
+					<label>Description</label>
+					<textarea style="background-color: rgb(241, 241, 241);"
+						  ng-model="selectedTC.description" rows="5">
 										</textarea>
-									</md-input-container>
-								</div>
-							</div>
-						</div>
-					</form>
-				</md-content>
-				<md-content class="md-padding">
-					<form name="mdForm" class="form-horizontal" novalidate>
-						<div class="row">
-							<div class="col-md-12">
-								<div class="col-md-4">
-									<md-input-container style="width: 100%;">
-										<label>Type</label>
-										<input value="{{selectedTC.metaData.imported ? 'Imported' : 'Created'}}" ng-disabled="true" type="text"/>
-									</md-input-container>
-								</div>
-								<div class="col-md-4">
-									<md-input-container style="width: 100%;">
-										<label>Date Created</label>
-										<md-datepicker ng-model="selectedTC.metaData._dateCreated" ng-change="dateChange(selectedTC.metaData,'dateCreated')" ng-disabled="true"></md-datepicker>
-									</md-input-container>
-								</div>
-								<div class="col-md-4">
-									<md-input-container style="width: 100%;">
-										<label>Date Last Updated</label>
-										<md-datepicker ng-model="selectedTC.metaData._dateLastUpdated" ng-change="dateChange(selectedTC.metaData,'dateLastUpdated')" ng-disabled="true"></md-datepicker>
-									</md-input-container>
-								</div>
-							</div>
-							<div class="col-md-12">
-								<div class="col-md-12">
-									<md-input-container style="width: 100%;">
-										<label>Last Changed in Test Plan Version</label>
-										<input ng-model="selectedTC.metaData.version" type="text"/>
-									</md-input-container>
-								</div>
-								<div class="col-md-12">
-									<md-input-container style="width: 100%;">
-										<label>Change Log</label>
-										<textarea style="background-color: rgb(241, 241, 241);" ng-model="selectedTC.metaData.changeLog" rows="5">
+				    </md-input-container>
+				</div>
+			    </div>
+			</div>
+		    </form>
+		</md-content>
+		<md-content class="md-padding">
+		    <form name="mdForm" class="form-horizontal" novalidate>
+			<div class="row">
+			    <div class="col-md-12">
+				<div class="col-md-4">
+				    <md-input-container style="width: 100%;">
+					<label>Type</label>
+					<input value="{{selectedTC.metaData.imported ? 'Imported' : 'Created'}}"
+					       ng-disabled="true" type="text"/>
+				    </md-input-container>
+				</div>
+				<div class="col-md-4">
+				    <md-input-container style="width: 100%;">
+					<label>Date Created</label>
+					<md-datepicker ng-model="selectedTC.metaData._dateCreated"
+						       ng-change="dateChange(selectedTC.metaData,'dateCreated')"
+						       ng-disabled="true"></md-datepicker>
+				    </md-input-container>
+				</div>
+				<div class="col-md-4">
+				    <md-input-container style="width: 100%;">
+					<label>Date Last Updated</label>
+					<md-datepicker ng-model="selectedTC.metaData._dateLastUpdated"
+						       ng-change="dateChange(selectedTC.metaData,'dateLastUpdated')"
+						       ng-disabled="true"></md-datepicker>
+				    </md-input-container>
+				</div>
+			    </div>
+			    <div class="col-md-12">
+				<div class="col-md-12">
+				    <md-input-container style="width: 100%;">
+					<label>Last Changed in Test Plan Version</label>
+					<input ng-model="selectedTC.metaData.version" type="text"/>
+				    </md-input-container>
+				</div>
+				<div class="col-md-12">
+				    <md-input-container style="width: 100%;">
+					<label>Change Log</label>
+					<textarea style="background-color: rgb(241, 241, 241);"
+						  ng-model="selectedTC.metaData.changeLog" rows="5">
 										</textarea>
-									</md-input-container>
-								</div>
-							</div>
-						</div>
-					</form>
-				</md-content>
-			</md-tab>
-			<md-tab label="Summary">
-				<ng-include src="'views/testView.html'" />
-			</md-tab>
-		</md-tabs>
-	</md-content>
+				    </md-input-container>
+				</div>
+			    </div>
+			</div>
+		    </form>
+		</md-content>
+	    </md-tab>
+	    <md-tab label="Summary">
+		<ng-include src="'views/testView.html'"/>
+	    </md-tab>
+	</md-tabs>
+    </md-content>
 </script>
-
-
-
-
-
-
-
 
 
 <!-- <md-input-container style="width: 100%;"> <label>Date -->

@@ -2,7 +2,7 @@
  * Created by Hossam Tamri on 4/17/17.
  */
 
-angular.module('tcl').directive('entityImport', function ($modal, FITSBackEnd, EntityService, EntityUtilsService, $http, $rootScope) {
+angular.module('tcl').directive('entityImport', function (PopUp, $modal, FITSBackEnd, EntityService, EntityUtilsService, $http, $rootScope) {
     return {
         restrict: 'E',
         templateUrl: 'import.html',
@@ -135,7 +135,7 @@ angular.module('tcl').directive('entityImport', function ($modal, FITSBackEnd, E
                 });
                 if($scope.importConfig && $scope.importConfig.$valid || !$scope.importConfig){
                     fd.append("config",new Blob([angular.toJson($scope.exportConfig)], { type: "application/json" }));
-                    $rootScope.$broadcast("start_import");
+                    PopUp.start("Importing Test Cases...");
                     try{
                         $http.post("api/testcase/import/" + $scope.tp.id + "/"+ ctrl.configFor($scope.FORMAT).label, fd,
                             {
@@ -145,14 +145,16 @@ angular.module('tcl').directive('entityImport', function ($modal, FITSBackEnd, E
                                 }
                             })
                             .success(function (result) {
+                                PopUp.stop();
                                 $rootScope.$broadcast("tp_import_success",result);
                             })
                             .error(function (result) {
+                                PopUp.stop();
                                 $rootScope.$broadcast("tp_import_failure",result);
                             });
                     }
                     catch(ex){
-                        $rootScope.$broadcast("end_import");
+                        PopUp.stop();
                         throw ex;
                     }
                 }

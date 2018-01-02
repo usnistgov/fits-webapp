@@ -4,39 +4,41 @@ import java.io.IOException;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
-
 import springfox.documentation.annotations.ApiIgnore;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-
 import gov.nist.healthcare.cds.domain.TestCase;
 import gov.nist.healthcare.cds.domain.TestCaseGroup;
 import gov.nist.healthcare.cds.domain.TestPlan;
 import gov.nist.healthcare.cds.domain.exception.ConfigurationException;
 import gov.nist.healthcare.cds.domain.exception.IllegalDelete;
 import gov.nist.healthcare.cds.domain.exception.IllegalSave;
+import gov.nist.healthcare.cds.domain.exception.ShareException;
 import gov.nist.healthcare.cds.domain.exception.UnsupportedFormat;
 import gov.nist.healthcare.cds.domain.wrapper.AppInfo;
 import gov.nist.healthcare.cds.domain.wrapper.EntityResult;
 import gov.nist.healthcare.cds.domain.wrapper.ZipExportSummary;
 import gov.nist.healthcare.cds.domain.wrapper.ImportConfig;
 import gov.nist.healthcare.cds.domain.wrapper.ImportSummary;
+import gov.nist.healthcare.cds.domain.wrapper.ShareRequest;
+import gov.nist.healthcare.cds.domain.wrapper.ShareResponse;
 import gov.nist.healthcare.cds.domain.xml.ErrorModel;
+import gov.nist.healthcare.cds.enumeration.EntityAccess;
 import gov.nist.healthcare.cds.repositories.TestPlanRepository;
 import gov.nist.healthcare.cds.service.DeleteTestObjectService;
 import gov.nist.healthcare.cds.service.PropertyService;
 import gov.nist.healthcare.cds.service.SaveService;
+import gov.nist.healthcare.cds.service.TPShareService;
 import gov.nist.healthcare.cds.service.TestPlanExtractUtils;
 import gov.nist.healthcare.cds.service.ValidateTestCase;
+import gov.nist.healthcare.cds.service.impl.data.RWTestPlanFilter;
 import gov.nist.healthcare.cds.service.impl.data.TestPlanClone;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.propertyeditors.StringTrimmerEditor;
+import org.springframework.http.MediaType;
 import org.springframework.security.web.bind.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.InitBinder;
@@ -48,6 +50,10 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 
 @Api
@@ -84,6 +90,12 @@ public class TestCaseController {
 
 	@Autowired
 	private AppInfo appInfo;
+	
+	@Autowired
+	private TPShareService shareService;
+	
+	@Autowired
+	private RWTestPlanFilter filter; 
 
 	@InitBinder
 	public void initBinder(WebDataBinder binder) {
@@ -93,8 +105,32 @@ public class TestCaseController {
 	@ApiOperation(value = "List of all test plans belonging to authenticated user")
 	@RequestMapping(value = "/testplans", method = RequestMethod.GET)
 	@ResponseBody
-	public List<TestPlan> test(@AuthenticationPrincipal Principal p) {
+	public List<TestPlan> testPlans(@AuthenticationPrincipal Principal p) {
 		return testPlanRepository.findByUser(p.getName());
+	}
+	
+	@ApiOperation(value = "List of all test plans belonging to authenticated user")
+	@RequestMapping(value = "/testplan/{id}", method = RequestMethod.GET)
+	@ResponseBody
+	public TestPlan testCase(
+			@ApiParam(value = "Id of test plan to get") @PathVariable String id,
+			@AuthenticationPrincipal Principal p) {
+		
+		TestPlan tp = ledger.tpBelongsTo(id, p.getName(), EntityAccess.R);	
+		return tp;
+	}
+	
+	
+	@ApiOperation(value = "List of all test plans belonging to authenticated user")
+	@RequestMapping(value = "/vOnly/testplans", method = RequestMethod.GET)
+	@ResponseBody
+	public List<TestPlan> testPlansViewOnly(@AuthenticationPrincipal Principal p) {
+		List<TestPlan> tps = new ArrayList<TestPlan>();
+		for(TestPlan tp : testPlanRepository.sharedWithUser(p.getName())){
+			filter.filterTestPlan(tp);
+			tps.add(tp);
+		}
+		return tps;
 	}
 
 	@ApiOperation(value = "WebApp Build Information")
@@ -104,6 +140,57 @@ public class TestCaseController {
 		return appInfo;
 	}
 
+	//---------------------- SHARE OPERATIONS ------------------------
+	
+	@ApiOperation(value = "Share TestPlan")
+	@RequestMapping(value = "/share", method = RequestMethod.POST)
+	@ResponseBody
+	public ShareResponse share(
+			@ApiParam(value = "TestCase Object to persist") @RequestBody ShareRequest sReq,
+			@AuthenticationPrincipal Principal p,
+			@ApiIgnore HttpServletResponse response) throws IOException {
+		
+		try {
+			shareService.share(sReq.getTpId(), p.getName(), sReq.getUserId());
+			return new ShareResponse(true,"success","");
+		} catch (ShareException e) {
+			return new ShareResponse(false,e.getErrcode(),e.getId());
+		}
+	}
+	
+	@ApiOperation(value = "Share TestPlan")
+	@RequestMapping(value = "/unshare", method = RequestMethod.POST)
+	@ResponseBody
+	public ShareResponse unshare(
+			@ApiParam(value = "TestCase Object to persist") @RequestBody ShareRequest sReq,
+			@AuthenticationPrincipal Principal p,
+			@ApiIgnore HttpServletResponse response) throws IOException {
+		
+		try {
+			shareService.unshare(sReq.getTpId(), p.getName(), sReq.getUserId());
+			return new ShareResponse(true,"success","");
+		} catch (ShareException e) {
+			return new ShareResponse(false,e.getErrcode(),e.getId());
+		}
+	}
+	
+	@ApiOperation(value = "Share TestPlan")
+	@RequestMapping(value = "/public/{tpId}/{bool}", method = RequestMethod.POST)
+	@ResponseBody
+	public ShareResponse makePublic(
+			@ApiParam(value = "TestPlan ID") @PathVariable String tpId, 
+			@ApiParam(value = "Public/Private bool") @PathVariable boolean bool, 
+			@AuthenticationPrincipal Principal p,
+			@ApiIgnore HttpServletResponse response) throws IOException {
+		
+		try {
+			shareService.makePublic(tpId, p.getName(),bool);
+			return new ShareResponse(true,"success","");
+		} catch (ShareException e) {
+			return new ShareResponse(false,e.getErrcode(),e.getId());
+		}
+	}
+	
 	//---------------------- SAVE OPERATIONS -------------------------
 	
 	@ApiOperation(value = "Save test case to authenticated user account")
@@ -182,41 +269,39 @@ public class TestCaseController {
 			@AuthenticationPrincipal Principal p,
 			@ApiIgnore HttpServletResponse response) throws IOException {
 		
-		TestPlan tp = ledger.tpBelongsTo(id, p.getName());
+		TestPlan tp = testPlanClone.clone(id,p.getName());
 		
 		if(tp != null){
-			testPlanClone.clone(tp);
 			return tp;
 		}
 		else
 			response.sendError(404);
 		
 		return null;
-		
 	}
 
 	//--------------------------- IMPORT/EXPORT NIST OPERATION ------------------------------
 	//---------------------------------------EXPORT------------------------------------------
-	
-	
 	@ApiOperation(value = "Prepare Export")
-	@RequestMapping(value = "/testcase/export/{format}/{tpId}", method = RequestMethod.POST)
+	@RequestMapping(value = "/testcase/export/{format}/{tpId}", method = RequestMethod.POST, consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
 	@ResponseBody
 	public void prepareExport(
-			@ApiParam(value = "TestCase ID List") @RequestBody String[] ids, 
+			@ApiParam(value = "TestCase ID List") FormData form, 
 			@ApiParam(value = "Test Plan ID") @PathVariable String tpId, 
 			@ApiParam(value = "Export Format (nist/cdc)") @PathVariable String format, 
-			@ApiIgnore HttpSession session,
 			@ApiIgnore HttpServletRequest request,
 			@ApiIgnore HttpServletResponse response, 
-			@AuthenticationPrincipal Principal p) throws IOException, UnsupportedFormat, ConfigurationException {
+			@AuthenticationPrincipal Principal p) throws IOException, UnsupportedFormat, ConfigurationException, ClassNotFoundException {
+		
+		ObjectMapper mapper = new ObjectMapper();
+		List<String> ids = mapper.readValue(form.getJson(), mapper.getTypeFactory().constructCollectionType(List.class,Class.forName(form.getClazz())));
 		
 		List<TestCase> tcs = new ArrayList<>();
 		List<EntityResult> eResult = new ArrayList<>();
 		
-		TestPlan tp = ledger.tpBelongsTo(tpId, p.getName());
+		TestPlan tp = ledger.tpBelongsTo(tpId, p.getName(), EntityAccess.R);
 		if(tp != null){
-			tcs.addAll(testPlanExtract.extract(tp, ids));
+			tcs.addAll(testPlanExtract.extract(tp, ids.toArray(new String[0])));
 		}
 		else {
 			EntityResult entityResult = new EntityResult("TestPlan ID "+tpId);
@@ -228,34 +313,51 @@ public class TestCaseController {
 		if(exportResult.getOut() != null){
 			exportResult.getOut().close();
 			byte[] result = exportResult.getBaos().toByteArray();
-			session.setAttribute("export_prepared", result);
-			response.setStatus(200);
+			response.setContentType("application/zip");
+			response.setHeader("Content-disposition", "attachment;filename=fits_testCases_export.zip");
+			response.getOutputStream().write(result);
 		}
 		else {
 			response.setStatus(400);
 		}
-
 	}
 	
-	@ApiOperation(value = "Collect exported ZIP from session (prior call to Prepare Export)")
-	@RequestMapping(value = "/testcase/export", method = RequestMethod.GET)
+	@ApiOperation(value = "Prepare Export")
+	@RequestMapping(value = "/testcase/export/tc/{format}/{tcId}", method = RequestMethod.POST, consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
 	@ResponseBody
-	public void exportTestCaseNIST(
-			@ApiIgnore HttpSession session,
+	public void exportTC(
+			@ApiParam(value = "Test Case ID") @PathVariable String tcId, 
+			@ApiParam(value = "Export Format (nist/cdc)") @PathVariable String format, 
 			@ApiIgnore HttpServletRequest request,
 			@ApiIgnore HttpServletResponse response, 
-			@AuthenticationPrincipal Principal p) throws IOException, UnsupportedFormat, ConfigurationException {
-		byte[] zip = session.getAttribute("export_prepared") != null ? (byte[]) session.getAttribute("export_prepared") : null;
-		if(zip != null) {
-			response.setContentType("application/zip");
-			response.setHeader("Content-disposition", "attachment;filename=fits_testCases_export.zip");
-			response.getOutputStream().write(zip);
+			@AuthenticationPrincipal Principal p) throws IOException, UnsupportedFormat, ConfigurationException, ClassNotFoundException {
+		
+		TestCase tc = ledger.tcBelongsTo(tcId, p.getName(), EntityAccess.R);	
+		
+		List<TestCase> tcs = new ArrayList<>();
+		List<EntityResult> eResult = new ArrayList<>();
+		
+		if(tc != null){
+			tcs.add(tc);
 		}
 		else {
-			response.sendError(400, "No export found");
+			EntityResult entityResult = new EntityResult("TestCase ID "+tcId);
+			entityResult.getErrors().add(new ErrorModel("Permission","TestPlan does not belong to user"));
+			eResult.add(entityResult);
+		}
+		
+		ZipExportSummary exportResult = exportService.exportTestCases(tcs, format, null);
+		if(exportResult.getOut() != null){
+			exportResult.getOut().close();
+			byte[] result = exportResult.getBaos().toByteArray();
+			response.setContentType("application/zip");
+			response.setHeader("Content-disposition", "attachment;filename=fits_testCases_export.zip");
+			response.getOutputStream().write(result);
+		}
+		else {
+			response.setStatus(400);
 		}
 	}
-
 
 	//---------------------------------------IMPORT------------------------------------------
 	@ApiOperation(value = "Import TestCases")
@@ -279,6 +381,14 @@ public class TestCaseController {
 		catch (Exception e) {
 			return ImportSummary.errorInFile();
 		}
+	}
+	
+	@RequestMapping(value = "/xxx", method = RequestMethod.POST, consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+	@ResponseBody
+	public Stub xxx(@AuthenticationPrincipal Principal p, FormData data) throws JsonParseException, JsonMappingException, ClassNotFoundException, IOException {
+		ObjectMapper mapper = new ObjectMapper();
+		Stub stub = (Stub) mapper.readValue(data.getJson(), Class.forName(data.getClazz()));
+		return stub;
 	}
 
 }
