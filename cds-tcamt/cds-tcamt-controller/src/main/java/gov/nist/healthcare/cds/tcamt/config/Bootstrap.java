@@ -3,7 +3,6 @@ package gov.nist.healthcare.cds.tcamt.config;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Properties;
@@ -17,8 +16,6 @@ import gov.nist.healthcare.cds.auth.domain.Account;
 import gov.nist.healthcare.cds.auth.domain.Privilege;
 import gov.nist.healthcare.cds.auth.repo.PrivilegeRepository;
 import gov.nist.healthcare.cds.auth.service.AccountService;
-import gov.nist.healthcare.cds.domain.Injection;
-import gov.nist.healthcare.cds.domain.Product;
 import gov.nist.healthcare.cds.domain.SoftwareConfig;
 import gov.nist.healthcare.cds.domain.VaccineMapping;
 import gov.nist.healthcare.cds.domain.exception.ProductNotFoundException;
@@ -29,16 +26,13 @@ import gov.nist.healthcare.cds.domain.wrapper.Documents;
 import gov.nist.healthcare.cds.domain.wrapper.Resources;
 import gov.nist.healthcare.cds.domain.wrapper.SimulatedResult;
 import gov.nist.healthcare.cds.domain.wrapper.SimulationMap;
-import gov.nist.healthcare.cds.domain.wrapper.VaccineRef;
 import gov.nist.healthcare.cds.enumeration.FHIRAdapter;
 import gov.nist.healthcare.cds.repositories.SoftwareConfigRepository;
-import gov.nist.healthcare.cds.repositories.TestCaseRepository;
 import gov.nist.healthcare.cds.repositories.VaccineMappingRepository;
 import gov.nist.healthcare.cds.service.TestCaseExecutionService;
 import gov.nist.healthcare.cds.service.TestRunnerService;
 import gov.nist.healthcare.cds.service.VaccineImportService;
 import gov.nist.healthcare.cds.service.VaccineMatcherService;
-import gov.nist.healthcare.cds.service.VaccineService;
 import gov.nist.healthcare.cds.service.impl.validation.ConfigurableVaccineMatcher;
 import gov.nist.healthcare.cds.service.impl.validation.ExecutionService;
 import gov.nist.healthcare.cds.service.vaccine.VaccineMatcherConfiguration;
@@ -137,10 +131,7 @@ public class Bootstrap {
 	
 	@Bean
 	public TestRunnerService testRunner(){
-//		return new TestRunnerServiceFhirImpl("https://p860556.campus.nist.gov:8443/forecast/ImmunizationRecommendations");
-//		return new TestRunnerServiceFhirImpl("https://hit-dev.nist.gov:15001/forecast/ImmunizationRecommendations");
-		//return new TestRunnerServiceFhirImpl("http://hit-dev.nist.gov:11080/fhirAdapter/fhir/Parameters/$cds-forecast");
-		return new TestRunnerServiceFhirImpl("http://hit-dev.nist.gov:11080/fhirAdapter/fhir/Parameters/$cds-forecast");
+		return new TestRunnerServiceFhirImpl("https://hit-dev.nist.gov:15000/fhirAdapter/fhir/Parameters/$cds-forecast");
 	}
 	
 	@Bean
@@ -180,13 +171,11 @@ public class Bootstrap {
 	public void createVaccine() throws IOException{
 		long all = vaccineRepository.count();
 		int i = 0;
-		if(all ==  0){
-			Set<VaccineMapping> set = vaccineService._import(Bootstrap.class.getResourceAsStream("/web_cvx.xlsx"),Bootstrap.class.getResourceAsStream("/web_vax2vg.xlsx"),Bootstrap.class.getResourceAsStream("/web_mvx.xlsx"),Bootstrap.class.getResourceAsStream("/web_tradename.xlsx"));
-			for(VaccineMapping mp : set){
-				if(!vaccineRepository.exists(mp.getId())){
-					i++;
-					vaccineRepository.save(mp);
-				}
+		Set<VaccineMapping> set = vaccineService._import(Bootstrap.class.getResourceAsStream("/web_cvx.xlsx"),Bootstrap.class.getResourceAsStream("/web_vax2vg.xlsx"),Bootstrap.class.getResourceAsStream("/web_mvx.xlsx"),Bootstrap.class.getResourceAsStream("/web_tradename.xlsx"));
+		for(VaccineMapping mp : set){
+			if(!vaccineRepository.exists(mp.getId())){
+				i++;
+				vaccineRepository.save(mp);
 			}
 		}
 		System.out.println("[VACCINE SERVICE IMPORT] IMPORTED "+i+" EXISTING "+all);
@@ -252,6 +241,10 @@ public class Bootstrap {
 		//Software
 		this.createSoftware();
 		
-		
 	}
+	
+	
+	
+	
+	
 }

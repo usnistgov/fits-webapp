@@ -135,6 +135,8 @@ public class TestExecutionController {
 				return execService.execute(config, tc, sc.getDate());
 			}
 			catch(ConnectionException ex){
+				System.out.println(ex);
+				ex.printStackTrace();
 				response.sendError(this.code(ex.getStatusCode()),ex.getStatusText());
 				return null;
 			}

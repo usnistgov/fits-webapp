@@ -8,5 +8,6 @@
 	<modules>
 		<module>cds-tcamt-controller</module>
 		<module>cds-tcamt-client</module>
+		<module>data-transform</module>
 	</modules>
 </project>
