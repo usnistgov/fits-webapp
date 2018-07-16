@@ -184,16 +184,21 @@ angular.module('tcl').directive('forecastReport', function() {
       };
 
       $scope.printDiff = function (exp,node) {
-          return $filter('date')(node.value, "MM/dd/yyyy", 'UTC') + $scope.diff(exp, node.value);
+          if(node.value){
+              return node.value.dateString + $scope.diff(exp.dateString, node.value.dateString);
+          }
+          return "";
       };
 
       $scope.diff = function(expected, actual) {
-        var days = (expected - actual) / 86400000;
-        var ds = Math.round(days);
-        if(ds !== 0){
-            return " ( "+(ds > 0 ? "minus " : "plus ") +  Math.abs(Math.round(days)) + " days )";
-        }
-        return "";
+          var d1 = moment(expected, "MM/DD/YYYY");
+          var d2 = moment(actual, "MM/DD/YYYY");
+          var ds = d1.diff(d2, 'days');
+
+          if(ds !== 0){
+            return " ( "+(ds > 0 ? "minus " : "plus ") + ds + " days )";
+          }
+          return "";
       };
 
       $scope.getVal = function (code) {

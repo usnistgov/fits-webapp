@@ -306,8 +306,7 @@ angular.module('tcl').factory('TestObjectFactory', function (EntityService, Test
             var dt = new Date();
             return {
                 type: 'fixed',
-                date: $rootScope.toUTC(dt),
-                _dateObj: dt
+                dateString : new Date().toLocaleDateString('en-US')
             }
         },
         createRD: function () {
@@ -410,7 +409,6 @@ angular.module('tcl').factory('TestObjectFactory', function (EntityService, Test
                 events: [],
                 forecast: []
             };
-            TestObjectUtil.sanitizeDates(tc);
             TestObjectUtil.markWithCLID(tc);
             return tc;
         },
@@ -433,7 +431,6 @@ angular.module('tcl').factory('TestObjectFactory', function (EntityService, Test
                 testCases: [],
                 testCaseGroups: []
             };
-            TestObjectUtil.sanitizeDates(tp);
             TestObjectUtil.markWithCLID(tp);
             return tp;
         },
@@ -521,7 +518,7 @@ angular.module('tcl').factory('TestObjectSynchronize', function ($q, $http, Test
                 $http.post('api/testcase/save', _tc).then(
                     function (response) {
                         var newTC = response.data;
-                        TestObjectUtil.sanitizeDates(newTC);
+                        // TestObjectUtil.sanitizeDates(newTC);
                         //TestObjectUtil.sanitizeEvents(newTC);
                         newTC._dateType = newTC.dateType;
                         deferred.resolve({
@@ -628,7 +625,6 @@ angular.module('tcl').factory('TestDataService', function (DataSynchService,$htt
             $http.get('api/testplans').then(
                 function (response) {
                     tps = angular.fromJson(response.data);
-                    TestObjectUtil.sanitizeDates(tps);
                     for (var tp = 0; tp < tps.length; tp++) {
                         //TestObjectUtil.tpUpdateHash(tps[tp]);
                         for (var tc = 0; tc < tps[tp].testCases.length; tc++) {
@@ -658,7 +654,6 @@ angular.module('tcl').factory('TestDataService', function (DataSynchService,$htt
             $http.get('api/testplan/'+id).then(
                 function (response) {
                     tp = angular.fromJson(response.data);
-                    TestObjectUtil.sanitizeDates(tp);
                     
                     for (var tc = 0; tc < tp.testCases.length; tc++) {
                         tp.testCases[tc]._dateType = tp.testCases[tc].dateType;

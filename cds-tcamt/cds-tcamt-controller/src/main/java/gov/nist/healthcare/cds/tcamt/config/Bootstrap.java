@@ -3,7 +3,8 @@ package gov.nist.healthcare.cds.tcamt.config;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
@@ -16,7 +17,13 @@ import gov.nist.healthcare.cds.auth.domain.Account;
 import gov.nist.healthcare.cds.auth.domain.Privilege;
 import gov.nist.healthcare.cds.auth.repo.PrivilegeRepository;
 import gov.nist.healthcare.cds.auth.service.AccountService;
+import gov.nist.healthcare.cds.domain.Date;
+import gov.nist.healthcare.cds.domain.Event;
+import gov.nist.healthcare.cds.domain.ExpectedForecast;
+import gov.nist.healthcare.cds.domain.FixedDate;
 import gov.nist.healthcare.cds.domain.SoftwareConfig;
+import gov.nist.healthcare.cds.domain.TestCase;
+import gov.nist.healthcare.cds.domain.VaccinationEvent;
 import gov.nist.healthcare.cds.domain.VaccineMapping;
 import gov.nist.healthcare.cds.domain.exception.ProductNotFoundException;
 import gov.nist.healthcare.cds.domain.exception.VaccineNotFoundException;
@@ -26,8 +33,10 @@ import gov.nist.healthcare.cds.domain.wrapper.Documents;
 import gov.nist.healthcare.cds.domain.wrapper.Resources;
 import gov.nist.healthcare.cds.domain.wrapper.SimulatedResult;
 import gov.nist.healthcare.cds.domain.wrapper.SimulationMap;
+import gov.nist.healthcare.cds.enumeration.DateType;
 import gov.nist.healthcare.cds.enumeration.FHIRAdapter;
 import gov.nist.healthcare.cds.repositories.SoftwareConfigRepository;
+import gov.nist.healthcare.cds.repositories.TestCaseRepository;
 import gov.nist.healthcare.cds.repositories.VaccineMappingRepository;
 import gov.nist.healthcare.cds.service.TestCaseExecutionService;
 import gov.nist.healthcare.cds.service.TestRunnerService;
@@ -71,6 +80,9 @@ public class Bootstrap {
 	private VaccineMappingRepository vaccineRepository;
 	
 	@Autowired
+	private TestCaseRepository testCaseRepository;
+	
+	@Autowired
 	private AccountService accService;
 	
 
@@ -85,7 +97,7 @@ public class Bootstrap {
 		AppInfo app = new AppInfo();
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
 		app.setAdminEmail(env.getProperty("webadmin.email"));
-		app.setDate(new Date(Integer.parseInt(env.getProperty("date"))));
+		app.setDate(new java.util.Date(Integer.parseInt(env.getProperty("date"))));
 		app.setVersion(env.getProperty("version"));
 		return app;
 	}
@@ -232,15 +244,15 @@ public class Bootstrap {
 			accService.createAdmin(a);
 		}
 
-		//Vaccine
-		this.createVaccine();
-		
-		//Privileges
-		this.createPrivileges();
-		
-		//Software
-		this.createSoftware();
-		
+//		//Vaccine
+//		this.createVaccine();
+//		
+//		//Privileges
+//		this.createPrivileges();
+//		
+//		//Software
+//		this.createSoftware();
+				
 	}
 	
 	

@@ -116,17 +116,12 @@
 				<div class="col-md-4">
 				    <md-input-container style="width: 100%;">
 					<label>Date Created</label>
-					<md-datepicker ng-model="selectedTC.metaData._dateCreated"
-						       ng-change="dateChange(selectedTC.metaData,'dateCreated')"
-						       ng-disabled="true"></md-datepicker>
-				    </md-input-container>
+                        <input ng-model="selectedTP.metaData.version" value="{{selectedTC.metaData.dateCreated | date:'MM/dd/yyyy' : 'UTC'}}" disabled="true" type="text"/>
 				</div>
 				<div class="col-md-4">
 				    <md-input-container style="width: 100%;">
 					<label>Date Last Updated</label>
-					<md-datepicker ng-model="selectedTC.metaData._dateLastUpdated"
-						       ng-change="dateChange(selectedTC.metaData,'dateLastUpdated')"
-						       ng-disabled="true"></md-datepicker>
+                        <input ng-model="selectedTP.metaData.version" ng-value="{{selectedTC.metaData.dateLastUpdated | date:'MM/dd/yyyy' : 'UTC'}}" disabled="true" type="text"/>
 				    </md-input-container>
 				</div>
 			    </div>

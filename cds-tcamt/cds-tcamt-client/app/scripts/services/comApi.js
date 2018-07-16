@@ -334,12 +334,7 @@ angular.module('tcl').factory('EntityUtilsService', function (EntityService,Noti
         this.sanitizeTC = function (tc) {
             tc._type = EntityService.type.TEST_CASE;
             tc._dateType = tc.dateType;
-            // if(tc.hasOwnProperty("errors") && tc.errors.length > 0){
-            //     // _.forEach(tc.errors,function (error) {
-            //     //     error._path = ctrl.sanitizeErrorPath(error.path);
-            //     // });
-            // }
-            ctrl.sanitizeDates(tc);
+            // ctrl.sanitizeDates(tc);
         };
 
         this.capitalize = function (string) {
@@ -372,7 +367,7 @@ angular.module('tcl').factory('EntityUtilsService', function (EntityService,Noti
 
         this.sanitizeTP = function (tp) {
             tp._type = EntityService.type.TEST_PLAN;
-            ctrl.sanitizeDates(tp.metaData);
+            // ctrl.sanitizeDates(tp.metaData);
             _.forEach(tp.testCaseGroups, function(tg) {
                 ctrl.sanitizeTG(tg);
             });
@@ -398,32 +393,32 @@ angular.module('tcl').factory('EntityUtilsService', function (EntityService,Noti
             }
         };
 
-        this.sanitizeDates = function (obj) {
-            if (typeof obj === 'object') {
-                if (Array.isArray(obj)) {
-                    for (var i = 0; i < obj.length; i++) {
-                        ctrl.sanitizeDates(obj[i]);
-                    }
-                }
-                else {
-                    for (var x in obj) {
-                        if(obj.hasOwnProperty(x)){
-                            if (~x.search(/date/i) || ~x.search(/earliest/i) || ~x.search(/recommended/i) ||  ~x.search(/complete/i) || ~x.search(/dob/i) || ~x.search(/pastDue/i)) {
-                                if (typeof obj[x] === 'number') {
-                                    obj["_" + x] = new Date(obj[x]);
-                                }
-                                else {
-                                    ctrl.sanitizeDate(obj[x]);
-                                }
-                            }
-                            else {
-                                ctrl.sanitizeDates(obj[x]);
-                            }
-                        }
-                    }
-                }
-            }
-        };
+        // this.sanitizeDates = function (obj) {
+        //     if (typeof obj === 'object') {
+        //         if (Array.isArray(obj)) {
+        //             for (var i = 0; i < obj.length; i++) {
+        //                 ctrl.sanitizeDates(obj[i]);
+        //             }
+        //         }
+        //         else {
+        //             for (var x in obj) {
+        //                 if(obj.hasOwnProperty(x)){
+        //                     if (~x.search(/date/i) || ~x.search(/earliest/i) || ~x.search(/recommended/i) ||  ~x.search(/complete/i) || ~x.search(/dob/i) || ~x.search(/pastDue/i)) {
+        //                         if (typeof obj[x] === 'number') {
+        //                             obj["_" + x] = new Date(obj[x]);
+        //                         }
+        //                         else {
+        //                             ctrl.sanitizeDate(obj[x]);
+        //                         }
+        //                     }
+        //                     else {
+        //                         ctrl.sanitizeDates(obj[x]);
+        //                     }
+        //                 }
+        //             }
+        //         }
+        //     }
+        // };
 
         this.transformTP = function (tp) {
             return {

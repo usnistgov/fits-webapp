@@ -35,6 +35,7 @@ var app = angular
         'btorfs.multiselect',
         'ui.select',
         'autocomplete',
+        'moment-picker',
         'ngTagsInput'
     ]);
 

@@ -41,6 +41,7 @@ var app = angular
         'infinite-scroll',
         'dndLists',
         'autocomplete',
+        'moment-picker',
         'ngTagsInput'
     ]);
 

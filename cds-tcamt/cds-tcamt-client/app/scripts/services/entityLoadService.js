@@ -41,44 +41,6 @@ angular.module('tcl').factory('EntityLoadService', function ($q, $http, Response
                 return ctrl.loadTPList(urlExecTP);
             }
         };
-
-        // ctrl.loadViewTPs = function () {
-        //     var deferred = $q.defer();
-        //     var saveURL = EntityUtilsService.createURL(urlTPv);
-        //     var type = EntityService.type.TEST_PLAN;
-        //
-        //     $http.get(saveURL).then(function (response) {
-        //             var tps = response.data;
-        //             for(var tpI = 0; tpI < tps.length; tpI++){
-        //                 EntityUtilsService.sanitizeTP(tps[tpI]);
-        //             }
-        //             deferred.resolve(ResponseService.success(type,action, "Test Plans Loaded Successfully", tps));
-        //         },
-        //         function (error) {
-        //             deferred.resolve(ResponseService.error(type,action, "Failed To Load Test Plans", error));
-        //         });
-        //
-        //     return deferred.promise;
-        // };
-        //
-        // ctrl.loadExecTP = function () {
-        //     var deferred = $q.defer();
-        //     var saveURL = EntityUtilsService.createURL(urlTPv);
-        //     var type = EntityService.type.TEST_PLAN;
-        //
-        //     $http.get(saveURL).then(function (response) {
-        //             var tps = response.data;
-        //             for(var tpI = 0; tpI < tps.length; tpI++){
-        //                 EntityUtilsService.sanitizeTP(tps[tpI]);
-        //             }
-        //             deferred.resolve(ResponseService.success(type,action, "Test Plans Loaded Successfully", tps));
-        //         },
-        //         function (error) {
-        //             deferred.resolve(ResponseService.error(type,action, "Failed To Load Test Plans", error));
-        //         });
-        //
-        //     return deferred.promise;
-        // }
     }
 
     return new LoadService();

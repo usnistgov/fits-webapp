@@ -404,35 +404,6 @@ angular
             $scope.getUsername = function () {
                 return userInfoService.getUsername();
             };
-            //
-            // $scope.autoSaveFct = function () {
-            //     $timeout(function () {
-            //         if($scope.selectedTP && $scope.autoSave.active){
-            //             console.log("Saving");
-            //             $scope.autoSave.saving = true;
-            //
-            //             $scope.saveTP($scope.selectedTP,true,true).then(function () {
-            //                 if($scope.selectedTC && TestObjectUtil.hashChanged($scope.selectedTC)){
-            //                     $scope.saveTC($scope.selectedTC,true).then(function () {
-            //                         $scope.autoSave.lastSave = new Date();
-            //                         $scope.autoSave.saving = false;
-            //                     },function () {
-            //                         $scope.autoSave.lastSave = new Date();
-            //                         $scope.autoSave.saving = false;
-            //                     })
-            //                 }
-            //                 else {
-            //                     $scope.autoSave.lastSave = new Date();
-            //                     $scope.autoSave.saving = false;
-            //                 }
-            //             },
-            //             function () {
-            //                 $scope.autoSave.saving = false;
-            //             });
-            //         }
-            //         $scope.autoSaveFct();
-            //     },10000);
-            // };
 
             //---------------------------------------------------------------------------------------------------------------------------------------------------
             //-[DT]--------------------------------------------------------------- WHEN DATES TYPES CHANGE ------------------------------------------------------
@@ -514,8 +485,8 @@ angular
             $scope.eventLabel = function (event) {
                 if (event.date) {
                     if (event.date.type && event.date.type === "fixed") {
-                        if (event.date.date) {
-                            return $filter('date')(event.date.date, "MM/dd/yyyy", 'UTC');
+                        if (event.date.dateString) {
+                            return event.date.dateString;
                         }
                         else {
                             return 'Fixed Date';
@@ -724,8 +695,6 @@ angular
                 PopUp.start("Opening Test Plan...");
                 $scope.tcFilter.wft = 'ALL';
                 var tpObj = JSON.parse(JSON.stringify(tp));
-                // $scope.tgCM[2].push($scope.tags());
-                // console.log($scope.tgCM);
                 $scope.entityUtils.sanitizeTP(tpObj);
                 $timeout(function () {
                     $scope.wholeTP = tpObj;
@@ -736,6 +705,7 @@ angular
                     },100);
                 },500);
             };
+
             $scope.selectTP = function (tp,skip) {
                 $scope.warning(skip).then(function () {
                     $timeout(function () {
@@ -1062,7 +1032,8 @@ angular
             $scope.filterList = function (list) {
                 if(list && Array.isArray(list) && list.length > 0){
                     var wf = $filter('workflow') (list, $scope.tcFilter.wft);
-                    return $scope.filterActive($scope.tcFilter) ? $filter('tcFilter')(wf, $scope.tcFilter) : wf;
+                    var tg = $filter('tags') (wf, $scope.tcFilter.tags);
+                    return $scope.filterActive($scope.tcFilter) ? $filter('tcFilter')(wf, $scope.tcFilter) : tg;
                 }
                 else {
                     return [];
@@ -1530,7 +1501,7 @@ angular
             };
 
             $scope.sanitizeTestCase = function (tc) {
-                TestObjectUtil.sanitizeDates(tc);
+                // TestObjectUtil.sanitizeDates(tc);
                 tc._dateType = tc.dateType;
             };
 

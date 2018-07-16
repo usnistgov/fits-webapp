@@ -109,9 +109,9 @@ angular.module('tcl').controller('ExecutionCtrl', function (DataSynchService, En
     $scope.selectedReport = {};
     $scope.assessmentDate = {
         type: 'fixed',
-        _dateObj: $scope.today,
-        date: $rootScope.toUTC($scope.today)
+        dateString: new  Date().toLocaleDateString('en-US')
     };
+    console.log("DATE STRING "+$scope.assessmentDate.dateString);
     $scope.heigth = {
         'heigth': '100%'
     };
@@ -310,6 +310,10 @@ angular.module('tcl').controller('ExecutionCtrl', function (DataSynchService, En
             $scope.configStub = JSON.parse(angular.toJson(config));
         }
 
+    };
+
+    $scope.asDate = function(str){
+        return moment(str, "MM/DD/YYYY", true).format("dddd, MMMM Do YYYY");
     };
 
     $scope.groupName = function (id) {
@@ -915,8 +919,8 @@ angular.module('tcl').controller('ExecutionCtrl', function (DataSynchService, En
     $scope.exe = function () {
         console.log("EXE");
         $scope.exec = true;
-        $scope.archive($scope.tcQueue, $rootScope.selectedConfig, $scope.assessmentDate.date);
-        ExecutionService.play($scope.tcQueue, $rootScope.selectedConfig.id, $scope.assessmentDate.date, $scope.controls, $scope.container).then(function (response) {
+        $scope.archive($scope.tcQueue, $rootScope.selectedConfig, $scope.assessmentDate.dateString);
+        ExecutionService.play($scope.tcQueue, $rootScope.selectedConfig.id, $scope.assessmentDate.dateString, $scope.controls, $scope.container).then(function (response) {
                 $scope.resultsHandle(response);
             },
             function (error) {
@@ -959,7 +963,7 @@ angular.module('tcl').controller('ExecutionCtrl', function (DataSynchService, En
 
     $scope.resume = function () {
         $scope.controls.paused = true;
-        ExecutionService.resume($scope.tcQueue, $rootScope.selectedConfig.id, $scope.assessmentDate.date, $scope.controls, $scope.container).then(function (response) {
+        ExecutionService.resume($scope.tcQueue, $rootScope.selectedConfig.id, $scope.assessmentDate.dateString, $scope.controls, $scope.container).then(function (response) {
                 $scope.resultsHandle(response);
             },
             function (error) {

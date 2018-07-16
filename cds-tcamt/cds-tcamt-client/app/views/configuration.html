@@ -17,7 +17,7 @@
 </script>
 <div layout="column" layout-align="center center" style="height: 100%; width: 100%;" ng-init="aEdit = false; cEdit = false;">
     <!-- Date -->
-    <div md-whiteframe="2" ng-show="nbRelativeTC > 0" layout="column" style="width: 100%; margin-bottom: 10px;" layout-align="start center">
+    <div md-whiteframe="2"  layout="column" style="width: 100%; margin-bottom: 10px;"  ng-show="nbRelativeTC > 0" layout-align="start center">
         <div class="panel-heading" style="text-align: center; color : black; width: 100%; background-color: white; border: 1px solid;">
             <i ng-show="assessmentDate.date" class="fa fa-check-circle pull-left" style="font-size: 1.5em; color : green;" aria-hidden="true"></i>
             <i ng-show="!assessmentDate.date" class="fa fa-times-circle pull-left" style="font-size: 1.5em; color : red;" aria-hidden="true"></i>
@@ -29,16 +29,19 @@
                 <i class="fa fa-calendar" style="font-size: 2em;" aria-hidden="true"></i>
             </div>
             <div flex="80" layout="row" layout-align="center center">
-                <strong>{{assessmentDate.date | date:'fullDate' : 'UTC' }}</strong>
+                <strong>{{asDate(assessmentDate.dateString)}}</strong>
+
             </div>
             <div flex="10" layout="row" layout-align="center center">
-                <button class="btn btn-xs btn-info pull-right" style="margin: 0;" ng-model="aEdit" uib-btn-checkbox btn-checkbox-true="true" btn-checkbox-false="false">
-                    <i class="fa fa-pencil" aria-hidden="true"></i>
-                </button>
+                <div class="input-group"
+                     moment-picker="assessmentDate.dateString"
+                     format="MM/DD/YYYY"
+                     style="max-width: 200px;">
+                    <button class="btn btn-xs btn-info pull-right" style="margin: 0;" >
+                        <i class="fa fa-pencil" aria-hidden="true"></i>
+                    </button>
+                </div>
             </div>
-        </div>
-        <div style="border: 1px solid #dddddd; width: 100%;" ng-show="aEdit" layout="row" layout-align="center center">
-            <div uib-datepicker ng-model="assessmentDate.date"></div>
         </div>
     </div>
     <div md-whiteframe="2" layout="column" layout-align="start center" style="width: 100%;">
@@ -118,10 +121,10 @@
                         <label>Connector Type</label>
                         <md-select ng-model="configStub.connector" required>
                             <md-option ng-value="'TCH'">TCH</md-option>
-	                    <md-option ng-value="'STC'">STC</md-option>
+	                        <md-option ng-value="'STC'">STC</md-option>
                             <md-option ng-value="'ICE'">ICE</md-option>
+                            <md-option ng-value="'MA'">MA</md-option>
                             <md-option ng-value="'FHIR'">FHIR</md-option>
-			    <!--<md-option ng-value="'HL7'">HL7</md-option>-->
                         </md-select>
                     </md-input-container>
 		    <!--<md-input-container style="width: 100%; margin-top: 15px;">-->

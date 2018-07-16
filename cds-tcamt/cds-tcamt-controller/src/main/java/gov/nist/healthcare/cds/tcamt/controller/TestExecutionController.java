@@ -2,11 +2,13 @@ package gov.nist.healthcare.cds.tcamt.controller;
 
 import java.io.IOException;
 import java.security.Principal;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import gov.nist.healthcare.cds.domain.FixedDate;
 import gov.nist.healthcare.cds.domain.SoftwareConfig;
 import gov.nist.healthcare.cds.domain.TestCase;
 import gov.nist.healthcare.cds.domain.TestCaseGroup;
@@ -132,12 +134,16 @@ public class TestExecutionController {
 		}
 		else {
 			try {
-				return execService.execute(config, tc, sc.getDate());
+				return execService.execute(config, tc, FixedDate.DATE_FORMAT.parse(sc.getDate()));
 			}
 			catch(ConnectionException ex){
 				System.out.println(ex);
 				ex.printStackTrace();
 				response.sendError(this.code(ex.getStatusCode()),ex.getStatusText());
+				return null;
+			} catch (ParseException e) {
+				System.out.println(e);
+				response.sendError(500,e.getMessage());
 				return null;
 			}
 		}

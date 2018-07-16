@@ -379,6 +379,7 @@ public class TestCaseController {
 			return ImportSummary.configError();
 		}
 		catch (Exception e) {
+			e.printStackTrace();
 			return ImportSummary.errorInFile();
 		}
 	}

@@ -5,6 +5,8 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
@@ -40,6 +42,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import gov.nist.fhir.client.ir.TestRunnerServiceFhirImpl;
 import gov.nist.healthcare.cds.domain.Date;
+import gov.nist.healthcare.cds.domain.Event;
+import gov.nist.healthcare.cds.domain.ExpectedForecast;
 import gov.nist.healthcare.cds.domain.FixedDate;
 import gov.nist.healthcare.cds.domain.RelativeDate;
 import gov.nist.healthcare.cds.domain.RelativeDateRule;
@@ -48,6 +52,7 @@ import gov.nist.healthcare.cds.domain.Tag;
 import gov.nist.healthcare.cds.domain.TestCase;
 import gov.nist.healthcare.cds.domain.TestCaseGroup;
 import gov.nist.healthcare.cds.domain.TestPlan;
+import gov.nist.healthcare.cds.domain.VaccinationEvent;
 import gov.nist.healthcare.cds.domain.VaccineMapping;
 import gov.nist.healthcare.cds.domain.exception.ProductNotFoundException;
 import gov.nist.healthcare.cds.domain.exception.VaccineNotFoundException;
@@ -127,44 +132,45 @@ public class SpringBootConsoleApplication implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-    	System.out.println("[UPDATE DATA]");
-    	System.out.println("[VACCINES]");
-    	long all = vaccineRepository.count();
-		int i = 0;
-		Set<VaccineMapping> set = vaccineService._import(SpringBootConsoleApplication.class.getResourceAsStream("/web_cvx.xlsx"),SpringBootConsoleApplication.class.getResourceAsStream("/web_vax2vg.xlsx"),SpringBootConsoleApplication.class.getResourceAsStream("/web_mvx.xlsx"),SpringBootConsoleApplication.class.getResourceAsStream("/web_tradename.xlsx"));
-		for(VaccineMapping mp : set){
-			i++;
-			vaccineRepository.save(mp);
-		}
-		System.out.println("[VACCINE SERVICE IMPORT] IMPORTED "+i+" EXISTING "+all);
-		System.out.println("[TAG]");
-		String username = "CDC_CDSi";
-		System.out.println("Username : "+username);
-		List<TestPlan> tps = tpRepo.findByUser(username);
-		List<TestCase> tcs = tcs(tps);
-		List<TestCase> toSave = new ArrayList<>();
-		
-		for(TestCase tc : tcs){
-			try {
-				Age a = age(tc);
-				Tag tag = tag(a);
-				if(tc.getTags() != null && tc.getTags().contains(tag)) continue;
-				else {
-					if(tc.getTags() == null){
-						tc.setTags(Arrays.asList(tag));
-					}
-					else {
-						tc.getTags().add(tag);
-					}
-					toSave.add(tc);
-				}
-			}
-			catch(Exception e){
-				System.out.println("[ISSUE] "+e.getMessage());
-			}
-		}
-		System.out.println("[UPDATED TCS] "+toSave.size()+" / "+tcs.size());
-		this.tcRepo.save(toSave);
+//    	System.out.println("[UPDATE DATA]");
+//    	System.out.println("[VACCINES]");
+//    	long all = vaccineRepository.count();
+//		int i = 0;
+//		Set<VaccineMapping> set = vaccineService._import(SpringBootConsoleApplication.class.getResourceAsStream("/web_cvx.xlsx"),SpringBootConsoleApplication.class.getResourceAsStream("/web_vax2vg.xlsx"),SpringBootConsoleApplication.class.getResourceAsStream("/web_mvx.xlsx"),SpringBootConsoleApplication.class.getResourceAsStream("/web_tradename.xlsx"));
+//		for(VaccineMapping mp : set){
+//			i++;
+//			vaccineRepository.save(mp);
+//		}
+//		System.out.println("[VACCINE SERVICE IMPORT] IMPORTED "+i+" EXISTING "+all);
+//		System.out.println("[TAG]");
+//		String username = "CDC_CDSi";
+//		System.out.println("Username : "+username);
+//		List<TestPlan> tps = tpRepo.findByUser(username);
+//		List<TestCase> tcs = tcs(tps);
+//		List<TestCase> toSave = new ArrayList<>();
+//		
+//		for(TestCase tc : tcs){
+//			try {
+//				Age a = age(tc);
+//				Tag tag = tag(a);
+//				if(tc.getTags() != null && tc.getTags().contains(tag)) continue;
+//				else {
+//					if(tc.getTags() == null){
+//						tc.setTags(Arrays.asList(tag));
+//					}
+//					else {
+//						tc.getTags().add(tag);
+//					}
+//					toSave.add(tc);
+//				}
+//			}
+//			catch(Exception e){
+//				System.out.println("[ISSUE] "+e.getMessage());
+//			}
+//		}
+//		System.out.println("[UPDATED TCS] "+toSave.size()+" / "+tcs.size());
+//		this.tcRepo.save(toSave);
+    	updateDates();
     }
     
     
@@ -174,6 +180,43 @@ public class SpringBootConsoleApplication implements CommandLineRunner {
     	else if(a.getYear() >= 19) return new Tag("19+");
     	return null;
     };
+    
+    public void updateDates(){
+		List<TestCase> testCases = this.tcRepo.findAll();
+		for(TestCase tc : testCases){
+			if(tc.getDateType().equals(DateType.FIXED)){
+				handleFD(tc.getEvalDate());
+				handleFD(tc.getPatient().getDob());
+				for(Event e : tc.getEvents()){
+					VaccinationEvent ve = (VaccinationEvent) e;
+					handleFD(ve.getDate());
+				}
+				for(ExpectedForecast ef : tc.getForecast()){
+					handleFD(ef.getEarliest());
+					handleFD(ef.getRecommended());
+					handleFD(ef.getPastDue());
+					handleFD(ef.getComplete());
+				}
+			}
+		}
+		
+		this.tcRepo.save(testCases);
+	}
+	
+	public void handleFD(Date d){
+		if(d != null){
+			FixedDate fd = (FixedDate) d;
+			fd.setDateString(getDate(fd.getDate()));
+			fd.setDate(null);
+		}
+	}
+	
+	public String getDate(java.util.Date date){
+		Calendar c = new GregorianCalendar();
+		c.setTime(date);
+		
+		return FixedDate.DATE_FORMAT.format(new java.util.Date(c.getTimeInMillis() - c.getTimeZone().getRawOffset()));
+	}
     
     
     private List<TestCase> tcs(List<TestPlan> tps) {
@@ -193,8 +236,8 @@ public class SpringBootConsoleApplication implements CommandLineRunner {
     
     private Age age(TestCase tc){
     	if(tc.getDateType().equals(DateType.FIXED)){
-    		LocalDate from = new LocalDate(((FixedDate) tc.getPatient().getDob()).getDate());
-    		LocalDate to = new LocalDate(((FixedDate) tc.getEvalDate()).getDate());
+    		LocalDate from = new LocalDate(((FixedDate) tc.getPatient().getDob()).getDateString());
+    		LocalDate to = new LocalDate(((FixedDate) tc.getEvalDate()).getDateString());
     		Period period = new Period(from, to, PeriodType.yearMonthDay());
     		return new Age(period.getYears(), period.getDays() > 0 || period.getMonths() > 0);
     	}
@@ -206,41 +249,6 @@ public class SpringBootConsoleApplication implements CommandLineRunner {
     	}
     }
     
-    
-	
-//	@Bean 
-//	public AppInfo appInfo() throws ParseException{
-//		AppInfo app = new AppInfo();
-//		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
-//		app.setAdminEmail(env.getProperty("webadmin.email"));
-//		app.setDate(new Date(Integer.parseInt(env.getProperty("date"))));
-//		app.setVersion(env.getProperty("version"));
-//		return app;
-//	}
-//	
-//	@Bean
-//	public JavaMailSenderImpl mailSender() {
-//		JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
-//		mailSender.setHost("smtp.nist.gov");
-//		mailSender.setPort(25);
-//		mailSender.setProtocol("smtp");
-//		Properties javaMailProperties = new Properties();
-//		javaMailProperties.setProperty("mail.smtp.auth","false");
-//		javaMailProperties.setProperty("mail.debug","true");
-//
-//		mailSender.setJavaMailProperties(javaMailProperties);
-//		return mailSender;
-//	}
-//
-//
-//	@Bean
-//	public org.springframework.mail.SimpleMailMessage templateMessage() {
-//		org.springframework.mail.SimpleMailMessage templateMessage = new org.springframework.mail.SimpleMailMessage();
-//		templateMessage.setFrom("fits@nist.gov");
-//		templateMessage.setSubject("NIST FITS Notification");
-//		return templateMessage;
-//	}
-//	
 	@Bean
 	public VaccineMatcherService matcher(){
 		return new ConfigurableVaccineMatcher();
@@ -261,17 +269,6 @@ public class SpringBootConsoleApplication implements CommandLineRunner {
 	public TestRunnerService testRunner(){
 		return new TestRunnerServiceFhirImpl("https://hit-dev.nist.gov:15000/fhirAdapter/fhir/Parameters/$cds-forecast");
 	}
-	
-//	@Bean
-//	public SimulationMap simulationMap() throws JsonParseException, JsonMappingException, IOException{
-//		ObjectMapper mapper = new ObjectMapper();
-//		SimulationMap sm = new SimulationMap();
-//		List<SimulatedResult> myObjects = mapper.readValue(Bootstrap.class.getResourceAsStream("/simulation.json"), mapper.getTypeFactory().constructCollectionType(List.class, SimulatedResult.class));
-//		for(SimulatedResult sr : myObjects){
-//			sm.put(sr.getId(),sr.getXml());
-//		}
-//		return sm;
-//	}
 	
 	
 	@Bean

@@ -34,13 +34,14 @@ body {
 								<div class="col-md-4">
 									<md-input-container style="width: 100%;">
 										<label>Creation Date</label>
-										<md-datepicker ng-model="selectedTP.metaData._dateCreated" ng-change="dateChange(selectedTP.metaData,'dateCreated')" ng-disabled="true"></md-datepicker>
+                                        <input ng-model="selectedTP.metaData.version" ng-value="selectedTP.metaData.dateCreated | date:'MM/dd/yyyy' : 'UTC'" disabled="true" type="text"/>
+                                        <span></span>
 									</md-input-container>
 								</div>
 								<div class="col-md-4">
 									<md-input-container style="width: 100%;">
 										<label>Date Last Updated</label>
-										<md-datepicker ng-model="selectedTP.metaData._dateLastUpdated" ng-change="dateChange(selectedTP.metaData,'dateLastUpdated')" ng-disabled="true"></md-datepicker>
+                                        <input ng-model="selectedTP.metaData.version" ng-value="selectedTP.metaData.dateLastUpdated | date:'MM/dd/yyyy' : 'UTC'" disabled="true" type="text"/>
 									</md-input-container>
 								</div>
 								<div class="col-md-12" style="height: 100%;">

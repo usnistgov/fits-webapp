@@ -225,7 +225,7 @@
 		    </div>
 		    <div flex="50" layout="column" layout-align="start center">
 			<span><strong>{{rp.veRequirement.vEvent.administred.name}}</strong></span>
-			<span>Date Administred : {{rp.veRequirement.dateAdministred | date:"MM/dd/yyyy" : 'UTC'}}</span>
+			<span>Date Administred : {{rp.veRequirement.dateAdministred.dateString}}</span>
 		    </div>
 		</div>
 		<div style="width : 100%;" layout="row" layout-align="start center"
@@ -239,7 +239,7 @@
 			<span><strong>{{getVx(rp.veRequirement.vEvent.administred).name}}</strong></span>
 			<span><strong>By</strong> {{rp.veRequirement.vEvent.administred.mx.name}}</span>
 			<span><strong>{{rp.veRequirement.vEvent.administred.name}}</strong></span>
-			<span>Date Administred : {{rp.veRequirement.dateAdministred | date:"MM/dd/yyyy" : 'UTC'}}</span>
+			<span>Date Administred : {{rp.veRequirement.dateAdministred.dateString}}</span>
 		    </div>
 		</div>
 	    </td>
@@ -296,7 +296,7 @@
 	</tr>
 	<tr ng-hide="fc.earliest.status === 'N'">
 	    <td style="background-color: #FFFFFF;">Earliest</td>
-	    <td>{{fc.forecastRequirement.earliest | date:"MM/dd/yyyy" : 'UTC'}}</td>
+	    <td>{{fc.forecastRequirement.earliest.dateString}}</td>
 	    <td>{{fc.earliest.status === 'U' ? '' : printDiff(fc.forecastRequirement.earliest,fc.earliest)}}</td>
 	    <td style="color : black;" ng-class="{ 'warning' : fc.earliest.status === 'W', 'success' : fc.earliest.status === 'P', 'danger' : fc.earliest.status === 'F', 'unmatched' : fc.earliest.status === 'U' }">
 		{{assessment(fc.earliest)}}
@@ -304,7 +304,7 @@
 	</tr>
 	<tr ng-hide="fc.recommended.status === 'N'">
 	    <td style="background-color: #FFFFFF;">Recommended</td>
-	    <td>{{fc.forecastRequirement.recommended | date:"MM/dd/yyyy" : 'UTC'}}</td>
+	    <td>{{fc.forecastRequirement.recommended.dateString}}</td>
 	    <td>{{fc.recommended.status === 'U' ? '' : printDiff(fc.forecastRequirement.recommended,fc.recommended)}}</td>
 	    <td style="color : black;" ng-class="{ 'warning' : fc.recommended.status === 'W', 'success' : fc.recommended.status === 'P', 'danger' : fc.recommended.status === 'F', 'unmatched' : fc.recommended.status === 'U' }">
 		{{assessment(fc.recommended)}}
@@ -312,7 +312,7 @@
 	</tr>
 	<tr ng-hide="fc.pastDue.status === 'N'">
 	    <td style="background-color: #FFFFFF;">Past Due</td>
-	    <td>{{fc.forecastRequirement.pastDue | date:"MM/dd/yyyy" : 'UTC'}}</td>
+	    <td>{{fc.forecastRequirement.pastDue.dateString}}</td>
 	    <td>{{fc.pastDue.status === 'U' ? '' : printDiff(fc.forecastRequirement.pastDue,fc.pastDue)}}</td>
 	    <td style="color : black;" ng-class="{ 'warning' : fc.pastDue.status === 'W', 'success' : fc.pastDue.status === 'P', 'danger' : fc.pastDue.status === 'F', 'unmatched' : fc.pastDue.status === 'U' }">
 		{{assessment(fc.pastDue)}}
@@ -320,7 +320,7 @@
 	</tr>
 	<tr ng-hide="fc.complete.status === 'N'">
 	    <td style="background-color: #FFFFFF;">Latest</td>
-	    <td>{{fc.forecastRequirement.complete | date:"MM/dd/yyyy" : 'UTC'}}</td>
+	    <td>{{fc.forecastRequirement.complete.dateString}}</td>
 	    <td>{{fc.complete.status === 'U' ? '' : printDiff(fc.forecastRequirement.complete,fc.complete)}}</td>
 	    <td style="color : black;" ng-class="{ 'warning' : fc.complete.status === 'W', 'success' : fc.complete.status === 'P', 'danger' : fc.complete.status === 'F', 'unmatched' : fc.complete.status === 'U' }">
 		{{assessment(fc.complete)}}

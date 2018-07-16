@@ -5,17 +5,23 @@
 			</md-checkbox>
 			<h4 style="color: #ffffff;" ng-bind="ctrl.label"><strong>{{ctrl.label}}</strong></h4>
 		</div>
-		<div ng-show="ctrl.type === 'FIXED' && ctrl.dt" ng-class="{'invalid-date' : !ctrl.dt || !ctrl.dt._dateObj, 'valid-date' : ctrl.dt && ctrl.dt._dateObj}" style="padding: 10px; border: 1px solid #e1e1e1;" layout="row" layout-align="center center">
+		<div ng-show="ctrl.type === 'FIXED' && ctrl.dt" ng-class="{'invalid-date' : !ctrl.dt || !dateIsValid(ctrl.dt.dateString) , 'valid-date' : ctrl.dt && dateIsValid(ctrl.dt.dateString)}" style="padding: 10px; border: 1px solid #e1e1e1;" layout="row" layout-align="center center">
 			<form name="fform">
-				<md-input-container>
-					<md-datepicker
-                            date-local
-							ng-model="ctrl.dt.date"
-							md-placeholder="Enter date" >
-					</md-datepicker>
-				</md-input-container>
-			</form>
-			<div ng-show="ctrl.dt.date" style="font-size: 15px; color: #0740C7; margin-left : 20px;">{{ctrl.dt.date | date : 'fullDate' : 'UTC'}}</div>
+                    <div class="input-group"
+                         moment-picker="ctrl.dt.dateString"
+                         format="MM/DD/YYYY"
+                         style="max-width: 100px;">
+                        <span class="input-group-addon">
+                            <i class="fa fa-calendar"></i>
+                        </span>
+                        <input
+                               placeholder="Enter Date"
+                               ng-model="ctrl.dt.dateString"
+                               ng-model-change="dateChange(ctrl.dt.dateString)"
+                               ng-model-options="{ updateOn: 'blur' }">
+                    </div>
+            </form>
+			<div ng-show="dateIsValid(ctrl.dt.dateString)" style="font-size: 15px; color: #0740C7; margin-left : 20px;">{{printDate(ctrl.dt.dateString)}}</div>
 		</div>
 		<div ng-show="ctrl.type === 'RELATIVE' && ctrl.dt" ng-class="{'invalid-date' : rform.$invalid || ctrl.dt.rules.length === 0, 'valid-date' : !rform.$invalid && ctrl.dt.rules.length > 0}" style="border: 1px solid #e1e1e1;" >
 			<form name="rform" layout="column" layout-align="center start">

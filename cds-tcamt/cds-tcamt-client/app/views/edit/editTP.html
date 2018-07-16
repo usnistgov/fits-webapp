@@ -213,7 +213,7 @@
 					    <td style="text-align: center;">
 						<div layout="row" layout-align="center center">
 						    <span ng-if="selectedTC.dateType === 'RELATIVE'">Today (Relative)</span>
-						    <span ng-if="selectedTC.dateType === 'FIXED'">{{selectedTC.evalDate.date | date:'MM/dd/yyyy' : 'UTC'}}</span>
+						    <span ng-if="selectedTC.dateType === 'FIXED'">{{selectedTC.evalDate.dateString}}</span>
 						</div>
 					    </td>
 					</tr>
@@ -223,7 +223,7 @@
 					    </td>
 					    <td style="text-align: center;">
 						<div layout="row" layout-align="center center">
-						    <span>{{selectedTC.patient.dob.date | date:'MM/dd/yyyy' : 'UTC'}}</span>
+						    <span>{{selectedTC.patient.dob.dateString}}</span>
 						</div>
 					    </td>
 					</tr>
