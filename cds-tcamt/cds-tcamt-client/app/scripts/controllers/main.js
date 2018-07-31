@@ -5,6 +5,9 @@ angular.module('tcl').controller('MainCtrl', ['DataSynchService','TestObjectUtil
         userInfoService.loadFromServer();
         $rootScope.loginDialog = null;
         $rootScope.timezone = moment().format('UTC');
+        $rootScope.printDate = function(str){
+            return moment(str, "MM/DD/YYYY").format("dddd, MMMM Do YYYY");
+        };
         $rootScope.toUTC = function (date) {
             var mDate = moment(date);
             return Date.UTC(mDate.year(),mDate.month(),mDate.date());

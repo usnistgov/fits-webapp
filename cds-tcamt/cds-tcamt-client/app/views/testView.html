@@ -51,8 +51,7 @@
                 <tr>
                     <td style="width : 200px;"><strong> Assessment Date </strong></td>
                     <td ng-show="selectedTC.evalDate.type === 'fixed'">
-                        {{selectedTC.evalDate.date | date:'MM/dd/yyyy' : 'UTC'}} - {{selectedTC.evalDate.date | date :
-                        'fullDate' : 'UTC'}}
+                        {{selectedTC.evalDate.dateString}} - {{printDate(selectedTC.evalDate.dateString)}}
                     </td>
                     <td ng-show="selectedTC.evalDate.type === 'relative'">
                         Relative (Today)
@@ -61,8 +60,7 @@
                 <tr>
                     <td style="width : 200px;"><strong> Date Of Birth </strong></td>
                     <td ng-if="selectedTC.patient.dob.type === 'fixed'">
-                        {{selectedTC.patient.dob.date | date:'MM/dd/yyyy' : 'UTC'}} - {{selectedTC.patient.dob.date | date :
-                        'fullDate' : 'UTC'}}
+                        {{selectedTC.patient.dob.dateString}} - {{printDate(selectedTC.patient.dob.dateString)}}
                     </td>
                     <td ng-if="selectedTC.patient.dob.type === 'relative'">
                         <table ng-if="selectedTC.patient.dob.rules">
@@ -99,8 +97,7 @@
                 <tr>
                     <td style="width : 200px;"><strong> Date Administred </strong></td>
                     <td ng-if="event.date.type === 'fixed'">
-                        {{event.date.date | date:'MM/dd/yyyy' : 'UTC'}} - {{event.date.date | date :
-                        'fullDate' : 'UTC'}}
+                        {{event.date.dateString}} - {{printDate(event.date.dateString)}}
                     </td>
                     <td ng-if="event.date.type === 'relative'">
                         <table ng-if="event.date.rules" style="font-size : 13px;">
@@ -171,7 +168,7 @@
                 <tr>
                     <td style="width : 200px;"><strong> Earliest Date </strong></td>
                     <td ng-if="fc.earliest.type === 'fixed'">
-                        {{fc.earliest.date | date:'MM/dd/yyyy' : 'UTC'}} - {{fc.earliest.date | date : 'fullDate' : 'UTC'}}
+                        {{fc.earliest.dateString}} - {{printDate(fc.earliest.dateString)}}
                     </td>
                     <td ng-if="fc.earliest.type === 'relative'">
                         <table ng-if="fc.earliest.rules" style="font-size : 13px;">
@@ -198,7 +195,7 @@
                 <tr>
                     <td style="width : 200px;"><strong> Recommended Date </strong></td>
                     <td ng-if="fc.recommended.type === 'fixed'">
-                        {{fc.recommended.date | date:'MM/dd/yyyy' : 'UTC'}} - {{fc.recommended.date | date : 'fullDate' : 'UTC'}}
+                        {{fc.recommended.dateString}} - {{printDate(fc.recommended.dateString)}}
                     </td>
                     <td ng-if="fc.recommended.type === 'relative'">
                         <table ng-if="fc.recommended.rules" style="font-size : 13px;">
@@ -225,7 +222,7 @@
                 <tr>
                     <td style="width : 200px;"><strong> Past Due Date </strong></td>
                     <td ng-if="fc.pastDue.type === 'fixed'">
-                        {{fc.pastDue.date | date:'MM/dd/yyyy' : 'UTC'}} - {{fc.pastDue.date | date : 'fullDate' : 'UTC'}}
+                        {{fc.pastDue.dateString}} - {{printDate(fc.pastDue.dateString)}}
                     </td>
                     <td ng-if="fc.pastDue.type === 'relative'">
                         <table ng-if="fc.pastDue.rules" style="font-size : 13px;">
@@ -252,7 +249,7 @@
                 <tr>
                     <td style="width : 200px;"><strong> Latest Date </strong></td>
                     <td ng-if="fc.complete.type === 'fixed'">
-                        {{fc.complete.date | date:'MM/dd/yyyy' : 'UTC'}} - {{fc.complete.date | date : 'fullDate' : 'UTC'}}
+                        {{fc.complete.dateString}} - {{printDate(fc.complete.dateString)}}
                     </td>
                     <td ng-if="fc.complete.type === 'relative'">
                         <table ng-if="fc.complete.rules" style="font-size : 13px;">

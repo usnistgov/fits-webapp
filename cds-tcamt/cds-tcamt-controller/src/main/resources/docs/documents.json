@@ -4,5 +4,23 @@
 		"date" : "Wednesday, April 12, 2017",
 		"fileName" : "FITS-NISTrsnelick-AIRA2017.pptx.zip",
 		"location" : "/docs/FITS-NISTrsnelick-AIRA2017.pptx.zip"
+	},
+	{
+		"name" : "How to create a test case",
+		"date" : "Wednesday, July 27, 2018",
+		"fileName" : "test_case_creation.pptx",
+		"location" : "/docs/test_case_creation.pptx"
+	},
+	{
+		"name" : "How to import test cases",
+		"date" : "Wednesday, July 27, 2018",
+		"fileName" : "test_case_import.pptx",
+		"location" : "/docs/test_case_import.pptx"
+	},
+	{
+		"name" : "How to execute test cases and browse reports",
+		"date" : "Wednesday, July 27, 2018",
+		"fileName" : "test_case_execution.pptx",
+		"location" : "/docs/test_case_execution.pptx"
 	}
 ]

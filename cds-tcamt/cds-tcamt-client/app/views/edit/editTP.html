@@ -293,12 +293,13 @@
 		    <div flex="70" style="text-align: center;">
 			<strong>Vaccination History and Expected Evaluations</strong>
 		    </div>
-		    <button flex="15" title="Add Event" type="button"
+		    <button flex="15" type="button"
 			    class="btn btn-xs btn-info pull-right"
 			    ng-click="addEvent();"
 			    ng-show="aTCisSelected()"
 			    style="margin: 0px;">
-			<span><i class="fa fa-plus fa-fw"></i></span>
+                <md-tooltip md-direction="top">Add Event</md-tooltip>
+                <span><i class="fa fa-plus fa-fw"></i></span>
 		    </button>
 		</div>
 		<div class="panel-body" ng-show="selectedTC.events.length > 0 && vxview">
@@ -323,12 +324,13 @@
 		    <div flex="70" style="text-align: center;">
 			<strong>Expected Forecasts</strong>
 		    </div>
-		    <button flex="15" title="Add Forecast" type="button"
+		    <button flex="15" type="button"
 			    class="btn btn-xs btn-info pull-right"
 			    style="margin: 0px;"
 			    ng-show="aTCisSelected() && !vOnly()"
 			    ng-click="addForecast(); tcChanged()">
-			<span><i class="fa fa-plus fa-fw"></i></span>
+                <md-tooltip md-direction="top">Add Forecast</md-tooltip>
+                <span><i class="fa fa-plus fa-fw"></i></span>
 		    </button>
 		</div>
 		<div class="panel-body" ng-show="selectedTC.forecast.length > 0 && fcview">

@@ -38,6 +38,7 @@
                      format="MM/DD/YYYY"
                      style="max-width: 200px;">
                     <button class="btn btn-xs btn-info pull-right" style="margin: 0;" >
+                        <md-tooltip md-direction="top">Date Picker</md-tooltip>
                         <i class="fa fa-pencil" aria-hidden="true"></i>
                     </button>
                 </div>
@@ -65,6 +66,7 @@
             </div>
             <div flex="10" layout="row" layout-align="center center">
                 <button ng-click="toggleSoftware()" class="btn btn-xs btn-info pull-right" style="margin: 0;" ng-model="cEdit" uib-btn-checkbox btn-checkbox-true="true" btn-checkbox-false="false">
+                    <md-tooltip md-direction="top">Open Software Configuration</md-tooltip>
                     <i class="fa fa-pencil" aria-hidden="true"></i>
                 </button>
             </div>
@@ -76,7 +78,9 @@
                         <strong>Software List</strong>
                     </div>
                     <div flex="10" layout="row" layout-align="center center">
-                        <i class="fa fa-plus" style="color: blue; cursor: pointer; font-size: 1.5em;" ng-click="createConf()" aria-hidden="true"></i>
+                        <i class="fa fa-plus" style="color: blue; cursor: pointer; font-size: 1.5em;" ng-click="createConf()" aria-hidden="true">
+                            <md-tooltip md-direction="top">Add Software Configuration</md-tooltip>
+                        </i>
                     </div>
                 </div>
                 <div style="width: 100%; padding: 0; height: 100%; overflow-y: auto;">
@@ -97,7 +101,9 @@
                                     </div>
                                 </div>
                                 <div flex="10" layout="row" layout-align="center center">
-                                    <i style="color: red; cursor: pointer; font-size: 1.5em;"  ng-click="deleteConfig($index,conf.id,conf._local)" class="fa fa-times" aria-hidden="true"></i>
+                                    <i style="color: red; cursor: pointer; font-size: 1.5em;"  ng-click="deleteConfig($index,conf.id,conf._local)" class="fa fa-times" aria-hidden="true">
+                                        <md-tooltip md-direction="top">Delete Configuration</md-tooltip>
+                                    </i>
                                 </div>
                         </md-list-item>
                     </md-list>
@@ -131,6 +137,7 @@
 			<!--<md-checkbox ng-model="configStub.auth" type="text" required>Authentication</md-checkbox>-->
 		    <!--</md-input-container>-->
                     <button ng-show="configForm.$valid" ng-click="saveConfig();" class="btn btn-success pull-right" >
+                        <md-tooltip md-direction="top">Save Software Configuration</md-tooltip>
                         <i class="fa fa-floppy-o" aria-hidden="true"></i>
                     </button>
                 </form>

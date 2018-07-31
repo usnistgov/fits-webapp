@@ -21,6 +21,7 @@
                      style="background-color: #293856;">
                     <div style="padding: 0;" ng-show="exec">
                         <button class="btn btn-xs btn-info" ng-click="back()" style="margin: 0; margin-right: 10px;">
+                            <md-tooltip md-direction="top">Back</md-tooltip>
                             <i class="fa fa-chevron-left" aria-hidden="true" style="font-size : 1.8em;"></i>
                         </button>
                     </div>
@@ -42,9 +43,11 @@
                                 <i ng-show="!controls.paused" class="fa fa-pause" aria-hidden="true"></i>
                                 <i ng-show="controls.paused" class="fa fa-play" aria-hidden="true"></i>
                             </span>
+                            <md-tooltip md-direction="top">{{ controls.paused ? 'Resume' : 'Pause'}}</md-tooltip>
                         </button>
                         <button ng-click="stop()" ng-show="exec && !showResults"
                                 class="btn btn-xs btn-danger" style="margin: 0px; margin-right: 10px;">
+                            <md-tooltip md-direction="top">Stop</md-tooltip>
                             <span>
                                 <i class="fa fa-stop" aria-hidden="true"></i>
                             </span>
@@ -52,29 +55,35 @@
 			<button ng-click="reloadFromHistory()"
 				ng-show="selectedConfig && hasHistory() && !controls.running"
 				class="btn btn-xs btn-info" style="margin: 0px; margin-right: 10px;">
-			    <span><i class="fa fa-refresh"></i> Rerun Last Execution </span>
+                <md-tooltip md-direction="top">Rerun Last Execution</md-tooltip>
+                <span><i class="fa fa-refresh"></i> Rerun Last Execution </span>
 			</button>
 			<button ng-click="exportExecReports()"
 				ng-show="exec && showResults && report && container.asList && container.asList.length > 0"
 				class="btn btn-xs btn-info" style="margin: 0px; margin-right: 10px;">
-			    <span><i class="fa fa-download"></i> Download Reports</span>
+                <md-tooltip md-direction="top"> Download Reports </md-tooltip>
+                <span><i class="fa fa-download"></i> Download Reports</span>
 			</button>
                         <button ng-click="saveReports()"
                                 ng-show="exec && showResults && report && container.asList && container.asList.length > 0 && !saved"
                                 class="btn btn-xs btn-success" style="margin: 0px; margin-right: 10px;">
+                            <md-tooltip md-direction="top">Save Reports</md-tooltip>
                             <span><i class="fa fa-floppy-o fa-fw"></i> Save Reports</span>
                         </button>
                         <button ng-click="clear()" ng-show="!exec && tcQueue.length > 0" class="btn btn-xs btn-danger"
                                 style="margin: 0px; margin-right: 10px;">
+                            <md-tooltip md-direction="top">Clear</md-tooltip>
                             <i class="fa fa-trash-o" style="font-size : 1.5em;" aria-hidden="true"></i>
                         </button>
                         <button ng-click="exe()" ng-show="!exec && canRun()" class="btn btn-xs btn-success"
                                 style="margin: 0px; margin-right: 10px;">
+                            <md-tooltip md-direction="top">Run</md-tooltip>
                             <i class="fa fa-play" style="font-size : 1.5em;" aria-hidden="true"></i>
                         </button>
                         <div style="padding: 0;">
                             <button class="btn btn-xs" ng-style="!qview ? { 'background-color' : '#44bf6b' } : {}"
                                     ng-click="qview = !qview" style="margin: 0; margin-right: 10px;">
+                                <md-tooltip md-direction="top">{{qview ? 'Hide' : 'Show'}}</md-tooltip>
                                 <i ng-show="!qview" class="fa fa-eye" aria-hidden="true"
                                    style="font-size : 1.5em; color: #2d5634;"></i>
                                 <i ng-show="qview" class="fa fa-eye-slash" aria-hidden="true"
@@ -243,6 +252,7 @@
                                     <div flex="100" layout="row" layout-align="space-around center">
                                         <div flex="10" layout="row" layout-align="center center">
                                             <button class="btn" ng-show="x.rp-1 >= 0 && viewTc.length > 0 && viewReport()" ng-click="goToReport(x.rp-1)">
+                                                <md-tooltip md-direction="top">Next</md-tooltip>
                                                 <i class="fa fa-chevron-left" style="font-size : 5em;"
                                                    aria-hidden="true"></i>
                                             </button>
@@ -258,6 +268,7 @@
                                         <div flex="10" layout="row" layout-align="center center">
                                             <button class="btn" ng-show="viewTc.length > x.rp+1 && viewTc.length > 0 && viewReport()"
                                                     ng-click="goToReport(x.rp+1)">
+                                                <md-tooltip md-direction="top">Back</md-tooltip>
                                                 <i class="fa fa-chevron-right" style="font-size : 5em;"
                                                    aria-hidden="true"></i>
                                             </button>
@@ -281,6 +292,7 @@
                             <button class="btn btn-xs" ng-click="multiToggle()"
                                     ng-class="{ 'btn-info' : !multipleSel, 'btn-success' : multipleSel  }"
                                     style="margin: 0;">
+                                <md-tooltip md-direction="top">Multiple Selection</md-tooltip>
                                 <i class="fa fa-files-o" style="font-size: 2em;" aria-hidden="true"></i>
                             </button>
                         </div>

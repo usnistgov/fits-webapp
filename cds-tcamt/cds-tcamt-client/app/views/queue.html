@@ -153,9 +153,11 @@
                 <md-list-item flex="10">
                     <div layout="row" layout-align="center center" style="width: 100%;">
                         <button ng-click="deleteTCL($index)" ng-if="!exec || $parent.showResults || $parent.controls.paused && !has(tc,'_s')" class="btn btn-xs btn-danger" >
+                            <md-tooltip md-direction="top">Remove Test Case Result</md-tooltip>
                             <i class="fa fa-times" aria-hidden="true"></i>
                         </button>
                         <button ng-click="goToReport($index)" class="btn btn-xs btn-info" ng-if="$parent.exec && $parent.showResults">
+                            <md-tooltip md-direction="top">Open Report</md-tooltip>
                             <i class="fa fa-search" aria-hidden="true"></i>
                         </button>
                     </div>

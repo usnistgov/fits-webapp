@@ -151,9 +151,11 @@
                         <md-card-actions layout="column" layout-align="end center">
                             <md-button ng-click="select(mp.vx)">
                                 <i style="font-size : 1.5em;" class="fa fa-hand-o-left" aria-hidden="true"></i>
+                                <md-tooltip md-direction="top">Select</md-tooltip>
                             </md-button>
                             <md-button ng-click="zoom(mp)" ng-show="mp.products && mp.products.length > 0 && allowMvx">
                                 <i style="font-size : 1.5em;" class="fa fa-search" aria-hidden="true"></i>
+                                <md-tooltip md-direction="top">Browse Products</md-tooltip>
                             </md-button>
                         </md-card-actions>
                     </md-card-title>

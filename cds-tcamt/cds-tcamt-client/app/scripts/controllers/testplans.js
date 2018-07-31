@@ -580,7 +580,7 @@ angular
             };
 
             $scope.exec = function (sw, tc) {
-                var config = { software : sw.id, date : new Date().getTime() };
+                var config = { software : sw.id, date : new Date().toLocaleDateString('en-US')};
                 $scope.quickV.running = true;
                 $scope.quickV.validationReport = {};
                 $scope.quickV.error = false;

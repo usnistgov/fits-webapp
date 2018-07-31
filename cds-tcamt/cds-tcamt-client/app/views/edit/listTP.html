@@ -75,16 +75,24 @@
             <div flex="10" style="padding-left: 20px;" layout="row" layout-align="end start" layout-wrap>
                 <button type="button" class="btn btn-sm btn-danger "
                         ng-click="confirmDeleteTestPlan(tp)" style="margin-top: 5px; margin-bottom: 0;">
+                    <md-tooltip md-direction="top">Delete Test Plan</md-tooltip>
                     <span><i class="fa fa-trash-o fa-fw"></i></span>
                 </button>
                 <button type="button" class="btn btn-sm btn-info "
                         ng-click="sharePanel(tp)" style="margin-top: 5px; margin-bottom: 0;">
+                    <md-tooltip md-direction="top">Share Test Plan</md-tooltip>
                     <span><i class="fa fa-share-alt"></i></span>
                 </button>
                 <button type="button" class="btn btn-sm btn-primary "
                         ng-disabled="!entityUtils.inSynch(tp)"
                         ng-click="cloneTestPlan(tp)" style="margin-top: 5px; margin-bottom: 0;">
+                    <md-tooltip md-direction="top">Clone Test Plan</md-tooltip>
                     <span><i class="fa fa-file"></i></span>
+                </button>
+                <button type="button" class="btn btn-sm btn-success"
+                        ng-click="openTP(tp)" style="margin-top: 5px; margin-bottom: 0;">
+                    <md-tooltip md-direction="top">Open Test Plan</md-tooltip>
+                    <span><i class="fa fa-edit"></i></span>
                 </button>
             </div>
         </md-list-item>
@@ -155,6 +163,7 @@
                 <button type="button" class="btn btn-sm btn-primary "
                         ng-disabled="!entityUtils.inSynch(tp)"
                         ng-click="cloneTestPlan(tp)" style="margin-top: 5px; margin-bottom: 0;">
+                    <md-tooltip md-direction="top">Clone Test Plan</md-tooltip>
                     <span><i class="fa fa-file"></i></span>
                 </button>
             </div>

@@ -28,7 +28,6 @@
                                 <th>
                                     File Name/Link
                                 </th>
-
                                 <th>
                                     Date Posted
                                 </th>
@@ -37,7 +36,7 @@
                             <tbody>
                             <tr ng-repeat="doc in documents">
                                 <td>
-                                    {{doc.name}}
+                                    <strong>{{doc.name}}</strong>
                                 </td>
                                 <td>
                                     <a class="point" ng-click="downloadDocument(doc.location)">{{doc.fileName}}</a>

@@ -209,6 +209,11 @@ angular.module('tcl')
                 $scope.account = row;
                 $scope.accountOrig = angular.copy($scope.account);
             };
+            $scope.unSelectAccount = function() {
+                $scope.accountpwd = {};
+                $scope.account = null;
+                $scope.accountOrig = {}
+            };
 
             $scope.deleteAccount = function() {
                 $scope.confirmDelete($scope.account);
