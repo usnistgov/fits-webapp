@@ -181,21 +181,55 @@
 			</tr>
 			<tr>
 			    <td md-whiteframe="2" colspan="2" style="text-align : center;">
-				XML Response
-				<button style="margin : 0px;" class="btn btn-xs pull-right"
-					ng-click="report.showXML = !report.showXML">
-				    <i ng-show="!report.showXML" class="fa fa-eye" aria-hidden="true"
-				       style="font-size : 1.5em; color: #2d5634;"></i>
-				    <i ng-show="report.showXML" class="fa fa-eye-slash" aria-hidden="true"
-				       style="font-size : 1.5em; color: rgb(203, 167, 167);"></i>
-				</button>
-			    <td>
+                    <strong>XML Response</strong>
+                    <button style="margin : 0px;" class="btn btn-xs pull-right"
+                        ng-click="report.showXML = !report.showXML">
+                        <i ng-show="!report.showXML" class="fa fa-eye" aria-hidden="true"
+                           style="font-size : 1.5em; color: #2d5634;"></i>
+                        <i ng-show="report.showXML" class="fa fa-eye-slash" aria-hidden="true"
+                           style="font-size : 1.5em; color: rgb(203, 167, 167);"></i>
+                    </button>
+			    </td>
 			</tr>
 			<tr ng-show="report.showXML">
 			    <td colspan="2" class="panel-resizable">
-				<pre style="height : 300px; overflow-y : scroll;" class="prettyprint">{{beauty}}</pre>
-			    <td>
+				    <pre style="height : 300px; overflow-y : scroll;" class="prettyprint">{{beauty}}</pre>
+			    </td>
 			</tr>
+            <tr>
+                <td md-whiteframe="2" colspan="2" style="text-align : center;">
+                    <strong>Vaccine Matcher Logs</strong>
+                    <button style="margin : 0px;" class="btn btn-xs pull-right"
+                            ng-click="report.showVML = !report.showVML">
+                        <i ng-show="!report.showVML" class="fa fa-eye" aria-hidden="true"
+                           style="font-size : 1.5em; color: #2d5634;"></i>
+                        <i ng-show="report.showVML" class="fa fa-eye-slash" aria-hidden="true"
+                           style="font-size : 1.5em; color: rgb(203, 167, 167);"></i>
+                    </button>
+                </td>
+            </tr>
+            <tr ng-show="report.showVML">
+                <td colspan="2" class="panel-resizable">
+                    <textarea style="height : 400px; width: 100%; background-color: whitesmoke; border-color: #cccccc;" disabled>{{report.matcherLogs}}</textarea>
+                </td>
+            </tr>
+            <tr>
+                <td md-whiteframe="2" colspan="2" style="text-align : center;">
+                    <strong>Communication Adapter Logs</strong>
+                    <button style="margin : 0px;" class="btn btn-xs pull-right"
+                            ng-click="report.showCAL = !report.showCAL">
+                        <i ng-show="!report.showCAL" class="fa fa-eye" aria-hidden="true"
+                           style="font-size : 1.5em; color: #2d5634;"></i>
+                        <i ng-show="report.showCAL" class="fa fa-eye-slash" aria-hidden="true"
+                           style="font-size : 1.5em; color: rgb(203, 167, 167);"></i>
+                    </button>
+                </td>
+            </tr>
+            <tr ng-show="report.showCAL">
+                <td colspan="2" class="panel-resizable">
+                    <textarea style="height : 400px; width: 100%; background-color: whitesmoke; border-color: #cccccc;" disabled>{{report.adapterLogs}}</textarea>
+                </td>
+            </tr>
 			</tbody>
 		    </table>
 		</div>

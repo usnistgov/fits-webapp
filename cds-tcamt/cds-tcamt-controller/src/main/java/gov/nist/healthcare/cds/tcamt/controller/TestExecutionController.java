@@ -177,6 +177,35 @@ public class TestExecutionController {
 		return reports;
 	}
 	
+//	@RequestMapping(value = "/exec/tcs/transient", method = RequestMethod.POST)
+//	@ResponseBody
+//	public List<Report> execAllTransient(@RequestBody TransientExecRequest execRequest,Principal user, HttpServletResponse response) throws UnresolvableDate, IOException {
+//		List<Report> reports = new ArrayList<Report>();
+//		for(String id : execRequest.getTestCases()){
+//			TestCase tc = ledger.tcBelongsTo(id, user.getName(), EntityAccess.R);
+//			SoftwareConfig config = execRequest.getSoftware();
+//			if(tc == null || config == null){
+//				response.sendError(403,"TestCase does not belong to user or Configuration is not set");
+//				return null;
+//			}
+//			else if(!tc.isRunnable()){
+//				response.sendError(500,"TestCase is not complete and therefore can't be executed");
+//				return null;
+//			}
+//			else {
+//				try {
+//					reports.add(execService.execute(config, tc, execRequest.getDate()));
+//				}
+//				catch(ConnectionException ex){
+//					response.sendError(this.code(ex.getStatusCode()),ex.getStatusText());
+//					return null;
+//				}
+//			}
+//		}
+//		return reports;
+//	}
+	
+	
 	@RequestMapping(value = "/exec/agg", method = RequestMethod.POST)
 	@ResponseBody
 	public AggregateReport aggregate(@RequestBody List<Report> reports, Principal user) {

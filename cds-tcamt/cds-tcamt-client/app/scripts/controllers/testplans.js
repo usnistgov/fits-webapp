@@ -1422,9 +1422,11 @@ angular
 
                         var obj = $itemScope.tc;
                         var clone = TestObjectUtil.cloneEntity(obj);
+
                         clone._local = true;
                         clone.name = "[CLONE] " + clone.name;
                         $scope.entityUtils.sanitizeTC(clone);
+
 
                         var list = TestObjectUtil.getList($scope.selectedTP, obj.id);
                         if (list) {

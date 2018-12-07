@@ -7,6 +7,7 @@ import java.util.List;
 import springfox.documentation.annotations.ApiIgnore;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import gov.nist.healthcare.cds.domain.TestCase;
 import gov.nist.healthcare.cds.domain.TestCaseGroup;
 import gov.nist.healthcare.cds.domain.TestPlan;
@@ -25,6 +26,7 @@ import gov.nist.healthcare.cds.domain.wrapper.ShareResponse;
 import gov.nist.healthcare.cds.domain.xml.ErrorModel;
 import gov.nist.healthcare.cds.enumeration.EntityAccess;
 import gov.nist.healthcare.cds.repositories.TestPlanRepository;
+import gov.nist.healthcare.cds.service.CommentService;
 import gov.nist.healthcare.cds.service.DeleteTestObjectService;
 import gov.nist.healthcare.cds.service.PropertyService;
 import gov.nist.healthcare.cds.service.SaveService;
@@ -75,7 +77,7 @@ public class TestCaseController {
 	
 	@Autowired
 	private gov.nist.healthcare.cds.service.impl.persist.ExportService exportService;
-
+	
 	@Autowired
 	private PropertyService ledger;
 
@@ -101,6 +103,8 @@ public class TestCaseController {
 	public void initBinder(WebDataBinder binder) {
 		binder.registerCustomEditor(String.class, new StringTrimmerEditor(true));
 	}
+	
+	//---------------------- GET OPERATIONS ------------------------
 
 	@ApiOperation(value = "List of all test plans belonging to authenticated user")
 	@RequestMapping(value = "/testplans", method = RequestMethod.GET)
@@ -109,7 +113,7 @@ public class TestCaseController {
 		return testPlanRepository.findByUser(p.getName());
 	}
 	
-	@ApiOperation(value = "List of all test plans belonging to authenticated user")
+	@ApiOperation(value = "Get a test plans belonging to authenticated user")
 	@RequestMapping(value = "/testplan/{id}", method = RequestMethod.GET)
 	@ResponseBody
 	public TestPlan testCase(
@@ -120,8 +124,18 @@ public class TestCaseController {
 		return tp;
 	}
 	
+//	@ApiOperation(value = "Get a testcase comment")
+//	@RequestMapping(value = "/testcase/{id}/comment", method = RequestMethod.GET)
+//	@ResponseBody
+//	public String getComment(
+//			@ApiParam(value = "Id of test case to get comment") @PathVariable String id,
+//			@AuthenticationPrincipal Principal p) {
+//		
+//		return this.commentService.getCommentForTestCase(id, p.getName());
+//	}
 	
-	@ApiOperation(value = "List of all test plans belonging to authenticated user")
+	
+	@ApiOperation(value = "List of test plans access as View Only")
 	@RequestMapping(value = "/vOnly/testplans", method = RequestMethod.GET)
 	@ResponseBody
 	public List<TestPlan> testPlansViewOnly(@AuthenticationPrincipal Principal p) {
@@ -225,6 +239,17 @@ public class TestCaseController {
 		
 		return saveButton.saveTG(tg, p.getName());
 	}
+	
+//	@ApiOperation(value = "Save test case comments (Only owner allowed)")
+//	@RequestMapping(value = "/testcase/{id}/comment", method = RequestMethod.POST)
+//	@ResponseBody
+//	public void saveTestCaseComment(
+//			@ApiParam(value = "Id of test case") @PathVariable String id,
+//			@ApiParam(value = "Comment of testcase") @RequestBody String content, 
+//			@AuthenticationPrincipal Principal p) throws IllegalSave {
+//		
+//		this.commentService.setCommentForTestCase(id, p.getName(), content);
+//	}
 
 
 	//-------------------- DELETE OPERATIONS ---------------------------

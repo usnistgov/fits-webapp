@@ -72,6 +72,8 @@ angular.module('tcl').controller('ExecutionCtrl', function (DataSynchService, En
     $scope.tabs = {
         reportTab: 0
     };
+    $scope.vxgs = [];
+    $scope.vxm = [];
     $scope.tpLoad = false;
     $scope.eService = EntityService;
     $scope.filterView = false;
@@ -158,6 +160,21 @@ angular.module('tcl').controller('ExecutionCtrl', function (DataSynchService, En
                 date: null
             }
         }
+    };
+
+    // VaccineService.load().then(function (data) {
+    //         for (var k in data) {
+    //             if (data.hasOwnProperty(k))
+    //                 $scope[k] = data[k];
+    //         }
+    //
+    //     },
+    //     function (err) {
+    //
+    // });
+
+    $scope.getMapping = function (x) {
+        return VaccineService.getMapping($scope.vxm, x);
     };
 
     $scope.filterList = function (list) {

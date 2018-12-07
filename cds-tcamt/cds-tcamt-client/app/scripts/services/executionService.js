@@ -21,7 +21,8 @@ angular.module('tcl').factory('ExecutionService', function (StatsService,$q,$htt
         decorateTc : function (tc,result,status) {
             tc._running = false;
             if(status){
-                tc._s = true;
+                tc._s =  result.engineResponseStatus === 'OK' || !result.engineResponseStatus;
+                tc._status = result.engineResponseStatus;
                 tc._events = result.events;
                 tc._events.cmp = StatsService.completion(tc._events.f, tc._events.p, tc._events.u, tc._events.w);
                 tc._events.crt = StatsService.correctness(tc._events.f, tc._events.p, tc._events.u, tc._events.w);

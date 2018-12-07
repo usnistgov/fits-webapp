@@ -15,7 +15,7 @@
         top.location = self.location;
     }
 </script>
-<md-content md-whiteframe="2" layout="column" style="height : 100%; border: 1px solid #b0b0b0;">
+<md-content md-whiteframe="2" layout="column" flex="100" style="height : 100%; border: 1px solid #b0b0b0;">
     <md-list  layout="row" ng-show="$parent.tcQueue.length > 0" style="height : 100%; background-color: white; min-height: 45px; padding: 0px; border-top : 1px solid #dddddd;">
         <md-list-item flex="{{exec ? 30 : 90 }}" style="border-right: 1px solid #dddddd;">
             <div layout="row" layout-align="center center" flex="100" style="width: 100%;" >
@@ -147,7 +147,21 @@
                         </md-list-item >
                     </div>
                     <div layout="row" layout-align="center center" ng-if="tc._s === false" flex="100">
-                        <strong>HTTP STATUS <span style="color: red;">({{tc._failure.status}}) - {{tc._failure.text}}</span></strong>
+                        <strong  ng-if="tc._failure" > Unhandled Server Issue HTTP Status <span style="color: red;">({{tc._failure.status}}) - {{tc._failure.text}}</span></strong>
+                        <strong  ng-if="tc._status" >
+                            <strong ng-show="tc._status === 'PROBLEM'" style="color: red;" layout="row" layout-align="center center">
+                                <i class="fa fa-exclamation-triangle" aria-hidden="true" style="font-size: 1.5em; color: red; margin-right: 10px;"></i>
+                                There has been a problem connecting to your server
+                            </strong>
+                            <strong ng-show="tc._status === 'NOT_FOUND'" style="color: red;" layout="row" layout-align="center center">
+                                <i class="fa fa-question-circle" aria-hidden="true" style="font-size: 1.5em; color: red; margin-right: 10px;"></i>
+                                Query returned no results
+                            </strong>
+                            <strong ng-show="tc._status === 'NOT_AUTHENTICATED'" style="color: red;" layout="row" layout-align="center center">
+                                <i class="fa fa-user-times" aria-hidden="true" style="font-size: 1.5em; color: red; margin-right: 10px;"></i>
+                                Unable to authenticate user
+                            </strong>
+                        </strong>
                     </div>
                 </div>
                 <md-list-item flex="10">

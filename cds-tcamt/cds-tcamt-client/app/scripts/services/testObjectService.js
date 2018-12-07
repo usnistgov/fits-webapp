@@ -66,7 +66,8 @@ angular.module('tcl').factory('TestObjectUtil', function () {
                             delete obj[prop];
                         }
                         else {
-                            testObjectService.cleanObject(obj[prop], exp);
+                            if(prop !== "relativeTo")
+                                testObjectService.cleanObject(obj[prop], exp);
                         }
                     }
                 }

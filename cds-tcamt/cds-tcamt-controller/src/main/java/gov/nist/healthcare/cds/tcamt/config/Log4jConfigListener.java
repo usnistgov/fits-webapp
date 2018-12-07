@@ -9,7 +9,7 @@ import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import javax.servlet.annotation.WebListener;
 
-import org.apache.log4j.PropertyConfigurator;
+//import org.apache.log4j.PropertyConfigurator;
 
 /**
  * @author Harold Affo (NIST)
@@ -32,7 +32,7 @@ public class Log4jConfigListener implements ServletContextListener {
 				f.mkdir();
 			}
 			p.put("log.dir", logDir);
-			PropertyConfigurator.configure(p);
+//			PropertyConfigurator.configure(p);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

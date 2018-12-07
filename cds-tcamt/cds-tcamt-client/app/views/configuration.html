@@ -19,8 +19,8 @@
     <!-- Date -->
     <div md-whiteframe="2"  layout="column" style="width: 100%; margin-bottom: 10px;"  ng-show="nbRelativeTC > 0" layout-align="start center">
         <div class="panel-heading" style="text-align: center; color : black; width: 100%; background-color: white; border: 1px solid;">
-            <i ng-show="assessmentDate.date" class="fa fa-check-circle pull-left" style="font-size: 1.5em; color : green;" aria-hidden="true"></i>
-            <i ng-show="!assessmentDate.date" class="fa fa-times-circle pull-left" style="font-size: 1.5em; color : red;" aria-hidden="true"></i>
+            <i ng-show="assessmentDate.dateString" class="fa fa-check-circle pull-left" style="font-size: 1.5em; color : green;" aria-hidden="true"></i>
+            <i ng-show="!assessmentDate.dateString" class="fa fa-times-circle pull-left" style="font-size: 1.5em; color : red;" aria-hidden="true"></i>
 
             <strong>Assessment Date for Relative Dates</strong>
         </div>
@@ -71,7 +71,7 @@
                 </button>
             </div>
         </div>
-        <div style="border: 1px solid #dddddd; width: 100%; height: 300px;" ng-show="cEdit" layout="row" layout-align="center start">
+        <div style="background-color: white; border: 1px solid #dddddd; width: 100%;" ng-show="cEdit" layout="row" layout-align="center stretch">
             <div flex="40" layout="column" layout-align="start start">
                 <div style="width: 100%; padding: 5px; border-bottom: 1px solid #dddddd; background-color: rgba(203,203,203,0.31); height: 50px;" layout="row" layout-align="start center">
                     <div flex="90" style="text-align: center;">
@@ -83,8 +83,8 @@
                         </i>
                     </div>
                 </div>
-                <div style="width: 100%; padding: 0; height: 100%; overflow-y: auto;">
-                    <md-list md-whiteframe="2" style="width: 100%; padding: 0; height: 100%;">
+                <div style="width: 100%; padding: 0; height: 100%; border-right: 1px solid #dddddd; overflow-y: auto;">
+                    <md-list md-whiteframe="2" style="width: 100%; padding: 0; background-color: whitesmoke; height: 100%;">
                         <md-list-item ng-repeat="conf in configs track by $index"
                                       ng-style="conf.id === configStub.id || conf.id === selectedConfig.id ? {'background-color' : '#daf3ff' } : {}"
                                       style="cursor: pointer; padding : 5px; height : 50px; text-align: center; border-bottom: 1px solid #dddddd;"
@@ -108,9 +108,8 @@
                         </md-list-item>
                     </md-list>
                 </div>
-
             </div>
-            <md-content flex="60" style="border-left: 1px solid #dddddd; background-color : white; height: 100%;" class="md-padding">
+            <md-content flex="60" style="background-color : white; height: 100%;" class="md-padding">
                 <div ng-show="!configStub" layout="column" layout-align="center center" style="height: 100%;">
                     <strong> No Software Configuration Selected </strong>
                 </div>
@@ -123,6 +122,18 @@
                         <label>End Point</label>
                         <input ng-model="configStub.endPoint" type="url" required/>
                     </md-input-container>
+                    <md-input-container ng-show="configStub.connector === 'HL7'" style="width: 100%;">
+                        <label>User ID</label>
+                        <input ng-model="configStub.userId" type="text" ng-required="configStub.connector === 'HL7'"/>
+                    </md-input-container>
+                    <md-input-container ng-show="configStub.connector === 'HL7'" style="width: 100%;">
+                        <label>Facility ID</label>
+                        <input ng-model="configStub.facilityId" type="text" ng-required="configStub.connector === 'HL7'"/>
+                    </md-input-container>
+                    <md-input-container ng-show="configStub.connector === 'HL7'" style="width: 100%;">
+                        <label>Password {{!configStub._local ? "[CHANGE SAVED PASSWORD]" : ""}}</label>
+                        <input ng-model="configStub.password" type="password" ng-required="configStub.connector === 'HL7' && configStub._local"/>
+                    </md-input-container>
                     <md-input-container style="width: 100%;">
                         <label>Connector Type</label>
                         <md-select ng-model="configStub.connector" required>
@@ -131,6 +142,8 @@
                             <md-option ng-value="'ICE'">ICE</md-option>
                             <md-option ng-value="'MA'">MA</md-option>
                             <md-option ng-value="'FHIR'">FHIR</md-option>
+                            <md-option ng-value="'HL7'">HL7</md-option>
+                            <md-option ng-value="'SWP'">SWP MDS</md-option>
                         </md-select>
                     </md-input-container>
 		    <!--<md-input-container style="width: 100%; margin-top: 15px;">-->

@@ -14,7 +14,8 @@ module.exports = function(grunt) {
 
 	// Time how long tasks take. Can help when optimizing build times
 	require('time-grunt')(grunt);
-
+    var os = require('os');
+    os.tmpDir = os.tmpdir;
 	grunt.loadNpmTasks('grunt-include-source');
 
 	// Configurable paths for the application
