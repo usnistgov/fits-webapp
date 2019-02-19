@@ -61,7 +61,7 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Service
-@PropertySource("classpath:filtered/app-info.properties" )
+@PropertySource("classpath:filtered/app-info.properties")
 public class Bootstrap {
 
 	@Autowired
@@ -85,18 +85,34 @@ public class Bootstrap {
 	@Autowired
 	private AccountService accService;
 	
+	private String ENV_ADMIN_USERNAME = "fits.admin.username";
+	private String ENV_ADMIN_PASSWORD = "fits.admin.password";
+	private String ENV_ADMIN_EMAIL = "fits.admin.email";
+	private String ENV_WEB_ADMIN_EMAIL = "fits.admin.web.email";
+	private String ENV_EMAIL_HOST = "fits.email.host";
+	private String ENV_EMAIL_PORT = "fits.email.port";
+	private String ENV_EMAIL_PROTOCOL = "fits.email.protocol";
+	private String ENV_EMAIL_SMTP_AUTH = "fits.email.smtp.auth";
+	private String ENV_EMAIL_FROM = "fits.email.from";
+	private String ENV_EMAIL_SUBJECT = "fits.email.subject";
+	private String ENV_ADAPTER_URL = "fits.adapter.url";
 
-	
+
 	@Bean
 	public PasswordEncoder passEncode(){
 		return new BCryptPasswordEncoder();
+	}
+	
+	@Bean
+	public String adminEmail() {
+		return env.getProperty(ENV_ADMIN_EMAIL);
 	}
 	
 	@Bean 
 	public AppInfo appInfo() throws ParseException{
 		AppInfo app = new AppInfo();
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
-		app.setAdminEmail(env.getProperty("webadmin.email"));
+		app.setAdminEmail(env.getProperty(ENV_WEB_ADMIN_EMAIL));
 		app.setDate(new java.util.Date(Integer.parseInt(env.getProperty("date"))));
 		app.setVersion(env.getProperty("version"));
 		return app;
@@ -105,11 +121,11 @@ public class Bootstrap {
 	@Bean
 	public JavaMailSenderImpl mailSender() {
 		JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
-		mailSender.setHost("smtp.nist.gov");
-		mailSender.setPort(25);
-		mailSender.setProtocol("smtp");
+		mailSender.setHost(env.getProperty(ENV_EMAIL_HOST));
+		mailSender.setPort(Integer.parseInt(env.getProperty(ENV_EMAIL_PORT)));
+		mailSender.setProtocol(env.getProperty(ENV_EMAIL_PROTOCOL));
 		Properties javaMailProperties = new Properties();
-		javaMailProperties.setProperty("mail.smtp.auth","false");
+		javaMailProperties.setProperty("mail.smtp.auth",env.getProperty(ENV_EMAIL_SMTP_AUTH));
 		javaMailProperties.setProperty("mail.debug","true");
 
 		mailSender.setJavaMailProperties(javaMailProperties);
@@ -120,8 +136,8 @@ public class Bootstrap {
 	@Bean
 	public org.springframework.mail.SimpleMailMessage templateMessage() {
 		org.springframework.mail.SimpleMailMessage templateMessage = new org.springframework.mail.SimpleMailMessage();
-		templateMessage.setFrom("fits@nist.gov");
-		templateMessage.setSubject("NIST FITS Notification");
+		templateMessage.setFrom(env.getProperty(ENV_EMAIL_FROM));
+		templateMessage.setSubject(env.getProperty(ENV_EMAIL_SUBJECT));
 		return templateMessage;
 	}
 	
@@ -137,13 +153,12 @@ public class Bootstrap {
 	
 	@Bean
 	public Marshaller castorM(){
-		
 		return new CastorMarshaller();
 	}
 	
 	@Bean
 	public TestRunnerService testRunner(){
-		return new TestRunnerServiceFhirImpl("https://hit-dev.nist.gov:15000/fhirAdapter/fhir/Parameters/$cds-forecast");
+		return new TestRunnerServiceFhirImpl(env.getProperty(ENV_ADAPTER_URL));
 	}
 	
 	@Bean
@@ -213,50 +228,34 @@ public class Bootstrap {
 		System.out.println("[PRIVILEGE CREATED]"+(pr.isEmpty() ? " NONE " : pr ));
 	}
 	
-	public void createSoftware(){
-		if(!softwareConfRepository.exists("prime")){
-			SoftwareConfig sfC = new SoftwareConfig();
-			sfC.setId("prime");
-			sfC.setConnector(FHIRAdapter.TCH);
-			sfC.setEndPoint("http://tchforecasttester.org/fv/forecast");
-			sfC.setName("Remote TCH");
-			sfC.setUser("hossam");
-			softwareConfRepository.save(sfC);
-			System.out.println("[PRIME SOFTWARE CONFIG] created");
+	public void createAdmin() {
+		String adminUsername = env.getProperty(ENV_ADMIN_USERNAME);
+		String adminPassword = env.getProperty(ENV_ADMIN_PASSWORD);
+		if(adminUsername != null && !adminUsername.isEmpty() && adminPassword != null && !adminPassword.isEmpty() && this.accService.getAccountByUsername(adminUsername) == null) {
+			Account a = new Account();
+			a.setUsername(adminUsername);
+			a.setPassword(adminPassword);
+			accService.createAdmin(a);
+			System.out.println("[ADMIN] userame : "+adminUsername+" created");
 		}
-		System.out.println("[PRIME SOFTWARE CONFIG] existing");
+		else {
+			System.out.println("[ADMIN] userame : "+adminUsername+" not created");
+		}
 	}
 	
+
 	@PostConstruct
 	public void init() throws ParseException, IOException, VaccineNotFoundException, ProductNotFoundException {
 		
-		if(accService.getAccountByUsername("shareTest") == null){
-			Account a = new Account();
-			a.setUsername("shareTest");
-			a.setPassword("12QWASZx");
-			accService.createAdmin(a);
-		}
+		// Create Privileges
+		this.createPrivileges();
 		
-		if(accService.getAccountByUsername("hossam") == null){
-			Account a = new Account();
-			a.setUsername("hossam");
-			a.setPassword("12QWASZx");
-			accService.createAdmin(a);
-		}
+		// Create Admin
+		this.createAdmin();
 
-//		//Vaccine
+		// Create Vaccinations
 //		this.createVaccine();
-//		
-//		//Privileges
-//		this.createPrivileges();
-//		
-//		//Software
-//		this.createSoftware();
-				
+
 	}
-	
-	
-	
-	
 	
 }

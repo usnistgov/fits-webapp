@@ -26,7 +26,6 @@ import gov.nist.healthcare.cds.domain.wrapper.ShareResponse;
 import gov.nist.healthcare.cds.domain.xml.ErrorModel;
 import gov.nist.healthcare.cds.enumeration.EntityAccess;
 import gov.nist.healthcare.cds.repositories.TestPlanRepository;
-import gov.nist.healthcare.cds.service.CommentService;
 import gov.nist.healthcare.cds.service.DeleteTestObjectService;
 import gov.nist.healthcare.cds.service.PropertyService;
 import gov.nist.healthcare.cds.service.SaveService;
@@ -104,7 +103,7 @@ public class TestCaseController {
 		binder.registerCustomEditor(String.class, new StringTrimmerEditor(true));
 	}
 	
-	//---------------------- GET OPERATIONS ------------------------
+	//--------------------------------GET OPERATIONS--------------------------------------------------
 
 	@ApiOperation(value = "List of all test plans belonging to authenticated user")
 	@RequestMapping(value = "/testplans", method = RequestMethod.GET)
@@ -122,18 +121,7 @@ public class TestCaseController {
 		
 		TestPlan tp = ledger.tpBelongsTo(id, p.getName(), EntityAccess.R);	
 		return tp;
-	}
-	
-//	@ApiOperation(value = "Get a testcase comment")
-//	@RequestMapping(value = "/testcase/{id}/comment", method = RequestMethod.GET)
-//	@ResponseBody
-//	public String getComment(
-//			@ApiParam(value = "Id of test case to get comment") @PathVariable String id,
-//			@AuthenticationPrincipal Principal p) {
-//		
-//		return this.commentService.getCommentForTestCase(id, p.getName());
-//	}
-	
+	}	
 	
 	@ApiOperation(value = "List of test plans access as View Only")
 	@RequestMapping(value = "/vOnly/testplans", method = RequestMethod.GET)
@@ -154,7 +142,7 @@ public class TestCaseController {
 		return appInfo;
 	}
 
-	//---------------------- SHARE OPERATIONS ------------------------
+	//---------------------------------------SHARE OPERATIONS-----------------------------------------
 	
 	@ApiOperation(value = "Share TestPlan")
 	@RequestMapping(value = "/share", method = RequestMethod.POST)
@@ -205,7 +193,7 @@ public class TestCaseController {
 		}
 	}
 	
-	//---------------------- SAVE OPERATIONS -------------------------
+	//----------------------------------SAVE OPERATIONS-------------------------------------------
 	
 	@ApiOperation(value = "Save test case to authenticated user account")
 	@RequestMapping(value = "/testcase/save", method = RequestMethod.POST)
@@ -239,20 +227,9 @@ public class TestCaseController {
 		
 		return saveButton.saveTG(tg, p.getName());
 	}
-	
-//	@ApiOperation(value = "Save test case comments (Only owner allowed)")
-//	@RequestMapping(value = "/testcase/{id}/comment", method = RequestMethod.POST)
-//	@ResponseBody
-//	public void saveTestCaseComment(
-//			@ApiParam(value = "Id of test case") @PathVariable String id,
-//			@ApiParam(value = "Comment of testcase") @RequestBody String content, 
-//			@AuthenticationPrincipal Principal p) throws IllegalSave {
-//		
-//		this.commentService.setCommentForTestCase(id, p.getName(), content);
-//	}
 
 
-	//-------------------- DELETE OPERATIONS ---------------------------
+	//----------------------------------DELETE OPERATIONS--------------------------------------
 	
 	@ApiOperation(value = "Delete TestCase with ID")
 	@RequestMapping(value = "/testcase/{id}/delete", method = RequestMethod.DELETE)
@@ -285,7 +262,7 @@ public class TestCaseController {
 		
 	}
 	
-	//--------------------------------- CLONE OPERATIONS ------------------------------------
+	//--------------------------------------CLONE OPERATION-----------------------------------
 	@ApiOperation(value = "Clone test plan to authenticated user account")
 	@RequestMapping(value = "/testplan/{id}/clone", method = RequestMethod.POST)
 	@ResponseBody
@@ -305,7 +282,6 @@ public class TestCaseController {
 		return null;
 	}
 
-	//--------------------------- IMPORT/EXPORT NIST OPERATION ------------------------------
 	//---------------------------------------EXPORT------------------------------------------
 	@ApiOperation(value = "Prepare Export")
 	@RequestMapping(value = "/testcase/export/{format}/{tpId}", method = RequestMethod.POST, consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
@@ -407,14 +383,6 @@ public class TestCaseController {
 			e.printStackTrace();
 			return ImportSummary.errorInFile();
 		}
-	}
-	
-	@RequestMapping(value = "/xxx", method = RequestMethod.POST, consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-	@ResponseBody
-	public Stub xxx(@AuthenticationPrincipal Principal p, FormData data) throws JsonParseException, JsonMappingException, ClassNotFoundException, IOException {
-		ObjectMapper mapper = new ObjectMapper();
-		Stub stub = (Stub) mapper.readValue(data.getJson(), Class.forName(data.getClazz()));
-		return stub;
 	}
 
 }

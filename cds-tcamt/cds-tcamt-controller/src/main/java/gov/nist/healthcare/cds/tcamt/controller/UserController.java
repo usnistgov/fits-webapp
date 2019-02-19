@@ -20,6 +20,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.mail.MailException;
 import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
@@ -52,7 +54,8 @@ public class UserController {
 	@Autowired
 	private MailSender mailSender;
 
-	private final String ADMIN_EMAIL = "robert.snelick@nist.gov";
+	@Value("#{adminEmail}")
+	private String ADMIN_EMAIL;
 
 	
 	@RequestMapping(value = "/accounts/login", method = RequestMethod.GET)
@@ -525,6 +528,7 @@ public class UserController {
 	private void sendRegistrationNotificationToAdmin(Account acc) {
 		SimpleMailMessage msg = new SimpleMailMessage(this.templateMessage);
 		msg.setSubject("New Registration Application on FITS");
+		System.out.println(ADMIN_EMAIL);
 		msg.setTo(ADMIN_EMAIL);
 		msg.setText("Hello Admin,  \n A new application has been submitted and is waiting for approval. The user information are as follow: \n\n"
 				+ "Name: "
