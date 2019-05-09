@@ -6,6 +6,7 @@ angular.module('tcl').factory('ExecutionService', function (StatsService,$q,$htt
             $http.post('api/exec/tc/' + tc.id,configuration).then(function (response) {
                     if (response.data) {
                         execService.decorateTc(tc,response.data,true);
+                        response.data.timestamps.responseReceivedByClient = new Date().getTime();
                         deferred.resolve({status : true, report : response.data});
                     } else {
                         execService.decorateTc(tc,response.data,false);

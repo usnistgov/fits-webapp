@@ -26,17 +26,29 @@
                         </tr>
                         <tr class="tbl-header">
                             <th st-ratio="5"></th>
-                            <th st-sort="fullName" st-ratio="30">
+                            <th st-sort="username" st-ratio="10">
+                                Username
+                            </th>
+                            <th st-sort="fullName" st-ratio="10">
                                 <div msg key='account.fullName'></div>
                             </th>
-                            <th st-sort="email" st-ratio="30">
+                            <th st-sort="email" st-ratio="20">
                                 <div msg key='account.email'></div>
                             </th>
-                            <th st-sort="organization" st-ratio="20">
+                            <th st-sort="organization" st-ratio="15">
                                 <div msg key='account.organization'></div>
                             </th>
-                            <th st-ratio="15">
+                            <th st-ratio="10">
                                 <div msg key='account.status'></div>
+                            </th>
+                            <th st-ratio="10">
+                                Test Cases Number
+                            </th>
+                            <th st-ratio="10">
+                                Number of Executions
+                            </th>
+                            <th st-ratio="10">
+                                Last Api Call
                             </th>
                         </tr>
                     </thead>
@@ -45,13 +57,23 @@
                         <td st-ratio="5">
                             <input ng-click="selectAccount(row)" ng-checked="account != null && row == account" type="radio">
                         </td>
-                        <td ng-bind="row.fullName" st-ratio="30"></td>
-                        <td ng-bind="row.email" st-ratio="30"></td>
-                        <td ng-bind="row.organization" st-ratio="20"></td>
-                        <td st-ratio="15">
+                        <td ng-bind="row.username" st-ratio="10"></td>
+                        <td ng-bind="row.fullName" st-ratio="10"></td>
+                        <td ng-bind="row.email" st-ratio="20"></td>
+                        <td ng-bind="row.organization" st-ratio="15"></td>
+                        <td st-ratio="10">
                             <span ng-show="!row.pending"><i class="fa fa-check success"></i>&nbsp;Approved</span>
                             <span ng-show="row.pending"><i class="fa fa-times danger"></i>&nbsp;Pending</span>
                         </td>
+                        <th st-ratio="10">
+                            <span ng-show="metadata[row.username]">{{metadata[row.username].testCases}}</span>
+                        </th>
+                        <th st-ratio="10">
+                             <span ng-show="metadata[row.username]">{{metadata[row.username].executions}}</span>
+                        </th>
+                        <th st-ratio="10">
+                             <span ng-show="metadata[row.username]">{{metadata[row.username].lastApiCall | date:'fullDate' }}</span>
+                        </th>
                     </tr>
                     </tbody>
                     <tfoot ng-show="accountList.length > 20">

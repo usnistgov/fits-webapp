@@ -47,6 +47,15 @@
                         Employer
                     </th>
                     <th>
+                        Test Cases Number
+                    </th>
+                    <th>
+                        Number of Executions
+                    </th>
+                    <th>
+                        Last Api Call
+                    </th>
+                    <th>
                         Enable/Disable
                     </th>
                 </tr>
@@ -67,6 +76,15 @@
                     </td>
                     <td>
                         {{ac.employer}}
+                    </td>
+                    <td>
+                        {{metadata[ac.username].testCases}}
+                    </td>
+                    <td>
+                        {{metadata[ac.username].executions}}
+                    </td>
+                    <td>
+                        {{metadata[ac.username].lastApiCall | date : 'fullDate'}}
                     </td>
                     <td>
                         <button class="btn btn-sm" ng-class="{'btn-success' : ac.pending, 'btn-danger' : !ac.pending}" ng-click="toggle(ac)">

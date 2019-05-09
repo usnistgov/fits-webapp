@@ -5,6 +5,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.TimeZone;
 
+import gov.nist.healthcare.cds.auth.tcamt.config.LastApiCallInterceptor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -15,10 +17,7 @@ import org.springframework.http.converter.json.MappingJackson2HttpMessageConvert
 import org.springframework.http.converter.xml.Jaxb2RootElementHttpMessageConverter;
 import org.springframework.web.multipart.MultipartResolver;
 import org.springframework.web.multipart.commons.CommonsMultipartResolver;
-import org.springframework.web.servlet.config.annotation.DefaultServletHandlerConfigurer;
-import org.springframework.web.servlet.config.annotation.EnableWebMvc;
-import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
+import org.springframework.web.servlet.config.annotation.*;
 
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -40,7 +39,10 @@ public class WebAppConfig extends WebMvcConfigurerAdapter {
 //          .paths(PathSelectors.ant("/api/*"))                          
 //          .build();                                           
 //    }
-//    
+//
+
+	@Autowired
+	LastApiCallInterceptor interceptor;
     
 	@Override
 	public void configureDefaultServletHandling(
@@ -110,5 +112,10 @@ public class WebAppConfig extends WebMvcConfigurerAdapter {
 	public MultipartResolver multipartResolver() {
 	    CommonsMultipartResolver multipartResolver = new CommonsMultipartResolver();
 	    return multipartResolver;
+	}
+
+	@Override
+	public void addInterceptors(InterceptorRegistry registry) {
+		registry.addInterceptor(interceptor);
 	}
 }

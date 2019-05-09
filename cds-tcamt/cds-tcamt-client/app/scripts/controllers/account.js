@@ -116,8 +116,8 @@ angular.module('tcl')
 'use strict';
 
 angular.module('tcl')
-    .controller('AccountsListCtrl', ['$scope', 'Notification', 'MultiAuthorsLoader', 'MultiSupervisorsLoader','Account', '$modal', '$resource','AccountLoader','userInfoService','$location',
-        function ($scope, Notification, MultiAuthorsLoader, MultiSupervisorsLoader, Account, $modal, $resource, AccountLoader, userInfoService, $location) {
+    .controller('AccountsListCtrl', ['$scope', '$http', 'Notification', 'MultiAuthorsLoader', 'MultiSupervisorsLoader','Account', '$modal', '$resource','AccountLoader','userInfoService','$location',
+        function ($scope, $http, Notification, MultiAuthorsLoader, MultiSupervisorsLoader, Account, $modal, $resource, AccountLoader, userInfoService, $location) {
 
             //$scope.accountTypes = [{ 'name':'Author', 'type':'author'}, {name:'Supervisor', type:'supervisor'}];
             //$scope.accountType = $scope.accountTypes[0];
@@ -126,6 +126,7 @@ angular.module('tcl')
             $scope.accountOrig = null;
             $scope.accountType = "author";
             $scope.scrollbarWidth = $scope.getScrollbarWidth();
+            $scope.metadata = {};
 
 //        var PasswordChange = $resource('api/accounts/:id/passwordchange', {id:'@id'});
             var PasswordChange = $resource('api/accounts/:id/userpasswordchange', {id:'@id'});
@@ -196,6 +197,11 @@ angular.module('tcl')
                     new MultiAuthorsLoader().then(function (response) {
                         $scope.accountList = response;
                         $scope.tmpAccountList = [].concat($scope.accountList);
+                    });
+                    $http.get('api/accounts/list/metadata').then(function (res) {
+                        for(var i = 0; i < res.data.length; i++) {
+                            $scope.metadata[res.data[i].username] = res.data[i];
+                        }
                     });
                 }
             };

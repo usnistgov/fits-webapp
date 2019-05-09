@@ -14,11 +14,15 @@ import gov.nist.healthcare.cds.auth.service.AccountService;
 import java.io.IOException;
 import java.security.Principal;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import gov.nist.healthcare.cds.domain.UserMetadata;
+import gov.nist.healthcare.cds.repositories.UserMetadataRepository;
+import gov.nist.healthcare.cds.service.UserMetadataService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
@@ -57,9 +61,13 @@ public class UserController {
 	@Value("#{adminEmail}")
 	private String ADMIN_EMAIL;
 
+	@Autowired
+	private UserMetadataRepository userMetadataRepository;
+
 	
 	@RequestMapping(value = "/accounts/login", method = RequestMethod.GET)
 	public ResponseMessage doNothing() {
+		User u = userService.getCurrentUser();
 		return new ResponseMessage(ResponseMessage.Type.success,
 				"loginSuccess", "succes");
 	}
@@ -112,6 +120,12 @@ public class UserController {
 			return accountRepository.save(acc);
 		}
 		return null;
+	}
+
+	@RequestMapping(value = "/accounts/list/metadata", method = RequestMethod.GET)
+	@ResponseBody
+	public List<UserMetadata> usermetadata() {
+		return this.userMetadataRepository.findAll();
 	}
 	
 	private void sendChangeAccountPasswordNotification(Account acc) {

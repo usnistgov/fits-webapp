@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.security.Principal;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -26,6 +27,7 @@ import gov.nist.healthcare.cds.repositories.TestPlanRepository;
 import gov.nist.healthcare.cds.service.AggregateReportService;
 import gov.nist.healthcare.cds.service.PropertyService;
 import gov.nist.healthcare.cds.service.TestCaseExecutionService;
+import gov.nist.healthcare.cds.service.UserMetadataService;
 import gov.nist.healthcare.cds.service.impl.data.RWTestPlanFilter;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,7 +57,10 @@ public class TestExecutionController {
 	private PropertyService ledger;
 	
 	@Autowired
-	private RWTestPlanFilter filter; 
+	private RWTestPlanFilter filter;
+
+	@Autowired
+	private UserMetadataService userMetadataService;
 
 	//------------------------ SOFTWARE CONFIGURATION -----------------------------
 	
@@ -120,11 +125,10 @@ public class TestExecutionController {
 	@RequestMapping(value = "/exec/tc/{id}", method = RequestMethod.POST)
 	@ResponseBody
 	public Report add(@RequestBody ExecutionConfig sc, @PathVariable String id,Principal user, HttpServletResponse response) throws UnresolvableDate, IOException {
+		long received = new Date().getTime();
 		TestCase tc = ledger.tcBelongsTo(id, user.getName(), EntityAccess.R);
 		SoftwareConfig config = ledger.configBelongsTo(sc.getSoftware(), user.getName());
 		if(tc == null || config == null){
-			System.out.println("TC "+tc);
-			System.out.println("CONF "+config);
 			response.sendError(403,"TestCase or Configuration does not belong to user");
 			return null;
 		}
@@ -134,15 +138,16 @@ public class TestExecutionController {
 		}
 		else {
 			try {
-				return execService.execute(config, tc, FixedDate.DATE_FORMAT.parse(sc.getDate()));
-			}
-			catch(ConnectionException ex){
-				System.out.println(ex);
-				ex.printStackTrace();
+				Report report = execService.execute(config, tc, FixedDate.DATE_FORMAT.parse(sc.getDate()));
+				userMetadataService.updateExecutions(user.getName(), 1);
+				long sent = new Date().getTime();
+				report.getTimestamps().setRequestReceived(received);
+				report.getTimestamps().setResponseSent(sent);
+				return report;
+			} catch(ConnectionException ex){
 				response.sendError(this.code(ex.getStatusCode()),ex.getStatusText());
 				return null;
 			} catch (ParseException e) {
-				System.out.println(e);
 				response.sendError(500,e.getMessage());
 				return null;
 			}
@@ -152,6 +157,8 @@ public class TestExecutionController {
 	@RequestMapping(value = "/exec/tcs", method = RequestMethod.POST)
 	@ResponseBody
 	public List<Report> execAll(@RequestBody TransientExecRequest execRequest,Principal user, HttpServletResponse response) throws UnresolvableDate, IOException {
+		long received = new Date().getTime();
+		int i = 0;
 		List<Report> reports = new ArrayList<Report>();
 		for(String id : execRequest.getTestCases()){
 			TestCase tc = ledger.tcBelongsTo(id, user.getName(), EntityAccess.R);
@@ -166,7 +173,10 @@ public class TestExecutionController {
 			}
 			else {
 				try {
-					reports.add(execService.execute(config, tc, execRequest.getDate()));
+					Report report = execService.execute(config, tc, execRequest.getDate());
+					report.getTimestamps().setRequestReceived(received);
+					reports.add(report);
+					i++;
 				}
 				catch(ConnectionException ex){
 					response.sendError(this.code(ex.getStatusCode()),ex.getStatusText());
@@ -174,37 +184,12 @@ public class TestExecutionController {
 				}
 			}
 		}
+		long sent = new Date().getTime();
+		reports.stream().forEach(report -> report.getTimestamps().setResponseSent(sent));
+		this.userMetadataService.updateExecutions(user.getName(), i);
 		return reports;
 	}
-	
-//	@RequestMapping(value = "/exec/tcs/transient", method = RequestMethod.POST)
-//	@ResponseBody
-//	public List<Report> execAllTransient(@RequestBody TransientExecRequest execRequest,Principal user, HttpServletResponse response) throws UnresolvableDate, IOException {
-//		List<Report> reports = new ArrayList<Report>();
-//		for(String id : execRequest.getTestCases()){
-//			TestCase tc = ledger.tcBelongsTo(id, user.getName(), EntityAccess.R);
-//			SoftwareConfig config = execRequest.getSoftware();
-//			if(tc == null || config == null){
-//				response.sendError(403,"TestCase does not belong to user or Configuration is not set");
-//				return null;
-//			}
-//			else if(!tc.isRunnable()){
-//				response.sendError(500,"TestCase is not complete and therefore can't be executed");
-//				return null;
-//			}
-//			else {
-//				try {
-//					reports.add(execService.execute(config, tc, execRequest.getDate()));
-//				}
-//				catch(ConnectionException ex){
-//					response.sendError(this.code(ex.getStatusCode()),ex.getStatusText());
-//					return null;
-//				}
-//			}
-//		}
-//		return reports;
-//	}
-	
+
 	
 	@RequestMapping(value = "/exec/agg", method = RequestMethod.POST)
 	@ResponseBody

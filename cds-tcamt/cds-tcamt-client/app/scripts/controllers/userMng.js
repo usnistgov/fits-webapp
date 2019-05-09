@@ -29,7 +29,7 @@ angular
             $scope.init = function () {
                 $http.get("api/accounts/list").then(function (res) {
                     $scope.accounts = res.data;
-                })
+                });
             };
 
             $scope.filterS = "";

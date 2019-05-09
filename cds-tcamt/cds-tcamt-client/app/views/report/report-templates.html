@@ -179,6 +179,61 @@
 				<forecast-report ssval="ssval" data="report.fcValidation"></forecast-report>
 			    </td>
 			</tr>
+
+            <tr>
+                <td md-whiteframe="2" colspan="2" style="text-align : center;">
+                    <strong>Performance Timestamps</strong>
+                    <button style="margin : 0px;" class="btn btn-xs pull-right"
+                            ng-click="report.showPERF = !report.showPERF">
+                        <i ng-show="!report.showPERF" class="fa fa-eye" aria-hidden="true"
+                           style="font-size : 1.5em; color: #2d5634;"></i>
+                        <i ng-show="report.showPERF" class="fa fa-eye-slash" aria-hidden="true"
+                           style="font-size : 1.5em; color: rgb(203, 167, 167);"></i>
+                    </button>
+                </td>
+            </tr>
+            <tr ng-show="report.showPERF">
+                <td colspan="2" class="panel-resizable">
+                    <table class="table table-striped table-condensed">
+                        <tr>
+                            <th>Checkpoint</th>
+                            <th>Date</th>
+                            <th>Elapsed Time</th>
+                        </tr>
+                        <tr>
+                            <td><strong>Request Received</strong></td>
+                            <td>{{report.timestamps.requestReceived | date:'yyyy-MM-dd HH:mm:ss Z'}}</td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Request sent to adapter</strong></td>
+                            <td>{{report.timestamps.requestSentToAdapter | date:'yyyy-MM-dd HH:mm:ss Z'}}</td>
+                            <td>{{report.timestamps.requestSentToAdapter - report.timestamps.requestReceived}} ms</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Response received from adapter</strong></td>
+                            <td>{{report.timestamps.responseReceivedFromAdapter | date:'yyyy-MM-dd HH:mm:ss Z'}}</td>
+                            <td>{{report.timestamps.responseReceivedFromAdapter - report.timestamps.requestSentToAdapter}} ms</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Response validation completed</strong></td>
+                            <td>{{report.timestamps.responseValidated | date:'yyyy-MM-dd HH:mm:ss Z'}}</td>
+                            <td>{{report.timestamps.responseValidated - report.timestamps.responseReceivedFromAdapter}} ms</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Response returned to client</strong></td>
+                            <td>{{report.timestamps.responseSent | date:'yyyy-MM-dd HH:mm:ss Z'}}</td>
+                            <td>{{report.timestamps.responseSent - report.timestamps.responseValidated}} ms</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Response received by client</strong></td>
+                            <td>{{report.timestamps.responseReceivedByClient | date:'yyyy-MM-dd HH:mm:ss Z'}}</td>
+                            <td>{{report.timestamps.responseReceivedByClient - report.timestamps.responseSent}} ms</td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+
 			<tr>
 			    <td md-whiteframe="2" colspan="2" style="text-align : center;">
                     <strong>XML Response</strong>
