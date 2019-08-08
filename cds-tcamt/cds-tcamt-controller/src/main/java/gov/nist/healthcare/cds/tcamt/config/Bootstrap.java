@@ -253,8 +253,6 @@ public class Bootstrap {
 		// Create Admin
 		this.createAdmin();
 
-
-
 	}
 	
 }
