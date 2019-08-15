@@ -411,10 +411,10 @@ app.run(function ($rootScope, $location, $anchorScroll, Restangular, $modal, $fi
                 });
             };
 
-        for (i = 0; i < requests.length; i += 1) {
-            retry(requests[i]);
-        }
-        $rootScope.requests401 = [];
+        // for (i = 0; i < requests.length; i += 1) {
+        //     retry(requests[i]);
+        // }
+        // $rootScope.requests401 = [];
 
     });
 
@@ -436,8 +436,10 @@ app.run(function ($rootScope, $location, $anchorScroll, Restangular, $modal, $fi
                     $rootScope.$broadcast('event:loginConfirmed');
                 } else {
                     userInfoService.setCurrentUser(null);
+                    delete httpHeaders.common['Authorization'];
                 }
             }, function () {
+                delete httpHeaders.common['Authorization'];
                 userInfoService.setCurrentUser(null);
             });
         });
@@ -448,7 +450,7 @@ app.run(function ($rootScope, $location, $anchorScroll, Restangular, $modal, $fi
      */
     $rootScope.$on('event:logoutRequest', function () {
         $http.get('logout');
-        httpHeaders.common['Authorization'] = null;
+        delete httpHeaders.common['Authorization'];
         userInfoService.setCurrentUser(null);
     });
 
@@ -456,7 +458,7 @@ app.run(function ($rootScope, $location, $anchorScroll, Restangular, $modal, $fi
      * On 'loginCancel' clears the Authentication header
      */
     $rootScope.$on('event:loginCancel', function () {
-        httpHeaders.common['Authorization'] = null;
+        delete httpHeaders.common['Authorization'];
     });
 
     $rootScope.$on('$routeChangeStart', function (next, current) {

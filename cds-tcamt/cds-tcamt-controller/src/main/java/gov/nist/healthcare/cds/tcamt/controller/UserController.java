@@ -509,6 +509,7 @@ public class UserController {
 			account.setPending(true);
 			userService.createTester(account);
 		} catch (Exception e) {
+			e.printStackTrace();
 			return new ResponseMessage(ResponseMessage.Type.danger,
 					"errorWithUser", null);
 		}
