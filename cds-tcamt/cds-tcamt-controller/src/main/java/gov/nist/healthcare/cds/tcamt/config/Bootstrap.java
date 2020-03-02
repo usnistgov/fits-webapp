@@ -113,7 +113,7 @@ public class Bootstrap {
 		AppInfo app = new AppInfo();
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
 		app.setAdminEmail(env.getProperty(ENV_WEB_ADMIN_EMAIL));
-		app.setDate(new java.util.Date(Integer.parseInt(env.getProperty("date"))));
+		app.setDate(new java.util.Date(Long.parseLong(env.getProperty("date"))));
 		app.setVersion(env.getProperty("version"));
 		return app;
 	}
