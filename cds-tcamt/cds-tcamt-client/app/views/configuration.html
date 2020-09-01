@@ -15,7 +15,7 @@
         top.location = self.location;
     }
 </script>
-<div layout="column" layout-align="center center" style="height: 100%; width: 100%;" ng-init="aEdit = false; cEdit = false;">
+<div layout="column" layout-align="center center" style="height: 100%; width: 100%;" ng-init="init()">
     <!-- Date -->
     <div md-whiteframe="2"  layout="column" style="width: 100%; margin-bottom: 10px;"  ng-show="nbRelativeTC > 0" layout-align="start center">
         <div class="panel-heading" style="text-align: center; color : black; width: 100%; background-color: white; border: 1px solid;">
@@ -58,7 +58,7 @@
             </div>
             <div flex="80" layout="row" layout-align="center center">
                 <div ng-show="selectedConfig">
-                    <strong>{{selectedConfig.name}} ({{selectedConfig.connector}})</strong> @ <strong>{{selectedConfig.endPoint}}</strong>
+                    <strong>{{selectedConfig.name}} ({{selectedConfig.connector === 'FHIR' ? 'FHIR DSTU3' : selectedConfig.connector }})</strong> @ <strong>{{selectedConfig.endPoint}}</strong>
                 </div>
                 <div ng-show="!selectedConfig">
                     <strong>No Software Selected</strong>
@@ -141,7 +141,8 @@
 	                        <md-option ng-value="'STC'">STC</md-option>
                             <md-option ng-value="'ICE'">ICE</md-option>
                             <md-option ng-value="'MA'">MA</md-option>
-                            <md-option ng-value="'FHIR'">FHIR</md-option>
+                            <md-option ng-value="'FHIRR4'">FHIR R4</md-option>
+                            <md-option ng-value="'FHIR'">FHIR DSTU3</md-option>
                             <md-option ng-value="'HL7'">HL7</md-option>
                             <md-option ng-value="'SWP'">SWP MDS</md-option>
                         </md-select>

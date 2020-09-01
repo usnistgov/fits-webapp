@@ -1,0 +1,143 @@
+    <div layout="column" layout-align="center center" style="height: 100%; width: 100%;" ng-init="init()">
+        <div md-whiteframe="2"  layout="column" style="width: 100%; margin-bottom: 10px;"  ng-show="ctrl.relative" layout-align="start center">
+            <div class="panel-heading" style="text-align: center; color : black; width: 100%; background-color: white; border: 1px solid;">
+                <i ng-show="ctrl.date.dateString" class="fa fa-check-circle pull-left" style="font-size: 1.5em; color : green;" aria-hidden="true"></i>
+                <i ng-show="!ctrl.date.dateString" class="fa fa-times-circle pull-left" style="font-size: 1.5em; color : red;" aria-hidden="true"></i>
+
+                <strong>Assessment Date for Relative Dates</strong>
+            </div>
+            <div style="border: 1px solid #dddddd; padding: 10px; text-align: center; width: 100%;" layout="row" layout-align="start center">
+                <div flex="10" layout="row" layout-align="center center">
+                    <i class="fa fa-calendar" style="font-size: 2em;" aria-hidden="true"></i>
+                </div>
+                <div flex="80" layout="row" layout-align="center center">
+                    <strong>{{asDate(ctrl.date.dateString)}}</strong>
+
+                </div>
+                <div flex="10" layout="row" layout-align="center center">
+                    <div class="input-group"
+                         moment-picker="ctrl.date.dateString"
+                         format="MM/DD/YYYY"
+                         style="max-width: 200px;">
+                        <button class="btn btn-xs btn-info pull-right" style="margin: 0;" >
+                            <md-tooltip md-direction="top">Date Picker</md-tooltip>
+                            <i class="fa fa-pencil" aria-hidden="true"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div md-whiteframe="2" layout="column" layout-align="start center" style="width: 100%;">
+            <div class="panel-heading" style="text-align: center; color : black; width: 100%; background-color: white; border: 1px solid;">
+                <i ng-show="ctrl.selectedConfig" class="fa fa-check-circle pull-left" style="font-size: 1.5em; color : green;" aria-hidden="true"></i>
+                <i ng-show="!ctrl.selectedConfig" class="fa fa-times-circle pull-left" style="font-size: 1.5em; color : red;" aria-hidden="true"></i>
+
+                <strong>Software</strong>
+            </div>
+            <div style="border: 1px solid #dddddd; padding: 10px; text-align: center; width: 100%;" layout="row" layout-align="start center">
+                <div flex="10" layout="row" layout-align="center center">
+                    <i class="fa fa-laptop" style="font-size: 2em;" aria-hidden="true"></i>
+                </div>
+                <div flex="80" layout="row" layout-align="center center">
+                    <div ng-show="ctrl.selectedConfig">
+                        <strong>{{ctrl.selectedConfig.name}} ({{ctrl.selectedConfig.connector === 'FHIR' ? 'FHIR DSTU3' : ctrl.selectedConfig.connector }})</strong> @ <strong>{{ctrl.selectedConfig.endPoint}}</strong>
+                    </div>
+                    <div ng-show="!ctrl.selectedConfig">
+                        <strong>No Software Selected</strong>
+                    </div>
+                </div>
+                <div flex="10" layout="row" layout-align="center center">
+                    <button class="btn btn-xs btn-info pull-right" style="margin: 0;" ng-model="cEdit" uib-btn-checkbox btn-checkbox-true="true" btn-checkbox-false="false">
+                        <md-tooltip md-direction="top">Open Software Configuration</md-tooltip>
+                        <i class="fa fa-pencil" aria-hidden="true"></i>
+                    </button>
+                </div>
+            </div>
+            <div style="background-color: white; border: 1px solid #dddddd; width: 100%;" ng-show="cEdit" layout="row" layout-align="center stretch">
+                <div flex="40" layout="column" layout-align="start start">
+                    <div style="width: 100%; padding: 5px; border-bottom: 1px solid #dddddd; background-color: rgba(203,203,203,0.31); height: 50px;" layout="row" layout-align="start center">
+                        <div flex="90" style="text-align: center;">
+                            <strong>Software List</strong>
+                        </div>
+                        <div flex="10" layout="row" layout-align="center center">
+                            <i class="fa fa-plus" style="color: blue; cursor: pointer; font-size: 1.5em;" ng-click="createConf()" aria-hidden="true">
+                                <md-tooltip md-direction="top">Add Software Configuration</md-tooltip>
+                            </i>
+                        </div>
+                    </div>
+                    <div style="width: 100%; padding: 0; height: 100%; border-right: 1px solid #dddddd; overflow-y: auto;">
+                        <md-list md-whiteframe="2" style="width: 100%; padding: 0; background-color: whitesmoke; height: 100%;">
+                            <md-list-item ng-repeat="conf in configs track by $index"
+                                          ng-style="conf.id === configStub.id || conf.id === ctrl.selectedConfig.id ? {'background-color' : '#daf3ff' } : {}"
+                                          style="cursor: pointer; padding : 5px; height : 50px; text-align: center; border-bottom: 1px solid #dddddd;"
+                                          class="hov"
+                                          layout="row" layout-align="center center">
+                                    <div flex="90" ng-click="onConfig(conf)" layout="row" layout-align="center center">
+                                        <div flex="10" layout="row" layout-align="start center">
+                                            <div style="margin-right: 20px; color: red;">
+                                                <i ng-show="conf._local" class="fa fa-refresh" aria-hidden="true"></i>
+                                            </div>
+                                        </div>
+                                        <div flex="90">
+                                            <strong>{{conf.name}}</strong>
+                                        </div>
+                                    </div>
+                                    <div flex="10" layout="row" layout-align="center center">
+                                        <i style="color: red; cursor: pointer; font-size: 1.5em;"  ng-click="deleteConfig($index,conf.id,conf._local)" class="fa fa-times" aria-hidden="true">
+                                            <md-tooltip md-direction="top">Delete Configuration</md-tooltip>
+                                        </i>
+                                    </div>
+                            </md-list-item>
+                        </md-list>
+                    </div>
+                </div>
+                <md-content flex="60" style="background-color : white; height: 100%;" class="md-padding">
+                    <div ng-show="!configStub" layout="column" layout-align="center center" style="height: 100%;">
+                        <strong> No Software Configuration Selected </strong>
+                    </div>
+                    <form name="configForm" ng-show="configStub">
+                        <md-input-container style="width: 100%; margin-top: 15px;">
+                            <label>Name</label>
+                            <input ng-model="configStub.name" type="text" required/>
+                        </md-input-container>
+                        <md-input-container style="width: 100%;">
+                            <label>End Point</label>
+                            <input ng-model="configStub.endPoint" type="url" required/>
+                        </md-input-container>
+                        <md-input-container ng-show="configStub.connector === 'HL7'" style="width: 100%;">
+                            <label>User ID</label>
+                            <input ng-model="configStub.userId" type="text" ng-required="configStub.connector === 'HL7'"/>
+                        </md-input-container>
+                        <md-input-container ng-show="configStub.connector === 'HL7'" style="width: 100%;">
+                            <label>Facility ID</label>
+                            <input ng-model="configStub.facilityId" type="text" ng-required="configStub.connector === 'HL7'"/>
+                        </md-input-container>
+                        <md-input-container ng-show="configStub.connector === 'HL7'" style="width: 100%;">
+                            <label>Password {{!configStub._local ? "[CHANGE SAVED PASSWORD]" : ""}}</label>
+                            <input ng-model="configStub.password" type="password" ng-required="configStub.connector === 'HL7' && configStub._local"/>
+                        </md-input-container>
+                        <md-input-container style="width: 100%;">
+                            <label>Connector Type</label>
+                            <md-select ng-model="configStub.connector" required>
+                                <md-option ng-value="'LSVF'">LSVF</md-option>
+                                <md-option ng-value="'STC'">STC</md-option>
+                                <md-option ng-value="'ICE'">ICE</md-option>
+                                <md-option ng-value="'MA'">MA</md-option>
+                                <md-option ng-value="'FHIRR4'">FHIR R4</md-option>
+                                <md-option ng-value="'FHIR'">FHIR DSTU3</md-option>
+                                <md-option ng-value="'HL7'">HL7</md-option>
+                                <md-option ng-value="'SWP'">SWP MDS</md-option>
+                            </md-select>
+                        </md-input-container>
+                        <button ng-show="configForm.$valid" ng-click="saveConfig();" class="btn btn-success pull-right" >
+                            <md-tooltip md-direction="top">Save Software Configuration</md-tooltip>
+                            <i class="fa fa-floppy-o" aria-hidden="true"></i>
+                        </button>
+                    </form>
+                </md-content>
+            </div>
+        </div>
+
+    </div>
+

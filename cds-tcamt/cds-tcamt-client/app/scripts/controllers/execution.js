@@ -287,46 +287,16 @@ angular.module('tcl').controller('ExecutionCtrl', function (DataSynchService, En
 //--------------------------------- UTILS ----------------------
 
     $scope.switchTP = function (tpd) {
-        console.log("SWITCH TP ");
-        console.log(tpd);
         $scope.tpLoad = true;
         $http.get('api/testplan/'+tpd.id).then(function (success) {
             $scope.tps = [];
             $scope.tps.push(success.data);
             $scope.tpLoad = false;
             $scope.selectTP(success.data);
-            console.log($scope.tps);
         },
         function (error) {
 
         });
-    };
-
-    $scope.createConf = function () {
-        var x = {
-            _local: true,
-            id: new ObjectId().toString(),
-            name: "New",
-            endPoint: "",
-            connector: ""
-        };
-        $scope.configs.push(x);
-        $scope.onConfig(x);
-    };
-
-    $scope.onConfig = function (config) {
-        if (!config) {
-            $scope.configStub = null;
-        }
-        if (!config._local) {
-            $rootScope.selectedConfig = config;
-            $scope.configStub = JSON.parse(angular.toJson(config));
-        }
-        else {
-            $rootScope.selectedConfig = null;
-            $scope.configStub = JSON.parse(angular.toJson(config));
-        }
-
     };
 
     $scope.asDate = function(str){
@@ -435,7 +405,6 @@ angular.module('tcl').controller('ExecutionCtrl', function (DataSynchService, En
     $scope.init = function () {
         $scope.loadConfig();
         $scope.loadTPDetails();
-        //$scope.loadTestCases();
         $scope.loadVaccines();
         $scope.loadEnums();
     };
@@ -444,65 +413,6 @@ angular.module('tcl').controller('ExecutionCtrl', function (DataSynchService, En
     $rootScope.$on('event:loginConfirmed', function () {
         $scope.init();
     });
-
-
-//------------------------------- CONFIG CONTROL ----------------
-
-    $scope.saveConfig = function () {
-        $http.post("api/exec/configs/save", $scope.configStub).then(function (result) {
-            var conf = angular.fromJson(result.data);
-            var idx = _.findIndex($scope.configs, function (x) {
-                return x.id === conf.id;
-            });
-            if (~idx) {
-                $scope.configs.splice(idx, 1, conf);
-            }
-            else {
-                $scope.configs.push(conf);
-            }
-            $scope.onConfig(conf);
-        });
-    };
-
-    $scope.toggleSoftware = function () {
-        $scope.cEdit = true;
-        $scope.onConfig($rootScope.selectedConfig);
-    };
-
-    $scope.deleteConfig = function (index, id, local) {
-        if (local) {
-            if ($scope.configs[index].id === $scope.configStub.id) {
-                $scope.configStub = null;
-                $rootScope.selectedConfig = null;
-            }
-            $scope.configs.splice(index, 1);
-        }
-        else {
-            $http.post("api/exec/configs/delete/" + id).then(function () {
-                if ($rootScope.selectedConfig.id === id) {
-                    $rootScope.selectedConfig = null;
-                }
-                if ($scope.configs[index].id === $scope.configStub.id) {
-                    $scope.configStub = null;
-                    $rootScope.selectedConfig = null;
-                }
-                $scope.configs.splice(index, 1);
-            });
-        }
-    };
-
-    // $scope.defaultConfig = function () {
-    //     $http.get('api/exec/configs/default').then(function (response) {
-    //         if (response.data && response.data !== '') {
-    //             for(var c = 0; c < $scope.configs.length; c++){
-    //                 if($scope.configs[c].id === response.data){
-    //                     $rootScope.selectedConfig = $scope.configs[c];
-    //                     break;
-    //                 }
-    //             }
-    //         }
-    //     });
-    // };
 
 //-------------------------------- DRAG AND DROP -------------------------
 
@@ -659,7 +569,7 @@ angular.module('tcl').controller('ExecutionCtrl', function (DataSynchService, En
 
     };
     $scope.canRun = function () {
-        return $rootScope.selectedConfig && $scope.tcQueue.length;
+        return $scope.selectedConfig && $scope.tcQueue.length;
     };
 
     $scope.deleteTCL = function (id) {
@@ -934,10 +844,9 @@ angular.module('tcl').controller('ExecutionCtrl', function (DataSynchService, En
     };
 
     $scope.exe = function () {
-        console.log("EXE");
         $scope.exec = true;
-        $scope.archive($scope.tcQueue, $rootScope.selectedConfig, $scope.assessmentDate.dateString);
-        ExecutionService.play($scope.tcQueue, $rootScope.selectedConfig.id, $scope.assessmentDate.dateString, $scope.controls, $scope.container).then(function (response) {
+        $scope.archive($scope.tcQueue, $scope.selectedConfig, $scope.assessmentDate.dateString);
+        ExecutionService.play($scope.tcQueue, $scope.selectedConfig.id, $scope.assessmentDate.dateString, $scope.controls, $scope.container).then(function (response) {
                 $scope.resultsHandle(response);
             },
             function (error) {
@@ -980,7 +889,7 @@ angular.module('tcl').controller('ExecutionCtrl', function (DataSynchService, En
 
     $scope.resume = function () {
         $scope.controls.paused = true;
-        ExecutionService.resume($scope.tcQueue, $rootScope.selectedConfig.id, $scope.assessmentDate.dateString, $scope.controls, $scope.container).then(function (response) {
+        ExecutionService.resume($scope.tcQueue, $scope.selectedConfig.id, $scope.assessmentDate.dateString, $scope.controls, $scope.container).then(function (response) {
                 $scope.resultsHandle(response);
             },
             function (error) {
