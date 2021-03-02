@@ -136,8 +136,12 @@
 	</dependencies>
 	<build>
 		<finalName>fits</finalName>
-		<!-- <resources> <resource> <directory>src/main/resources/filtered</directory> 
-			<filtering>true</filtering> </resource> </resources> -->
+<!--		<resources>-->
+<!--			<resource>-->
+<!--				<directory>src/main/resources/filtered</directory>-->
+<!--				<filtering>true</filtering>-->
+<!--			</resource>-->
+<!--		</resources>-->
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
