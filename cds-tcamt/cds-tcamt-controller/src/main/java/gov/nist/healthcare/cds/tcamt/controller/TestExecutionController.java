@@ -9,6 +9,8 @@ import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import gov.nist.healthcare.cds.auth.domain.Account;
+import gov.nist.healthcare.cds.auth.service.AccountService;
 import gov.nist.healthcare.cds.domain.FixedDate;
 import gov.nist.healthcare.cds.domain.SoftwareConfig;
 import gov.nist.healthcare.cds.domain.TestCase;
@@ -30,6 +32,8 @@ import gov.nist.healthcare.cds.service.TestCaseExecutionService;
 import gov.nist.healthcare.cds.service.UserMetadataService;
 import gov.nist.healthcare.cds.service.impl.data.RWTestPlanFilter;
 
+import gov.nist.healthcare.cds.tcamt.domain.OperationCode;
+import gov.nist.hit.logging.HITStatsLogger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -61,6 +65,9 @@ public class TestExecutionController {
 
 	@Autowired
 	private UserMetadataService userMetadataService;
+
+	@Autowired
+	private AccountService accountService;
 
 	//------------------------ SOFTWARE CONFIGURATION -----------------------------
 	
@@ -138,6 +145,8 @@ public class TestExecutionController {
 		}
 		else {
 			try {
+				Account account = this.accountService.getCurrentUser();
+				HITStatsLogger.log(user.getName(), account.getOrganization(), OperationCode.TESTEXEC.name(), tc.getTestPlan(), tc.getId(), tc.getUid());
 				Report report = execService.execute(config, tc, FixedDate.DATE_FORMAT.parse(sc.getDate()));
 				userMetadataService.updateExecutions(user.getName(), 1);
 				long sent = new Date().getTime();
@@ -173,6 +182,8 @@ public class TestExecutionController {
 			}
 			else {
 				try {
+					Account account = this.accountService.getCurrentUser();
+					HITStatsLogger.log(user.getName(), account.getOrganization(), OperationCode.TESTEXEC.name(), tc.getTestPlan(), tc.getId(), tc.getUid());
 					Report report = execService.execute(config, tc, execRequest.getDate());
 					report.getTimestamps().setRequestReceived(received);
 					reports.add(report);

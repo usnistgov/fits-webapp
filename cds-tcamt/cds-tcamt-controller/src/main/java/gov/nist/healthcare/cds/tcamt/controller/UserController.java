@@ -67,15 +67,15 @@ public class UserController {
 	
 	@RequestMapping(value = "/accounts/login", method = RequestMethod.GET)
 	public ResponseMessage doNothing() {
-		User u = userService.getCurrentUser();
+		Account u = userService.getCurrentUser();
 		return new ResponseMessage(ResponseMessage.Type.success,
 				"loginSuccess", "succes");
 	}
 	
 	@RequestMapping(value = "/shortaccounts", method = RequestMethod.GET)
 	@ResponseBody
-	public List<Account> accounts() {		
-		User u = userService.getCurrentUser();
+	public List<Account> accounts() {
+		Account u = userService.getCurrentUser();
 		if(u != null && u.isEnabled() && isAdmin(u)){
 			List<Account> users = new ArrayList<Account>();
 			List<Account> acc = accountRepository.findAll();
@@ -92,7 +92,7 @@ public class UserController {
 	@RequestMapping(value = "/accounts/{accountId}/approveaccount", method = RequestMethod.POST)
 	@ResponseBody
 	public Account accountsEnable(@PathVariable String accountId) {
-		User u = userService.getCurrentUser();
+		Account u = userService.getCurrentUser();
 		if(u != null && u.isEnabled() && isAdmin(u)){
 			Account a = accountRepository.findOne(accountId);
 			a.setPending(false);
@@ -369,8 +369,8 @@ public class UserController {
 	public ResponseMessage adminChangeAccountPassword(
 			@RequestBody PasswordChange acc,
 			@PathVariable String accountId) {
-		
-		User u = userService.getCurrentUser();
+
+		Account u = userService.getCurrentUser();
 		if(u == null || !u.isEnabled() || !isAdmin(u)){
 			return null;
 		}
@@ -412,7 +412,7 @@ public class UserController {
 	
 	@RequestMapping(value = "/accounts/{accountId}/suspendaccount", method = RequestMethod.POST)
 	public Account accountsDisable(@PathVariable String accountId) {
-		User u = userService.getCurrentUser();
+		Account u = userService.getCurrentUser();
 		if(u != null && u.isEnabled() && isAdmin(u)){
 			Account a = accountRepository.findOne(accountId);
 			a.setPending(true);
@@ -444,7 +444,7 @@ public class UserController {
 	 * */
 	@RequestMapping(value = "/accounts/cuser", method = RequestMethod.GET)
 	public CurrentUser getCUser() {
-		User u = userService.getCurrentUser();
+		Account u = userService.getCurrentUser();
 		CurrentUser cu = null;
 		if (u != null && u.isEnabled()) {
 			Account a = accountRepository.findByUsername(u.getUsername());
