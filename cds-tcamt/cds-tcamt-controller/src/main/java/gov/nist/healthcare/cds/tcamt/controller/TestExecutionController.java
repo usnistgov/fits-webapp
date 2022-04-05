@@ -6,6 +6,7 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
@@ -19,10 +20,7 @@ import gov.nist.healthcare.cds.domain.TestPlan;
 import gov.nist.healthcare.cds.domain.TransientExecRequest;
 import gov.nist.healthcare.cds.domain.exception.ConnectionException;
 import gov.nist.healthcare.cds.domain.exception.UnresolvableDate;
-import gov.nist.healthcare.cds.domain.wrapper.AggregateReport;
-import gov.nist.healthcare.cds.domain.wrapper.ExecutionConfig;
-import gov.nist.healthcare.cds.domain.wrapper.Report;
-import gov.nist.healthcare.cds.domain.wrapper.TestPlanDetails;
+import gov.nist.healthcare.cds.domain.wrapper.*;
 import gov.nist.healthcare.cds.enumeration.EntityAccess;
 import gov.nist.healthcare.cds.repositories.SoftwareConfigRepository;
 import gov.nist.healthcare.cds.repositories.TestPlanRepository;
@@ -206,6 +204,18 @@ public class TestExecutionController {
 	@ResponseBody
 	public AggregateReport aggregate(@RequestBody List<Report> reports, Principal user) {
 		return aggregateService.aggregate(reports);
+	}
+
+	@RequestMapping(value = "/exec/validate", method = RequestMethod.POST)
+	@ResponseBody
+	public List<Report> validate(@RequestBody List<ValidationRequest> validationRequests) {
+		return validationRequests.stream().map(validationRequest -> this.execService.validateResponse(
+				validationRequest.getForecasts(),
+				validationRequest.getEvents(),
+				validationRequest.getTestCase(),
+				validationRequest.getEvaluationDate()
+				)
+		).collect(Collectors.toList());
 	}
 	
 	private int code(String s){
