@@ -251,7 +251,7 @@ public class Bootstrap {
 		productMapping.put("210:ASZ:AstraZeneca COVID-19 Vaccine", "210:ASZ:AstraZeneca COVID-19 Vaccine (includes non-US tradenames VAXZEVRIA, COVISHIELD)");
 
 		// Original : "Moderna COVID-19 Vaccine (non-US Spikevax)"
-		productMapping.put("207:MOD:Moderna COVID-19 Vaccine", "207:MOD:Moderna COVID-19 Vaccine (includes non-US tradename Spikevax)");
+		productMapping.put("207:MOD:Moderna COVID-19 Vaccine (includes non-US tradename Spikevax)", "207:MOD:Moderna COVID-19 Vaccine (non-US Spikevax)");
 
 		productMapping.put("208:PFR:Pfizer-BioNTech COVID-19 Vaccine", "208:PFR:Pfizer-BioNTech COVID-19 Vaccine (EUA labeled)  COMIRNATY (BLA labeled)");
 
