@@ -8,6 +8,8 @@
     }
 </script>
 <ng-include src="'views/report/report-templates.html'"></ng-include>
+
+
 <div>
     <div ng-show="!isAuthenticated()" style="font-size: 18px;text-align: center">
         <p>Please <a href="" ng-click="loginReq()"><i class="fa fa-sign-in"></i>&nbsp;login</a> to access this page. You
@@ -113,7 +115,11 @@
                         <tbody>
                         <tr>
                             <td style="width: 35%;" ng-hide="exec">
-                                <ng-include src="'views/configuration.html'"/>
+                                <software-configuration
+                                        date="assessmentDate"
+                                        relative="nbRelativeTC > 0"
+                                        selected-config="selectedConfig"
+                                ></software-configuration>
                             </td>
                             <td style="width: 65%;">
                                 <md-content layout="column" ng-show="showResults">

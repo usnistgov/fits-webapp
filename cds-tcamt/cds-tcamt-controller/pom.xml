@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>gov.nist.healthcare.cds.tcamt</groupId>
 		<artifactId>cds-tcamt</artifactId>
-		<version>1.0-Beta</version>
+		<version>1.2</version>
 	</parent>
 	<artifactId>cds-tcamt-controller</artifactId>
 	<packaging>war</packaging>
@@ -14,12 +14,17 @@
 		<junit.version>4.11</junit.version>
 		<logback.version>1.0.13</logback.version>
 		<jcl-over-slf4j.version>1.7.5</jcl-over-slf4j.version>
-		<cds-base.version>0.0.1-SNAPSHOT</cds-base.version>
-		<info.version>1.0-Beta</info.version>
+		<cds-base.version>1.0.0</cds-base.version>
+		<info.version>1.2</info.version>
 		<build.date>${maven.build.timestamp}</build.date>
 		<maven.build.timestamp.format>yyyy-MM-dd HH:mm</maven.build.timestamp.format>
 	</properties>
 	<dependencies>
+		<dependency>
+			<groupId>gov.nist.hit.hl7</groupId>
+			<artifactId>hit-stats-logger</artifactId>
+			<version>1.0.0</version>
+		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-context-support</artifactId>
@@ -60,6 +65,16 @@
 			<groupId>gov.nist.healthcare.cds</groupId>
 			<artifactId>cds-base-service</artifactId>
 			<version>${cds-base.version}</version>
+			<exclusions>
+				<exclusion>
+					<artifactId>slf4j-log4j12</artifactId>
+					<groupId>org.slf4j</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>bcprov-jdk15on</artifactId>
+					<groupId>org.bouncycastle</groupId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>com.fasterxml.jackson.dataformat</groupId>
@@ -77,31 +92,11 @@
 			<version>4.4</version>
 			<scope>test</scope>
 		</dependency>
-		<!-- <dependency> -->
-		<!-- <groupId>com.fasterxml.jackson.core</groupId> -->
-		<!-- <artifactId>jackson-core</artifactId> -->
-		<!-- <version>2.4.4</version> -->
-		<!-- </dependency> -->
-		<!-- <dependency> -->
-		<!-- <groupId>com.fasterxml.jackson.core</groupId> -->
-		<!-- <artifactId>jackson-databind</artifactId> -->
-		<!-- <version>2.4.4</version> -->
-		<!-- </dependency> -->
-		<!-- <dependency> -->
-		<!-- <groupId>com.fasterxml.jackson.datatype</groupId> -->
-		<!-- <artifactId>jackson-datatype-hibernate4</artifactId> -->
-		<!-- <version>2.5.3</version> -->
-		<!-- </dependency> -->
+
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-core</artifactId>
 			<version>${spring.version}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>jcl-over-slf4j</artifactId>
-			<version>${jcl-over-slf4j.version}</version>
 		</dependency>
 
 		<dependency>
@@ -144,8 +139,12 @@
 	</dependencies>
 	<build>
 		<finalName>fits</finalName>
-		<!-- <resources> <resource> <directory>src/main/resources/filtered</directory> 
-			<filtering>true</filtering> </resource> </resources> -->
+<!--		<resources>-->
+<!--			<resource>-->
+<!--				<directory>src/main/resources/filtered</directory>-->
+<!--				<filtering>true</filtering>-->
+<!--			</resource>-->
+<!--		</resources>-->
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>

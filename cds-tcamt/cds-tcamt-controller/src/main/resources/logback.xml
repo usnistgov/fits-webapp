@@ -1,0 +1,31 @@
+<configuration>
+
+    <property name="HIT_STATS_TOOL_ID" value="FITS" />
+    <include resource="gov/nist/hit/stats/logger/base.xml" />
+
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="ASYNC-STDOUT-APPENDER" class="ch.qos.logback.classic.AsyncAppender">
+        <appender-ref ref="STDOUT"/>
+    </appender>
+
+    <logger name="org.springframework" level="INFO" appender-ref="FILE"/>
+
+    <logger name="org.immregistries" level="OFF" additivity="false" />
+
+    <logger name="gov.nist" level="*" additivity="false" >
+        <appender-ref ref="STDOUT" />
+    </logger>
+    <logger name="org.springframework" level="ERROR" additivity="false" >
+        <appender-ref ref="STDOUT" />
+    </logger>
+
+
+    <root level="OFF" />
+
+
+</configuration>

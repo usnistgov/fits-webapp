@@ -16,7 +16,7 @@
     }
 </script>
 <md-content md-whiteframe="2" layout="column" flex="100" style="height : 100%; border: 1px solid #b0b0b0;">
-    <md-list  layout="row" ng-show="$parent.tcQueue.length > 0" style="height : 100%; background-color: white; min-height: 45px; padding: 0px; border-top : 1px solid #dddddd;">
+    <md-list  layout="row" ng-show="$parent.tcQueue.length > 0" style="background-color: white; min-height: 45px; padding: 0px; border-top : 1px solid #dddddd;">
         <md-list-item flex="{{exec ? 30 : 90 }}" style="border-right: 1px solid #dddddd;">
             <div layout="row" layout-align="center center" flex="100" style="width: 100%;" >
                 <strong>Test Case Name</strong>
@@ -89,7 +89,7 @@
             <strong>DROP TEST PLANS, TEST CASE GROUPS, TEST CASES HERE</strong>
         </div>
     </div>
-    <md-virtual-repeat-container ng-class="{'drop-zone' :  $parent.tcQueue.length === 0 && !$parent.exec, 'fill' :  $parent.tcQueue.length === 0 }" style="height : 285px;" id="qbody" dnd-list="tcQueue"  dnd-drop="drop(list, item, index)" md-top-index="$parent.controls.top">
+    <md-virtual-repeat-container ng-class="{'drop-zone' :  $parent.tcQueue.length === 0 && !$parent.exec, 'fill' :  $parent.tcQueue.length === 0 }" style="height : 100%; min-height: 250px;" id="qbody" dnd-list="tcQueue"  dnd-drop="drop(list, item, index)" md-top-index="$parent.controls.top">
         <md-list-item md-virtual-repeat="tc in $parent.viewTc = (tcQueue | testcase:$parent.filter.queueSearch | fcFilter:$parent.filter:$parent.showResults | evFilter:$parent.filter:$parent.showResults | execSuccess:$parent.filter.exec:$parent.showResults )" class="repeated-item" flex
                       layout="row"
                       ng-class="{'cursor-move' : !$parent.exec, 'fail' : tc._s === false, 'info' : $index === x.rp && $parent.showResults }"

@@ -119,7 +119,10 @@ public class TestCaseController {
 			@ApiParam(value = "Id of test plan to get") @PathVariable String id,
 			@AuthenticationPrincipal Principal p) {
 		
-		TestPlan tp = ledger.tpBelongsTo(id, p.getName(), EntityAccess.R);	
+		TestPlan tp = ledger.tpBelongsTo(id, p.getName(), EntityAccess.R);
+		if(filter.elect(tp, p.getName())) {
+			filter.filterTestPlan(tp);
+		}
 		return tp;
 	}	
 	

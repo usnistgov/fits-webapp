@@ -6,9 +6,12 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import gov.nist.healthcare.cds.auth.domain.Account;
+import gov.nist.healthcare.cds.auth.service.AccountService;
 import gov.nist.healthcare.cds.domain.FixedDate;
 import gov.nist.healthcare.cds.domain.SoftwareConfig;
 import gov.nist.healthcare.cds.domain.TestCase;
@@ -17,10 +20,7 @@ import gov.nist.healthcare.cds.domain.TestPlan;
 import gov.nist.healthcare.cds.domain.TransientExecRequest;
 import gov.nist.healthcare.cds.domain.exception.ConnectionException;
 import gov.nist.healthcare.cds.domain.exception.UnresolvableDate;
-import gov.nist.healthcare.cds.domain.wrapper.AggregateReport;
-import gov.nist.healthcare.cds.domain.wrapper.ExecutionConfig;
-import gov.nist.healthcare.cds.domain.wrapper.Report;
-import gov.nist.healthcare.cds.domain.wrapper.TestPlanDetails;
+import gov.nist.healthcare.cds.domain.wrapper.*;
 import gov.nist.healthcare.cds.enumeration.EntityAccess;
 import gov.nist.healthcare.cds.repositories.SoftwareConfigRepository;
 import gov.nist.healthcare.cds.repositories.TestPlanRepository;
@@ -30,6 +30,8 @@ import gov.nist.healthcare.cds.service.TestCaseExecutionService;
 import gov.nist.healthcare.cds.service.UserMetadataService;
 import gov.nist.healthcare.cds.service.impl.data.RWTestPlanFilter;
 
+import gov.nist.healthcare.cds.tcamt.domain.OperationCode;
+import gov.nist.hit.logging.HITStatsLogger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -61,6 +63,9 @@ public class TestExecutionController {
 
 	@Autowired
 	private UserMetadataService userMetadataService;
+
+	@Autowired
+	private AccountService accountService;
 
 	//------------------------ SOFTWARE CONFIGURATION -----------------------------
 	
@@ -138,6 +143,8 @@ public class TestExecutionController {
 		}
 		else {
 			try {
+				Account account = this.accountService.getCurrentUser();
+				HITStatsLogger.log(user.getName(), account.getOrganization(), OperationCode.TESTEXEC.name(), tc.getTestPlan(), tc.getId(), tc.getUid());
 				Report report = execService.execute(config, tc, FixedDate.DATE_FORMAT.parse(sc.getDate()));
 				userMetadataService.updateExecutions(user.getName(), 1);
 				long sent = new Date().getTime();
@@ -173,6 +180,8 @@ public class TestExecutionController {
 			}
 			else {
 				try {
+					Account account = this.accountService.getCurrentUser();
+					HITStatsLogger.log(user.getName(), account.getOrganization(), OperationCode.TESTEXEC.name(), tc.getTestPlan(), tc.getId(), tc.getUid());
 					Report report = execService.execute(config, tc, execRequest.getDate());
 					report.getTimestamps().setRequestReceived(received);
 					reports.add(report);
@@ -195,6 +204,18 @@ public class TestExecutionController {
 	@ResponseBody
 	public AggregateReport aggregate(@RequestBody List<Report> reports, Principal user) {
 		return aggregateService.aggregate(reports);
+	}
+
+	@RequestMapping(value = "/exec/validate", method = RequestMethod.POST)
+	@ResponseBody
+	public List<Report> validate(@RequestBody List<ValidationRequest> validationRequests) {
+		return validationRequests.stream().map(validationRequest -> this.execService.validateResponse(
+				validationRequest.getForecasts(),
+				validationRequest.getEvents(),
+				validationRequest.getTestCase(),
+				validationRequest.getEvaluationDate()
+				)
+		).collect(Collectors.toList());
 	}
 	
 	private int code(String s){

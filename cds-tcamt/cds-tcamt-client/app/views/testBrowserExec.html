@@ -55,6 +55,7 @@
 			 ng-class="{selected1 : isSelectedTC(tc) && !multipleSel, cdraggable : find(selected,tc) && multipleSel, inqueue : inQueue(tc)}">
 			<div style="margin-left: 5px;">
 							<span ng-class="{selected1 : isSelectedTC(tc) && !multipleSel, cdraggable : find(selected,tc) && multipleSel, inqueue : inQueue(tc)}">
+                                <wf-tag code="tc.workflowTag"></wf-tag>
 								<span class="label label-case label-icon">TC</span>
 								<span style="font-weight: initial;"
 								      ng-class="{ 'unsaved' : tc._changed }">
@@ -106,6 +107,7 @@
 			    <div id="{{'tc-'+tc.id}}" ng-click="selectTC(tc)" ng-class="{selected1 : isSelectedTC(tc) && !multipleSel, cdraggable : find(selected,tc) && multipleSel, inqueue : inQueue(tc)}">
 				<div style="margin-left: 5px;">
 				    <span ng-class="{selected1 : isSelectedTC(tc) && !multipleSel, cdraggable : find(selected,tc) && multipleSel, inqueue : inQueue(tc)}">
+                        <wf-tag code="tc.workflowTag"></wf-tag>
 					    <span class="label label-case label-icon">TC</span>
 					    <span style="font-weight: initial;"
 						  ng-class="{ 'unsaved' : tc._changed }">

@@ -3,11 +3,7 @@ package gov.nist.healthcare.cds.tcamt.config;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
-import java.util.List;
-import java.util.Properties;
-import java.util.Set;
+import java.util.*;
 
 import javax.annotation.PostConstruct;
 import javax.xml.bind.JAXBException;
@@ -17,24 +13,13 @@ import gov.nist.healthcare.cds.auth.domain.Account;
 import gov.nist.healthcare.cds.auth.domain.Privilege;
 import gov.nist.healthcare.cds.auth.repo.PrivilegeRepository;
 import gov.nist.healthcare.cds.auth.service.AccountService;
-import gov.nist.healthcare.cds.domain.Date;
-import gov.nist.healthcare.cds.domain.Event;
-import gov.nist.healthcare.cds.domain.ExpectedForecast;
-import gov.nist.healthcare.cds.domain.FixedDate;
-import gov.nist.healthcare.cds.domain.SoftwareConfig;
-import gov.nist.healthcare.cds.domain.TestCase;
-import gov.nist.healthcare.cds.domain.VaccinationEvent;
 import gov.nist.healthcare.cds.domain.VaccineMapping;
-import gov.nist.healthcare.cds.domain.exception.ProductNotFoundException;
-import gov.nist.healthcare.cds.domain.exception.VaccineNotFoundException;
 import gov.nist.healthcare.cds.domain.wrapper.AppInfo;
 import gov.nist.healthcare.cds.domain.wrapper.Document;
 import gov.nist.healthcare.cds.domain.wrapper.Documents;
 import gov.nist.healthcare.cds.domain.wrapper.Resources;
 import gov.nist.healthcare.cds.domain.wrapper.SimulatedResult;
 import gov.nist.healthcare.cds.domain.wrapper.SimulationMap;
-import gov.nist.healthcare.cds.enumeration.DateType;
-import gov.nist.healthcare.cds.enumeration.FHIRAdapter;
 import gov.nist.healthcare.cds.repositories.SoftwareConfigRepository;
 import gov.nist.healthcare.cds.repositories.TestCaseRepository;
 import gov.nist.healthcare.cds.repositories.VaccineMappingRepository;
@@ -42,6 +27,7 @@ import gov.nist.healthcare.cds.service.TestCaseExecutionService;
 import gov.nist.healthcare.cds.service.TestRunnerService;
 import gov.nist.healthcare.cds.service.VaccineImportService;
 import gov.nist.healthcare.cds.service.VaccineMatcherService;
+import gov.nist.healthcare.cds.service.impl.data.SimpleCodeRemapService;
 import gov.nist.healthcare.cds.service.impl.validation.ConfigurableVaccineMatcher;
 import gov.nist.healthcare.cds.service.impl.validation.ExecutionService;
 import gov.nist.healthcare.cds.service.vaccine.VaccineMatcherConfiguration;
@@ -84,6 +70,9 @@ public class Bootstrap {
 	
 	@Autowired
 	private AccountService accService;
+
+	@Autowired
+	private SimpleCodeRemapService simpleCodeRemapService;
 	
 	private String ENV_ADMIN_USERNAME = "fits.admin.username";
 	private String ENV_ADMIN_PASSWORD = "fits.admin.password";
@@ -113,7 +102,7 @@ public class Bootstrap {
 		AppInfo app = new AppInfo();
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
 		app.setAdminEmail(env.getProperty(ENV_WEB_ADMIN_EMAIL));
-		app.setDate(new java.util.Date(Integer.parseInt(env.getProperty("date"))));
+		app.setDate(new java.util.Date(Long.parseLong(env.getProperty("date"))));
 		app.setVersion(env.getProperty("version"));
 		return app;
 	}
@@ -198,7 +187,7 @@ public class Bootstrap {
 	public void createVaccine() throws IOException{
 		long all = vaccineRepository.count();
 		int i = 0;
-		Set<VaccineMapping> set = vaccineService._import(Bootstrap.class.getResourceAsStream("/web_cvx.xlsx"),Bootstrap.class.getResourceAsStream("/web_vax2vg.xlsx"),Bootstrap.class.getResourceAsStream("/web_mvx.xlsx"),Bootstrap.class.getResourceAsStream("/web_tradename.xlsx"));
+		Set<VaccineMapping> set = vaccineService._import(Bootstrap.class.getResourceAsStream("/codeset/web_cvx.xlsx"),Bootstrap.class.getResourceAsStream("/codeset/web_vax2vg.xlsx"),Bootstrap.class.getResourceAsStream("/codeset/web_mvx.xlsx"),Bootstrap.class.getResourceAsStream("/codeset/web_tradename.xlsx"));
 		for(VaccineMapping mp : set){
 			if(!vaccineRepository.exists(mp.getId())){
 				i++;
@@ -245,7 +234,7 @@ public class Bootstrap {
 	
 
 	@PostConstruct
-	public void init() throws ParseException, IOException, VaccineNotFoundException, ProductNotFoundException {
+	public void init() throws Exception {
 		
 		// Create Privileges
 		this.createPrivileges();
@@ -253,6 +242,27 @@ public class Bootstrap {
 		// Create Admin
 		this.createAdmin();
 
+		//Create Vaccines
+		Map<String, String> cvxMapping = new HashMap<>();
+
+		Map<String, String> productMapping = new HashMap<>();
+
+		// Original : "AstraZeneca COVID-19 Vaccine (Non-US tradenames include VAXZEVRIA, COVISHIELD)"
+		productMapping.put("210:ASZ:AstraZeneca COVID-19 Vaccine", "210:ASZ:AstraZeneca COVID-19 Vaccine (includes non-US tradenames VAXZEVRIA, COVISHIELD)");
+
+		// Original : "Moderna COVID-19 Vaccine (non-US Spikevax)"
+		productMapping.put("207:MOD:Moderna COVID-19 Vaccine (includes non-US tradename Spikevax)", "207:MOD:Moderna COVID-19 Vaccine (non-US Spikevax)");
+
+		productMapping.put("208:PFR:Pfizer-BioNTech COVID-19 Vaccine", "208:PFR:Pfizer-BioNTech COVID-19 Vaccine (EUA labeled)  COMIRNATY (BLA labeled)");
+
+		this.simpleCodeRemapService.reloadCodeSetsAndRemapTestCases(
+				Bootstrap.class.getResourceAsStream("/codeset/web_cvx.xlsx"),
+				Bootstrap.class.getResourceAsStream("/codeset/web_vax2vg.xlsx"),
+				Bootstrap.class.getResourceAsStream("/codeset/web_mvx.xlsx"),
+				Bootstrap.class.getResourceAsStream("/codeset/web_tradename.xlsx"),
+				cvxMapping,
+				productMapping
+		);
 	}
 	
 }

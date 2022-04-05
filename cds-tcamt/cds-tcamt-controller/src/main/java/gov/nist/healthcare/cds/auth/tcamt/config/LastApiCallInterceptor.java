@@ -1,5 +1,6 @@
 package gov.nist.healthcare.cds.auth.tcamt.config;
 
+import gov.nist.healthcare.cds.auth.domain.Account;
 import gov.nist.healthcare.cds.auth.service.AccountService;
 import gov.nist.healthcare.cds.service.UserMetadataService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +25,7 @@ public class LastApiCallInterceptor extends HandlerInterceptorAdapter {
             HttpServletResponse response,
             Object handler) throws Exception {
 
-        User u = this.accountService.getCurrentUser();
+        Account u = this.accountService.getCurrentUser();
         if(u != null) {
             this.userMetadataService.updateLastApiCall(u.getUsername());
         }

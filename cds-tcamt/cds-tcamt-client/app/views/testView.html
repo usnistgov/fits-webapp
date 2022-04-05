@@ -21,6 +21,12 @@
                     <td>{{selectedTC.description}}</td>
                 </tr>
                 <tr>
+                    <td style="width : 250px;" ><strong>Tags</strong></td>
+                    <td>
+                        <span ng-repeat="tag in selectedTC.tags track by tag.text"> {{ tag.text }}</span>
+                    </td>
+                </tr>
+                <tr>
                     <td style="width : 250px;"><strong> Last Changed in Test Plan Version </strong></td>
                     <td>{{selectedTC.metaData.version}}</td>
                 </tr>
