@@ -248,7 +248,7 @@ public class Bootstrap {
 		Map<String, String> productMapping = new HashMap<>();
 
 		// Original : "AstraZeneca COVID-19 Vaccine (Non-US tradenames include VAXZEVRIA, COVISHIELD)"
-		productMapping.put("210:ASZ:AstraZeneca COVID-19 Vaccine", "210:ASZ:AstraZeneca COVID-19 Vaccine (includes non-US tradenames VAXZEVRIA, COVISHIELD)");
+		productMapping.put("210:ASZ:AstraZeneca COVID-19 Vaccine (includes non-US tradenames VAXZEVRIA, COVISHIELD)", "210:ASZ:AstraZeneca COVID-19 Vaccine (Non-US tradenames include VAXZEVRIA, COVISHIELD)");
 
 		// Original : "Moderna COVID-19 Vaccine (non-US Spikevax)"
 		productMapping.put("207:MOD:Moderna COVID-19 Vaccine (includes non-US tradename Spikevax)", "207:MOD:Moderna COVID-19 Vaccine (non-US Spikevax)");
