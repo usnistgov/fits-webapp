@@ -17,9 +17,22 @@ angular.module('tcl')
         $scope.updateAccount = function() {
             //not sure it is very clean...
             //TODO: Add call back?
-            new Account($scope.account).$save();
-
-            $scope.accountOrig = angular.copy($scope.account);
+            var accSave = new Account($scope.account)
+            accSave.$save(function(){
+                if(accSave.type === 'success'){
+                    Notification.success({
+                        message: "Account Updated Successfully",
+                        delay: 3000
+                    });
+                    $scope.accountOrig = angular.copy($scope.account);
+                }
+                else {
+                    Notification.error({
+                        message: accSave.text,
+                        delay: 3000
+                    });
+                }
+            });
         };
 
         $scope.resetForm = function() {

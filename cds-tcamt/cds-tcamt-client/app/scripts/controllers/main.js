@@ -126,15 +126,15 @@ angular.module('tcl').controller('MainCtrl', ['DataSynchService','TestObjectUtil
             return '';
         };
 
-        $rootScope.downloadDocument = function (path) {
-            if (path != null) {
+        $rootScope.downloadDocument = function (name) {
+            if (name != null) {
                 var form = document.createElement("form");
                 form.action = "api/documentation/downloadDocument";
                 form.method = "POST";
                 form.target = "_target";
                 var input = document.createElement("input");
-                input.name = "path";
-                input.value = path;
+                input.name = "name";
+                input.value = name;
                 form.appendChild(input);
                 form.style.display = 'none';
                 document.body.appendChild(form);

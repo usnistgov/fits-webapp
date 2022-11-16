@@ -31,23 +31,36 @@ public class DocumentationController {
 	
 	@RequestMapping(value = "/downloadDocument", method = RequestMethod.POST)
 	public void downloadDocumentByPath(
-		@RequestParam("path") String path,
+		@RequestParam("name") String name,
 		HttpServletRequest request, HttpServletResponse response) throws Exception {
 		try {
-			if (path != null) {
-				String fileName = null;
-				path = !path.startsWith("/") ? "/" + path : path;
-				InputStream content = DocumentationController.class.getResourceAsStream(path);
+			Document document = findDocument(name);
+			if (document != null && locationIsValid(document.getLocation())) {
+				InputStream content = DocumentationController.class.getResourceAsStream(document.getLocation());
 				if (content != null) {
-					fileName = path.substring(path.lastIndexOf("/") + 1);
-					response.setContentType(getContentType(path));
-					fileName = fileName.replaceAll(" ", "-");
-					response.setHeader("Content-disposition", "attachment;filename=" + fileName);
+					response.setContentType(getContentType(document.getFileName()));
+					response.setHeader("Content-disposition", "attachment;filename=" + document.getFileName());
 					FileCopyUtils.copy(content, response.getOutputStream());
 				}
 			}
 		} catch (IOException e) {
 			throw new Exception("Cannot download the document");
+		}
+	}
+
+	boolean locationIsValid(String location) {
+		return (location.startsWith("/docs") || location.startsWith("/doc_resources")) && !location.contains("..");
+	}
+
+	Document findDocument(String name) {
+		if(name != null && !name.isEmpty()) {
+			if(documents.getDocumentMap().containsKey(name)) {
+				return documents.getDocumentMap().get(name);
+			} else {
+				return resources.getResourceMap().get(name);
+			}
+		} else {
+			return null;
 		}
 	}
 	
@@ -61,16 +74,6 @@ public class DocumentationController {
 	@ResponseBody
 	public List<Document> resources(HttpServletRequest request, HttpServletResponse response) throws Exception {
 		return resources.getResources();
-	}
-
-	private InputStream getContent(String path) {
-		InputStream content = null;
-		if (!path.startsWith("/")) {
-			content = DocumentationController.class.getResourceAsStream("/" + path);
-		} else {
-			content = DocumentationController.class.getResourceAsStream(path);
-		}
-		return content;
 	}
 
 	private String getContentType(String fileName) {
@@ -100,7 +103,6 @@ public class DocumentationController {
 		} else if (fileExtension.equals("ppt")) {
 			contentType = "application/vnd.ms-powerpoint";
 		}
-		System.out.println("[CTNTYPE] "+contentType);
 		return contentType;
 	}
 

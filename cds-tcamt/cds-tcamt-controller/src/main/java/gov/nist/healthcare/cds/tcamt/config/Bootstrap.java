@@ -217,30 +217,12 @@ public class Bootstrap {
 		System.out.println("[PRIVILEGE CREATED]"+(pr.isEmpty() ? " NONE " : pr ));
 	}
 	
-	public void createAdmin() {
-		String adminUsername = env.getProperty(ENV_ADMIN_USERNAME);
-		String adminPassword = env.getProperty(ENV_ADMIN_PASSWORD);
-		if(adminUsername != null && !adminUsername.isEmpty() && adminPassword != null && !adminPassword.isEmpty() && this.accService.getAccountByUsername(adminUsername) == null) {
-			Account a = new Account();
-			a.setUsername(adminUsername);
-			a.setPassword(adminPassword);
-			accService.createAdmin(a);
-			System.out.println("[ADMIN] userame : "+adminUsername+" created");
-		}
-		else {
-			System.out.println("[ADMIN] userame : "+adminUsername+" not created");
-		}
-	}
-	
 
 	@PostConstruct
 	public void init() throws Exception {
 		
 		// Create Privileges
 		this.createPrivileges();
-		
-		// Create Admin
-		this.createAdmin();
 
 		//Create Vaccines
 		Map<String, String> cvxMapping = new HashMap<>();

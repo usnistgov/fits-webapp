@@ -1,12 +1,6 @@
 package gov.nist.healthcare.cds.tcamt.controller;
 
-import gov.nist.healthcare.cds.auth.domain.Account;
-import gov.nist.healthcare.cds.auth.domain.AccountPasswordReset;
-import gov.nist.healthcare.cds.auth.domain.CurrentUser;
-import gov.nist.healthcare.cds.auth.domain.PasswordChange;
-import gov.nist.healthcare.cds.auth.domain.PasswordChangeException;
-import gov.nist.healthcare.cds.auth.domain.Privilege;
-import gov.nist.healthcare.cds.auth.domain.ResponseMessage;
+import gov.nist.healthcare.cds.auth.domain.*;
 import gov.nist.healthcare.cds.auth.repo.AccountPasswordResetRepository;
 import gov.nist.healthcare.cds.auth.repo.AccountRepository;
 import gov.nist.healthcare.cds.auth.service.AccountService;
@@ -29,6 +23,7 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.mail.MailException;
 import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -67,21 +62,21 @@ public class UserController {
 	
 	@RequestMapping(value = "/accounts/login", method = RequestMethod.GET)
 	public ResponseMessage doNothing() {
-		Account u = userService.getCurrentUser();
 		return new ResponseMessage(ResponseMessage.Type.success,
 				"loginSuccess", "succes");
 	}
 	
 	@RequestMapping(value = "/shortaccounts", method = RequestMethod.GET)
 	@ResponseBody
-	public List<Account> accounts() {
+	@PreAuthorize("hasAuthority('ADMIN')")
+	public List<ShortAccount> accounts() {
 		Account u = userService.getCurrentUser();
 		if(u != null && u.isEnabled() && isAdmin(u)){
-			List<Account> users = new ArrayList<Account>();
+			List<ShortAccount> users = new ArrayList<>();
 			List<Account> acc = accountRepository.findAll();
 			for(Account a : acc){
 				if(!isAdmin(a)){
-					users.add(a);
+					users.add(new ShortAccount(a));
 				}
 			}
 			return users;
@@ -91,154 +86,107 @@ public class UserController {
 	
 	@RequestMapping(value = "/accounts/{accountId}/approveaccount", method = RequestMethod.POST)
 	@ResponseBody
-	public Account accountsEnable(@PathVariable String accountId) {
+	@PreAuthorize("hasAuthority('ADMIN')")
+	public ShortAccount accountsEnable(@PathVariable String accountId) {
 		Account u = userService.getCurrentUser();
 		if(u != null && u.isEnabled() && isAdmin(u)){
 			Account a = accountRepository.findOne(accountId);
 			a.setPending(false);
 			accountRepository.save(a);
 			this.sendAccountApproveNotification(a);
-			return a;
+			return new ShortAccount(a);
 		}
 		return null;
 	}
 	
 	@RequestMapping(value = "/accounts/{accountId}", method = RequestMethod.GET)
 	@ResponseBody
-	public Account accountId(@PathVariable String accountId,Principal p) {
+	public ShortAccount getAccount(@PathVariable String accountId,Principal p) {
 		Account a = accountRepository.findByUsername(p.getName());
 		if(a.getId().equals(accountId)){
-			return a;
+			return new ShortAccount(a);
 		}
 		return null;
 	}
 	
 	@RequestMapping(value = "/accounts/{accountId}", method = RequestMethod.POST)
 	@ResponseBody
-	public Account accountSave(@RequestBody Account acc, @PathVariable String accountId,Principal p) {
-		if(acc.getId().equals(accountId) && acc.getUsername().equals(p.getName())){
-			return accountRepository.save(acc);
+	public ResponseMessage updateAccount(@RequestBody Account acc, @PathVariable String accountId) throws Exception {
+		if(acc.getId().equals(accountId)){
+			Account current = userService.getCurrentUser();
+			Account referenced = accountRepository.findOne(accountId);
+			if(current.getUsername().equals(referenced.getUsername()) && current.getId().equals(referenced.getId())) {
+				List<String> issues = userService.checkAccountInfo(acc);
+				if(issues == null || issues.isEmpty()) {
+					referenced.setFullName(acc.getFullName());
+					referenced.setOrganization(acc.getOrganization());
+					if(!referenced.getEmail().equalsIgnoreCase(acc.getEmail())) {
+						Account byEmail = accountRepository.findByEmailIgnoreCase(acc.getEmail());
+						if(byEmail == null) {
+							referenced.setEmail(acc.getEmail());
+						} else {
+							return new ResponseMessage(ResponseMessage.Type.danger,
+									"Email already used.", null);
+						}
+					}
+					accountRepository.save(referenced);
+					return new ResponseMessage(ResponseMessage.Type.success,
+							"Account Updated Successfully", null);
+				} else {
+					return new ResponseMessage(ResponseMessage.Type.danger,
+							String.join(", ", issues), null);
+				}
+			}
 		}
-		return null;
+		return new ResponseMessage(ResponseMessage.Type.danger,
+				"Invalid request", null);
 	}
 
 	@RequestMapping(value = "/accounts/list/metadata", method = RequestMethod.GET)
 	@ResponseBody
-	public List<UserMetadata> usermetadata() {
-		return this.userMetadataRepository.findAll();
-	}
-	
-	private void sendChangeAccountPasswordNotification(Account acc) {
-		SimpleMailMessage msg = new SimpleMailMessage(this.templateMessage);
-
-		msg.setTo(acc.getEmail());
-		msg.setSubject("FITS Password Change Notification");
-		msg.setText("Dear " + acc.getUsername() + " \n\n"
-				+ "Your password has been successfully changed." + " \n\n"
-				+ "Sincerely,\n\n" + "The FITS Team");
-
-		try {
-			this.mailSender.send(msg);
-		} catch (MailException ex) {
-			ex.printStackTrace();
+	@PreAuthorize("hasAuthority('ADMIN')")
+	public List<UserMetadata> getUsersMetadata() {
+		Account u = userService.getCurrentUser();
+		if(u != null && u.isEnabled() && isAdmin(u)){
+			return this.userMetadataRepository.findAll();
 		}
+		return null;
 	}
-	
-	private void sendChangeAccountPasswordNotification(Account acc,
-			String newPassword) {
-		SimpleMailMessage msg = new SimpleMailMessage(this.templateMessage);
-		msg.setTo(acc.getEmail());
-		msg.setSubject("FITS Password Change Notification");
-		msg.setText("Dear " + acc.getUsername() + " \n\n"
-				+ "Your password has been successfully changed." + " \n\n"
-				+ "Your new temporary password is ." + newPassword + " \n\n"
-				+ "Please update your password once logged in. \n\n"
-				+ "Sincerely,\n\n" + "The FITS Team");
 
-		try {
-			this.mailSender.send(msg);
-		} catch (MailException ex) {
-			ex.printStackTrace();
-		}
-	}
-	
-
-	private void sendResetAccountPasswordNotification(Account acc) {
-		SimpleMailMessage msg = new SimpleMailMessage(this.templateMessage);
-
-		msg.setTo(acc.getEmail());
-		msg.setSubject("FITS Password Rest Notification");
-		msg.setText("Dear " + acc.getUsername() + " \n\n"
-				+ "Your password has been successfully reset." + " \n"
-				+ "Your username is: " + acc.getUsername() + " \n\n"
-				+ "Sincerely,\n\n" + "The FITS Team");
-
-		try {
-			this.mailSender.send(msg);
-		} catch (MailException ex) {
-			ex.printStackTrace();
-		}
-	}
 	
 	@RequestMapping(value = "/accounts/{accountId}/passwordchange", method = RequestMethod.POST)
 	public ResponseMessage changeAccountPassword(
-			@RequestBody PasswordChange acc,
-			@PathVariable String accountId, HttpServletResponse response, Principal p) throws IOException {
-		Account a = accountRepository.findByUsername(p.getName());
-		if(!p.getName().equals(acc.getUsername()) || !a.getId().equals(a.getId())){
+			@RequestBody PasswordChange pChange, HttpServletResponse response) throws IOException {
+		Account current = userService.getCurrentUser();
+
+		if(!current.getUsername().equals(pChange.getUsername()) || !current.getId().equals(pChange.getId())){
 			response.sendError(403);
-		}
-		
-		// check there is a username in the request
-		if (acc.getUsername() == null || acc.getUsername().isEmpty()) {
 			return new ResponseMessage(ResponseMessage.Type.danger,
-					"Missing Username", null);
+					"Invalid Request", null);
 		}
 
-		if (acc.getNewPassword() == null || acc.getNewPassword().length() < 4) {
-			return new ResponseMessage(ResponseMessage.Type.danger,
-					"Invalid Password", null);
-		}
-
-		Account onRecordAccount = accountRepository.findOne(accountId);
-		if (!onRecordAccount.getUsername().equals(acc.getUsername())) {
-			return new ResponseMessage(ResponseMessage.Type.danger,
-					"Invalid Username", null);
-		}
-
+		Account userAccount = accountRepository.findOne(current.getId());
 		try {
-			userService.changePassword(onRecordAccount,acc);
+			userService.changePassword(userAccount, pChange);
 		} catch (PasswordChangeException e) {
-			return new ResponseMessage(ResponseMessage.Type.danger,
-					e.getMessage(), null);
+			return new ResponseMessage(ResponseMessage.Type.danger, e.getMessage(), null);
 		}
 
 		// send email notification
-		this.sendChangeAccountPasswordNotification(onRecordAccount);
-
-		return new ResponseMessage(ResponseMessage.Type.success,
-				"Password Changed Successfully", onRecordAccount.getId().toString(),
-				true);
+		this.sendChangeAccountPasswordNotification(userAccount);
+		return new ResponseMessage(ResponseMessage.Type.success, "Password Changed Successfully", "", true);
 	}
 	
 	@RequestMapping(value = "/sooa/accounts/{userId}/passwordreset", method = RequestMethod.POST, params = "token")
-	public ResponseMessage resetAccountPassword(@RequestBody Account acc,
-			@PathVariable String userId,
+	public ResponseMessage resetAccountPassword(@RequestBody PasswordResetRequest passwordResetRequest,
 			@RequestParam(required = true) String token) {
 
-		// logger.debug("^^^^^^^^^^^^^^^^^^^^^ -5 ^^^^^^^^^^^^^^^^^^");
-
 		// check there is a username in the request
-		if (acc.getUsername() == null || acc.getUsername().isEmpty()) {
-			return new ResponseMessage(ResponseMessage.Type.danger,
-					"Username Missing", null);
+		if (passwordResetRequest.getUsername() == null || passwordResetRequest.getUsername().isEmpty()) {
+			return new ResponseMessage(ResponseMessage.Type.danger, "Username Missing", null);
 		}
 
-		// logger.debug("^^^^^^^^^^^^^^^^^^^^^ -4 ^^^^^^^^^^^^^^^^^^");
-
-		AccountPasswordReset apr = accountResetPasswordRepository.findByUsername(acc.getUsername());
-
-		// logger.debug("^^^^^^^^^^^^^^^^^^^^^ -3 ^^^^^^^^^^^^^^^^^^");
+		AccountPasswordReset apr = accountResetPasswordRepository.findByUsername(passwordResetRequest.getUsername());
 
 		// check there is a reset request on record
 		if (apr == null) {
@@ -246,48 +194,24 @@ public class UserController {
 					"No reset request found", null);
 		}
 
-		// logger.debug("^^^^^^^^^^^^^^^^^^^^^ -2 ^^^^^^^^^^^^^^^^^^");
-
-		// check that for username, the token in record is the token passed in
-		// request
-		if (!apr.getCurrentToken().equals(token)) {
+		Account onRecordAccount = accountRepository.findOne(passwordResetRequest.getUserId());
+		// Check that id and username match
+		if(!onRecordAccount.getUsername().equals(passwordResetRequest.getUsername())) {
 			return new ResponseMessage(ResponseMessage.Type.danger,
 					"Invalid request", null);
 		}
 
-		// logger.debug("^^^^^^^^^^^^^^^^^^^^^ -1 ^^^^^^^^^^^^^^^^^^");
-
-		// check token is not expired
-		if (apr.isTokenExpired()) {
-			return new ResponseMessage(ResponseMessage.Type.danger,
-					"Request has expired", null);
-		}
-
-		// logger.debug("^^^^^^^^^^^^^^^^^^^^^ 0 ^^^^^^^^^^^^^^^^^^");
-
-		Account onRecordAccount = accountRepository.findOne(userId);
-
-		// logger.debug("^^^^^^^^^^^^^^^^^^^^^ "+onRecordUser.getPassword()+" ^^^^^^^^^^^^^^^^^^");
-
-		// logger.debug("^^^^^^^^^^^^^^^^^^^^^ 1 ^^^^^^^^^^^^^^^^^^");
-
-
-		// logger.debug("^^^^^^^^^^^^^^^^^^^^^ 2 ^^^^^^^^^^^^^^^^^^");
-
 		try {
-			userService.changePassword(acc.getPassword(), userId);
+			userService.changePasswordWithoutOldCheck(apr, token, onRecordAccount, passwordResetRequest.getPassword());
+			accountResetPasswordRepository.delete(apr.getId());
 		} catch (PasswordChangeException e) {
 			return new ResponseMessage(ResponseMessage.Type.danger,
 					e.getMessage(), null);
 		}
-		
-		// logger.debug("^^^^^^^^^^^^^^^^^^^^^ 3 ^^^^^^^^^^^^^^^^^^");
 
-		// send email notification
 		this.sendResetAccountPasswordNotification(onRecordAccount);
-
 		return new ResponseMessage(ResponseMessage.Type.success,
-				"accountPasswordReset", onRecordAccount.getId().toString());
+				"accountPasswordReset", onRecordAccount.getId());
 	}
 	
 	@RequestMapping(value = "/sooa/accounts/passwordreset", method = RequestMethod.POST)
@@ -300,7 +224,7 @@ public class UserController {
 		if (username != null) {
 			acc = accountRepository.findByUsername(username);
 			if (acc == null) {
-				acc = accountRepository.findByEmail(username);
+				acc = accountRepository.findByEmailIgnoreCase(username);
 			}
 		} else {
 			return new ResponseMessage(ResponseMessage.Type.danger,
@@ -313,16 +237,13 @@ public class UserController {
 		}
 
 		Account user = acc;
-		// start password reset process (for reset)
-		// Create reset token. First get accountPasswordReset element from the
-		// repository. If null create it.
 		AccountPasswordReset arp = accountResetPasswordRepository.findByUsername(acc.getUsername());
 		if (arp == null) {
 			arp = new AccountPasswordReset();
 			arp.setUsername(acc.getUsername());
 		}
 
-		arp.setCurrentToken(arp.getNewToken());
+		arp.setCurrentToken(AccountPasswordReset.getNewToken());
 		arp.setTimestamp(new java.util.Date());
 		arp.setNumberOfReset(arp.getNumberOfReset() + 1);
 
@@ -333,98 +254,66 @@ public class UserController {
 				+ "&token="
 				+ UriUtils.encodeQueryParam(arp.getCurrentToken(), "UTF-8");
 
-		// System.out.println("****************** "+url+" *******************");
-
 		// generate and send email
 		this.sendAccountPasswordResetRequestNotification(acc, url);
 
 		return new ResponseMessage(ResponseMessage.Type.success,
-				"resetRequestProcessed", acc.getId().toString(), true);
-	}
-	
-	private void sendAccountPasswordResetRequestNotification(Account acc,
-			String url) {
-		SimpleMailMessage msg = new SimpleMailMessage(this.templateMessage);
-
-		msg.setTo(acc.getEmail());
-		msg.setSubject("FITS Password Reset Request Notification");
-		msg.setText("Dear "
-				+ acc.getUsername()
-				+ " \n\n"
-				+ "**** If you have not requested a password reset, please disregard this email **** \n\n\n"
-				+ "You password reset request has been processed.\n"
-				+ "Copy and paste the following url to your browser to initiate the password change:\n"
-				+ url + " \n\n" + "Sincerely, " + "\n\n" + "The FITS Team"
-				+ "\n\n" + "P.S: If you need help, contact us at '"
-				+ ADMIN_EMAIL + "'");
-
-		try {
-			this.mailSender.send(msg);
-		} catch (MailException ex) {
-			ex.printStackTrace();
-		}
+				"resetRequestProcessed", acc.getId(), true);
 	}
 	
 	@RequestMapping(value = "/accounts/{accountId}/userpasswordchange", method = RequestMethod.POST)
+	@PreAuthorize("hasAuthority('ADMIN')")
 	public ResponseMessage adminChangeAccountPassword(
-			@RequestBody PasswordChange acc,
-			@PathVariable String accountId) {
+			@RequestBody PasswordChange pChange) {
 
 		Account u = userService.getCurrentUser();
 		if(u == null || !u.isEnabled() || !isAdmin(u)){
 			return null;
 		}
 		
-//		String newPassword = acc.getNewPassword();
-		
 		// check there is a username in the request
-		if (acc.getUsername() == null || acc.getUsername().isEmpty()) {
+		if (pChange.getUsername() == null || pChange.getUsername().isEmpty()) {
 			return new ResponseMessage(ResponseMessage.Type.danger,
 					"Username Missing", null);
 		}
 
-		if (acc.getNewPassword() == null || acc.getNewPassword().length() < 4) {
-			return new ResponseMessage(ResponseMessage.Type.danger,
-					"Invalid Password", null);
-		}
-
-		Account onRecordAccount = accountRepository.findOne(accountId);
-		if (!onRecordAccount.getUsername().equals(acc.getUsername())) {
+		Account onRecordAccount = accountRepository.findOne(pChange.getId());
+		if (!onRecordAccount.getUsername().equals(pChange.getUsername())) {
 			return new ResponseMessage(ResponseMessage.Type.danger,
 					"Invalid Username", null);
 		}
 
 		try {
-			userService.changePasswordForUser(onRecordAccount, acc);
+			userService.changePasswordForUser(onRecordAccount, pChange);
 		} catch (PasswordChangeException e) {
 			return new ResponseMessage(ResponseMessage.Type.danger,
 					e.getMessage(), null);
 		}
 
 		// send email notification
-		this.sendChangeAccountPasswordNotification(onRecordAccount, acc.getNewPassword());
+		this.sendChangeAccountPasswordNotification(onRecordAccount, pChange.getNewPassword());
 
 		return new ResponseMessage(ResponseMessage.Type.success,
-				"accountPasswordReset", onRecordAccount.getId().toString(),
+				"accountPasswordReset", onRecordAccount.getId(),
 				true);
 	}
 	
 	
 	@RequestMapping(value = "/accounts/{accountId}/suspendaccount", method = RequestMethod.POST)
-	public Account accountsDisable(@PathVariable String accountId) {
+	@PreAuthorize("hasAuthority('ADMIN')")
+	public ShortAccount accountsDisable(@PathVariable String accountId) {
 		Account u = userService.getCurrentUser();
 		if(u != null && u.isEnabled() && isAdmin(u)){
 			Account a = accountRepository.findOne(accountId);
 			a.setPending(true);
 			accountRepository.save(a);
-			return a;
+			return new ShortAccount(a);
 		}
 		return null;
 	}
 	
 	public boolean isAdmin(User u){
 		for(GrantedAuthority ga : u.getAuthorities()){
-			System.out.println("AUTH "+ga.getAuthority());
 			if(ga.getAuthority().equals("ADMIN"))
 				return true;
 		}
@@ -467,7 +356,7 @@ public class UserController {
 	public ResponseMessage accountEmailExist(@PathVariable String email,
 			@RequestParam(required = false) String email1) {
 
-		if (accountRepository.findByEmail(email) != null) {
+		if (accountRepository.findByEmailIgnoreCase(email) != null) {
 			return new ResponseMessage(ResponseMessage.Type.success,
 					"emailFound", email);
 		} else {
@@ -493,33 +382,49 @@ public class UserController {
 	public ResponseMessage registerUserWhenNotAuthenticated(
 			@RequestBody Account account) {
 
-		// validate entry
-		boolean validEntry = true;
-		validEntry = accountRepository.findByUsername(account.getUsername()) != null ? validEntry = false : validEntry;
-		validEntry = accountRepository.findByEmail(account.getEmail()) != null ? validEntry = false : validEntry;
-
-		if (!validEntry) {
+		// Check Account Info
+		List<String> accountInfoIssues = userService.checkAccountInfo(account);
+		if(accountInfoIssues != null && !accountInfoIssues.isEmpty()) {
 			return new ResponseMessage(ResponseMessage.Type.danger,
-					"duplicateInformation", null);
+					String.join(", ", accountInfoIssues), null);
 		}
-		
-		
+
+		// Check Account Uniqueness
+		List<String> accountUniquenessIssues = userService.checkAccountUniqueness(account);
+		if(accountUniquenessIssues != null && !accountUniquenessIssues.isEmpty()) {
+			return new ResponseMessage(ResponseMessage.Type.danger,
+					String.join(", ", accountUniquenessIssues), null);
+		}
+
+		// Check Password Policy
+		List<String> accountPasswordIssues = userService.checkPasswordPolicy(account.getPassword());
+		if(accountPasswordIssues != null && !accountPasswordIssues.isEmpty()) {
+			return new ResponseMessage(ResponseMessage.Type.danger,
+					String.join(", ", accountPasswordIssues), null);
+		}
+
+		Account userAccount = new Account();
+		userAccount.setUsername(account.getUsername());
+		userAccount.setEmail(account.getEmail());
+		userAccount.setPassword(account.getPassword());
+		userAccount.setPending(true);
+		userAccount.setFullName(account.getFullName());
+		userAccount.setOrganization(account.getOrganization());
+		userAccount.setSignedConfidentialityAgreement(account.getSignedConfidentialityAgreement());
+
 		// create new user with tester role
 		try {
-			account.setPending(true);
-			userService.createTester(account);
+			userService.createTester(userAccount);
 		} catch (Exception e) {
-			e.printStackTrace();
 			return new ResponseMessage(ResponseMessage.Type.danger,
 					"errorWithUser", null);
 		}
 
 		// generate and send email
-		this.sendRegistrationNotificationToAdmin(account);
-		this.sendApplicationConfirmationNotification(account);
+		this.sendRegistrationNotificationToAdmin(userAccount);
+		this.sendApplicationConfirmationNotification(userAccount);
 
-		return new ResponseMessage(ResponseMessage.Type.success, "userAdded",
-				account.getId().toString(), "true");
+		return new ResponseMessage(ResponseMessage.Type.success, "userAdded", "", "true");
 	}
 	
 	private void sendApplicationConfirmationNotification(Account acc) {
@@ -543,7 +448,6 @@ public class UserController {
 	private void sendRegistrationNotificationToAdmin(Account acc) {
 		SimpleMailMessage msg = new SimpleMailMessage(this.templateMessage);
 		msg.setSubject("New Registration Application on FITS");
-		System.out.println(ADMIN_EMAIL);
 		msg.setTo(ADMIN_EMAIL);
 		msg.setText("Hello Admin,  \n A new application has been submitted and is waiting for approval. The user information are as follow: \n\n"
 				+ "Name: "
@@ -579,6 +483,79 @@ public class UserController {
 				+ "to login .\n" + "\n\n" + "Sincerely, " + "\n\n"
 				+ "The FITS Team" + "\n\n"
 				+ "P.S: If you need help, contact us at '" + ADMIN_EMAIL + "'");
+		try {
+			this.mailSender.send(msg);
+		} catch (MailException ex) {
+			ex.printStackTrace();
+		}
+	}
+
+	private void sendChangeAccountPasswordNotification(Account acc) {
+		SimpleMailMessage msg = new SimpleMailMessage(this.templateMessage);
+
+		msg.setTo(acc.getEmail());
+		msg.setSubject("FITS Password Change Notification");
+		msg.setText("Dear " + acc.getUsername() + " \n\n"
+				+ "Your password has been successfully changed." + " \n\n"
+				+ "Sincerely,\n\n" + "The FITS Team");
+
+		try {
+			this.mailSender.send(msg);
+		} catch (MailException ex) {
+			ex.printStackTrace();
+		}
+	}
+
+	private void sendChangeAccountPasswordNotification(Account acc,
+													   String newPassword) {
+		SimpleMailMessage msg = new SimpleMailMessage(this.templateMessage);
+		msg.setTo(acc.getEmail());
+		msg.setSubject("FITS Password Change Notification");
+		msg.setText("Dear " + acc.getUsername() + " \n\n"
+				+ "Your password has been successfully changed." + " \n\n"
+				+ "Your new temporary password is ." + newPassword + " \n\n"
+				+ "Please update your password once logged in. \n\n"
+				+ "Sincerely,\n\n" + "The FITS Team");
+
+		try {
+			this.mailSender.send(msg);
+		} catch (MailException ex) {
+			ex.printStackTrace();
+		}
+	}
+
+	private void sendAccountPasswordResetRequestNotification(Account acc,
+															 String url) {
+		SimpleMailMessage msg = new SimpleMailMessage(this.templateMessage);
+		msg.setTo(acc.getEmail());
+		msg.setSubject("FITS Password Reset Request Notification");
+		msg.setText("Dear "
+				+ acc.getUsername()
+				+ " \n\n"
+				+ "**** If you have not requested a password reset, please disregard this email **** \n\n\n"
+				+ "You password reset request has been processed.\n"
+				+ "Copy and paste the following url to your browser to initiate the password change:\n"
+				+ url + " \n\n" + "Sincerely, " + "\n\n" + "The FITS Team"
+				+ "\n\n" + "P.S: If you need help, contact us at '"
+				+ ADMIN_EMAIL + "'");
+
+		try {
+			this.mailSender.send(msg);
+		} catch (MailException ex) {
+			ex.printStackTrace();
+		}
+	}
+
+	private void sendResetAccountPasswordNotification(Account acc) {
+		SimpleMailMessage msg = new SimpleMailMessage(this.templateMessage);
+
+		msg.setTo(acc.getEmail());
+		msg.setSubject("FITS Password Rest Notification");
+		msg.setText("Dear " + acc.getUsername() + " \n\n"
+				+ "Your password has been successfully reset." + " \n"
+				+ "Your username is: " + acc.getUsername() + " \n\n"
+				+ "Sincerely,\n\n" + "The FITS Team");
+
 		try {
 			this.mailSender.send(msg);
 		} catch (MailException ex) {

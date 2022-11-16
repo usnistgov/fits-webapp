@@ -39,7 +39,7 @@
                                     <strong>{{doc.name}}</strong>
                                 </td>
                                 <td>
-                                    <a class="point" ng-click="downloadDocument(doc.location)">{{doc.fileName}}</a>
+                                    <a class="point" ng-click="downloadDocument(doc.fileName)">{{doc.fileName}}</a>
                                 </td>
                                 <td>
                                     {{doc.date}}
@@ -78,7 +78,7 @@
                                     {{doc.name}}
                                 </td>
                                 <td>
-                                    <a class="point" ng-click="downloadDocument(doc.location)">{{doc.fileName}}</a>
+                                    <a class="point" ng-click="downloadDocument(doc.fileName)">{{doc.fileName}}</a>
                                 </td>
                                 <td>
                                     {{doc.date | date: 'MM/dd/yyyy HH:mm:ss'}}

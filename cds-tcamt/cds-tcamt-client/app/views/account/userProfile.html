@@ -69,7 +69,7 @@
             <div class="control-group form-group" ng-class="{'has-success has-feedback': editAccountForm.inputFullName.$valid, 'igl-has-error has-feedback': !editAccountForm.inputFullName.$valid}">
                 <label class="control-label col-sm-2" for="inputFullName"><div msg key='account.fullname'></div></label>
                 <div class="controls col-sm-7">
-                    <input type="text" class="form-control immediate-help account-input" name="inputFullName" id="inputFullName" ng-model='account.fullName' ng-minlength="2" required
+                    <input type="text" class="form-control immediate-help account-input" name="inputFullName" id="inputFullName" ng-model='account.fullName' ng-minlength="4" required
                           >
                     <div class="input-help">
                         <h4><div msg key='registration.fullname.error'></div></h4>
@@ -88,69 +88,14 @@
                  </div>
             </div>
 
-            <!--<div class="control-group form-group" ng-class="{'has-success has-feedback': editAccountForm.inputPhoneNumber.$valid, 'igl-has-error has-feedback': !editAccountForm.inputPhoneNumber.$valid}">-->
-                <!--<label class="control-label col-sm-2" for="inputPhoneNumber"><div msg key='account.phone'></div></label>-->
-                <!--<div class="controls col-sm-7">-->
-                    <!--<input type="text" class="form-control immediate-help account-input" name="inputPhoneNumber" id="inputPhoneNumber" ig-check-phone ng-model='account.phone'-->
-                         <!--&gt;-->
-                    <!--<div class="input-help">-->
-                        <!--<h4><div msg key='registration.phone.error'></div></h4>-->
-                        <!--<ul>-->
-                            <!--<li ng-class="phoneIsNumber">-->
-                                <!--<div msg key='registration.phone.error.notNumber'></div>-->
-                            <!--</li>-->
-                            <!--<li ng-class="phoneValidLength">-->
-                                <!--<div msg key='registration.phone.error.length'></div>-->
-                            <!--</li>-->
-                        <!--</ul>-->
-                    <!--</div>-->
-                 <!--</div>-->
-            <!--</div>-->
-
-            <!--<div class="control-group form-group" ng-class="{'has-success has-feedback': editAccountForm.inputEmployer.$valid, 'igl-has-error has-feedback': !editAccountForm.inputEmployer.$valid}">-->
-                <!--<label class="control-label col-sm-2" for="inputEmployer"><div msg key='account.employer'></div></label>-->
-                <!--<div class="controls col-sm-7">-->
-                    <!--<input type="text" class="form-control immediate-help account-input" name="inputEmployer" id="inputEmployer" ng-model='account.employer' ng-minlength="2"-->
-                          <!--&gt;-->
-
-                    <!--&lt;!&ndash;<div class="input-help">&ndash;&gt;-->
-                        <!--&lt;!&ndash;<h4><div msg key='account.employer.error'></div></h4>&ndash;&gt;-->
-                    <!--&lt;!&ndash;</div>&ndash;&gt;-->
-                    <!--&lt;!&ndash;<span class="valid" ng-show="editAccountForm.inputEmployer.$valid"><img alt="check OK" src="images/check.png" ></span><br>&ndash;&gt;-->
-                <!--</div>-->
-            <!--</div>-->
-
-            <!--<div class="control-group form-group" ng-class="{'has-success has-feedback': editAccountForm.inputTitle.$valid, 'igl-has-error has-feedback': !editAccountForm.inputTitle.$valid}">-->
-                <!--<label class="control-label col-sm-2" for="inputTitle"><div msg key='account.title'></div></label>-->
-                <!--<div class="controls col-sm-7">-->
-                    <!--<input type="text" class="form-control immediate-help account-input" name="inputTitle" id="inputTitle" ng-model='account.title'-->
-                          <!--&gt;-->
-                <!--</div>-->
-            <!--</div>-->
-
             <div class="control-group form-group" ng-class="{'has-success has-feedback': editAccountForm.inputOrganization.$valid, 'igl-has-error has-feedback': !editAccountForm.inputOrganization.$valid}">
                 <label class="control-label col-sm-2" for="inputOrganization"><div msg key='account.organization'></div></label>
                 <div class="controls col-sm-7">
                     <input type="text" class="form-control immediate-help account-input" name="inputOrganization" id="inputOrganization" ng-model='account.organization'
                            >
 
-                    <!--<div class="input-help">-->
-                        <!--<h4><div msg key='account.juridiction.error'></div></h4>-->
-                    <!--</div>-->
-                    <!--<span class="valid" ng-show="editAccountForm.inputJuridiction.$valid"><img alt="check OK" src="images/check.png" ></span><br>-->
                 </div>
             </div>
-
-            <!--<div class="control-group form-group">-->
-                <!--<label class="control-label col-sm-2" for="inputLastName"><div msg key='registration.lastname'></div></label>-->
-                <!--<div class="controls col-sm-7">-->
-                    <!--<input type="text" class="form-control immediate-help" name="inputLastName" id="inputLastName" ng-model='account.lastname' ng-minlength="2" required>-->
-                    <!--<div class="input-help">-->
-                        <!--<h4><div msg key='account.lastname.error'></div></h4>-->
-                    <!--</div>-->
-                    <!--<span class="valid" ng-show="editAccountForm.inputLastName.$valid"><i class="fa fa-check success"></i><br>-->
-                <!--</div>-->
-            <!--</div>-->
 
             <div class="control-group form-group" >
                 <div class="col-md-offset-2 col-sm-7">
@@ -160,17 +105,6 @@
             </div>
         </div>
 
-        <h3><div msg key="account.deleteSectionTitle"></div></h3>
-        <div ng-form name="deleteAccountForm" class="form-horizontal" novalidate>
-            <p>
-                <div msg key="account.deleteMessage"></div>
-            </p>
-            <div class="control-group form-group">
-                <div class="controls col-sm-10">
-                     <button class="btn btn-danger" ng-click='deleteAccount()'><div msg key="account.deleteButton"></div></button>
-                </div>
-            </div>
-        </div>
     </div>
   </div>
 </div>
