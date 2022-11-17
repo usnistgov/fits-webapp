@@ -8,14 +8,6 @@ angular.module('tcl').run(function ($httpBackend, $q, $http) {
         return [200, {}, {}];
     });
 
-    $httpBackend.whenGET('api/shortaccounts?filter=accountType::author').respond(function (method, url, data, headers) {
-        var request = new XMLHttpRequest();
-        request.open('GET', '../../resources/shortaccounts.json', false);
-        request.send(null);
-        var profile = request.response;
-        return [request.status, profile, {}];
-    });
-
     $httpBackend.whenPOST('api/accounts/1/userpasswordchange').respond(function (method, url, data, headers) {
         return [200, {type: 'success',
             text: 'accountPasswordReset',
@@ -43,14 +35,6 @@ angular.module('tcl').run(function ($httpBackend, $q, $http) {
             text: 'accountIsNotPending',
             resourceId: '2',
             manualHandle: "false"}, {}];
-    });
-
-    $httpBackend.whenPOST('api/testplans/supplementsGeneration').respond(function (method, url, data, headers) {
-        var request = new XMLHttpRequest();
-        request.open('GET', '../../resources/messageContentsGeneration.json', false);
-        request.send(null);
-        var profile = angular.fromJson(request.response);
-        return [request.status, profile, {}];
     });
 
 
@@ -110,26 +94,10 @@ angular.module('tcl').run(function ($httpBackend, $q, $http) {
         var profile = angular.fromJson('{"events":{"p":0,"f":0,"u":0,"w":0},"forecasts":{"p":1,"f":1,"u":0,"w":2}}');
         return [request.status, profile, {}];
     });
-    
-    $httpBackend.whenGET('api/exec/collect').respond(function (method, url, data, headers) {
-        var request = new XMLHttpRequest();
-        request.open('GET', '../../resources/validation.json', false);
-        request.send(null);
-        var profile = angular.fromJson(request.response);
-        return [request.status, profile, {}];
-    });
-    
+
     $httpBackend.whenGET('api/exec/agg').respond(function (method, url, data, headers) {
         var request = new XMLHttpRequest();
         request.open('GET', '../../resources/agg.json', false);
-        request.send(null);
-        var profile = angular.fromJson(request.response);
-        return [request.status, profile, {}];
-    });
-    
-    $httpBackend.whenGET('api/validate').respond(function (method, url, data, headers) {
-        var request = new XMLHttpRequest();
-        request.open('GET', '../../resources/validation.json', false);
         request.send(null);
         var profile = angular.fromJson(request.response);
         return [request.status, profile, {}];
@@ -224,13 +192,6 @@ angular.module('tcl').run(function ($httpBackend, $q, $http) {
         return [request.status, profile, {}];
     });
 
-    $httpBackend.whenGET('api/template').respond(function (method, url, data, headers) {
-        var request = new XMLHttpRequest();
-        request.open('GET', '../../resources/template.json', false);
-        request.send(null);
-        var profile = angular.fromJson(request.response);
-        return [request.status, profile, {}];
-    });
 
     $httpBackend.whenGET('api/appInfo').respond(function (method, url, data, headers) {
         var request = new XMLHttpRequest();

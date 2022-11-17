@@ -18,8 +18,6 @@ import gov.nist.healthcare.cds.domain.wrapper.AppInfo;
 import gov.nist.healthcare.cds.domain.wrapper.Document;
 import gov.nist.healthcare.cds.domain.wrapper.Documents;
 import gov.nist.healthcare.cds.domain.wrapper.Resources;
-import gov.nist.healthcare.cds.domain.wrapper.SimulatedResult;
-import gov.nist.healthcare.cds.domain.wrapper.SimulationMap;
 import gov.nist.healthcare.cds.repositories.SoftwareConfigRepository;
 import gov.nist.healthcare.cds.repositories.TestCaseRepository;
 import gov.nist.healthcare.cds.repositories.VaccineMappingRepository;
@@ -149,18 +147,7 @@ public class Bootstrap {
 	public TestRunnerService testRunner(){
 		return new TestRunnerServiceFhirImpl(env.getProperty(ENV_ADAPTER_URL));
 	}
-	
-	@Bean
-	public SimulationMap simulationMap() throws JsonParseException, JsonMappingException, IOException{
-		ObjectMapper mapper = new ObjectMapper();
-		SimulationMap sm = new SimulationMap();
-		List<SimulatedResult> myObjects = mapper.readValue(Bootstrap.class.getResourceAsStream("/simulation.json"), mapper.getTypeFactory().constructCollectionType(List.class, SimulatedResult.class));
-		for(SimulatedResult sr : myObjects){
-			sm.put(sr.getId(),sr.getXml());
-		}
-		return sm;
-	}
-	
+
 	@Bean
 	public Documents documents() throws JsonParseException, JsonMappingException, IOException{
 		Documents docs = new Documents();
