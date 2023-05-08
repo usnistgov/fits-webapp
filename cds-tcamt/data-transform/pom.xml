@@ -21,7 +21,7 @@
         <dependency>
         	<groupId>gov.nist.healthcare.cds</groupId>
         	<artifactId>cds-base-service</artifactId>
-        	<version>0.0.1-SNAPSHOT</version>
+        	<version>1.0.1</version>
         	<!-- <exclusions>
         		<exclusion>
         			<groupId>gov.nist.healthcare.cds</groupId>

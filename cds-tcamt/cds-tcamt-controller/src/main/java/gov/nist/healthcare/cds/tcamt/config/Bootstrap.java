@@ -9,7 +9,6 @@ import javax.annotation.PostConstruct;
 import javax.xml.bind.JAXBException;
 
 import gov.nist.fhir.client.ir.TestRunnerServiceFhirImpl;
-import gov.nist.healthcare.cds.auth.domain.Account;
 import gov.nist.healthcare.cds.auth.domain.Privilege;
 import gov.nist.healthcare.cds.auth.repo.PrivilegeRepository;
 import gov.nist.healthcare.cds.auth.service.AccountService;
@@ -165,12 +164,7 @@ public class Bootstrap {
 		docs.setResources(myObjects);
 		return docs;
 	}
-	
-	@Bean
-	public TestCaseExecutionService testExecution(){
-		return new ExecutionService();
-	}
-	
+
 	public void createVaccine() throws IOException{
 		long all = vaccineRepository.count();
 		int i = 0;
@@ -207,7 +201,7 @@ public class Bootstrap {
 
 	@PostConstruct
 	public void init() throws Exception {
-		
+
 		// Create Privileges
 		this.createPrivileges();
 
@@ -223,6 +217,19 @@ public class Bootstrap {
 		productMapping.put("207:MOD:Moderna COVID-19 Vaccine (includes non-US tradename Spikevax)", "207:MOD:Moderna COVID-19 Vaccine (non-US Spikevax)");
 
 		productMapping.put("208:PFR:Pfizer-BioNTech COVID-19 Vaccine", "208:PFR:Pfizer-BioNTech COVID-19 Vaccine (EUA labeled)  COMIRNATY (BLA labeled)");
+
+		productMapping.put("211:NVX:Novavax COVID-19 Vaccine", "211:NVX:Novavax COVID-19 Vaccine (Non-US Tradenames NUVAXOVID, COVOVAX)");
+
+		productMapping.put("229:MOD:Moderna COVID-19 Vaccine (non-US Spikevax)", "229:MOD:Moderna COVID-19 Bivalent, Original + BA.4/BA.5 (Non-US Tradename Spikevax Bivalent)");
+
+		productMapping.put("230:MOD:Moderna COVID-19 Vaccine (non-US Spikevax)", "230:MOD:Moderna COVID-19 Bivalent, Original + BA.4/BA.5 (Non-US Tradename Spikevax Bivalent)");
+
+		productMapping.put("300:PFR:Pfizer-BioNTech COVID-19 Vaccine (EUA labeled)  COMIRNATY (BLA labeled)", "300:PFR:Pfizer-BioNTech COVID-19 Bivalent, Original + BA.4/BA.5 (Non-US Tradename COMIRNATY Bivalent)");
+
+		productMapping.put("301:PFR:Pfizer-BioNTech COVID-19 Vaccine (EUA labeled)  COMIRNATY (BLA labeled)", "301:PFR:Pfizer-BioNTech COVID-19 Bivalent, Original + BA.4/BA.5 (Non-US Tradename COMIRNATY Bivalent)");
+
+		productMapping.put("302:PFR:Pfizer-BioNTech COVID-19 Vaccine (EUA labeled)  COMIRNATY (BLA labeled)", "302:PFR:Pfizer-BioNTech COVID-19 Bivalent, Original + BA.4/BA.5 (Non-US Tradename COMIRNATY Bivalent)");
+
 
 		this.simpleCodeRemapService.reloadCodeSetsAndRemapTestCases(
 				Bootstrap.class.getResourceAsStream("/codeset/web_cvx.xlsx"),

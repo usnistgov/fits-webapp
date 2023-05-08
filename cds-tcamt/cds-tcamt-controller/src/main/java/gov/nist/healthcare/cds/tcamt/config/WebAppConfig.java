@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.TimeZone;
 
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import gov.nist.healthcare.cds.auth.tcamt.config.LastApiCallInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -61,7 +62,7 @@ public class WebAppConfig extends WebMvcConfigurerAdapter {
 		mapper.setTimeZone(TimeZone.getTimeZone("UTC"));
 		// Registering Hibernate4Module to support lazy objects
 		mapper.registerModule(new Hibernate4Module());
-
+		mapper.registerModule(new JavaTimeModule());
 		messageConverter.setObjectMapper(mapper);
 		return messageConverter;
 
