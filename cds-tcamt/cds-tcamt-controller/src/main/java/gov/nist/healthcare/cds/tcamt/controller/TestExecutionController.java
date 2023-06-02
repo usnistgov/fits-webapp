@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.security.Principal;
 import java.text.ParseException;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -146,7 +147,7 @@ public class TestExecutionController {
 			try {
 				Account account = this.accountService.getCurrentUser();
 				HITStatsLogger.log(user.getName(), account.getOrganization(), OperationCode.TESTEXEC.name(), tc.getTestPlan(), tc.getId(), tc.getUid());
-				Report report = execService.execute(config, tc, LocalDate.parse(sc.getDate(), FixedDate.formatter));
+				Report report = execService.execute(config, tc, LocalDate.parse(sc.getDate(), DateTimeFormatter.ofPattern("M/d/yyyy")));
 				userMetadataService.updateExecutions(user.getName(), 1);
 				long sent = new Date().getTime();
 				report.getTimestamps().setRequestReceived(received);
