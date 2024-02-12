@@ -8,7 +8,6 @@ import gov.nist.healthcare.cds.auth.service.AccountService;
 import java.io.IOException;
 import java.security.Principal;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -16,10 +15,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import gov.nist.healthcare.cds.domain.UserMetadata;
 import gov.nist.healthcare.cds.repositories.UserMetadataRepository;
-import gov.nist.healthcare.cds.service.UserMetadataService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.PropertySource;
 import org.springframework.mail.MailException;
 import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
@@ -446,27 +443,33 @@ public class UserController {
 	}
 	
 	private void sendRegistrationNotificationToAdmin(Account acc) {
-		SimpleMailMessage msg = new SimpleMailMessage(this.templateMessage);
-		msg.setSubject("New Registration Application on FITS");
-		msg.setTo(ADMIN_EMAIL);
-		msg.setText("Hello Admin,  \n A new application has been submitted and is waiting for approval. The user information are as follow: \n\n"
-				+ "Name: "
-				+ acc.getFullName()
-				+ "\n"
-				+ "Email: "
-				+ acc.getEmail()
-				+ "\n"
-				+ "Username: "
-				+ acc.getUsername()
-				+ "\n"
-				+ "Organization: "
-				+ acc.getOrganization()
-				+ " \n\n"
-				+ "Sincerely, " + "\n\n" + "The FITS Team" + "\n\n");
-		try {
-			this.mailSender.send(msg);
-		} catch (MailException ex) {
-			ex.printStackTrace();
+		List<Account> admins = this.userService.getAdminUsers();
+		for(Account admin: admins) {
+			if(admin.getEmail() != null && !admin.getEmail().isEmpty()) {
+				String email = admin.getEmail().trim();
+				SimpleMailMessage msg = new SimpleMailMessage(this.templateMessage);
+				msg.setSubject("New Registration Application on FITS");
+				msg.setTo(email);
+				msg.setText("Hello Admin,  \n A new application has been submitted and is waiting for approval. The user information are as follow: \n\n"
+						            + "Name: "
+						            + acc.getFullName()
+						            + "\n"
+						            + "Email: "
+						            + acc.getEmail()
+						            + "\n"
+						            + "Username: "
+						            + acc.getUsername()
+						            + "\n"
+						            + "Organization: "
+						            + acc.getOrganization()
+						            + " \n\n"
+						            + "Sincerely, " + "\n\n" + "The FITS Team" + "\n\n");
+				try {
+					this.mailSender.send(msg);
+				} catch (MailException ex) {
+					ex.printStackTrace();
+				}
+			}
 		}
 	}
 	
