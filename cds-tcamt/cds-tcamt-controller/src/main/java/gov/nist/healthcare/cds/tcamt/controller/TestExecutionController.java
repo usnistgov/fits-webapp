@@ -2,7 +2,6 @@ package gov.nist.healthcare.cds.tcamt.controller;
 
 import java.io.IOException;
 import java.security.Principal;
-import java.text.ParseException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -14,16 +13,12 @@ import javax.servlet.http.HttpSession;
 
 import gov.nist.healthcare.cds.auth.domain.Account;
 import gov.nist.healthcare.cds.auth.service.AccountService;
-import gov.nist.healthcare.cds.domain.FixedDate;
-import gov.nist.healthcare.cds.domain.SoftwareConfig;
-import gov.nist.healthcare.cds.domain.TestCase;
-import gov.nist.healthcare.cds.domain.TestCaseGroup;
-import gov.nist.healthcare.cds.domain.TestPlan;
-import gov.nist.healthcare.cds.domain.TransientExecRequest;
+import gov.nist.healthcare.cds.domain.*;
 import gov.nist.healthcare.cds.domain.exception.ConnectionException;
 import gov.nist.healthcare.cds.domain.exception.UnresolvableDate;
 import gov.nist.healthcare.cds.domain.wrapper.*;
 import gov.nist.healthcare.cds.enumeration.EntityAccess;
+import gov.nist.healthcare.cds.repositories.ShortTestPlanRepository;
 import gov.nist.healthcare.cds.repositories.SoftwareConfigRepository;
 import gov.nist.healthcare.cds.repositories.TestPlanRepository;
 import gov.nist.healthcare.cds.service.AggregateReportService;
@@ -69,6 +64,9 @@ public class TestExecutionController {
 	@Autowired
 	private AccountService accountService;
 
+	@Autowired
+	private ShortTestPlanRepository shortTestPlanRepository;
+
 	//------------------------ SOFTWARE CONFIGURATION -----------------------------
 	
 	@RequestMapping(value = "/exec/configs", method = RequestMethod.GET)
@@ -110,25 +108,13 @@ public class TestExecutionController {
 	
 	@RequestMapping(value = "/exec/short/tps", method = RequestMethod.GET)
 	@ResponseBody
-	public List<TestPlanDetails> tpshort(Principal p, HttpServletResponse response) throws UnresolvableDate, IOException {
-		List<TestPlan> tps = testPlanRepository.findByUser(p.getName());
-		for(TestPlan tp : testPlanRepository.sharedWithUser(p.getName())){
-			filter.filterTestPlan(tp);
-			tps.add(tp);
-		}
-		List<TestPlanDetails> details = new ArrayList<>();
-		for(TestPlan tp : tps){
-			int nbTc = tp.getTestCases().size();
-			for(TestCaseGroup tcg : tp.getTestCaseGroups()){
-				nbTc += tcg.getTestCases().size();
-			}
-			details.add(new TestPlanDetails(tp.getName(), tp.getId(), nbTc));
-		}
-		return details;
+	public List<ShortTestPlan> tpshort(Principal p, HttpServletResponse response) throws UnresolvableDate, IOException {
+		List<ShortTestPlan> testPlans = shortTestPlanRepository.getUserNotArchivedTestPlans(p.getName());
+		testPlans.addAll(shortTestPlanRepository.getSharedWithUserTestPlans(p.getName()));
+		return testPlans;
 	}
 	
 	//------------------------ EXECUTE TEST CASE -----------------------------
-	
 	@RequestMapping(value = "/exec/tc/{id}", method = RequestMethod.POST)
 	@ResponseBody
 	public Report add(@RequestBody ExecutionConfig sc, @PathVariable String id,Principal user, HttpServletResponse response) throws UnresolvableDate, IOException {

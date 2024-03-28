@@ -4,6 +4,11 @@ import java.io.IOException;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
+
+import gov.nist.healthcare.cds.domain.ShortTestPlan;
+import gov.nist.healthcare.cds.domain.wrapper.*;
+import gov.nist.healthcare.cds.repositories.ShortTestPlanRepository;
+import gov.nist.healthcare.cds.repositories.TestPlanRepository;
 import springfox.documentation.annotations.ApiIgnore;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -16,16 +21,8 @@ import gov.nist.healthcare.cds.domain.exception.IllegalDelete;
 import gov.nist.healthcare.cds.domain.exception.IllegalSave;
 import gov.nist.healthcare.cds.domain.exception.ShareException;
 import gov.nist.healthcare.cds.domain.exception.UnsupportedFormat;
-import gov.nist.healthcare.cds.domain.wrapper.AppInfo;
-import gov.nist.healthcare.cds.domain.wrapper.EntityResult;
-import gov.nist.healthcare.cds.domain.wrapper.ZipExportSummary;
-import gov.nist.healthcare.cds.domain.wrapper.ImportConfig;
-import gov.nist.healthcare.cds.domain.wrapper.ImportSummary;
-import gov.nist.healthcare.cds.domain.wrapper.ShareRequest;
-import gov.nist.healthcare.cds.domain.wrapper.ShareResponse;
 import gov.nist.healthcare.cds.domain.xml.ErrorModel;
 import gov.nist.healthcare.cds.enumeration.EntityAccess;
-import gov.nist.healthcare.cds.repositories.TestPlanRepository;
 import gov.nist.healthcare.cds.service.DeleteTestObjectService;
 import gov.nist.healthcare.cds.service.PropertyService;
 import gov.nist.healthcare.cds.service.SaveService;
@@ -51,19 +48,12 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 
 @Api
 @RestController
 public class TestCaseController {
-
-
-	@Autowired
-	private TestPlanRepository testPlanRepository;
 	
 	@Autowired
 	private TestPlanClone testPlanClone;
@@ -76,6 +66,9 @@ public class TestCaseController {
 	
 	@Autowired
 	private gov.nist.healthcare.cds.service.impl.persist.ExportService exportService;
+
+	@Autowired
+	private TestPlanRepository testPlanRepository;
 	
 	@Autowired
 	private PropertyService ledger;
@@ -96,7 +89,10 @@ public class TestCaseController {
 	private TPShareService shareService;
 	
 	@Autowired
-	private RWTestPlanFilter filter; 
+	private RWTestPlanFilter filter;
+
+	@Autowired
+	private ShortTestPlanRepository shortTestPlanRepository;
 
 	@InitBinder
 	public void initBinder(WebDataBinder binder) {
@@ -105,20 +101,27 @@ public class TestCaseController {
 	
 	//--------------------------------GET OPERATIONS--------------------------------------------------
 
-	@ApiOperation(value = "List of all test plans belonging to authenticated user")
+	@ApiOperation(value = "List of all not archived test plans belonging to authenticated user")
 	@RequestMapping(value = "/testplans", method = RequestMethod.GET)
 	@ResponseBody
-	public List<TestPlan> testPlans(@AuthenticationPrincipal Principal p) {
-		return testPlanRepository.findByUser(p.getName());
+	public List<ShortTestPlan> testPlans(@AuthenticationPrincipal Principal p) {
+		return shortTestPlanRepository.getUserNotArchivedTestPlans(p.getName());
 	}
-	
-	@ApiOperation(value = "Get a test plans belonging to authenticated user")
+
+	@ApiOperation(value = "List of all archived test plans belonging to authenticated user")
+	@RequestMapping(value = "/archived/testplans", method = RequestMethod.GET)
+	@ResponseBody
+	public List<ShortTestPlan> testPlansArchived(@AuthenticationPrincipal Principal p) {
+		return shortTestPlanRepository.getUserArchivedTestPlans(p.getName());
+	}
+
+
+	@ApiOperation(value = "Get a test plan belonging to authenticated user")
 	@RequestMapping(value = "/testplan/{id}", method = RequestMethod.GET)
 	@ResponseBody
-	public TestPlan testCase(
+	public TestPlan testPlan(
 			@ApiParam(value = "Id of test plan to get") @PathVariable String id,
 			@AuthenticationPrincipal Principal p) {
-		
 		TestPlan tp = ledger.tpBelongsTo(id, p.getName(), EntityAccess.R);
 		if(filter.elect(tp, p.getName())) {
 			filter.filterTestPlan(tp);
@@ -126,16 +129,11 @@ public class TestCaseController {
 		return tp;
 	}	
 	
-	@ApiOperation(value = "List of test plans access as View Only")
+	@ApiOperation(value = "List of all test plans use has read access to but not belonging to user")
 	@RequestMapping(value = "/vOnly/testplans", method = RequestMethod.GET)
 	@ResponseBody
-	public List<TestPlan> testPlansViewOnly(@AuthenticationPrincipal Principal p) {
-		List<TestPlan> tps = new ArrayList<TestPlan>();
-		for(TestPlan tp : testPlanRepository.sharedWithUser(p.getName())){
-			filter.filterTestPlan(tp);
-			tps.add(tp);
-		}
-		return tps;
+	public List<ShortTestPlan> testPlansViewOnly(@AuthenticationPrincipal Principal p) {
+		return shortTestPlanRepository.getSharedWithUserTestPlans(p.getName());
 	}
 
 	@ApiOperation(value = "WebApp Build Information")
@@ -264,12 +262,49 @@ public class TestCaseController {
 		trash.deleteTestCaseGroup(id, p.getName());
 		
 	}
-	
+
+	@ApiOperation(value = "Archive a test plan belonging to authenticated user")
+	@RequestMapping(value = "/testplan/{id}/archive", method = RequestMethod.POST)
+	@ResponseBody
+	public ShortTestPlan archiveTestPlan(
+			@ApiParam(value = "Id of test plan to get") @PathVariable String id,
+			@AuthenticationPrincipal Principal p,
+			@ApiIgnore HttpServletResponse response) throws IOException {
+		TestPlan tp = ledger.tpBelongsTo(id, p.getName(), EntityAccess.W);
+		if(tp != null) {
+			tp.setArchived(true);
+			testPlanRepository.save(tp);
+			return new ShortTestPlan(tp);
+		} else {
+			response.sendError(404);
+		}
+		return null;
+	}
+
+	@ApiOperation(value = "Unarchive a test plan belonging to authenticated user")
+	@RequestMapping(value = "/testplan/{id}/unarchive", method = RequestMethod.POST)
+	@ResponseBody
+	public ShortTestPlan unarchiveTestPlan(
+			@ApiParam(value = "Id of test plan to get") @PathVariable String id,
+			@AuthenticationPrincipal Principal p,
+			@ApiIgnore HttpServletResponse response) throws IOException {
+		TestPlan tp = ledger.tpBelongsTo(id, p.getName(), EntityAccess.W);
+		if(tp != null) {
+			tp.setArchived(false);
+			testPlanRepository.save(tp);
+			return new ShortTestPlan(tp);
+		} else {
+			response.sendError(404);
+		}
+		return null;
+	}
+
+
 	//--------------------------------------CLONE OPERATION-----------------------------------
 	@ApiOperation(value = "Clone test plan to authenticated user account")
 	@RequestMapping(value = "/testplan/{id}/clone", method = RequestMethod.POST)
 	@ResponseBody
-	public TestPlan cloneTestPlan(
+	public ShortTestPlan cloneTestPlan(
 			@ApiParam(value = "Id of test plan to clone") @PathVariable String id,
 			@AuthenticationPrincipal Principal p,
 			@ApiIgnore HttpServletResponse response) throws IOException {
@@ -277,7 +312,7 @@ public class TestCaseController {
 		TestPlan tp = testPlanClone.clone(id,p.getName());
 		
 		if(tp != null){
-			return tp;
+			return new ShortTestPlan(tp);
 		}
 		else
 			response.sendError(404);
@@ -305,6 +340,9 @@ public class TestCaseController {
 		
 		TestPlan tp = ledger.tpBelongsTo(tpId, p.getName(), EntityAccess.R);
 		if(tp != null){
+			if(!tp.getUser().equals(p.getName())){
+				filter.filterTestPlan(tp);
+			}
 			tcs.addAll(testPlanExtract.extract(tp, ids.toArray(new String[0])));
 		}
 		else {
@@ -374,7 +412,11 @@ public class TestCaseController {
 			@AuthenticationPrincipal Principal p) {
 		
 		try {
-			return importService.importTestCases(files, format, id, config);
+			TestPlan tp = ledger.tpBelongsTo(id, p.getName(), EntityAccess.W);
+			if(tp == null) {
+				return ImportSummary.unableToAccessTp();
+			}
+			return importService.importTestCases(files, format, tp, config);
 		}  
 		catch (UnsupportedFormat e) {
 			return ImportSummary.invalidFormat();

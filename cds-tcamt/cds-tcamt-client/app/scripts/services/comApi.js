@@ -14,7 +14,8 @@ angular.module('tcl').factory('EntityService', function () {
         this.access = {
             READ_ONLY : 'ro',
             WRITE : 'r',
-            EXEC : 'x'
+            EXEC : 'x',
+            ARCHIVED: 'archive',
         };
 
         this.action = {

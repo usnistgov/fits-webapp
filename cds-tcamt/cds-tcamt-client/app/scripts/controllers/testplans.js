@@ -254,6 +254,7 @@ angular
                 tpList: true,
                 tpDetails: false
             };
+            $scope.viewArchived = false;
             $scope.FITS_SERVER = FITSBackEnd;
             $scope.testCases = [];
             $scope.filterView = false;
@@ -312,6 +313,7 @@ angular
             $scope.selectedTG = null;
             $scope.tps = [];
             $scope.vTps = [];
+            $scope.archivedTps = [];
             $scope.hasIncomplete = false;
             $scope.tpTree = [];
             $scope.evalStatus = [];
@@ -346,6 +348,7 @@ angular
                 "application/x-xls",
                 "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
             ];
+            $scope.viewOnly = false;
 
             $scope.print = function (x) {
                 console.log(x);
@@ -405,6 +408,9 @@ angular
                 return userInfoService.getUsername();
             };
 
+            $scope.toggleViewArchived = function () {
+                $scope.viewArchived = !$scope.viewArchived;
+            }
             //---------------------------------------------------------------------------------------------------------------------------------------------------
             //-[DT]--------------------------------------------------------------- WHEN DATES TYPES CHANGE ------------------------------------------------------
             //---------------------------------------------------------------------------------------------------------------------------------------------------
@@ -516,7 +522,6 @@ angular
 
             $scope.newTestPlan = function () {
                 var tp = TestObjectFactory.createTP();
-                $scope.tps.push(tp);
                 $scope.entityChangeLog[tp.id] = true;
                 $scope.tcFilter.wft = 'ALL';
                 $scope.tpTags = [];
@@ -645,6 +650,19 @@ angular
                 return d.promise;
             };
 
+            $scope.loadArchived = function () {
+                var d = $q.defer();
+                $scope.FITS_SERVER.loadTPSByAccess(EntityService.access.ARCHIVED).then(function (data) {
+                    if(data.status){
+                        $scope.archivedTps = data.obj;
+                        d.resolve(true);
+                    }
+                    else {
+                        d.resolve(false);
+                    }
+                });
+                return d.promise;
+            };
             //---------------------------------------------------------------------------------------------------------------------------------------------------
             //---------------------------------------------------------------------------------------------------------------------------------------------------
             //---------------------------------------------------------------------------------------------------------------------------------------------------
@@ -691,19 +709,28 @@ angular
 
             };
 
-            $scope.openTP = function (tp) {
+            $scope.openTP = function (tp, vOnly) {
                 PopUp.start("Opening Test Plan...");
                 $scope.tcFilter.wft = 'ALL';
-                var tpObj = JSON.parse(JSON.stringify(tp));
-                $scope.entityUtils.sanitizeTP(tpObj);
-                $timeout(function () {
-                    $scope.wholeTP = tpObj;
-                    $scope.selectTP(tpObj);
-                    $scope.updateTags(tpObj);
-                    $timeout(function () {
-                        PopUp.stop();
-                    },100);
-                },500);
+                $scope.FITS_SERVER.loadTestPlan(tp.id).then(function (data) {
+                    if(data.status){
+                        var tpObj = JSON.parse(JSON.stringify(data.obj));
+                        $scope.entityUtils.sanitizeTP(tpObj);
+                        $timeout(function () {
+                            $scope.wholeTP = tpObj;
+                            $scope.viewOnly = vOnly;
+                            $scope.selectTP(tpObj);
+                            $scope.updateTags(tpObj);
+                            $timeout(function () {
+                                PopUp.stop();
+                            },100);
+                        },500);
+                    } else {
+                        $timeout(function () {
+                            PopUp.stop();
+                        },100);
+                    }
+                });
             };
 
             $scope.selectTP = function (tp,skip) {
@@ -739,12 +766,7 @@ angular
             };
 
             $scope.vOnly = function () {
-               return $scope.selectedTP && $scope.selectedTP.vOnly;
-            };
-
-            $scope.viewTP = function (tp) {
-                tp.vOnly = true;
-                $scope.openTP(tp);
+               return $scope.viewOnly;
             };
 
             $scope.selectTC = function (tc,skip,goToSummary) {
@@ -1233,12 +1255,17 @@ angular
             };
 
             $scope.closeTP = function () {
-                $scope.FITS_SERVER.loadTPSByAccess(EntityService.access.WRITE).then(function (data) {
-                    if(data.status){
-                        $scope.tps = data.obj;
-                    }
+                $scope.loading = true;
+                DataSynchService.clear();
+                $scope.loadTestCases().then(function (a) {
+                    $scope.loadViewTestCases().then(function (a) {
+                        $scope.loadArchived().then(function (a) {
+                            $scope.loading = false;
+                            $scope.error = null;
+                            $scope.cleanUpWorkSpace();
+                        });
+                    });
                 });
-                $scope.cleanUpWorkSpace();
             };
 
             $scope.has = function (a, b) {
@@ -1657,20 +1684,6 @@ angular
                 }
                 else if (newValue === true) {
                     PopUp.start("Importing Test Cases...");
-                    // $scope.impDiag = $modal.open({
-                    //     templateUrl: 'ImportLoading.html',
-                    //     controller: 'ConfirmTestPlanDeleteCtrl',
-                    //     backdrop : 'static',
-                    //     keyboard : false,
-                    //     resolve: {
-                    //         testplanToDelete: function () {
-                    //             return null;
-                    //         },
-                    //         tps: function () {
-                    //             return $scope.tps;
-                    //         }
-                    //     }
-                    // });
                 }
             });
 
@@ -1877,19 +1890,73 @@ angular
                     DataSynchService.clear();
                     $scope.loadTestCases().then(function (a) {
                         $scope.loadViewTestCases().then(function (a) {
-                            $scope.initEnums().then(function (b) {
-                                $scope.initSoftware().then(function (b) {
-                                    $scope.loadVaccines().then(function (c) {
-
-                                        $scope.loading = false;
-                                        $scope.error = null;
-                                        //$scope.autoSaveFct();
+                            $scope.loadArchived().then(function (a) {
+                                $scope.initEnums().then(function (b) {
+                                    $scope.initSoftware().then(function (b) {
+                                        $scope.loadVaccines().then(function (c) {
+                                            $scope.loading = false;
+                                            $scope.error = null;
+                                        });
                                     });
                                 });
                             });
                         });
                     });
                 }
+            };
+
+            $scope.archiveTestPlan = function (tp) {
+                $http.post("api/testplan/"+tp.id+"/archive").success(function (response) {
+                    var data = response;
+                    var notification = {
+                        severity :  EntityService.severity.SUCCESS,
+                        message : "Test Plan Archived"
+                    };
+
+                    var idx = $scope.tps.findIndex(function (elm) {
+                        return elm.id === data.id;
+                    });
+                    if(idx !== -1) {
+                        $scope.tps.splice(idx, 1);
+                    }
+                    $scope.archivedTps.push(data);
+                    $scope.notify(notification);
+
+                }).error(function () {
+                    var notification = {
+                        severity :  EntityService.severity.ERROR,
+                        message : "Failed to archive test plan"
+                    };
+
+                    $scope.notify(notification);
+                });
+            };
+
+            $scope.unArchiveTestPlan = function (tp) {
+                $http.post("api/testplan/"+tp.id+"/unarchive").success(function (response) {
+                    var data = response;
+                    var notification = {
+                        severity :  EntityService.severity.SUCCESS,
+                        message : "Test Plan Restored"
+                    };
+
+                    var idx = $scope.archivedTps.findIndex(function (elm) {
+                        return elm.id === data.id;
+                    });
+
+                    if(idx !== -1) {
+                        $scope.archivedTps.splice(idx, 1);
+                    }
+                    $scope.tps.push(data);
+                    $scope.notify(notification);
+                }).error(function () {
+                    var notification = {
+                        severity :  EntityService.severity.ERROR,
+                        message : "Failed to restore test plan"
+                    };
+
+                    $scope.notify(notification);
+                });
             };
 
             $rootScope.$on('event:loginConfirmed', function () {
@@ -2199,21 +2266,11 @@ angular
             });
 
             $rootScope.$on('tp_import_success',function (event,result) {
-                console.log("IMPORT SUCCESS");
-                console.log(result.testPlan);
-                console.log($scope.tps);
                 PopUp.stop();
                 var tp = result.testPlan;
                 if(tp){
-                    var id = _.findIndex($scope.tps,function (tpF) {
-                        return tpF.id === tp.id;
-                    });
-                    console.log("ID "+id);
-                    if(~id){
-                        $scope.entityUtils.sanitizeTP(tp);
-                        $scope.tps.splice(id,1,tp);
-                        $scope.selectTP(tp);
-                    }
+                    $scope.entityUtils.sanitizeTP(tp);
+                    $scope.selectTP(tp);
                 }
 
                 $scope.sum = $modal.open({
@@ -2228,7 +2285,6 @@ angular
             });
 
             $rootScope.$on('tp_import_failure',function (event,result) {
-                console.log("IMPORT FAILURE");
                 PopUp.stop();
 
                 $scope.sum = $modal.open({

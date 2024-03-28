@@ -16,6 +16,8 @@ angular.module('tcl').factory('FITSBackEnd', function ($q, TrashService, EntityS
         ctrl.saveAll = SaveService.saveAll;
         // ACCESS
         ctrl.loadTPSByAccess = EntityLoadService.loadTPSByAccess;
+        // Load test plan
+        ctrl.loadTestPlan = EntityLoadService.loadTP;
         // NO ARG
         ctrl.loadSharedTestPlans = EntityLoadService.loadViewTPs;
         // tpId, user

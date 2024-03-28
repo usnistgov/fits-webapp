@@ -30,13 +30,15 @@
                       md-whiteframe="2" class="hov"
                       style="border-top : 1px solid #dddddd; border-right : 1px solid #dddddd; border-left : 1px solid #dddddd; background-color: white; padding-top: 5px;padding-bottom: 5px;"
                       ng-style="$index === tps.length - 1 ? { 'border-bottom' : '1px solid #dddddd' } : {}">
-            <div flex="90" layout="row" layout-align="start" ng-click="openTP(tp)">
-                <div flex="25" layout="column" layout-align="center center">
-                    <span>
-			<span ng-if="tp.public" class="badge" style="margin-right: 10px; background-color: green;">Public</span>
-                        <strong>{{tp.name}}</strong>
-			<span class="label label-case label-icon" style="margin-left: 10px; color: black; font-size: 13px;">{{calculateTC(tp)}}</span>
-                    </span>
+            <div flex="80" layout="row" layout-align="start" ng-click="openTP(tp)">
+                <div flex="30" layout="column" layout-align="center center">
+                    <div style="display: flex; align-items: center; justify-content: space-between;">
+                        <span ng-if="tp.public" class="badge" style="background-color: green; margin-right: 5px;">Public</span>
+                        <strong>
+                            {{tp.name}}
+                            <span class="label label-case label-icon" style="margin-left: 10px; color: black; font-size: 13px;">{{tp.nbTestCases}}</span>
+                        </strong>
+                    </div>
                 </div>
                 <div flex="30" layout="column" layout-align="center center" style="text-align: center;">
                     {{tp.description}}
@@ -52,7 +54,7 @@
                         <strong>Version </strong>{{tp.metaData.version}}
                     </span>
                 </div>
-                <div flex="15" layout="column" layout-align="start start">
+                <div flex="10" layout="column" layout-align="start start">
                     <span>
                         <strong>Owner </strong>
                     </span>
@@ -61,18 +63,17 @@
                     </span>
                 </div>
                 <div flex="10" layout="column" layout-align="start start">
-                    <div style="width: 100%;" ng-show="tp.viewers.length > 0" layout="column"
-                         layout-align="start start">
-			<span>
-			    <strong>Shared With</strong>
-                    	</span>
+                    <div style="width: 100%;" ng-show="tp.viewers.length > 0" layout="column" layout-align="start start">
+                        <span>
+                            <strong>Shared With</strong>
+                        </span>
                         <span ng-repeat="viewer in tp.viewers">
-			    <i class="fa fa-user" style="color: saddlebrown;" aria-hidden="true"></i> {{viewer}}
-                    	</span>
+                            <i class="fa fa-user" style="color: saddlebrown;" aria-hidden="true"></i> {{viewer}}
+                        </span>
                     </div>
                 </div>
             </div>
-            <div flex="10" style="padding-left: 20px;" layout="row" layout-align="end start" layout-wrap>
+            <div flex="20" style="padding-left: 20px;" layout="row" layout-align="end start" layout-wrap>
                 <button type="button" class="btn btn-sm btn-danger "
                         ng-click="confirmDeleteTestPlan(tp)" style="margin-top: 5px; margin-bottom: 0;">
                     <md-tooltip md-direction="top">Delete Test Plan</md-tooltip>
@@ -93,6 +94,11 @@
                         ng-click="openTP(tp)" style="margin-top: 5px; margin-bottom: 0;">
                     <md-tooltip md-direction="top">Open Test Plan</md-tooltip>
                     <span><i class="fa fa-edit"></i></span>
+                </button>
+                <button type="button" class="btn btn-sm btn-default"
+                        ng-click="archiveTestPlan(tp)" style="margin-top: 5px; margin-bottom: 0; background-color: #d88e06; color: white;">
+                    <md-tooltip md-direction="top">Archive</md-tooltip>
+                    <span><i class="fa fa-archive"></i></span>
                 </button>
             </div>
         </md-list-item>
@@ -115,11 +121,10 @@
                       md-whiteframe="2" class="hov"
                       style="border-top : 1px solid #dddddd; border-right : 1px solid #dddddd; border-left : 1px solid #dddddd; background-color: white; padding-top: 5px;padding-bottom: 5px;"
                       ng-style="$index === tps.length - 1 ? { 'border-bottom' : '1px solid #dddddd' } : {}">
-            <div flex="90" layout="row" layout-align="start" ng-click="viewTP(tp)">
-                <div flex="25" layout="column" layout-align="center center">
+            <div flex="80" layout="row" layout-align="start" ng-click="openTP(tp, true)">
+                <div flex="30" layout="column" layout-align="center center">
                     <span>
-                        <strong>{{tp.name}}</strong><span class="label label-case label-icon"
-                                                          style="margin-left: 10px; color: black; font-size: 13px;">{{calculateTC(tp)}}</span>
+                        <strong>{{tp.name}}</strong>
                     </span>
                 </div>
                 <div flex="30" layout="column" layout-align="center center" style="text-align: center;">
@@ -136,7 +141,7 @@
                         <strong>Version </strong>{{tp.metaData.version}}
                     </span>
                 </div>
-                <div flex="15" layout="column" layout-align="start start">
+                <div flex="10" layout="column" layout-align="start start">
                     <span>
                         <strong>Owner </strong>
                     </span>
@@ -145,26 +150,84 @@
                     </span>
                 </div>
                 <div flex="10" layout="column" layout-align="start start">
-                    <!--<div style="width: 100%;" ng-show="tp.viewers.length > 0" layout="column" layout-align="start start">-->
-                    <!--<span>-->
-                    <!--<strong>Shared With</strong>-->
-                    <!--</span>-->
-                    <!--<span ng-repeat="viewer in tp.viewers">-->
-                    <!--<i class="fa fa-user" style="color: saddlebrown;" aria-hidden="true"></i> {{viewer}}-->
-                    <!--</span>-->
-                    <!--</div>-->
                 </div>
             </div>
-            <div flex="10" style="padding-left: 20px;" layout="row" layout-align="end start" layout-wrap>
-                <!--<button type="button" class="btn btn-sm btn-success "-->
-                <!--ng-click="view(tp)" style="margin-top: 5px; margin-bottom: 0;">-->
-                <!--<span><i class="fa fa-search"></i></span>-->
-                <!--</button>-->
+            <div flex="20" style="padding-left: 20px;" layout="row" layout-align="end start" layout-wrap>
                 <button type="button" class="btn btn-sm btn-primary "
                         ng-disabled="!entityUtils.inSynch(tp)"
                         ng-click="cloneTestPlan(tp)" style="margin-top: 5px; margin-bottom: 0;">
                     <md-tooltip md-direction="top">Clone Test Plan</md-tooltip>
                     <span><i class="fa fa-file"></i></span>
+                </button>
+            </div>
+        </md-list-item>
+    </md-list>
+
+    <!--ARCHIVED-->
+    <div ng-show="archivedTps.length > 0" style="width: 100%;" layout="row" layout-align="start between">
+        <div flex="100" layout="row" layout-align="start center">
+            <span ng-show="accordi.tpList"><h3 style="margin: 0"><strong>Archived ({{archivedTps.length}})</strong></h3></span>
+            <button class="btn btn-sm btn-success" style="margin-left: 10px;" ng-click="toggleViewArchived()">
+                <span ng-if="!viewArchived">Show <i class="fa fa-eye"></i></span>
+                <span ng-if="viewArchived">Hide <i class="fa fa-eye-slash"></i></span>
+            </button>
+        </div>
+    </div>
+
+    <md-list style="width: 100%;" ng-show="!loading && archivedTps.length > 0 && viewArchived">
+        <md-list-item ng-repeat="tp in archivedTps" layout="row" layout-align="start"
+                      md-whiteframe="2" class="hov"
+                      style="border-top : 1px solid #dddddd; border-right : 1px solid #dddddd; border-left : 1px solid #dddddd; background-color: white; padding-top: 5px;padding-bottom: 5px;"
+                      ng-style="$index === archivedTps.length - 1 ? { 'border-bottom' : '1px solid #dddddd' } : {}">
+            <div flex="80" layout="row" layout-align="start">
+                <div flex="30" layout="column" layout-align="center center">
+                    <div style="display: flex; align-items: center; justify-content: space-between;">
+                        <span ng-if="tp.public" class="badge" style="background-color: green; margin-right: 5px;">Public</span>
+                        <strong>
+                            {{tp.name}}
+                            <span class="label label-case label-icon" style="margin-left: 10px; color: black; font-size: 13px;">{{tp.nbTestCases}}</span>
+                        </strong>
+                    </div>
+                </div>
+                <div flex="30" layout="column" layout-align="center center" style="text-align: center;">
+                    {{tp.description}}
+                </div>
+                <div flex="20" layout="column" layout-align="start start">
+                    <span>
+                        <strong>Created On </strong>{{tp.metaData.dateCreated | date:'MM/dd/yyyy' : 'UTC'}}
+                    </span>
+                    <span>
+                        <strong>Last Updated On </strong>{{tp.metaData.dateLastUpdated | date:'MM/dd/yyyy' : 'UTC'}}
+                    </span>
+                    <span>
+                        <strong>Version </strong>{{tp.metaData.version}}
+                    </span>
+                </div>
+                <div flex="10" layout="column" layout-align="start start">
+                    <span>
+                        <strong>Owner </strong>
+                    </span>
+                    <span>
+                        <i class="fa fa-user" style="color: darkgreen;" aria-hidden="true"></i> {{tp.user}}
+                    </span>
+                </div>
+                <div flex="10" layout="column" layout-align="start start">
+                    <div style="width: 100%;" ng-show="tp.viewers.length > 0" layout="column" layout-align="start start">
+                        <span>
+                            <strong>Shared With</strong>
+                        </span>
+                        <span ng-repeat="viewer in tp.viewers">
+                            <i class="fa fa-user" style="color: saddlebrown;" aria-hidden="true"></i> {{viewer}}
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <div flex="20" style="padding-left: 20px;" layout="row" layout-align="end start" layout-wrap>
+                <button type="button" class="btn btn-sm btn-success"
+                        ng-disabled="!entityUtils.inSynch(tp)"
+                        ng-click="unArchiveTestPlan(tp)" style="margin-top: 5px; margin-bottom: 0;">
+                    <md-tooltip md-direction="top">Unarchive Test Plan</md-tooltip>
+                    <span><i class="fa fa-refresh"></i></span>
                 </button>
             </div>
         </md-list-item>
@@ -176,4 +239,3 @@
     </div>
 
 </md-content>
-
