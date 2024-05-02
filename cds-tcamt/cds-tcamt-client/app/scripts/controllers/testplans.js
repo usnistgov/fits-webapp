@@ -973,7 +973,7 @@ angular
                 return angular.element(document.getElementById(id)).scope();
             };
 
-            $scope.noDatesSS = ['G','F','A','I','S','C','X'];
+            $scope.noDatesSS = ['G','F','A','I','S','C','X', 'R'];
 
             $scope.needDates = function (ss) {
                 return !~$scope.noDatesSS.indexOf(ss);
