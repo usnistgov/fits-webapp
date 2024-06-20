@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>gov.nist.healthcare.cds.tcamt</groupId>
 		<artifactId>cds-tcamt</artifactId>
-		<version>1.3</version>
+		<version>1.4</version>
 	</parent>
 	<build>
 		<finalName>tcamt-client</finalName>
