@@ -215,6 +215,7 @@ public class Bootstrap {
 
 		productMapping.put("302:PFR:Pfizer-BioNTech COVID-19 Vaccine (EUA labeled)  COMIRNATY (BLA labeled)", "302:PFR:Pfizer-BioNTech COVID-19 Bivalent, Original + BA.4/BA.5 (Non-US Tradename COMIRNATY Bivalent)");
 
+		productMapping.put("158:SEQ:Afluria, quadrivalent", "158:SEQ:Afluria quadrivalent, with preservative");
 
 		this.simpleCodeRemapService.reloadCodeSetsAndRemapTestCases(
 				Bootstrap.class.getResourceAsStream("/codeset/web_cvx.xlsx"),
