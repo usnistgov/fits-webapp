@@ -24,8 +24,11 @@
         <appender-ref ref="STDOUT" />
     </logger>
 
+    <logger name="org.apache.http" level="${FITS_APACHE_HTTP_LOG_LEVEL:-ERROR}">
+        <appender-ref ref="STDOUT" />
+    </logger>
+
 
     <root level="OFF" />
-
 
 </configuration>
