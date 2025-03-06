@@ -4,6 +4,7 @@
   "dependencies": {
     "angular": "1.5.5",
     "angular-animate": "1.5.5",
+    "angular-aria": "1.5.8",
     "angular-bootstrap": "~0.14.2",
     "angular-cookies": "1.5.5",
     "angular-messages": "1.5.5",
@@ -25,7 +26,7 @@
     "restangular": "~1.4.0",
     "sass-bootstrap": "~3.0.2",
     "angular-bootstrap-contextmenu": "0.9.7",
-    "bootstrap-material-design": "~0.3.0",
+    "MDBootstrap": "~0.3.0",
     "angular-local-storage": "~0.2.3",
     "angularjs-dropdown-multiselect": "~1.5.2",
     "lodash": "~3.10.1",
