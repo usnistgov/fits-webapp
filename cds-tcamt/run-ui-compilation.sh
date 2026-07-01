@@ -1,3 +1,3 @@
 #!/bin/sh
 set -e
-docker compose -f docker-compose-ui-compilation.yml run fits-dev
+docker compose -f dev/docker-compose-ui-compilation.yml run fits-dev
