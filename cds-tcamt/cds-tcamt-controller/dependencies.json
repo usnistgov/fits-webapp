@@ -1,0 +1,16 @@
+{
+  "dependencies": [
+    {
+      "name": "FHIR Lib",
+      "repository": "https://github.com/usnistgov/fhirLib",
+      "sha1": "f619a839d46a8babdba5ccc0652cf6a1d35db209",
+      "cmd": "mvn clean install"
+    },
+    {
+      "name": "CDS BASE",
+      "repository": "https://github.com/usnistgov/cds-base",
+      "sha1": "4d5a69d0c8022a76a1fed39d4939a2740b6aea5c",
+      "cmd": "mvn -f ./cds-base/pom.xml clean install"
+    }
+  ]
+}
