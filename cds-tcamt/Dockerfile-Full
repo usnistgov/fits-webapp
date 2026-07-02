@@ -7,20 +7,13 @@ SHELL ["/bin/bash", "-c"]
 
 # Set the working directory
 WORKDIR /app
-
-# Copy the source code into the container
-#COPY ./cds-tcamt-controller ./cds-tcamt-controller
-#COPY ./cds-tcamt-client ./cds-tcamt-client
+# Bind the source code into the container
 RUN --mount=type=bind,source=.,target=. \
-     echo "Files inside the mounted source folder:"  \
-    && ls -la \
 chmod +x dev/in-container-compilation.sh && dev/in-container-compilation.sh
 
-
 # ==========================================
-# Stage 2: Deploy
+# Stage 2: Build JAR
 # ==========================================
-# Using the JRE (Java Runtime Environment) for a smaller final footprint
 FROM eclipse-temurin:8-jdk AS builder
 
 WORKDIR /app
@@ -34,6 +27,10 @@ RUN --mount=type=bind,source=./cds-tcamt-controller,target=. \
      echo "Files inside the mounted source folder:" && ls -la \
      && chmod +x ./dependencies.sh && chmod +x ./build-with-dependencies.sh && ./build-with-dependencies.sh
 
+
+# ==========================================
+# Stage 3: Build Deploy
+# ==========================================
 FROM tomcat:9.0.108-jdk8-temurin-noble as deploy
 RUN rm -rf /usr/local/tomcat/webapps/*
 RUN rm -rf /usr/local/tomcat/webapps.dist
