@@ -38,7 +38,7 @@ echo "$TAGS"
 if [ "$PUSH_DOCKERHUB" == "y" ]; then
   read -p "Are you sure you want to push Images $TAGS to DockerHub? (yes/no): " CONFIRM
   if [ "$CONFIRM" == "yes" ]; then
-        docker buildx build -f ./Dockerfile-Full --platform linux/amd64,linux/arm64 --push $TAGS .
+        docker buildx build -f ./Dockerfile --platform linux/amd64,linux/arm64 --push $TAGS .
         header_section "Image nist775hit/fits-webapp:$SANITIZED_VERSION successfully pushed to DockerHub"
         if [ "$AS_LATEST" == "y" ]; then
           header_section "Image nist775hit/fits-webapp:latest successfully pushed to DockerHub"
@@ -48,5 +48,5 @@ if [ "$PUSH_DOCKERHUB" == "y" ]; then
     fi
 else
   header_section "Building Docker Image version: $SANITIZED_VERSION (local only)"
-  docker buildx build -f ./Dockerfile-Full --load $TAGS .
+  docker buildx build -f ./Dockerfile --load $TAGS .
 fi

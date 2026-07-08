@@ -9,5 +9,5 @@ node_modules/
 webapp/
 **/.sdkmanrc
 .sdkmanrc
-/.env.dev
-/run-dev.sh
+/cds-tcamt/.env.dev
+/cds-tcamt/run-dev.sh

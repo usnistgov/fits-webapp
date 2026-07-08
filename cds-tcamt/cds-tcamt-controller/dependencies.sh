@@ -1,7 +1,9 @@
 #!/bin/bash
 
-# Configuration
-JSON_FILE="dependencies.json"
+# Get the directory where THIS script lives
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+# Aim at Configuration file
+JSON_FILE="$SCRIPT_DIR/dependencies.json"
 
 # --- 1. PREREQUISITES CHECK ---
 if [ ! -f "$JSON_FILE" ]; then
