@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.annotation.PostConstruct;
 import javax.xml.bind.JAXBException;
@@ -25,6 +27,7 @@ import gov.nist.healthcare.cds.service.impl.validation.ConfigurableVaccineMatche
 import gov.nist.healthcare.cds.service.vaccine.VaccineMatcherConfiguration;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
@@ -37,6 +40,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @Service
 @PropertySource("classpath:application.properties")
 public class Bootstrap {
+
+	@Value("${FITS_UPGRADE_REMAP_DISABLE:false}")
+	private boolean FITS_UPGRADE_REMAP_DISABLE;
 
 	@Autowired
 	private Environment env;
@@ -61,7 +67,7 @@ public class Bootstrap {
 	private String ENV_EMAIL_FROM = "fits.email.from";
 	private String ENV_EMAIL_SUBJECT = "fits.email.subject";
 	private String ENV_ADAPTER_URL = "fits.adapter.url";
-	
+
 	@Bean
 	public String adminEmail() {
 		return env.getProperty(ENV_ADMIN_EMAIL);
@@ -217,14 +223,18 @@ public class Bootstrap {
 
 		productMapping.put("158:SEQ:Afluria, quadrivalent", "158:SEQ:Afluria quadrivalent, with preservative");
 
-		this.simpleCodeRemapService.reloadCodeSetsAndRemapTestCases(
-				Bootstrap.class.getResourceAsStream("/codeset/web_cvx.xlsx"),
-				Bootstrap.class.getResourceAsStream("/codeset/web_vax2vg.xlsx"),
-				Bootstrap.class.getResourceAsStream("/codeset/web_mvx.xlsx"),
-				Bootstrap.class.getResourceAsStream("/codeset/web_tradename.xlsx"),
-				cvxMapping,
-				productMapping
-		);
+		if (FITS_UPGRADE_REMAP_DISABLE)  {
+			Logger.getLogger(Bootstrap.class.getName()).log(Level.WARNING, "Bootstrap upgrade and remap on testcases disabled, not recommended when changing around versions. Enable with FITS_2_UPGRADE_REMAP_DISABLE=true");
+		} else {
+			this.simpleCodeRemapService.reloadCodeSetsAndRemapTestCases(
+					Bootstrap.class.getResourceAsStream("/codeset/web_cvx.xlsx"),
+					Bootstrap.class.getResourceAsStream("/codeset/web_vax2vg.xlsx"),
+					Bootstrap.class.getResourceAsStream("/codeset/web_mvx.xlsx"),
+					Bootstrap.class.getResourceAsStream("/codeset/web_tradename.xlsx"),
+					cvxMapping,
+					productMapping
+			);
+		}
 	}
 	
 }
