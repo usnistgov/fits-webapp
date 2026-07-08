@@ -45,4 +45,4 @@ RUN sed -i '/<\/web-app>/i \
       <location>/error.html<\/location>\n\
     <\/error-page>\n' /usr/local/tomcat/conf/web.xml
 COPY ./error.html /usr/local/tomcat/webapps/ROOT/error.html
-COPY --from=builder ./cds-tcamt-controller/target/fits.war /usr/local/tomcat/webapps/fits.war
+COPY --from=builder /app/cds-tcamt-controller/target/fits.war /usr/local/tomcat/webapps/fits.war
