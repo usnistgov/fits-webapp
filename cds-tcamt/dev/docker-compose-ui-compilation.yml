@@ -1,0 +1,13 @@
+services:
+  fits-dev:
+    image: nist775hit/fits-dev-environment
+    platform: linux/amd64
+    stdin_open: true # Equivalent to -i
+    tty: true        # Equivalent to -t
+    volumes:
+      - ../:/etc/app
+    entrypoint: ./dev/in-container-compilation.sh
+    command:
+      - /bin/bash
+#      - /bin/bash in-container-compilation.sh
+#    entrypoint:
