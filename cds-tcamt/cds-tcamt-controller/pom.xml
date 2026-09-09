@@ -169,6 +169,13 @@
 				<includes>
 					<include>**/*</include>
 				</includes>
+				<!-- application.properties is copied by the filtered resource above. Without this
+exclude the unfiltered pass copies it a second time and overwrites the filtered
+output, so @version@ / @timestamp@ reach the war verbatim and the appInfo bean
+dies at startup with 'Unparseable date: "@timestamp@"'. -->
+				<excludes>
+					<exclude>application.properties</exclude>
+				</excludes>
 			</resource>
 		</resources>
 		<plugins>
