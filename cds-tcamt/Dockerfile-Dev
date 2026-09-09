@@ -18,7 +18,7 @@ RUN sed -i '/<\/web-app>/i \
 COPY ./error.html /usr/local/tomcat/webapps/ROOT/error.html
 COPY ./cds-tcamt-controller/target/fits.war /usr/local/tomcat/webapps/fits.war
 
-COPY ./.env.dev /usr/local/tomcat/.env.dev
+COPY ./dev.docker.env /usr/local/tomcat/.env.dev
 COPY dev/dev-entrypoint.sh /usr/local/tomcat/entrypoint.sh
 RUN chmod +x /usr/local/tomcat/entrypoint.sh
 
