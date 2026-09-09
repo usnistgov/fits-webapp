@@ -32,7 +32,7 @@ RUN chmod +x ./cds-tcamt-controller/dependencies.sh && chmod +x ./cds-tcamt-cont
 # ==========================================
 # Stage 3: Build Deploy
 # ==========================================
-FROM tomcat:9.0.108-jdk8-temurin-noble AS deploy
+FROM tomcat:9.0.117-jdk8-temurin-noble AS deploy
 RUN rm -rf /usr/local/tomcat/webapps/*
 RUN rm -rf /usr/local/tomcat/webapps.dist
 RUN sed -i '/<\/web-app>/i \
