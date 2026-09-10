@@ -15,8 +15,8 @@
     {
       "name": "CDS BASE",
       "repository": "https://github.com/usnistgov/cds-base",
-      "sha1": "4cd286aa3bf2eb2d3e6d0f2afb97109cb766cb98",
-      "cmd": "mvn -f ./cds-base/pom.xml clean install "
+      "sha1": "b42790f7bfc324581ef32ddbe818b720b099f0a1",
+      "cmd": "mvn -f ./cds-base/pom.xml clean install -DskipTests"
     }
   ]
 }
